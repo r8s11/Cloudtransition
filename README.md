@@ -60,7 +60,7 @@ cloudtransition/
 
 ### Frontend
 
-- **React 18** - Modern UI library with Hooks
+- **React 19** - Modern UI library with Hooks
 - **React Router** - Client-side routing
 - **React Query** - Server state management
 - **Tailwind CSS** / **Material-UI** - Styling frameworks
@@ -327,8 +327,8 @@ Strategic reading schedule with 12 industry-standard books.
 1. **Clone this repository**
 
 ```bash
-git clone https://github.com/yourusername/career-transition.git
-cd career-transition
+git clone https://github.com/r8s11/cloudtransition.git
+cd cloudtransition
 ```
 
 2. **Read Week 1 Plan**
@@ -408,16 +408,16 @@ Feel free to use this plan for your own career transition!
 
 ## 👤 Author
 
-**[Your Name]**
+**Roosevelt**
 
 Starting as: IT Support Specialist
 Goal: Full-Stack Cloud DevOps Engineer
 Timeline: 14 weeks
 Commitment: 20 hours/week
 
-- **GitHub:** [@yourusername](https://github.com/yourusername)
-- **LinkedIn:** [Your Profile](https://linkedin.com/in/yourprofile)
-- **Email:** your.email@example.com
+- **GitHub:** [@r8s11](https://github.com/r8s11)
+- **LinkedIn:** [Your Profile](https://linkedin.com/in/rooseveltsegura)
+- **Email:** mail@roosevelt.info
 - **Portfolio:** Coming in Week 7!
 
 ---
@@ -441,9 +441,9 @@ Commitment: 20 hours/week
 
 ## 📈 Repository Stats
 
-![GitHub last commit](https://img.shields.io/github/last-commit/yourusername/career-transition)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/w/yourusername/career-transition)
-![GitHub repo size](https://img.shields.io/github/repo-size/yourusername/career-transition)
+![GitHub last commit](https://img.shields.io/github/last-commit/r8s11/cloudtransition)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/r8s11/cloudtransition)
+![GitHub repo size](https://img.shields.io/github/repo-size/r8s11/cloudtransition)
 
 **Join me on this journey! ⭐ Star this repo to follow along.**
 
