@@ -32,7 +32,7 @@ plans/
 
 1. **Compute (25-30%)**
    - App Service, Functions, Containers
-   
+
 2. **Storage (15-20%)**
    - Blob, Cosmos DB, Azure SQL
 
@@ -269,7 +269,7 @@ Simple checklist format for each week.
 - Commits: X
 - Hours: X
 - Pages: X
-```
+
 ```
 
 ---
@@ -277,26 +277,31 @@ Simple checklist format for each week.
 ## 🎯 How to Use These Plans
 
 ### 1. Start with Main README
+
 - Clone repository
 - Read main README.md
 - Understand 14-week overview
 
 ### 2. Week 1 Day-by-Day
+
 - Follow day-by-day guide
 - Check off daily tasks
 - Build first project
 
 ### 3. Subject Plans
+
 - Reference as you learn each topic
 - Follow weekly breakdown
 - Practice with exercises
 
 ### 4. Weekly Goals
+
 - Review every Sunday
 - Plan upcoming week
 - Track progress
 
 ### 5. Books Plan
+
 - Read daily (1 hour)
 - Take notes
 - Apply immediately
@@ -305,7 +310,7 @@ Simple checklist format for each week.
 
 ## 📂 Recommended File Organization
 
-```
+```markdown
 career-transition/
 │
 ├── README.md                          # Main overview
@@ -346,6 +351,7 @@ career-transition/
 └── certifications/                    # AZ-204 prep
     ├── az-204-notes.md
     └── practice-exams/
+
 ```
 
 ---
@@ -425,12 +431,14 @@ cd projects/week1-task-manager
 ## 📊 Progress Tracking
 
 ### Simple Metrics
+
 - **GitHub Commits:** Daily activity
 - **Deployed Projects:** 3 by Week 8
 - **Books Read:** 10-12 by Week 14
 - **Certification:** AZ-204 by Week 11
 
 ### Weekly Review Questions
+
 1. What did I build this week?
 2. What did I learn?
 3. What challenged me?
