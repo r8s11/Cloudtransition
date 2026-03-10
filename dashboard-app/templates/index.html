@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career Dashboard &mdash; 2026</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ── NAV ──────────────────────────────────────────────────── -->
+<nav class="topnav">
+  <div class="logo"><span>Cloud</span>Transition</div>
+  <div class="nav-tabs">
+    {% set pages = [
+      ("overview", "Overview"),
+      ("education", "Education"),
+      ("tasks", "Tasks"),
+      ("projects", "Projects"),
+      ("skills", "Skills"),
+      ("career", "Career"),
+    ] %}
+    {% for pid, plabel in pages %}
+    <button class="nav-tab {% if loop.first %}active{% endif %}" data-page="{{ pid }}">{{ plabel }}</button>
+    {% endfor %}
+    <a class="nav-tab" href="/reader">Reader</a>
+  </div>
+  <div class="nav-date">{{ today }}</div>
+</nav>
+
+<div class="main">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- OVERVIEW PAGE                                               -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page active" id="page-overview">
+
+  <!-- Restart Banner -->
+  <div class="restart-banner">
+    <div class="banner-icon">&#x1F504;</div>
+    <div>
+      <h3>Fresh Start Next Week</h3>
+      <p>Restarting the learning journey from Week 1. All previous progress preserved &mdash; building on what you know.</p>
+    </div>
+  </div>
+
+  <div class="page-header">
+    <h2>2026 Learning &amp; Career Dashboard</h2>
+    <p>Full-time worker &middot; 10-15 hrs/week &middot; Learn by building</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid-4" style="margin-bottom: 16px;">
+    <div class="stat-box">
+      <div class="stat-value" style="color: var(--accent);">W{{ current_week }}</div>
+      <div class="stat-label">Calendar Week</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" style="color: var(--green);">{{ tasks.done|length }}/{{ total_tasks }}</div>
+      <div class="stat-label">Tasks Done</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" style="color: var(--blue);">{{ projects|length }}</div>
+      <div class="stat-label">Active Projects</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" style="color: var(--purple);">{{ certifications|length }}</div>
+      <div class="stat-label">Certifications</div>
+    </div>
+  </div>
+
+  <!-- Year Progress Rings -->
+  <div class="card">
+    <div class="card-title">Year Progress</div>
+    <div class="grid-4" style="justify-items: center; padding: 8px 0;">
+      {% for ring in [
+        {"pct": year_pct, "label": "2026", "color": "#D97757"},
+        {"pct": q1_pct, "label": "Q1", "color": "#4a9e6e"},
+        {"pct": q2_pct, "label": "Q2", "color": "#4a7fb5"},
+        {"pct": q3_pct, "label": "Q3", "color": "#7c5cbf"},
+      ] %}
+      <div class="ring-container">
+        {% set circ = 99.9 %}
+        {% set offset = circ * (1 - ring.pct / 100) %}
+        <svg class="ring-svg" viewBox="0 0 36 36">
+          <circle class="ring-bg" cx="18" cy="18" r="15.9"/>
+          <circle class="ring-fill" cx="18" cy="18" r="15.9"
+            stroke="{{ ring.color }}"
+            stroke-dasharray="{{ circ }}"
+            stroke-dashoffset="{{ offset }}"/>
+          <text class="ring-text" x="18" y="18">{{ ring.pct }}%</text>
+        </svg>
+        <div class="ring-label">{{ ring.label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Projects Summary -->
+  <div class="card">
+    <div class="card-title">Projects</div>
+    <div class="grid-3">
+      {% for p in projects %}
+      <div class="project-card" style="border-left: 4px solid {{ p.color }};">
+        <div class="project-header">
+          <h3>{{ p.name }}</h3>
+        </div>
+        <div class="project-status badge" style="background: {{ p.color }}20; color: {{ p.color }}; margin-bottom: 8px;">
+          {{ p.status }}
+        </div>
+        <div class="progress-label">
+          <span class="name">Q1: {{ p.q1_goal }}</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="background: {{ p.color }}; width: 0;" data-width="0%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Success Metrics -->
+  <div class="card">
+    <div class="card-title">End of 2026 Goals</div>
+    {% for m in success_metrics %}
+    <div class="metric-row">
+      <div class="metric-cat">{{ m.category }}</div>
+      <div class="metric-goal">{{ m.goal }}</div>
+      <div class="metric-measure">{{ m.metric }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- EDUCATION PAGE                                               -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-education">
+
+  <div class="page-header">
+    <h2>{{ edu_program.name or 'Education Plan' }}</h2>
+    <p>{{ edu_program.school or 'SNHU' }} &middot; {{ edu_program.pathway or 'AS → BS' }} &middot; Catalog {{ edu_program.catalog or '' }}</p>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="grid-5" style="margin-bottom: 16px;">
+    <div class="stat-box">
+      <div class="stat-value" style="color: var(--green);">{{ edu_stats.credits_applied or 0 }}</div>
+      <div class="stat-label">Credits Applied</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" style="color: var(--accent);">{{ edu_stats.credits_remaining or 0 }}</div>
+      <div class="stat-label">Remaining (BS)</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" style="color: var(--blue);">{{ edu_stats.progress_pct or 0 }}%</div>
+      <div class="stat-label">Degree Progress</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" style="color: var(--purple);">2027</div>
+      <div class="stat-label">AS Target</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" style="color: var(--green);">2028</div>
+      <div class="stat-label">BS Target</div>
+    </div>
+  </div>
+
+  <!-- Degree Progress + Credit Sources -->
+  <div class="grid-2">
+    <!-- Progress Ring -->
+    <div class="card">
+      <div class="card-title">Degree Progress</div>
+      <div style="display: flex; align-items: center; gap: 24px;">
+        <div class="ring-container" style="flex-shrink: 0;">
+          {% set deg_circ = 99.9 %}
+          {% set deg_offset = deg_circ * (1 - (edu_stats.progress_pct or 0) / 100) %}
+          <svg class="ring-svg" viewBox="0 0 36 36" style="width: 100px; height: 100px;">
+            <circle class="ring-bg" cx="18" cy="18" r="15.9"/>
+            <circle class="ring-fill" cx="18" cy="18" r="15.9"
+              stroke="var(--green)"
+              stroke-dasharray="{{ deg_circ }}"
+              stroke-dashoffset="{{ deg_offset }}"/>
+            <text class="ring-text" x="18" y="18">{{ edu_stats.progress_pct or 0 }}%</text>
+          </svg>
+          <div class="ring-label">BS (120 cr)</div>
+        </div>
+        <div style="flex: 1;">
+          <div class="edu-stat-line">
+            <span>Credits applied</span>
+            <strong>{{ edu_stats.credits_applied or 0 }} / {{ edu_stats.credits_required or 120 }}</strong>
+          </div>
+          <div class="edu-stat-line">
+            <span>AS remaining (est.)</span>
+            <strong>~{{ edu_stats.as_credits_remaining or 0 }} cr</strong>
+          </div>
+          <div class="edu-stat-line">
+            <span>BS remaining</span>
+            <strong>{{ edu_stats.credits_remaining or 0 }} cr</strong>
+          </div>
+          <div class="edu-stat-line">
+            <span>Max transferable</span>
+            <strong>90 cr (SNHU cap)</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Credit Sources Stacked Bar -->
+    <div class="card">
+      <div class="card-title">Credits by Source</div>
+      <div class="stacked-bar-container">
+        <div class="stacked-bar">
+          {% for src in edu_sources %}
+          {% if src.credits > 0 %}
+          <div class="stacked-segment"
+            style="width: {{ (src.credits / (edu_stats.credits_required or 120) * 100)|round(1) }}%; background: {{ src.color }};"
+            title="{{ src.source }}: {{ src.credits }} cr">
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+        <div class="stacked-legend">
+          {% for src in edu_sources %}
+          <div class="legend-item">
+            <span class="legend-dot" style="background: {{ src.color }};"></span>
+            <span class="legend-label">{{ src.source }}</span>
+            <span class="legend-value">{{ src.credits }} cr</span>
+            {% if src.status == "completed" %}
+            <span class="badge" style="background: var(--green-light); color: var(--green); font-size: 9px;">Done</span>
+            {% elif src.status == "not_started" %}
+            <span class="badge" style="background: var(--surface-alt); color: var(--text-muted); font-size: 9px;">Planned</span>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transfer Strategy Phases -->
+  <div class="card">
+    <div class="card-title">Credit Strategy &mdash; Cheapest First</div>
+    <div class="grid-3" style="gap: 12px;">
+      {% set phase_colors = ["#c9a227", "#7c5cbf", "#D97757", "#4a7fb5", "#4a9e6e"] %}
+      {% for ph in edu_phases %}
+      <div class="phase-card" style="border-top: 3px solid {{ phase_colors[loop.index0 % 5] }};">
+        <div class="phase-header">
+          <span class="phase-number">Phase {{ ph.phase }}</span>
+          {% if ph.status == "completed" %}
+          <span class="badge" style="background: var(--green-light); color: var(--green);">Done</span>
+          {% elif ph.status == "in_progress" %}
+          <span class="badge" style="background: var(--blue-light); color: var(--blue);">Active</span>
+          {% else %}
+          <span class="badge" style="background: var(--surface-alt); color: var(--text-muted);">Upcoming</span>
+          {% endif %}
+        </div>
+        <h4 class="phase-name">{{ ph.name }}</h4>
+        <p class="phase-desc">{{ ph.description }}</p>
+        <div class="phase-stats">
+          <div><strong>{{ ph.credits }}</strong> credits</div>
+          <div><strong>{{ ph.cost }}</strong></div>
+          <div>{{ ph.duration }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Timeline + Cost/Actions -->
+  <div class="grid-2">
+    <!-- Timeline -->
+    <div class="card">
+      <div class="card-title">Timeline</div>
+      <div class="edu-timeline">
+        {% for m in edu_timeline %}
+        <div class="timeline-item {{ 'timeline-done' if m.status == 'completed' else ('timeline-future' if m.status == 'future' else '') }}">
+          <div class="timeline-dot"
+            style="background: {{ 'var(--green)' if m.status == 'completed' else ('var(--text-muted)' if m.status == 'future' else 'var(--accent)') }};"></div>
+          <div class="timeline-content">
+            <div class="timeline-milestone">{{ m.milestone }}</div>
+            <div class="timeline-target">{{ m.target }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Cost + Actions -->
+    <div>
+      <!-- Cost -->
+      <div class="card">
+        <div class="card-title">Cost Projection</div>
+        {% for item in edu_cost.get("breakdown", []) %}
+        <div class="metric-row">
+          <div class="metric-goal">{{ item.item }}</div>
+          <div class="metric-measure">${{ "{:,}".format(item.amount) }}</div>
+        </div>
+        {% endfor %}
+        <div class="metric-row" style="border-top: 2px solid var(--border); margin-top: 4px; padding-top: 12px;">
+          <div class="metric-goal" style="font-weight: 700;">Total estimated</div>
+          <div class="metric-measure" style="font-weight: 700; color: var(--accent);">${{ "{:,}".format(edu_cost.get("total_low", 0)) }}&ndash;${{ "{:,}".format(edu_cost.get("total_high", 0)) }}</div>
+        </div>
+        <div class="metric-row" style="background: var(--green-light); border-radius: 8px; padding: 10px 12px; margin-top: 8px;">
+          <div class="metric-goal" style="color: var(--green); font-weight: 600;">After max Pell Grant</div>
+          <div class="metric-measure" style="color: var(--green); font-weight: 700;">${{ "{:,}".format(edu_cost.get("net_low", 0)) }}&ndash;${{ "{:,}".format(edu_cost.get("net_high", 0)) }}</div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card">
+        <div class="card-title">
+          Action Items
+          <span class="badge badge-count">{{ edu_actions|length }}</span>
+        </div>
+        {% for a in edu_actions %}
+        <div class="task-item">
+          <div class="task-check {{ 'done' if a.done else '' }}">{{ '&#x2713;' if a.done else '' }}</div>
+          <span class="task-text {{ 'done' if a.done else '' }}">{{ a.text }}</span>
+          <span class="task-cat" style="background: var(--accent-light); color: var(--accent);">P{{ a.priority }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Course Detail (Sophia) -->
+  <div class="card">
+    <div class="card-title">Sophia Sprint &mdash; Course Priorities</div>
+    {% set sophia_src = edu_sources|selectattr("source", "equalto", "Sophia Learning")|first %}
+    {% if sophia_src %}
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>Priority</th>
+          <th>Course</th>
+          <th>SNHU Equiv</th>
+          <th>Credits</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in sophia_src.courses|sort(attribute="priority") %}
+        <tr>
+          <td>
+            {% if c.priority == 1 %}
+            <span class="badge" style="background: var(--red-light); color: var(--red);">P1 &mdash; Major</span>
+            {% elif c.priority == 2 %}
+            <span class="badge" style="background: var(--yellow-light); color: var(--yellow);">P2 &mdash; Gen Ed</span>
+            {% else %}
+            <span class="badge" style="background: var(--surface-alt); color: var(--text-muted);">P3 &mdash; Elective</span>
+            {% endif %}
+          </td>
+          <td>{{ c.name }}</td>
+          <td style="font-family: var(--mono); font-size: 12px;">{{ c.code }}</td>
+          <td style="text-align: center;">{{ c.credits }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- TASKS PAGE                                                  -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-tasks">
+  <div class="page-header">
+    <h2>Task Tracker</h2>
+    <p>Week 1 Continuation &mdash; Restarting next week</p>
+  </div>
+
+  <!-- Active Tasks -->
+  <div class="card">
+    <div class="card-title">
+      Active
+      <span class="badge badge-count">{{ tasks.active|length }}</span>
+    </div>
+    {% for t in tasks.active %}
+    <div class="task-item">
+      <div class="task-check"></div>
+      <span class="task-text">{{ t.text }}</span>
+      {% set cat_cls = "cat-" + t.cat|lower|replace(" ", "-")|replace("&", "") %}
+      <span class="task-cat {{ cat_cls }}">{{ t.cat }}</span>
+    </div>
+    {% endfor %}
+    {% if not tasks.active %}
+    <div class="empty-state">
+      <div class="empty-icon">&#x2705;</div>
+      <p>No active tasks. Update TASKS.md to add new items.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Done Tasks -->
+  <div class="card">
+    <div class="card-title">
+      Completed
+      <span class="badge badge-done">{{ tasks.done|length }}</span>
+    </div>
+    {% for t in tasks.done %}
+    <div class="task-item">
+      <div class="task-check done">&#x2713;</div>
+      <span class="task-text done">{{ t.text }}</span>
+      <span class="task-cat cat-setup">{{ t.cat }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- PROJECTS PAGE                                               -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-projects">
+  <div class="page-header">
+    <h2>Projects</h2>
+    <p>3 production apps by end of 2026 &mdash; Restarting from Week 1</p>
+  </div>
+
+  {% for p in projects %}
+  <div class="card" style="border-left: 4px solid {{ p.color }};">
+    <div class="project-header">
+      <h3 style="font-size: 20px;">{{ p.name }}</h3>
+      <span class="badge" style="background: {{ p.color }}20; color: {{ p.color }};">{{ p.status }}</span>
+    </div>
+
+    <div class="progress-label">
+      <span class="name">Q1 Goal: {{ p.q1_goal }}</span>
+      <span class="pct">Restarting</span>
+    </div>
+    <div class="progress-track" style="margin-bottom: 16px;">
+      <div class="progress-fill" style="background: {{ p.color }}; width: 0;"></div>
+    </div>
+
+    <div class="card-title">Completed Features</div>
+    <ul class="feature-list">
+      {% for f in p.features %}
+      <li>{{ f }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+
+  <!-- Learning Matrix -->
+  <div class="card">
+    <div class="card-title">Skills x Projects Matrix</div>
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>Skill</th>
+          <th>WODCard</th>
+          <th>SalsaSegura</th>
+          <th>SalsaTD</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in learning_matrix %}
+        <tr>
+          <td>{{ m.skill }}</td>
+          <td><span class="dot {{ 'dot-on' if m.wod else 'dot-off' }}"></span></td>
+          <td><span class="dot {{ 'dot-on' if m.salsa else 'dot-off' }}"></span></td>
+          <td><span class="dot {{ 'dot-on' if m.td else 'dot-off' }}"></span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SKILLS PAGE                                                 -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-skills">
+  <div class="page-header">
+    <h2>Skills &amp; Certifications</h2>
+    <p>From skills/skills-inventory.yml &mdash; updates automatically</p>
+  </div>
+
+  <div class="grid-2">
+    <!-- Left: Technical + Soft Skills -->
+    <div>
+      {% set ns = namespace(current_cat="") %}
+      {% for sk in technical_skills %}
+        {% if sk.category != ns.current_cat %}
+          {% if ns.current_cat != "" %}</div>{% endif %}
+          <div class="card">
+          <div class="card-title">{{ sk.category }}</div>
+          {% set ns.current_cat = sk.category %}
+        {% endif %}
+
+        {% set prof_pct = {"beginner": 25, "intermediate": 50, "advanced": 75, "expert": 100} %}
+        {% set prof_color = {"beginner": "var(--red)", "intermediate": "var(--yellow)", "advanced": "var(--blue)", "expert": "var(--green)"} %}
+
+        <div class="skill-row">
+          <div class="progress-label">
+            <span class="name">{{ sk.name }}</span>
+            <span class="pct">{{ sk.proficiency }}</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill"
+              style="background: {{ prof_color.get(sk.proficiency, 'var(--text-muted)') }};"
+              data-width="{{ prof_pct.get(sk.proficiency, 0) }}%"></div>
+          </div>
+          <div class="skill-meta">
+            <span class="badge badge-{{ sk.proficiency }}">{{ sk.proficiency }}</span>
+            <span class="skill-years">{{ sk.years }} yrs</span>
+          </div>
+        </div>
+      {% endfor %}
+      {% if ns.current_cat != "" %}</div>{% endif %}
+
+      <!-- Soft Skills -->
+      <div class="card">
+        <div class="card-title">Soft Skills</div>
+        {% for sk in soft_skills %}
+        <div class="skill-row">
+          <div class="progress-label">
+            <span class="name">{{ sk.name }}</span>
+            <span class="badge badge-{{ sk.proficiency }}">{{ sk.proficiency }}</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="background: var(--red);" data-width="15%"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right: Certifications -->
+    <div>
+      <div class="card">
+        <div class="card-title">Certifications</div>
+        {% for cert in certifications %}
+        <div class="cert-card">
+          <div class="cert-icon" style="background: {{ 'var(--green-light)' if cert.obtained else 'var(--yellow-light)' }};">
+            {{ '&#x1F3C5;' if cert.obtained else '&#x1F4CB;' }}
+          </div>
+          <div class="cert-info">
+            <h4>{{ cert.name }}</h4>
+            <p>
+              {{ cert.issuer }}
+              {% if cert.obtained %} &middot; Obtained: {{ cert.obtained }}{% endif %}
+              {% if cert.expires and cert.expires != 'never' %} &middot; Expires: {{ cert.expires }}
+              {% elif cert.expires == 'never' %} &middot; No expiry
+              {% endif %}
+            </p>
+          </div>
+          {% if not cert.obtained %}
+          <span class="cert-status" style="background: var(--yellow-light); color: var(--yellow);">Pending</span>
+          {% else %}
+          <span class="cert-status" style="background: var(--green-light); color: var(--green);">Active</span>
+          {% endif %}
+        </div>
+        {% endfor %}
+
+        {% if not certifications %}
+        <div class="empty-state">
+          <div class="empty-icon">&#x1F3C6;</div>
+          <p>No certifications yet. Update skills/skills-inventory.yml to add them.</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Monthly Checkpoints -->
+      <div class="card">
+        <div class="card-title">Monthly Learning Checkpoints</div>
+        {% set checkpoints = [
+          ("Jan", "React + Git", "3 projects with components"),
+          ("Feb", "Cosmos DB + FastAPI", "Data persisting"),
+          ("Mar", "Docker + CI/CD", "Automated deployments"),
+          ("Apr", "Auth + Adv React", "User systems working"),
+          ("May", "PWA + WebSockets", "Offline + real-time"),
+          ("Jun", "Performance", "Lighthouse 90+"),
+          ("Jul-Aug", "K8s + Terraform", "Production infra"),
+          ("Sep-Oct", "AZ-204 Prep", "Practice exams 75%+"),
+          ("Nov", "AZ-204 EXAM", "PASS"),
+          ("Dec", "Job Search", "Applications submitted"),
+        ] %}
+        {% for month, skill, validation in checkpoints %}
+        <div class="metric-row">
+          <div class="metric-cat" style="color: {{ 'var(--green)' if loop.index <= 2 else 'var(--text-muted)' }};">{{ month }}</div>
+          <div class="metric-goal">{{ skill }}</div>
+          <div class="metric-measure">{{ validation }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- CAREER PAGE                                                 -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-career">
+  <div class="page-header">
+    <h2>Career Hub</h2>
+    <p>Goals, networking, and job search &mdash; from your YAML files</p>
+  </div>
+
+  <div class="grid-2">
+    <!-- Left -->
+    <div>
+      <!-- Goals -->
+      <div class="card">
+        <div class="card-title">Career Goals</div>
+        {% if has_goals %}
+        <h3>{{ vision.title }}</h3>
+        <p>{{ vision.description }}</p>
+        {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">&#x1F3AF;</div>
+          <p>No goals defined yet. Update goals/career-goals.yml to set your vision and milestones.</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Job Applications -->
+      <div class="card">
+        <div class="card-title">Job Applications &mdash; 2026</div>
+        <div class="grid-3" style="margin-bottom: 12px;">
+          {% for label, key, color in [
+            ("Applied", "applied", "var(--blue)"),
+            ("Screening", "screening", "var(--yellow)"),
+            ("Interviews", "interviews", "var(--purple)"),
+            ("Onsites", "onsites", "var(--accent)"),
+            ("Offers", "offers", "var(--green)"),
+            ("Pending", "pending", "var(--text-muted)"),
+          ] %}
+          <div class="stat-box stat-sm">
+            <div class="stat-value" style="color: {{ color }};">{{ job_stats[key] }}</div>
+            <div class="stat-label">{{ label }}</div>
+          </div>
+          {% endfor %}
+        </div>
+
+        {% if job_stats.applied == 0 %}
+        <div class="empty-state" style="padding: 16px;">
+          <p>Job search begins Week 49 (December). Update interviews/job-applications.yml when ready.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right -->
+    <div>
+      <!-- Networking -->
+      <div class="card">
+        <div class="card-title">Networking Goals</div>
+        {% for g in net_goals %}
+        <div class="net-goal">
+          <div class="net-goal-text">
+            <h4>{{ g.goal }}</h4>
+            <p>Progress for 2026</p>
+          </div>
+          <div class="net-goal-progress">{{ g.progress }}</div>
+        </div>
+        {% endfor %}
+
+        {% if not net_goals %}
+        <div class="empty-state">
+          <div class="empty-icon">&#x1F91D;</div>
+          <p>Add networking goals in networking/contacts.yml</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Application Checklist -->
+      <div class="card">
+        <div class="card-title">Application Checklist</div>
+        {% for item in app_checklist %}
+        <div class="task-item">
+          <div class="task-check"></div>
+          <span class="task-text">{{ item }}</span>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Success Metrics -->
+      <div class="card">
+        <div class="card-title">2026 Success Metrics</div>
+        {% for m in success_metrics %}
+        <div class="metric-row">
+          <div class="metric-cat">{{ m.category }}</div>
+          <div class="metric-goal">{{ m.goal }}</div>
+          <div class="metric-measure">{{ m.metric }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Footer ──────────────────────────────────────────────── -->
+<div class="footer">
+  <p>CloudTransition Career Dashboard &middot; Powered by FastAPI + Jinja2</p>
+  <p>Data reads from workspace YAML files on each page load &middot; {{ today }}</p>
+</div>
+
+</div><!-- .main -->
+
+<!-- ── Client JS (navigation + animations, no innerHTML) ──── -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Tab navigation
+  document.querySelectorAll('.nav-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+      var target = document.getElementById('page-' + tab.dataset.page);
+      if (target) {
+        target.classList.add('active');
+        // Re-trigger progress bar animations for newly visible page
+        animateBars(target);
+      }
+    });
+  });
+
+  // Animate progress bars on load
+  animateBars(document);
+});
+
+function animateBars(scope) {
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      scope.querySelectorAll('.progress-fill[data-width]').forEach(function(el) {
+        el.style.width = el.dataset.width;
+      });
+    });
+  });
+}
+</script>
+</body>
+</html>

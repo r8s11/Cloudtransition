@@ -2,7 +2,7 @@
 
 > From SQL basics to database architecture and Azure SQL Database
 
-**Timeline:** Weeks 1-6 (parallel with React)  
+**Timeline:** Weeks 1-12 (parallel with React)
 **Time Commitment:** 4 hours/week  
 **Goal:** Write efficient queries and design robust databases
 
@@ -10,7 +10,7 @@
 
 ## 📋 Learning Path
 
-### Week 1: SQL Fundamentals (4 hours)
+### Weeks 1-2: SQL Fundamentals (4 hours)
 **Topics:**
 - SELECT basics (columns, WHERE, ORDER BY, LIMIT)
 - INSERT, UPDATE, DELETE
@@ -45,7 +45,7 @@ SELECT COUNT(*) FROM users;
 
 ---
 
-### Week 2: JOINs & Relationships (4 hours)
+### Weeks 3-4: JOINs & Relationships (4 hours)
 **Topics:**
 - INNER JOIN
 - LEFT JOIN, RIGHT JOIN
@@ -70,7 +70,7 @@ GROUP BY customers.name, orders.order_date;
 
 ---
 
-### Week 3: Aggregations & GROUP BY (4 hours)
+### Weeks 5-6: Aggregations & GROUP BY (4 hours)
 **Topics:**
 - COUNT, SUM, AVG, MIN, MAX
 - GROUP BY
@@ -95,7 +95,7 @@ ORDER BY avg_price DESC;
 
 ---
 
-### Week 4: Database Design (4 hours)
+### Weeks 7-8: Database Design (4 hours)
 **Topics:**
 - ER diagrams
 - Normalization (1NF, 2NF, 3NF)
@@ -132,7 +132,7 @@ CREATE INDEX idx_asset_tag ON assets(asset_tag);
 
 ---
 
-### Week 5: Advanced SQL (4 hours)
+### Weeks 9-10: Advanced SQL (4 hours)
 **Topics:**
 - Views
 - Stored procedures
@@ -161,7 +161,7 @@ FROM products;
 
 ---
 
-### Week 6: Azure SQL & Performance (4 hours)
+### Weeks 11-12: Azure SQL & Performance (4 hours)
 **Topics:**
 - Azure SQL Database setup
 - Connection strings
@@ -211,12 +211,12 @@ COMMIT;
 
 ## ✅ Checklist
 
-- [ ] Week 1: Basic queries mastered
-- [ ] Week 2: JOINs comfortable
-- [ ] Week 3: Aggregations understood
-- [ ] Week 4: Designed multi-table schema
-- [ ] Week 5: Used views and stored procedures
-- [ ] Week 6: Azure SQL deployed
+- [ ] Weeks 1-2: Basic queries mastered
+- [ ] Weeks 3-4: JOINs comfortable
+- [ ] Weeks 5-6: Aggregations understood
+- [ ] Weeks 7-8: Designed multi-table schema
+- [ ] Weeks 9-10: Used views and stored procedures
+- [ ] Weeks 11-12: Azure SQL deployed
 
 ---
 

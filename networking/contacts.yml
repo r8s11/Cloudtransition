@@ -1,0 +1,52 @@
+# Professional Network
+# Track contacts, interactions, and relationship building
+
+contacts:
+  # - name:
+  #   company:
+  #   title:
+  #   relationship:  # former_colleague | mentor | peer | recruiter | industry_contact | other
+  #   met_via:
+  #   linkedin:
+  #   email:
+  #   tags: []
+  #   last_contact:
+  #     date:
+  #     type:  # coffee_chat | email | linkedin_message | phone_call | conference | other
+  #     notes:
+  #   next_action:
+  #     task:
+  #     due_date:
+  #   interaction_history:
+  #     - date:
+  #       type:
+  #       notes:
+
+target_connections:
+  # - role:
+  #   reason:
+  #   target_count:
+  #   current_count: 0
+  #   approach:
+
+networking_goals:
+  - goal: Attend 1 tech event per month
+    progress: 0/12 for 2026
+    events_attended: []
+
+  - goal: Have 2 coffee chats per month
+    progress: 0/24 for 2026
+    completed: []
+
+reminder_settings:
+  check_in_cadence:
+    close_contacts: every_3_months
+    former_colleagues: every_6_months
+    general_network: once_a_year
+
+notes: |
+  Keep contacts warm with genuine interactions:
+  - Share relevant articles/resources
+  - Congratulate on achievements
+  - Offer help when possible
+  - Be authentic, not transactional

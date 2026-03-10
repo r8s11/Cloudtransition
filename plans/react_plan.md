@@ -2,8 +2,8 @@
 
 > Complete React curriculum from fundamentals to production-ready applications
 
-**Timeline:** Weeks 1-8 (parallel with other learning)  
-**Time Commitment:** 6 hours/week  
+**Timeline:** Weeks 1-16 (parallel with other learning)
+**Time Commitment:** 6 hours/week
 **Goal:** Build modern, performant React applications
 
 ---
@@ -11,10 +11,10 @@
 ## 📋 Table of Contents
 
 1. [Overview](#overview)
-2. [Week 1-2: React Fundamentals](#week-1-2-react-fundamentals)
-3. [Week 3-4: Advanced Patterns](#week-3-4-advanced-patterns)
-4. [Week 5-6: State Management](#week-5-6-state-management)
-5. [Week 7-8: Production Ready](#week-7-8-production-ready)
+2. [Weeks 1-4: React Fundamentals](#weeks-1-4-react-fundamentals)
+3. [Weeks 5-8: Advanced Patterns](#weeks-5-8-advanced-patterns)
+4. [Weeks 9-12: State Management](#weeks-9-12-state-management)
+5. [Weeks 13-16: Production Ready](#weeks-13-16-production-ready)
 6. [Resources](#resources)
 7. [Practice Projects](#practice-projects)
 
@@ -38,16 +38,16 @@
 
 ---
 
-## Week 1-2: React Fundamentals
+## Weeks 1-4: React Fundamentals
 
 ### Topics
 
 #### Day 1-2: Setup & JSX
-- [ ] Create React app with Vite
-- [ ] Understand JSX syntax
-- [ ] JavaScript in JSX with `{}`
-- [ ] Conditional rendering
-- [ ] Lists and keys
+- [X] Create React app with Vite
+- [X] Understand JSX syntax
+- [X] JavaScript in JSX with `{}`
+- [X] Conditional rendering
+- [X] Lists and keys
 
 **Resources:**
 - react.dev/learn (Quick Start section)
@@ -101,12 +101,12 @@ function Card({ title, description, status = "active" }) {
 function Counter() {
   const [count, setCount] = useState(0);
   const [history, setHistory] = useState([]);
-  
+
   const increment = () => {
     setCount(count + 1);
     setHistory([...history, count + 1]);
   };
-  
+
   return (
     <div>
       <h2>Count: {count}</h2>
@@ -130,7 +130,7 @@ function Counter() {
 function UserProfile({ userId }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     fetch(`/api/users/${userId}`)
       .then(res => res.json())
@@ -139,7 +139,7 @@ function UserProfile({ userId }) {
         setLoading(false);
       });
   }, [userId]);  // Re-fetch when userId changes
-  
+
   if (loading) return <div>Loading...</div>;
   return <div>{user.name}</div>;
 }
@@ -159,18 +159,18 @@ function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
-    
+
     if (!email.includes('@')) {
       newErrors.email = 'Invalid email';
     }
     if (password.length < 8) {
       newErrors.password = 'Password too short';
     }
-    
+
     if (Object.keys(newErrors).length === 0) {
       // Submit form
       console.log('Submitted:', { email, password });
@@ -178,7 +178,7 @@ function LoginForm() {
       setErrors(newErrors);
     }
   };
-  
+
   return (
     <form onSubmit={handleSubmit}>
       <input
@@ -188,7 +188,7 @@ function LoginForm() {
         placeholder="Email"
       />
       {errors.email && <span>{errors.email}</span>}
-      
+
       <input
         type="password"
         value={password}
@@ -196,14 +196,14 @@ function LoginForm() {
         placeholder="Password"
       />
       {errors.password && <span>{errors.password}</span>}
-      
+
       <button type="submit">Login</button>
     </form>
   );
 }
 ```
 
-### Week 1-2 Project: Task Manager
+### Weeks 1-4 Project: Task Manager
 Build a complete CRUD application:
 - Create, read, update, delete tasks
 - Mark tasks as complete
@@ -213,7 +213,7 @@ Build a complete CRUD application:
 
 ---
 
-## Week 3-4: Advanced Patterns
+## Weeks 5-8: Advanced Patterns
 
 ### Topics
 
@@ -238,7 +238,7 @@ function App() {
         <Link to="/about">About</Link>
         <Link to="/users">Users</Link>
       </nav>
-      
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -272,7 +272,7 @@ function useFetch(url) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   useEffect(() => {
     fetch(url)
       .then(res => res.json())
@@ -285,17 +285,17 @@ function useFetch(url) {
         setLoading(false);
       });
   }, [url]);
-  
+
   return { data, loading, error };
 }
 
 // Usage
 function UserList() {
   const { data: users, loading, error } = useFetch('/api/users');
-  
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
-  
+
   return (
     <ul>
       {users.map(user => <li key={user.id}>{user.name}</li>)}
@@ -311,7 +311,7 @@ function UserList() {
 - [ ] Responsive design
 - [ ] Theming
 
-### Week 3-4 Project: IT Asset Management (Frontend)
+### Weeks 5-8 Project: IT Asset Management (Frontend)
 Multi-page application with:
 - Dashboard with statistics
 - Asset list with search/filter
@@ -321,7 +321,7 @@ Multi-page application with:
 
 ---
 
-## Week 5-6: State Management
+## Weeks 9-12: State Management
 
 ### Topics
 
@@ -340,7 +340,7 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     // Check if user is logged in
     fetch('/api/auth/me')
@@ -351,7 +351,7 @@ export function AuthProvider({ children }) {
       })
       .catch(() => setLoading(false));
   }, []);
-  
+
   const login = async (email, password) => {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
@@ -360,12 +360,12 @@ export function AuthProvider({ children }) {
     const user = await res.json();
     setUser(user);
   };
-  
+
   const logout = () => {
     fetch('/api/auth/logout', { method: 'POST' });
     setUser(null);
   };
-  
+
   return (
     <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
@@ -376,7 +376,7 @@ export function AuthProvider({ children }) {
 // Use in components
 function Profile() {
   const { user, logout } = useContext(AuthContext);
-  
+
   return (
     <div>
       <p>Welcome, {user.name}!</p>
@@ -417,11 +417,11 @@ function reducer(state, action) {
 
 function ItemManager() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  
+
   const addItem = (item) => {
     dispatch({ type: 'ADD_ITEM', payload: item });
   };
-  
+
   // ... rest of component
 }
 ```
@@ -440,16 +440,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 function TaskList() {
   const queryClient = useQueryClient();
-  
+
   // Fetch tasks
   const { data: tasks, isLoading } = useQuery({
     queryKey: ['tasks'],
     queryFn: () => fetch('/api/tasks').then(res => res.json())
   });
-  
+
   // Create task mutation
   const createTask = useMutation({
-    mutationFn: (newTask) => 
+    mutationFn: (newTask) =>
       fetch('/api/tasks', {
         method: 'POST',
         body: JSON.stringify(newTask)
@@ -459,9 +459,9 @@ function TaskList() {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
     }
   });
-  
+
   if (isLoading) return <div>Loading...</div>;
-  
+
   return (
     <div>
       {tasks.map(task => (
@@ -475,7 +475,7 @@ function TaskList() {
 }
 ```
 
-### Week 5-6 Project: Infrastructure Platform (Frontend)
+### Weeks 9-12 Project: Infrastructure Platform (Frontend)
 Advanced state management with:
 - React Query for server state
 - Context API for authentication
@@ -485,7 +485,7 @@ Advanced state management with:
 
 ---
 
-## Week 7-8: Production Ready
+## Weeks 13-16: Production Ready
 
 ### Topics
 
@@ -511,17 +511,17 @@ const ExpensiveComponent = memo(function ExpensiveComponent({ data }) {
 function ParentComponent() {
   const [count, setCount] = useState(0);
   const [items, setItems] = useState([]);
-  
+
   // Memoize expensive calculation
   const total = useMemo(() => {
     return items.reduce((sum, item) => sum + item.price, 0);
   }, [items]);  // Only recalculate when items change
-  
+
   // Memoize callback
   const handleClick = useCallback(() => {
     console.log('Clicked with count:', count);
   }, [count]);  // Only recreate when count changes
-  
+
   return (
     <div>
       <ExpensiveComponent data={items} />
@@ -555,15 +555,15 @@ class ErrorBoundary extends React.Component {
     super(props);
     this.state = { hasError: false };
   }
-  
+
   static getDerivedStateFromError(error) {
     return { hasError: true };
   }
-  
+
   componentDidCatch(error, errorInfo) {
     console.error('Error:', error, errorInfo);
   }
-  
+
   render() {
     if (this.state.hasError) {
       return <h1>Something went wrong.</h1>;
@@ -592,7 +592,7 @@ class ErrorBoundary extends React.Component {
 - [ ] Props validation
 - [ ] Accessibility (a11y)
 
-### Week 7-8 Project: Portfolio Website
+### Weeks 13-16 Project: Portfolio Website
 Production-ready features:
 - Optimized performance (Lighthouse 95+)
 - Error boundaries
@@ -631,21 +631,21 @@ Production-ready features:
 
 ## 🏗️ Practice Projects
 
-### Beginner Level (Week 1-2)
+### Beginner Level (Weeks 1-4)
 1. Counter app
 2. Todo list
 3. Weather app
 4. Recipe finder
 5. Portfolio page
 
-### Intermediate Level (Week 3-4)
+### Intermediate Level (Weeks 5-8)
 1. E-commerce product catalog
 2. Blog with routing
 3. Movie search app
 4. Quiz application
 5. Dashboard with charts
 
-### Advanced Level (Week 5-8)
+### Advanced Level (Weeks 9-16)
 1. Full-stack task manager
 2. Real-time chat app
 3. Social media feed
@@ -656,7 +656,7 @@ Production-ready features:
 
 ## ✅ Progress Checklist
 
-### Week 1-2: Fundamentals
+### Weeks 1-4: Fundamentals
 - [ ] Created first React app
 - [ ] Understand JSX
 - [ ] Built components with props
@@ -664,21 +664,21 @@ Production-ready features:
 - [ ] Fetched data with useEffect
 - [ ] Built task manager app
 
-### Week 3-4: Advanced
+### Weeks 5-8: Advanced
 - [ ] Implemented React Router
 - [ ] Created custom hooks
 - [ ] Used UI component library
 - [ ] Built multi-page application
 - [ ] Professional styling
 
-### Week 5-6: State Management
+### Weeks 9-12: State Management
 - [ ] Implemented Context API
 - [ ] Used useReducer
 - [ ] Set up React Query
 - [ ] Managed complex state
 - [ ] Handled authentication
 
-### Week 7-8: Production
+### Weeks 13-16: Production
 - [ ] Optimized performance
 - [ ] Added error boundaries
 - [ ] Wrote tests

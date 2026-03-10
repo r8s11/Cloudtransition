@@ -2,7 +2,7 @@
 
 > Strategic reading schedule with 12 industry-standard books for your career transition
 
-**Timeline:** Weeks 1-14
+**Timeline:** Weeks 1-28
 **Time Commitment:** 1 hour/day (30 min morning + 30 min evening)
 **Goal:** 10-12 books completed with applied knowledge
 
@@ -40,7 +40,7 @@
 
 ## 📅 Reading Schedule
 
-### Weeks 1-2: Foundation
+### Weeks 1-4: Foundation
 
 | Book                    | Chapters             | Time    | Priority     |
 | ----------------------- | -------------------- | ------- | ------------ |
@@ -61,7 +61,7 @@
 
 ---
 
-### Weeks 3-4: Code Quality
+### Weeks 5-8: Code Quality
 
 | Book               | Chapters             | Time    | Priority     |
 | ------------------ | -------------------- | ------- | ------------ |
@@ -83,7 +83,7 @@
 
 ---
 
-### Weeks 5-6: DevOps Deep Dive
+### Weeks 9-12: DevOps Deep Dive
 
 | Book                    | Chapters              | Time    | Priority     |
 | ----------------------- | --------------------- | ------- | ------------ |
@@ -104,7 +104,7 @@
 
 ---
 
-### Weeks 7-8: Practical DevOps
+### Weeks 13-16: Practical DevOps
 
 | Book                  | Chapters                 | Time    | Priority |
 | --------------------- | ------------------------ | ------- | -------- |
@@ -125,7 +125,7 @@
 
 ---
 
-### Weeks 9-10: Certification Focus
+### Weeks 17-20: Certification Focus
 
 | Book                         | Chapters       | Time      | Priority     |
 | ---------------------------- | -------------- | --------- | ------------ |
@@ -146,7 +146,7 @@
 
 ---
 
-### Weeks 11-14: Interview & Advanced
+### Weeks 21-28: Interview & Advanced
 
 | Book                              | Chapters                  | Time    | Priority    |
 | --------------------------------- | ------------------------- | ------- | ----------- |
@@ -464,19 +464,19 @@ Ch 13-17: Algorithms
 
 ### Weekly Reading Goals
 
-| Week  | Pages Goal | Books in Progress                      |
-| ----- | ---------- | -------------------------------------- |
-| 1     | 150        | Phoenix Project, Python Crash Course   |
-| 2     | 150        | Complete Phoenix, Continue Python      |
-| 3     | 120        | Clean Code, Learning React             |
-| 4     | 120        | Continue both                          |
-| 5     | 100        | DevOps Handbook, SQL in 10 Min         |
-| 6     | 100        | Continue both                          |
-| 7     | 100        | Python for DevOps                      |
-| 8     | 100        | Docker Deep Dive                       |
-| 9     | 80         | AZ-204 reference, Pragmatic Programmer |
-| 10    | 80         | Continue Pragmatic                     |
-| 11-14 | 60/week    | Cracking Interview, Accelerate         |
+| Weeks  | Pages Goal | Books in Progress                      |
+| ------ | ---------- | -------------------------------------- |
+| 1-2    | 150        | Phoenix Project, Python Crash Course   |
+| 3-4    | 150        | Complete Phoenix, Continue Python      |
+| 5-6    | 120        | Clean Code, Learning React             |
+| 7-8    | 120        | Continue both                          |
+| 9-10   | 100        | DevOps Handbook, SQL in 10 Min         |
+| 11-12  | 100        | Continue both                          |
+| 13-14  | 100        | Python for DevOps                      |
+| 15-16  | 100        | Docker Deep Dive                       |
+| 17-18  | 80         | AZ-204 reference, Pragmatic Programmer |
+| 19-20  | 80         | Continue Pragmatic                     |
+| 21-28  | 60/week    | Cracking Interview, Accelerate         |
 
 ---
 
@@ -584,38 +584,38 @@ def example():
 
 ## ✅ Checklist
 
-### Weeks 1-2
+### Weeks 1-4
 
 - [ ] The Phoenix Project (complete)
 - [ ] Python Crash Course Ch 1-10
 - [ ] 100+ pages read
 - [ ] Notes organized
 
-### Weeks 3-4
+### Weeks 5-8
 
 - [ ] Clean Code Ch 1-6
 - [ ] Learning React (complete)
 - [ ] Applied Clean Code principles
 
-### Weeks 5-6
+### Weeks 9-12
 
 - [ ] DevOps Handbook Part I-II
 - [ ] SQL in 10 Minutes (complete)
 - [ ] 500+ total pages
 
-### Weeks 7-8
+### Weeks 13-16
 
 - [ ] Python for DevOps (key chapters)
 - [ ] Docker Deep Dive (optional)
 - [ ] 700+ total pages
 
-### Weeks 9-10
+### Weeks 17-20
 
 - [ ] Pragmatic Programmer started
 - [ ] AZ-204 reference used
 - [ ] 900+ total pages
 
-### Weeks 11-14
+### Weeks 21-28
 
 - [ ] Cracking Interview (practice problems)
 - [ ] Accelerate (complete)
@@ -626,13 +626,13 @@ def example():
 
 ## 🏆 Success Metrics
 
-| Milestone            | Target  | Status |
-| -------------------- | ------- | ------ |
-| First book completed | Week 2  | ⬜     |
-| 500 pages read       | Week 6  | ⬜     |
-| 5 books completed    | Week 8  | ⬜     |
-| 1000 pages read      | Week 10 | ⬜     |
-| 10 books completed   | Week 14 | ⬜     |
+| Milestone            | Target      | Status |
+| -------------------- | ----------- | ------ |
+| First book completed | Weeks 3-4   | ⬜     |
+| 500 pages read       | Weeks 11-12 | ⬜     |
+| 5 books completed    | Weeks 15-16 | ⬜     |
+| 1000 pages read      | Weeks 19-20 | ⬜     |
+| 10 books completed   | Weeks 27-28 | ⬜     |
 
 ---
 

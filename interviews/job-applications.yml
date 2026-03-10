@@ -1,0 +1,77 @@
+# Job Applications Tracker
+# Monitor application status, interviews, and follow-ups
+
+active_applications:
+  # - company:
+  #   role:
+  #   job_id:
+  #   application_date:
+  #   job_url:
+  #   status:  # applied | screening | interviewing | offer | rejected | withdrawn
+  #   salary_range:
+  #   location:
+  #   priority:  # high | medium | low
+  #
+  #   contacts:
+  #     - name:
+  #       role:
+  #       email:
+  #       linkedin:
+  #
+  #   timeline:
+  #     - date:
+  #       stage:  # application_submitted | recruiter_screen | technical_screen | onsite_scheduled | onsite_completed | offer_received
+  #       notes:
+  #
+  #   interview_prep:
+  #     -
+  #
+  #   next_steps:
+  #     - task:
+  #       date:
+  #
+  #   notes: |
+
+past_applications:
+  # - company:
+  #   role:
+  #   application_date:
+  #   status:  # rejected | withdrawn | offer_declined
+  #   notes:
+
+target_companies:
+  # - name:
+  #   roles_of_interest: []
+  #   priority:  # high | medium | low
+  #   connections:
+  #   notes:
+
+application_strategy:
+  weekly_goal:
+  focus_areas:
+    -
+
+  application_checklist:
+    - Tailor resume to job description
+    - Research company and team
+    - Find internal referral if possible
+    - Write custom cover letter (for high priority)
+    - Add to tracker before submitting
+    - Set calendar reminder to follow up in 1 week
+
+statistics:
+  2026:
+    applications_sent: 0
+    screening_calls: 0
+    technical_interviews: 0
+    onsites: 0
+    offers: 0
+    rejections: 0
+    pending: 0
+
+notes: |
+  Track everything to identify patterns:
+  - Which application sources work best (referrals, direct, LinkedIn)?
+  - What's my conversion rate at each stage?
+  - How long does each company's process take?
+  - What interview questions come up repeatedly?

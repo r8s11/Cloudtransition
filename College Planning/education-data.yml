@@ -1,0 +1,233 @@
+# Education Data — SNHU BS in Computer Science
+# Source of truth for the dashboard. Update when audit data changes.
+# Last synced with snhu-plan.md: 2026-03-10
+
+program:
+  name: BS in Computer Science
+  school: Southern New Hampshire University (SNHU)
+  student_id: "4354432"
+  catalog: "2026 C-3"
+  pathway: AS → BS → IT (optional)
+
+degree_stats:
+  credits_required: 120
+  credits_applied: 36
+  credits_remaining: 84
+  progress_pct: 30
+  requirements_pct: 29
+  as_credits_required: 60
+  as_credits_remaining: 24  # estimated
+
+credit_sources:
+  - source: Middlesex Community College
+    credits: 19
+    cost: 0
+    status: completed
+    color: "#4a7fb5"
+    courses:
+      - { code: BIO 120, name: General Biology I, credits: 3 }
+      - { code: ENG 122, name: English Comp I, credits: 3 }
+      - { code: COM 212, name: Public Speaking, credits: 3 }
+      - { code: MAT 140, name: Precalculus, credits: 3 }
+      - { code: PSY 1ELE, name: Psychology Elective, credits: 3 }
+      - { code: LFR 111, name: Beginning French I, credits: 3 }
+      - { code: BIO 120L, name: Biology Lab, credits: 1 }
+
+  - source: Certifications (CPL)
+    credits: 8
+    cost: 0
+    status: completed
+    color: "#4a9e6e"
+    courses:
+      - { code: IT 1ELE, name: "AZ-900 Azure Fundamentals", credits: 2 }
+      - { code: CYB 220, name: "CompTIA Security+ → Network Security", credits: 3 }
+      - { code: IT 476, name: "AWS Cloud Practitioner → Experiential Learning", credits: 3 }
+
+  - source: Saylor Academy
+    credits: 15
+    cost: 0
+    status: not_started
+    color: "#c9a227"
+    courses:
+      - { code: CS electives, name: "CS101 + CS102 + CS302 sequence", credits: 9 }
+      - { code: ECO-201, name: "ECON101 Microeconomics", credits: 3 }
+      - { code: ECO-202, name: "ECON102 Macroeconomics", credits: 3 }
+
+  - source: Sophia Learning
+    credits: 35
+    cost: 198
+    status: not_started
+    color: "#7c5cbf"
+    courses:
+      - { code: IT 140, name: "Intro to Python Programming", credits: 3, priority: 1 }
+      - { code: IT 145, name: "Intro to Java Programming", credits: 3, priority: 1 }
+      - { code: CS 231, name: "Intro to Relational Databases", credits: 3, priority: 1 }
+      - { code: MAT 225, name: "Calculus I", credits: 4, priority: 1 }
+      - { code: ENG 190, name: "English Composition II", credits: 3, priority: 2 }
+      - { code: PHL-212, name: "Introduction to Ethics", credits: 3, priority: 2 }
+      - { code: HIS-113, name: "U.S. History I", credits: 3, priority: 2 }
+      - { code: ACC-201, name: "Financial Accounting", credits: 3, priority: 3 }
+      - { code: BUS-206, name: "Business Law", credits: 3, priority: 3 }
+      - { code: OL-110, name: "Intro to Business", credits: 3, priority: 3 }
+      - { code: PSY-211, name: "Lifespan Development", credits: 3, priority: 3 }
+
+  - source: Study.com
+    credits: 6
+    cost: 95
+    status: not_started
+    color: "#D97757"
+    courses:
+      - { code: CS 250, name: "Software Dev Lifecycle", credits: 3 }
+      - { code: CS 255, name: "System Analysis & Design", credits: 3 }
+
+  - source: SNHU (institutional)
+    credits: 41
+    cost: 14022
+    status: not_started
+    color: "#c44d4d"
+    courses:
+      - { code: FYE 101, name: "First Year Experience", credits: 0 }
+      - { code: MAT 243, name: "Applied Statistics for STEM", credits: 3 }
+      - { code: CS 210, name: "Programming Languages / OOP (C++)", credits: 3 }
+      - { code: CS 230, name: "Operating Platforms", credits: 3 }
+      - { code: MAT 230, name: "Discrete Mathematics", credits: 3 }
+      - { code: CS 300, name: "Data Structures & Algorithms", credits: 3 }
+      - { code: CS 305, name: "Software Security", credits: 3 }
+      - { code: CS 320, name: "Software Test / QA", credits: 3 }
+      - { code: CS 330, name: "Computer Graphics & Visualization", credits: 3 }
+      - { code: CS 340, name: "Client/Server Development", credits: 3 }
+      - { code: CS 360, name: "Mobile Architecture", credits: 3 }
+      - { code: CS 370, name: "Emerging Trends in CS", credits: 3 }
+      - { code: CS 465, name: "Full Stack Development I", credits: 3 }
+      - { code: MAT 350, name: "Applied Linear Algebra", credits: 3 }
+      - { code: PHY 150, name: "Introductory Physics", credits: 3 }
+      - { code: CS 499, name: "Capstone", credits: 3 }
+
+transfer_phases:
+  - phase: 1
+    name: Saylor Academy
+    status: not_started
+    cost: "$0"
+    credits: "up to 15"
+    duration: "4-6 weeks"
+    description: "Free courses. Start immediately."
+
+  - phase: 2
+    name: Sophia Learning
+    status: not_started
+    cost: "$99-198"
+    credits: "28-40"
+    duration: "1-2 months"
+    description: "Sprint through CS major reqs + Gen Ed + electives."
+
+  - phase: 3
+    name: Study.com
+    status: not_started
+    cost: "$95"
+    credits: "6"
+    duration: "1 month"
+    description: "CS-250 and CS-255 — not available on Sophia."
+
+  - phase: 4
+    name: SNHU (AS milestone)
+    status: not_started
+    cost: "~$10,944-$14,022"
+    credits: "32-41"
+    duration: "~5 terms"
+    description: "SNHU-only courses. AS earned after this phase."
+
+  - phase: 5
+    name: SNHU (BS completion)
+    status: not_started
+    cost: "included above"
+    credits: "remaining"
+    duration: "~6 terms"
+    description: "Upper-level CS courses. BS earned."
+
+timeline:
+  - milestone: "Drop IT 140 + ENG 190 from SNHU"
+    target: "ASAP"
+    status: not_started
+    phase: prep
+
+  - milestone: "Start Saylor Academy"
+    target: "Immediately"
+    status: not_started
+    phase: 1
+
+  - milestone: "Sophia Learning sprint"
+    target: "Summer 2026"
+    status: not_started
+    phase: 2
+
+  - milestone: "Study.com (CS-250 + CS-255)"
+    target: "Summer 2026"
+    status: not_started
+    phase: 3
+
+  - milestone: "Submit all transfers to SNHU"
+    target: "Aug 2026"
+    status: not_started
+    phase: 3
+
+  - milestone: "First SNHU term (MAT 243 + FYE 101)"
+    target: "Fall 2026"
+    status: not_started
+    phase: 4
+
+  - milestone: "Earn AS in Computer Science"
+    target: "Spring/Summer 2027"
+    status: not_started
+    phase: 4
+
+  - milestone: "Earn BS in Computer Science"
+    target: "Spring 2028"
+    status: not_started
+    phase: 5
+
+  - milestone: "Optional: Start IT degree"
+    target: "Fall 2028"
+    status: future
+    phase: 6
+
+cost:
+  total_low: 11900
+  total_high: 19200
+  pell_grant: 14790
+  net_low: 0
+  net_high: 4400
+  breakdown:
+    - { item: "Saylor Academy", amount: 0 }
+    - { item: "Sophia Learning (1-2 months)", amount: 198 }
+    - { item: "Study.com (1 month)", amount: 95 }
+    - { item: "SNHU tuition (~32-53 cr)", amount: 14022 }
+    - { item: "Books/materials", amount: 800 }
+
+actions:
+  - text: "Talk to advisor — drop IT 140 + ENG 190, ask about transfer timing"
+    priority: 1
+    done: false
+  - text: "Start Saylor — create account, begin CS101 (free)"
+    priority: 2
+    done: false
+  - text: "Start Sophia — subscribe ($99/mo), begin IT 140 + IT 145 + ENG 190"
+    priority: 3
+    done: false
+  - text: "Verify: Saylor CS101+CS102+CS302 → major elective slots?"
+    priority: 4
+    done: false
+  - text: "Verify: Study.com CS 307 → CS-250 and CS 302 → CS-255 current?"
+    priority: 5
+    done: false
+  - text: "Verify: AS requirements vs BS (plan AS milestone)"
+    priority: 6
+    done: false
+  - text: "Verify: What transfer course satisfies Culmination Experience?"
+    priority: 7
+    done: false
+  - text: "File FAFSA at studentaid.gov"
+    priority: 8
+    done: false
+  - text: "Check employer tuition reimbursement eligibility"
+    priority: 9
+    done: false

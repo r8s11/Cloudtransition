@@ -63,7 +63,7 @@ Replace App.jsx with this:
 ```jsx
 function App() {
   const skills = ["Python", "React", "SQL", "Azure", "DevOps"];
-  
+
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial' }}>
       <h1>My Tech Stack Learning Journey</h1>
@@ -198,7 +198,7 @@ import { useState } from 'react';
 
 function Counter() {
   const [count, setCount] = useState(0);
-  
+
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
       <h2>Counter: {count}</h2>
@@ -225,24 +225,24 @@ import { useState } from 'react';
 function TodoList() {
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState('');
-  
+
   const addTodo = () => {
     if (input.trim()) {
       setTodos([...todos, { id: Date.now(), text: input, done: false }]);
       setInput('');
     }
   };
-  
+
   const toggleTodo = (id) => {
-    setTodos(todos.map(todo => 
+    setTodos(todos.map(todo =>
       todo.id === id ? { ...todo, done: !todo.done } : todo
     ));
   };
-  
+
   const deleteTodo = (id) => {
     setTodos(todos.filter(todo => todo.id !== id));
   };
-  
+
   return (
     <div style={{ maxWidth: '500px', margin: '20px auto', padding: '20px' }}>
       <h2>My To-Do List</h2>
@@ -259,12 +259,12 @@ function TodoList() {
           Add
         </button>
       </div>
-      
+
       <ul style={{ listStyle: 'none', padding: 0, marginTop: '20px' }}>
         {todos.map(todo => (
-          <li key={todo.id} style={{ 
-            padding: '10px', 
-            margin: '10px 0', 
+          <li key={todo.id} style={{
+            padding: '10px',
+            margin: '10px 0',
             border: '1px solid #ccc',
             borderRadius: '4px'
           }}>
@@ -278,7 +278,7 @@ function TodoList() {
             >
               {todo.text}
             </span>
-            <button 
+            <button
               onClick={() => deleteTodo(todo.id)}
               style={{ float: 'right' }}
             >
@@ -361,7 +361,7 @@ function UserList() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   useEffect(() => {
     // Fetch users from JSONPlaceholder API
     fetch('https://jsonplaceholder.typicode.com/users')
@@ -375,21 +375,21 @@ function UserList() {
         setLoading(false);
       });
   }, []); // Empty array = run once on mount
-  
+
   if (loading) return <div>Loading users...</div>;
   if (error) return <div>Error: {error}</div>;
-  
+
   return (
     <div style={{ padding: '20px' }}>
       <h2>User Directory</h2>
-      <div style={{ 
-        display: 'grid', 
+      <div style={{
+        display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '20px' 
+        gap: '20px'
       }}>
         {users.map(user => (
-          <div key={user.id} style={{ 
-            border: '1px solid #ddd', 
+          <div key={user.id} style={{
+            border: '1px solid #ddd',
             padding: '15px',
             borderRadius: '8px'
           }}>
@@ -1159,8 +1159,8 @@ Create a simple checklist file (checklist.md):
 - [x] 30+ GitHub commits
 
 ## Books Progress
-- [x] The Phoenix Project - Chapters 1-4 (20% done)
-- [x] Python Crash Course - Chapters 1-4 (40% done)
+- [] The Phoenix Project - Chapters 1-4 (20% done)
+- [] Python Crash Course - Chapters 1-4 (40% done)
 
 ## Code Stats
 - GitHub commits: 30+

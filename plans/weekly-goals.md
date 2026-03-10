@@ -2,16 +2,16 @@
 
 > Your week-by-week roadmap to Full-Stack Cloud DevOps Engineer
 
-**Timeline:** 14 Weeks
+**Timeline:** 26-32 Weeks
 **Commitment:** 20 hours/week
-**Total Hours:** ~280 hours
+**Total Hours:** ~520-640 hours
 
 ---
 
 ## 📋 Table of Contents
 
 1. [How to Use This Tracker](#how-to-use-this-tracker)
-2. [Weekly Goals (Weeks 1-14)](#week-1)
+2. [Weekly Goals (Weeks 1-28)](#week-1)
 3. [Review Templates](#review-template)
 4. [Progress Summary](#progress-summary)
 5. [Success Metrics](#success-metrics)
@@ -37,9 +37,9 @@
 
 ### Weekly Commit Goals
 
-- Week 1-4: 15-20 commits/week
-- Week 5-8: 15+ commits/week
-- Week 9-14: 10+ commits/week
+- Weeks 1-8: 15-20 commits/week
+- Weeks 9-16: 15+ commits/week
+- Weeks 17-28: 10+ commits/week
 
 ---
 
@@ -51,7 +51,7 @@
 
 ### Goals
 
-- [ ] Development environment fully set up
+- [X] Development environment fully set up
 - [ ] Task Manager v1 deployed to Azure
 - [ ] 20+ GitHub commits
 - [ ] SQLBolt lessons 1-12 complete
@@ -61,14 +61,14 @@
 
 **Monday:** Setup Day
 
-- [ ] Install Node.js, Python, VS Code, Git
-- [ ] Create GitHub account and first repo
-- [ ] Create Azure free account
+- [X] Install Node.js, Python, VS Code, Git
+- [X] Create GitHub account and first repo
+- [X] Create Azure free account
 - [ ] Read Phoenix Project Ch 1
 
 **Tuesday:** React Basics
 
-- [ ] Create first React app with Vite
+- [X] Create first React app with Vite
 - [ ] Learn JSX syntax
 - [ ] Build simple component
 - [ ] SQLBolt lessons 1-3
@@ -1068,7 +1068,7 @@ Strategy:
 
 **Sunday:** Celebrate & Reflect (2-3 hours)
 
-- [ ] Write 14-week retrospective
+- [ ] Write 26-32 week retrospective
 - [ ] Plan next steps
 - [ ] **CELEBRATE YOUR JOURNEY! 🎉**
 
@@ -1100,7 +1100,7 @@ Use this template every Sunday evening:
 - GitHub commits: X
 - Study hours: X
 - Pages read: X
-- Applications sent: X (Weeks 11+)
+- Applications sent: X (Weeks 23+)
 
 ## ✅ Completed
 
@@ -1147,22 +1147,22 @@ Notes: Why this rating?
 
 ## 📊 Progress Summary
 
-| Week | Focus                        | Hours | Commits | Status |
-| ---- | ---------------------------- | ----- | ------- | ------ |
-| 1    | React + SQL + Git            | 20    | 20+     | ⬜     |
-| 2    | Advanced SQL + FastAPI       | 20    | 15+     | ⬜     |
-| 3    | Docker + CI/CD               | 20    | 15+     | ⬜     |
-| 4    | **Project 1 Complete**       | 20    | 20+     | ⬜     |
-| 5    | State Management + Terraform | 20    | 15+     | ⬜     |
-| 6    | **Kubernetes + Project 2**   | 20    | 20+     | ⬜     |
-| 7    | **Portfolio Website**        | 20    | 15+     | ⬜     |
-| 8    | Monitoring + Security        | 20    | 15+     | ⬜     |
-| 9    | AZ-204 Intensive             | 20    | 10+     | ⬜     |
-| 10   | AZ-204 Deep Dive             | 20    | 10+     | ⬜     |
-| 11   | **AZ-204 EXAM**              | 15    | 5+      | ⬜     |
-| 12   | Job Search Start             | 20    | 5+      | ⬜     |
-| 13   | Active Job Search            | 20    | 5+      | ⬜     |
-| 14   | **Final Push**               | 20    | 5+      | ⬜     |
+| Weeks  | Focus                        | Hours | Commits | Status |
+| ------ | ---------------------------- | ----- | ------- | ------ |
+| 1-2    | React + SQL + Git            | 20    | 20+     | ⬜     |
+| 3-4    | Advanced SQL + FastAPI       | 20    | 15+     | ⬜     |
+| 5-6    | Docker + CI/CD               | 20    | 15+     | ⬜     |
+| 7-8    | **Project 1 Complete**       | 20    | 20+     | ⬜     |
+| 9-10   | State Management + Terraform | 20    | 15+     | ⬜     |
+| 11-12  | **Kubernetes + Project 2**   | 20    | 20+     | ⬜     |
+| 13-14  | **Portfolio Website**        | 20    | 15+     | ⬜     |
+| 15-16  | Monitoring + Security        | 20    | 15+     | ⬜     |
+| 17-18  | AZ-204 Intensive             | 20    | 10+     | ⬜     |
+| 19-20  | AZ-204 Deep Dive             | 20    | 10+     | ⬜     |
+| 21-22  | **AZ-204 EXAM**              | 15    | 5+      | ⬜     |
+| 23-24  | Job Search Start             | 20    | 5+      | ⬜     |
+| 25-26  | Active Job Search            | 20    | 5+      | ⬜     |
+| 27-28  | **Final Push**               | 20    | 5+      | ⬜     |
 
 **Legend:** ⬜ Not Started | 🟨 In Progress | ✅ Complete
 
@@ -1170,14 +1170,14 @@ Notes: Why this rating?
 
 ## 🏆 Success Metrics
 
-### By Week 4 ✓
+### By Week 8 ✓
 
 - [ ] 1 deployed full-stack project
 - [ ] 70+ GitHub commits
 - [ ] 4 books read/in progress
 - [ ] React + SQL fundamentals solid
 
-### By Week 8 ✓
+### By Week 16 ✓
 
 - [ ] 3 deployed projects
 - [ ] 200+ GitHub commits
@@ -1185,14 +1185,14 @@ Notes: Why this rating?
 - [ ] Docker + CI/CD experience
 - [ ] Terraform basics
 
-### By Week 11 ✓
+### By Week 22 ✓
 
 - [ ] **AZ-204 CERTIFIED**
 - [ ] 300+ GitHub commits
 - [ ] 10 books read
 - [ ] Full DevOps pipeline experience
 
-### By Week 14 ✓
+### By Week 28 ✓
 
 - [ ] 350+ GitHub commits
 - [ ] 12 books completed
@@ -1239,5 +1239,5 @@ Notes: Why this rating?
 ---
 
 _Last Updated: [Date]_
-_Current Week: [X] of 14_
+_Current Week: [X] of 26-32_
 _Next Milestone: [Goal]_

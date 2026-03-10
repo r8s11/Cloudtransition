@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reader &mdash; CloudTransition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Foundation ────────────────────────────────────────────── */
+:root {
+  --bg: #f6f3ed;
+  --surface: #fffdf9;
+  --surface-alt: #f0ece4;
+  --border: #ddd7cc;
+  --border-light: #ebe7de;
+  --text: #2a2520;
+  --text-mid: #5c554d;
+  --text-muted: #968e84;
+  --accent: #c46a42;
+  --accent-warm: #d4825e;
+  --accent-bg: #fdf0e8;
+  --ink: #1a1714;
+  --code-bg: #2b2623;
+  --code-text: #e8dfd6;
+  --sidebar-w: 280px;
+  --header-h: 52px;
+  --serif: 'Newsreader', 'Georgia', serif;
+  --sans: 'DM Sans', -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --radius: 10px;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+.reader-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  height: var(--header-h);
+  background: rgba(246, 243, 237, 0.92);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border-bottom: 1px solid var(--border-light);
+  display: flex; align-items: center;
+  padding: 0 20px; gap: 12px;
+}
+
+.header-back {
+  display: flex; align-items: center; gap: 6px;
+  text-decoration: none; color: var(--accent);
+  font-size: 13px; font-weight: 600;
+  font-family: var(--sans);
+  padding: 6px 12px; border-radius: 8px;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.header-back:hover { background: var(--accent-bg); }
+.header-back svg { flex-shrink: 0; }
+
+.header-divider {
+  width: 1px; height: 24px;
+  background: var(--border);
+}
+
+.breadcrumb {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; color: var(--text-muted);
+  font-family: var(--mono);
+  overflow: hidden; white-space: nowrap;
+  min-width: 0; flex: 1;
+}
+.breadcrumb-seg {
+  color: var(--text-mid);
+  font-weight: 500;
+}
+.breadcrumb-sep {
+  color: var(--border); margin: 0 2px;
+  flex-shrink: 0;
+}
+
+.header-actions {
+  display: flex; gap: 6px; margin-left: auto; flex-shrink: 0;
+}
+.header-btn {
+  width: 34px; height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-mid);
+  cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.header-btn:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent-warm);
+  color: var(--accent);
+}
+
+/* ── Layout ────────────────────────────────────────────────── */
+.reader-layout {
+  display: flex;
+  height: calc(100vh - var(--header-h));
+  margin-top: var(--header-h);
+}
+
+/* ── Sidebar ───────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border-light);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  transition: margin-left 0.35s var(--ease), opacity 0.25s;
+}
+.sidebar.collapsed {
+  margin-left: calc(-1 * var(--sidebar-w));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar-search {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border-light);
+}
+.search-input {
+  width: 100%;
+  padding: 8px 12px 8px 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-input::placeholder { color: var(--text-muted); }
+.search-input:focus {
+  border-color: var(--accent-warm);
+  box-shadow: 0 0 0 3px rgba(196, 106, 66, 0.1);
+}
+.search-wrap {
+  position: relative;
+}
+.search-icon {
+  position: absolute; left: 10px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted); pointer-events: none;
+}
+
+.file-count {
+  padding: 8px 16px 6px;
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--text-muted);
+  font-family: var(--sans);
+}
+
+.sidebar-tree {
+  flex: 1; overflow-y: auto;
+  padding: 4px 8px 20px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.folder-group { margin-bottom: 4px; }
+
+.folder-toggle {
+  display: flex; align-items: center; gap: 6px;
+  width: 100%; border: none; background: none;
+  padding: 6px 8px; cursor: pointer;
+  font-family: var(--sans);
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.6px;
+  color: var(--text-mid);
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.folder-toggle:hover { background: var(--surface-alt); }
+.folder-toggle svg {
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.folder-toggle.open svg { transform: rotate(90deg); }
+
+.folder-files { padding-left: 10px; }
+.folder-files.hidden { display: none; }
+
+.file-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 10px; border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px; color: var(--text-mid);
+  transition: all 0.15s;
+  border: 1px solid transparent;
+}
+.file-item:hover {
+  background: var(--surface-alt);
+  color: var(--text);
+}
+.file-item.active {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-color: rgba(196, 106, 66, 0.15);
+  font-weight: 500;
+}
+.file-item svg { flex-shrink: 0; opacity: 0.5; }
+.file-item.active svg { opacity: 1; }
+
+.file-size {
+  margin-left: auto;
+  font-size: 10px; color: var(--text-muted);
+  font-family: var(--mono);
+}
+
+/* ── Content Area ─────────────────────────────────────────── */
+.content-area {
+  flex: 1; overflow-y: auto;
+  padding: 0;
+  scroll-behavior: smooth;
+}
+
+.content-inner {
+  max-width: 740px;
+  margin: 0 auto;
+  padding: 48px 40px 80px;
+}
+
+/* ── Welcome State ────────────────────────────────────────── */
+.welcome {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 60vh; text-align: center;
+  padding: 40px;
+}
+.welcome-mark {
+  width: 72px; height: 72px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-warm) 100%);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 24px rgba(196, 106, 66, 0.2);
+}
+.welcome h2 {
+  font-family: var(--serif);
+  font-size: 26px; font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.welcome p {
+  color: var(--text-muted); font-size: 14px;
+  max-width: 340px; line-height: 1.7;
+}
+.welcome-keys {
+  margin-top: 20px;
+  display: flex; gap: 16px;
+  font-size: 12px; color: var(--text-muted);
+}
+.welcome-keys kbd {
+  display: inline-block;
+  padding: 2px 7px; border-radius: 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 11px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* ── Loading ──────────────────────────────────────────────── */
+.loading {
+  display: flex; align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+}
+.loading-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin: 0 4px;
+  animation: loadPulse 1s ease infinite;
+}
+.loading-dot:nth-child(2) { animation-delay: 0.15s; }
+.loading-dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes loadPulse {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* ── Markdown Prose ───────────────────────────────────────── */
+.prose { animation: proseIn 0.4s var(--ease); }
+@keyframes proseIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.prose h1 {
+  font-family: var(--serif);
+  font-size: 34px; font-weight: 700;
+  line-height: 1.2; color: var(--ink);
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+.prose h1 + p,
+.prose h1 + blockquote { margin-top: 4px; }
+
+.prose h2 {
+  font-family: var(--serif);
+  font-size: 24px; font-weight: 600;
+  color: var(--ink);
+  margin-top: 40px; margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border-light);
+  letter-spacing: -0.2px;
+}
+
+.prose h3 {
+  font-family: var(--sans);
+  font-size: 13px; font-weight: 700;
+  color: var(--text);
+  margin-top: 32px; margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.prose h4 {
+  font-family: var(--serif);
+  font-size: 18px; font-weight: 600;
+  color: var(--text);
+  margin-top: 28px; margin-bottom: 8px;
+  font-style: italic;
+}
+
+.prose p {
+  font-family: var(--serif);
+  font-size: 16px; line-height: 1.8;
+  margin-bottom: 16px; color: var(--text);
+}
+
+.prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: rgba(196, 106, 66, 0.3);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s;
+}
+.prose a:hover {
+  text-decoration-color: var(--accent);
+}
+
+.prose strong { font-weight: 600; color: var(--ink); }
+.prose em { font-style: italic; }
+
+.prose ul, .prose ol {
+  font-family: var(--serif);
+  font-size: 16px; line-height: 1.8;
+  margin-bottom: 16px;
+  padding-left: 24px;
+}
+.prose li { margin-bottom: 4px; }
+.prose li::marker { color: var(--accent); }
+
+.prose blockquote {
+  border-left: 3px solid var(--accent);
+  margin: 20px 0;
+  padding: 12px 20px;
+  background: var(--accent-bg);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--text-mid);
+  font-size: 15px;
+}
+
+.prose hr {
+  border: none;
+  height: 1px;
+  background: var(--border);
+  margin: 36px 0;
+  position: relative;
+}
+.prose hr::after {
+  content: "\2726";
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg);
+  padding: 0 12px;
+  color: var(--border);
+  font-size: 14px;
+}
+
+/* Code — inline */
+.prose code {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--surface-alt);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--accent);
+  border: 1px solid var(--border-light);
+}
+
+/* Code — blocks */
+.prose pre {
+  background: var(--code-bg);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin: 20px 0;
+  overflow-x: auto;
+  border: 1px solid rgba(0,0,0,0.1);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.15);
+}
+.prose pre code {
+  background: none; border: none;
+  padding: 0; color: var(--code-text);
+  font-size: 13px; line-height: 1.7;
+}
+
+/* Tables */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 14px;
+  font-family: var(--sans);
+}
+.prose thead th {
+  text-align: left;
+  padding: 10px 14px;
+  background: var(--surface-alt);
+  font-weight: 600; font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-mid);
+  border-bottom: 2px solid var(--border);
+}
+.prose tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text);
+  vertical-align: top;
+}
+.prose tbody tr:hover td {
+  background: rgba(196, 106, 66, 0.03);
+}
+
+/* Task lists */
+.prose input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  vertical-align: middle;
+  margin-right: 6px;
+  position: relative;
+  top: -1px;
+  cursor: default;
+}
+.prose input[type="checkbox"]:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.prose input[type="checkbox"]:checked::after {
+  content: "\2713";
+  position: absolute;
+  top: -1px; left: 2px;
+  color: #fff; font-size: 11px;
+  font-weight: 700;
+}
+
+/* Images */
+.prose img {
+  max-width: 100%; height: auto;
+  border-radius: var(--radius);
+  margin: 16px 0;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+.content-area::-webkit-scrollbar { width: 6px; }
+.content-area::-webkit-scrollbar-track { background: transparent; }
+.content-area::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+.content-area::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── Mobile ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  :root { --sidebar-w: 100vw; }
+
+  .sidebar {
+    position: fixed; top: var(--header-h);
+    left: 0; bottom: 0; z-index: 40;
+    width: 100vw;
+    border-right: none;
+  }
+  .sidebar.collapsed {
+    margin-left: 0;
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  .content-inner {
+    padding: 28px 20px 60px;
+  }
+
+  .prose h1 { font-size: 26px; }
+  .prose h2 { font-size: 20px; }
+
+  .welcome-keys { display: none; }
+}
+
+/* ── Mobile overlay ───────────────────────────────────────── */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(42,37,32,0.3);
+  z-index: 35;
+  backdrop-filter: blur(2px);
+}
+.sidebar-overlay.visible { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────── -->
+<header class="reader-header">
+  <a href="/" class="header-back">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    Dashboard
+  </a>
+  <div class="header-divider"></div>
+  <div class="breadcrumb" id="breadcrumb">
+    <span class="breadcrumb-seg">Reader</span>
+  </div>
+  <div class="header-actions">
+    <button class="header-btn" id="toggleSidebar" title="Toggle sidebar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h12M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ── Overlay (mobile) ────────────────────────────────────── -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ── Layout ──────────────────────────────────────────────── -->
+<div class="reader-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-search">
+      <div class="search-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search files...">
+      </div>
+    </div>
+    <div class="file-count" id="fileCount">Loading...</div>
+    <div class="sidebar-tree" id="fileTree"></div>
+  </aside>
+
+  <!-- Content -->
+  <main class="content-area" id="contentArea">
+    <div class="content-inner" id="contentInner">
+      <div class="welcome" id="welcomeState">
+        <div class="welcome-mark">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+            <path d="M8 7h6"/>
+            <path d="M8 11h8"/>
+          </svg>
+        </div>
+        <h2>Your Knowledge Library</h2>
+        <p>Select a file from the sidebar to start reading. Plans, guides, and notes &mdash; all rendered beautifully.</p>
+        <div class="welcome-keys">
+          <span><kbd>Ctrl</kbd> + <kbd>K</kbd> Search</span>
+          <span><kbd>Ctrl</kbd> + <kbd>B</kbd> Sidebar</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<!-- ── Libraries (from CDN) ────────────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+
+<script>
+(function() {
+  // ── State ──────────────────────────────────────────────────
+  var allFiles = [];
+  var currentPath = null;
+  var sidebarOpen = true;
+
+  // ── DOM refs ───────────────────────────────────────────────
+  var fileTree = document.getElementById('fileTree');
+  var fileCount = document.getElementById('fileCount');
+  var searchInput = document.getElementById('searchInput');
+  var contentInner = document.getElementById('contentInner');
+  var breadcrumb = document.getElementById('breadcrumb');
+  var sidebar = document.getElementById('sidebar');
+  var toggleBtn = document.getElementById('toggleSidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+
+  // ── Configure marked ──────────────────────────────────────
+  marked.setOptions({
+    gfm: true,
+    breaks: false,
+  });
+
+  // ── Helpers ────────────────────────────────────────────────
+  function make(tag, cls) {
+    var el = document.createElement(tag);
+    if (cls) el.className = cls;
+    return el;
+  }
+  function txt(tag, cls, s) {
+    var el = make(tag, cls);
+    el.textContent = s;
+    return el;
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    return (bytes / 1024).toFixed(1) + ' KB';
+  }
+
+  function createChevronSvg() {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '12');
+    svg.setAttribute('height', '12');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2.5');
+    svg.setAttribute('stroke-linecap', 'round');
+    var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    p.setAttribute('d', 'M9 18l6-6-6-6');
+    svg.appendChild(p);
+    return svg;
+  }
+
+  function createFileIcon() {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '14');
+    svg.setAttribute('height', '14');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2');
+    svg.setAttribute('stroke-linecap', 'round');
+    var p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    p1.setAttribute('d', 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z');
+    var p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    p2.setAttribute('d', 'M14 2v6h6');
+    svg.appendChild(p1);
+    svg.appendChild(p2);
+    return svg;
+  }
+
+  // ── Sidebar toggle ────────────────────────────────────────
+  function toggleSidebarFn() {
+    sidebarOpen = !sidebarOpen;
+    sidebar.classList.toggle('collapsed', !sidebarOpen);
+    overlay.classList.toggle('visible', sidebarOpen && window.innerWidth <= 768);
+  }
+
+  toggleBtn.addEventListener('click', toggleSidebarFn);
+  overlay.addEventListener('click', function() {
+    sidebarOpen = false;
+    sidebar.classList.add('collapsed');
+    overlay.classList.remove('visible');
+  });
+
+  // ── Keyboard shortcuts ────────────────────────────────────
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+      if (!sidebarOpen) toggleSidebarFn();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+      e.preventDefault();
+      toggleSidebarFn();
+    }
+  });
+
+  // ── Build file tree ───────────────────────────────────────
+  function buildTree(files) {
+    fileTree.textContent = '';
+
+    // Group by folder
+    var groups = {};
+    files.forEach(function(f) {
+      var folder = f.folder || 'Root';
+      if (!groups[folder]) groups[folder] = [];
+      groups[folder].push(f);
+    });
+
+    // Sort folders: Root first, then alphabetically
+    var folderNames = Object.keys(groups).sort(function(a, b) {
+      if (a === 'Root') return -1;
+      if (b === 'Root') return 1;
+      return a.localeCompare(b);
+    });
+
+    fileCount.textContent = files.length + ' documents';
+
+    folderNames.forEach(function(folder) {
+      var group = make('div', 'folder-group');
+
+      // Folder toggle button
+      var toggle = make('button', 'folder-toggle open');
+      toggle.appendChild(createChevronSvg());
+      toggle.appendChild(document.createTextNode(' ' + folder));
+      group.appendChild(toggle);
+
+      // Files in folder
+      var fileList = make('div', 'folder-files');
+
+      groups[folder].forEach(function(f) {
+        var item = make('div', 'file-item');
+        item.dataset.path = f.path;
+
+        item.appendChild(createFileIcon());
+        item.appendChild(txt('span', '', f.name));
+        item.appendChild(txt('span', 'file-size', formatSize(f.size)));
+
+        if (f.path === currentPath) item.classList.add('active');
+
+        item.addEventListener('click', function() { loadFile(f.path); });
+        fileList.appendChild(item);
+      });
+
+      group.appendChild(fileList);
+
+      // Toggle collapse
+      toggle.addEventListener('click', function() {
+        toggle.classList.toggle('open');
+        fileList.classList.toggle('hidden');
+      });
+
+      fileTree.appendChild(group);
+    });
+  }
+
+  // ── Update breadcrumb ─────────────────────────────────────
+  function updateBreadcrumb(path) {
+    breadcrumb.textContent = '';
+    breadcrumb.appendChild(txt('span', 'breadcrumb-seg', 'Reader'));
+
+    if (!path) return;
+
+    var parts = path.split('/');
+    parts.forEach(function(part, i) {
+      breadcrumb.appendChild(txt('span', 'breadcrumb-sep', '/'));
+      var cls = (i === parts.length - 1) ? 'breadcrumb-seg' : '';
+      breadcrumb.appendChild(txt('span', cls, part));
+    });
+  }
+
+  // ── Render markdown safely ────────────────────────────────
+  // We use marked.js to parse markdown into HTML, then DOMPurify
+  // to sanitize it before inserting into the DOM. This is the
+  // recommended pattern for safe markdown rendering.
+  function renderMarkdown(rawMarkdown) {
+    var parsed = marked.parse(rawMarkdown);
+    // SAFE: DOMPurify sanitizes all parsed HTML before DOM insertion
+    return DOMPurify.sanitize(parsed, {
+      ADD_ATTR: ['target'],
+      ADD_TAGS: ['input'],
+    });
+  }
+
+  // ── Load file ─────────────────────────────────────────────
+  function loadFile(path) {
+    currentPath = path;
+    updateBreadcrumb(path);
+
+    // Mark active in sidebar
+    document.querySelectorAll('.file-item').forEach(function(el) {
+      el.classList.toggle('active', el.dataset.path === path);
+    });
+
+    // Loading state
+    contentInner.textContent = '';
+    var loading = make('div', 'loading');
+    for (var i = 0; i < 3; i++) {
+      loading.appendChild(make('div', 'loading-dot'));
+    }
+    contentInner.appendChild(loading);
+
+    // Close sidebar on mobile
+    if (window.innerWidth <= 768) {
+      sidebarOpen = false;
+      sidebar.classList.add('collapsed');
+      overlay.classList.remove('visible');
+    }
+
+    // Fetch file content
+    fetch('/api/file?path=' + encodeURIComponent(path))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) {
+          contentInner.textContent = '';
+          var errP = txt('p', '', 'Error: ' + data.error);
+          errP.style.cssText = 'color:var(--text-muted);text-align:center;padding:60px 20px;';
+          contentInner.appendChild(errP);
+          return;
+        }
+
+        // Render sanitized markdown into prose container
+        var safeHtml = renderMarkdown(data.content);
+        contentInner.textContent = '';
+        var prose = make('div', 'prose');
+        // SAFE: HTML was sanitized by DOMPurify in renderMarkdown()
+        prose.innerHTML = safeHtml;
+
+        // Make external links open in new tab
+        prose.querySelectorAll('a').forEach(function(a) {
+          var href = a.getAttribute('href');
+          if (href && (href.startsWith('http://') || href.startsWith('https://'))) {
+            a.setAttribute('target', '_blank');
+            a.setAttribute('rel', 'noopener noreferrer');
+          }
+        });
+
+        contentInner.appendChild(prose);
+        document.getElementById('contentArea').scrollTop = 0;
+      });
+  }
+
+  // ── Search ────────────────────────────────────────────────
+  searchInput.addEventListener('input', function() {
+    var q = searchInput.value.toLowerCase().trim();
+    if (!q) {
+      buildTree(allFiles);
+      return;
+    }
+    var filtered = allFiles.filter(function(f) {
+      return f.name.toLowerCase().indexOf(q) !== -1 ||
+             f.folder.toLowerCase().indexOf(q) !== -1 ||
+             f.path.toLowerCase().indexOf(q) !== -1;
+    });
+    buildTree(filtered);
+  });
+
+  // ── Init ──────────────────────────────────────────────────
+  fetch('/api/files')
+    .then(function(r) { return r.json(); })
+    .then(function(files) {
+      allFiles = files;
+      buildTree(files);
+    });
+})();
+</script>
+</body>
+</html>

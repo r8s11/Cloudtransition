@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Career Dashboard — 2026</title>
+<style>
+  :root {
+    --bg: #faf9f5;
+    --surface: #ffffff;
+    --surface-alt: #f5f3ef;
+    --border: #e8e4dd;
+    --text: #2d2a26;
+    --text-muted: #8a8580;
+    --accent: #D97757;
+    --accent-light: #f0d4c8;
+    --green: #4a9e6e;
+    --green-light: #e0f2e8;
+    --yellow: #c9a227;
+    --yellow-light: #fdf6dd;
+    --blue: #4a7fb5;
+    --blue-light: #deeaf6;
+    --red: #c44d4d;
+    --red-light: #fce4e4;
+    --purple: #7c5cbf;
+    --purple-light: #ede4f7;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  .topnav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex; align-items: center; gap: 8px;
+    height: 56px;
+    backdrop-filter: blur(8px);
+  }
+  .topnav .logo {
+    font-weight: 700; font-size: 18px; color: var(--accent);
+    margin-right: 24px; white-space: nowrap;
+  }
+  .topnav .logo span { color: var(--text); }
+  .nav-tabs {
+    display: flex; gap: 4px; overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tab {
+    padding: 8px 16px; border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer; white-space: nowrap;
+    border: none; background: none; color: var(--text-muted);
+    transition: all 0.2s;
+  }
+  .nav-tab:hover { background: var(--surface-alt); color: var(--text); }
+  .nav-tab.active { background: var(--accent); color: #fff; }
+  .nav-date {
+    margin-left: auto; font-size: 12px;
+    color: var(--text-muted); white-space: nowrap;
+    font-family: var(--mono);
+  }
+
+  /* MAIN */
+  .main { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  /* PAGE */
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-size: 14px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text-muted); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title .icon { font-size: 16px; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  @media (max-width: 768px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .main { padding: 16px; }
+  }
+
+  /* STAT BOX */
+  .stat-box {
+    text-align: center; padding: 16px;
+    background: var(--surface-alt);
+    border-radius: 8px;
+  }
+  .stat-value {
+    font-size: 28px; font-weight: 700;
+    font-family: var(--mono);
+    line-height: 1.2;
+  }
+  .stat-label {
+    font-size: 11px; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+
+  /* PROGRESS BAR */
+  .progress-track {
+    background: var(--surface-alt);
+    border-radius: 6px; height: 8px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 6px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0;
+  }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 12px; margin-bottom: 6px;
+  }
+  .progress-label .name { font-weight: 500; }
+  .progress-label .pct { color: var(--text-muted); font-family: var(--mono); }
+
+  /* SKILL BAR */
+  .skill-row { margin-bottom: 14px; }
+  .skill-meta {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 4px;
+  }
+  .skill-badge {
+    font-size: 10px; padding: 2px 8px;
+    border-radius: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .badge-beginner { background: var(--red-light); color: var(--red); }
+  .badge-intermediate { background: var(--yellow-light); color: var(--yellow); }
+  .badge-advanced { background: var(--blue-light); color: var(--blue); }
+  .badge-expert { background: var(--green-light); color: var(--green); }
+  .badge-low { background: var(--red-light); color: var(--red); }
+
+  .skill-years {
+    font-size: 11px; color: var(--text-muted);
+    font-family: var(--mono);
+  }
+
+  /* PROJECT CARD */
+  .project-card {
+    border-left: 4px solid var(--accent);
+    padding: 16px; background: var(--surface);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+  }
+  .project-card h3 {
+    font-size: 16px; font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .project-card .status {
+    font-size: 12px; color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  .project-features {
+    list-style: none; padding: 0;
+  }
+  .project-features li {
+    font-size: 13px; padding: 3px 0;
+    display: flex; align-items: flex-start; gap: 6px;
+  }
+  .project-features li::before {
+    content: "✓"; color: var(--green);
+    font-weight: 700; flex-shrink: 0;
+  }
+
+  /* TASK LIST */
+  .task-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--surface-alt);
+    font-size: 14px;
+  }
+  .task-item:last-child { border-bottom: none; }
+  .task-check {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 4px; flex-shrink: 0;
+    margin-top: 2px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .task-check.done {
+    background: var(--green); border-color: var(--green);
+    color: #fff; font-size: 11px;
+  }
+  .task-text.done {
+    text-decoration: line-through;
+    color: var(--text-muted);
+  }
+  .task-category {
+    font-size: 10px; padding: 2px 6px;
+    border-radius: 4px; font-weight: 600;
+    text-transform: uppercase; margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* ROADMAP TABLE */
+  .roadmap-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 12px;
+  }
+  .roadmap-table th {
+    text-align: left; padding: 8px 10px;
+    background: var(--surface-alt);
+    font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    font-size: 10px; position: sticky; top: 55px;
+    z-index: 5;
+  }
+  .roadmap-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--surface-alt);
+    vertical-align: top;
+  }
+  .roadmap-table tr:hover td { background: var(--surface-alt); }
+  .roadmap-table .week-num {
+    font-weight: 700; font-family: var(--mono);
+    color: var(--accent);
+  }
+  .roadmap-table .current-week {
+    background: var(--accent-light) !important;
+  }
+  .roadmap-table .past-week td { color: var(--text-muted); }
+  .roadmap-table .quarter-header td {
+    background: var(--text);
+    color: #fff; font-weight: 700;
+    font-size: 13px; padding: 10px;
+  }
+
+  /* CERT CARD */
+  .cert-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px; background: var(--surface-alt);
+    border-radius: 8px; margin-bottom: 8px;
+  }
+  .cert-icon {
+    width: 40px; height: 40px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .cert-info h4 { font-size: 14px; font-weight: 600; }
+  .cert-info p { font-size: 12px; color: var(--text-muted); }
+  .cert-status {
+    margin-left: auto; font-size: 10px;
+    padding: 3px 8px; border-radius: 10px;
+    font-weight: 600; text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* GOALS EMPTY STATE */
+  .empty-state {
+    text-align: center; padding: 40px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; max-width: 300px; margin: 0 auto; }
+
+  /* TIME TRACK */
+  .time-grid {
+    display: grid;
+    grid-template-columns: auto repeat(4, 1fr);
+    gap: 1px; background: var(--border);
+    border-radius: 8px; overflow: hidden;
+    font-size: 12px;
+  }
+  .time-cell {
+    padding: 8px 12px;
+    background: var(--surface);
+    text-align: center;
+  }
+  .time-cell.header {
+    background: var(--surface-alt);
+    font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; font-size: 10px;
+  }
+  .time-cell.day-label {
+    text-align: left; font-weight: 500;
+    background: var(--surface);
+  }
+  .time-cell.total-row {
+    font-weight: 700; background: var(--surface-alt);
+  }
+
+  /* QUARTER TABS */
+  .quarter-tabs {
+    display: flex; gap: 4px; margin-bottom: 16px;
+  }
+  .quarter-tab {
+    flex: 1; padding: 10px;
+    text-align: center; border-radius: 8px;
+    cursor: pointer; font-size: 13px; font-weight: 600;
+    background: var(--surface-alt); color: var(--text-muted);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .quarter-tab:hover { border-color: var(--accent); }
+  .quarter-tab.active {
+    background: var(--accent); color: #fff;
+    border-color: var(--accent);
+  }
+
+  /* WEEKLY SCHEDULE */
+  .schedule-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 1fr 100px;
+    gap: 1px; background: var(--border);
+    font-size: 13px;
+  }
+  .schedule-row:first-child { border-radius: 8px 8px 0 0; overflow: hidden; }
+  .schedule-row:last-child { border-radius: 0 0 8px 8px; overflow: hidden; }
+  .schedule-cell {
+    padding: 10px 12px; background: var(--surface);
+  }
+  .schedule-cell.header {
+    background: var(--surface-alt); font-weight: 600;
+    font-size: 10px; text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .schedule-cell.day { font-weight: 600; }
+
+  /* NETWORKING */
+  .net-goal {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px; background: var(--surface-alt);
+    border-radius: 8px; margin-bottom: 8px;
+  }
+  .net-goal-text { flex: 1; }
+  .net-goal-text h4 { font-size: 14px; font-weight: 500; }
+  .net-goal-text p { font-size: 12px; color: var(--text-muted); }
+  .net-goal-progress {
+    font-family: var(--mono); font-size: 14px;
+    font-weight: 700; color: var(--accent);
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center; padding: 40px 24px;
+    color: var(--text-muted); font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  /* METRIC RING */
+  .ring-container {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 8px;
+  }
+  .ring-svg { width: 80px; height: 80px; }
+  .ring-bg { fill: none; stroke: var(--surface-alt); stroke-width: 6; }
+  .ring-fill {
+    fill: none; stroke-width: 6;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .ring-text {
+    font-family: var(--mono); font-size: 14px;
+    font-weight: 700; fill: var(--text);
+    text-anchor: middle; dominant-baseline: central;
+  }
+  .ring-label {
+    font-size: 11px; color: var(--text-muted);
+    text-align: center; font-weight: 500;
+  }
+
+  /* SUCCESS METRICS */
+  .metric-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid var(--surface-alt);
+  }
+  .metric-row:last-child { border-bottom: none; }
+  .metric-cat {
+    font-size: 12px; font-weight: 600;
+    min-width: 100px;
+  }
+  .metric-goal { flex: 1; font-size: 13px; }
+  .metric-measure {
+    font-size: 12px; color: var(--text-muted);
+    font-family: var(--mono);
+  }
+
+  /* LEARNING MATRIX */
+  .matrix-table {
+    width: 100%; border-collapse: collapse; font-size: 12px;
+  }
+  .matrix-table th {
+    padding: 8px; background: var(--surface-alt);
+    font-weight: 600; font-size: 10px;
+    text-transform: uppercase; color: var(--text-muted);
+  }
+  .matrix-table td {
+    padding: 8px; border-bottom: 1px solid var(--surface-alt);
+    text-align: center;
+  }
+  .matrix-table td:first-child { text-align: left; font-weight: 500; }
+  .matrix-dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+  .dot-active { background: var(--green); }
+  .dot-inactive { background: var(--border); }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="logo"><span>Cloud</span>Transition</div>
+  <div class="nav-tabs" id="navTabs"></div>
+  <div class="nav-date" id="navDate"></div>
+</nav>
+
+<div class="main" id="appMain"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DATA — Update this section to match your YAML files
+// ═══════════════════════════════════════════════════════════════
+
+const DATA = {
+  currentWeek: 8,
+  currentDate: '2026-02-27',
+  weekDates: 'February 19-25, 2026',
+
+  // From TASKS.md
+  tasks: {
+    active: [
+      { text: 'JSX syntax — build a simple component', cat: 'React', done: false },
+      { text: 'Components & Props — pass data with props', cat: 'React', done: false },
+      { text: 'useState hook — add state, handle button clicks', cat: 'React', done: false },
+      { text: 'useEffect — API calls and side effects', cat: 'React', done: false },
+      { text: 'Create task input form and handle form submission', cat: 'React', done: false },
+      { text: 'SQLBolt lessons 1-12', cat: 'SQL', done: false },
+      { text: 'Complete Task Manager MVP (basic CRUD)', cat: 'Project', done: false },
+      { text: 'Add styling (CSS or Tailwind)', cat: 'Project', done: false },
+      { text: 'Deploy Task Manager to Azure Static Web Apps', cat: 'Project', done: false },
+      { text: 'The Phoenix Project — Ch 1-8', cat: 'Reading', done: false },
+      { text: 'Python Crash Course — Ch 1-4', cat: 'Reading', done: false },
+      { text: 'GitHub repo with 20+ commits', cat: 'Deliverable', done: false },
+      { text: 'Live deployed Task Manager URL', cat: 'Deliverable', done: false },
+      { text: 'SQLBolt completion certificate', cat: 'Deliverable', done: false },
+      { text: 'Week 1 review document', cat: 'Deliverable', done: false },
+    ],
+    done: [
+      { text: 'Install Node.js, Python, VS Code, Git', cat: 'Setup' },
+      { text: 'Create GitHub account and first repo', cat: 'Setup' },
+      { text: 'Create Azure free account', cat: 'Setup' },
+      { text: 'Create first React app with Vite', cat: 'Setup' },
+    ]
+  },
+
+  // From skills-inventory.yml
+  skills: {
+    technical: [
+      { category: 'Programming Languages', skills: [
+        { name: 'Python', proficiency: 'beginner', years: 3 },
+        { name: 'JavaScript', proficiency: 'beginner', years: 3 },
+      ]},
+      { category: 'Tools & Frameworks', skills: [
+        { name: 'Git', proficiency: 'advanced', years: 5 },
+      ]},
+      { category: 'Cloud & Infrastructure', skills: [
+        { name: 'AWS', proficiency: 'intermediate', years: 2 },
+      ]},
+    ],
+    soft: [
+      { name: 'Project Management', proficiency: 'low' },
+      { name: 'Technical Writing', proficiency: 'low' },
+      { name: 'Public Speaking', proficiency: 'low' },
+    ],
+    certifications: [
+      { name: 'AWS Certified Solutions Architect', issuer: 'Amazon Web Services', obtained: '2024-06', expires: '2027-06' },
+      { name: 'Project Management Professional (PMP)', issuer: 'PMI', obtained: null, expires: 'never' },
+    ],
+  },
+
+  // From DASHBOARD.md — projects
+  projects: [
+    {
+      name: 'WODCard',
+      q1Goal: 'MVP Live',
+      currentStatus: 'Week 7/13 — React+FastAPI connected',
+      color: '#D97757',
+      features: [
+        'React + Vite + TypeScript frontend',
+        'FastAPI backend structure',
+        'Card component with flip animation',
+        'Timer component, exercise data model',
+      ],
+    },
+    {
+      name: 'SalsaSegura',
+      q1Goal: '50 events',
+      currentStatus: 'Week 2/13 — Events display working',
+      color: '#4a7fb5',
+      features: [
+        'React TypeScript app deployed to Azure',
+        'Events display, header, footer, hero section',
+        'Work in progress page',
+      ],
+    },
+    {
+      name: 'SalsaTD',
+      q1Goal: 'MVP v1.0',
+      currentStatus: 'Week 5/13 — Cosmos DB prototype exists',
+      color: '#7c5cbf',
+      features: [
+        'Game board with turn-based play (2-30 players)',
+        'Truth & Dare decks with spiciness levels',
+        'Dark mode, scroll indicator, mobile optimized',
+        'Card UI with animations, deck reshuffling',
+        'Penalty system, Azure Cosmos DB prototype',
+      ],
+    },
+  ],
+
+  // From DASHBOARD.md — roadmap
+  roadmap: {
+    q1: {
+      theme: 'Build the habits, ship MVPs',
+      learning: 'React + SQL + Git + FastAPI + Cosmos DB',
+      russian: 'A1 Level',
+      weeks: [
+        { num: 1, dates: 'Jan 1-7', learn: 'React basics, Git', wod: '✅ Card component', salsa: '✅ Events display', td: '✅ Game board', ru: 'Cyrillic alphabet' },
+        { num: 2, dates: 'Jan 8-14', learn: 'React state, Cosmos DB', wod: '🔄 Cosmos DB setup', salsa: '🔄 Calendar view', td: '🔄 Cosmos DB', ru: 'Basic greetings' },
+        { num: 3, dates: 'Jan 15-21', learn: 'useEffect, API calls', wod: 'History page prep', salsa: 'DB backend', td: 'Rating API', ru: 'Introduce yourself' },
+        { num: 4, dates: 'Jan 22-28', learn: 'React forms', wod: 'Workout form', salsa: 'Submissions form', td: 'Rating UI', ru: 'Numbers 1-20' },
+        { num: 5, dates: 'Jan 29-Feb 4', learn: 'FastAPI routes', wod: 'Workout history', salsa: 'Auth setup', td: 'Spiciness filter', ru: 'Family vocabulary' },
+        { num: 6, dates: 'Feb 5-11', learn: 'Auth patterns', wod: '-', salsa: 'Moderation', td: 'Session storage', ru: 'Present tense' },
+        { num: 7, dates: 'Feb 12-18', learn: 'React Router', wod: 'Multi-page', salsa: 'Mobile optimize', td: '-', ru: 'Days/months' },
+        { num: 8, dates: 'Feb 19-25', learn: 'Docker basics', wod: 'Dockerize', salsa: 'Search filters', td: 'Deck filtering', ru: 'Food vocabulary' },
+        { num: 9, dates: 'Feb 26-Mar 4', learn: 'Docker Compose', wod: 'Docker Compose', salsa: 'Email system', td: 'Analytics', ru: 'Questions' },
+        { num: 10, dates: 'Mar 5-11', learn: 'Azure deployment', wod: 'Deploy to Azure', salsa: 'Social sharing', td: '-', ru: 'Past tense intro' },
+        { num: 11, dates: 'Mar 12-18', learn: 'GitHub Actions', wod: 'CI/CD pipeline', salsa: 'Event pages', td: 'Session persist', ru: 'Locations' },
+        { num: 12, dates: 'Mar 19-25', learn: 'CI/CD complete', wod: 'Pipeline polish', salsa: 'Map view', td: 'Mobile polish', ru: 'Shopping phrases' },
+        { num: 13, dates: 'Mar 26-31', learn: 'Q1 Review', wod: 'MVP Live 🚀', salsa: '50 events 🎉', td: 'MVP v1.0 🚀', ru: 'A1 Checkpoint' },
+      ],
+    },
+    q2: {
+      theme: 'Add value, grow users',
+      learning: 'Advanced React + PWA + WebSockets + Terraform intro',
+      russian: 'A2 Level',
+      weeks: [
+        { num: 14, dates: 'Apr 1-8', learn: 'Auth deep dive', wod: 'User auth', salsa: 'Advanced filters', td: 'SignalR setup', ru: 'Accusative case' },
+        { num: 15, dates: 'Apr 9-15', learn: 'User profiles', wod: 'Profiles', salsa: 'Recurring events', td: 'Session mgmt', ru: 'Adjectives' },
+        { num: 16, dates: 'Apr 16-22', learn: 'State mgmt', wod: 'Category filters', salsa: 'Event tags', td: 'API endpoints', ru: 'Colors/sizes' },
+        { num: 17, dates: 'Apr 23-29', learn: 'Forms + validation', wod: 'Deck builder', salsa: 'Profile enhance', td: 'SignalR hub', ru: 'Genitive case' },
+        { num: 18, dates: 'Apr 30-May 6', learn: 'Data viz', wod: 'Stats dashboard', salsa: 'RSVP system', td: 'Lobby UI', ru: 'Weather' },
+        { num: 19, dates: 'May 7-13', learn: 'URL params', wod: 'Share workout', salsa: 'Favorites', td: 'Host/Join', ru: 'Directions' },
+        { num: 20, dates: 'May 14-20', learn: 'Open Graph', wod: 'Social cards', salsa: 'Reviews', td: 'Real-time sync', ru: 'Dative case' },
+        { num: 21, dates: 'May 21-27', learn: 'CSS Grid/Flex', wod: 'Mobile redesign', salsa: 'Photo gallery', td: 'Voting system', ru: 'Time expressions' },
+        { num: 22, dates: 'May 28-Jun 3', learn: 'Service Workers', wod: 'PWA setup', salsa: 'Multi-city', td: 'Private mode', ru: 'Instrumental case' },
+        { num: 23, dates: 'Jun 4-10', learn: 'IndexedDB', wod: 'Offline mode', salsa: 'Venue profiles', td: 'Spectator', ru: 'Verbs of motion' },
+        { num: 24, dates: 'Jun 11-17', learn: 'Push API', wod: 'Notifications', salsa: 'Instructor profiles', td: 'In-game chat', ru: 'Prepositional case' },
+        { num: 25, dates: 'Jun 18-24', learn: 'Performance', wod: 'Lighthouse 90+', salsa: 'Event series', td: 'Reconnect logic', ru: 'Aspect basics' },
+        { num: 26, dates: 'Jun 25-30', learn: 'Q2 Review', wod: 'Feature v1 🎉', salsa: '1K visitors 🎉', td: 'Multiplayer 🎉', ru: 'A2 Checkpoint' },
+      ],
+    },
+    q3: {
+      theme: 'Production-grade, prepare for cert',
+      learning: 'Kubernetes + Terraform + AZ-204 prep start',
+      russian: 'B1 Start',
+      weeks: [
+        { num: 27, dates: 'Jul 1-8', learn: 'K8s concepts', wod: 'Leaderboard', salsa: 'Eventbrite', td: 'Community cards', ru: 'Complex sentences' },
+        { num: 28, dates: 'Jul 9-15', learn: 'K8s deployment', wod: 'Challenges', salsa: 'Featured events', td: 'Moderation', ru: 'Subjunctive mood' },
+        { num: 29, dates: 'Jul 16-22', learn: 'AKS basics', wod: 'Community submit', salsa: 'Venue partners', td: 'Custom decks', ru: 'News reading' },
+        { num: 30, dates: 'Jul 23-29', learn: 'Terraform intro', wod: 'K8s deploy', salsa: 'Premium features', td: 'Theme packs', ru: 'Podcast listening' },
+        { num: 31, dates: 'Jul 30-Aug 5', learn: 'Terraform Azure', wod: 'Terraform', salsa: 'PWA', td: 'Timer modes', ru: 'Writing practice' },
+        { num: 32, dates: 'Aug 6-12', learn: 'App Insights', wod: 'Monitoring', salsa: 'QR check-in', td: 'Challenge mode', ru: 'Business vocab' },
+        { num: 33, dates: 'Aug 13-19', learn: 'Log Analytics', wod: 'Logging', salsa: 'Forums', td: 'Leaderboards', ru: 'Debate basics' },
+        { num: 34, dates: 'Aug 20-26', learn: 'AZ-204: Compute', wod: 'Voice commands', salsa: 'Video', td: 'Achievements', ru: 'Film comprehension' },
+        { num: 35, dates: 'Aug 27-Sep 2', learn: 'AZ-204: Storage', wod: 'Templates', salsa: 'Performance', td: 'Notifications', ru: 'Tech vocabulary' },
+        { num: 36, dates: 'Sep 3-9', learn: 'AZ-204: Security', wod: 'Fitness export', salsa: 'SEO', td: 'Share results', ru: 'Slang/idioms' },
+        { num: 37, dates: 'Sep 10-16', learn: 'AZ-204: Monitor', wod: 'Video demos', salsa: 'Analytics', td: 'PWA offline', ru: 'Reading novels' },
+        { num: 38, dates: 'Sep 17-23', learn: 'AZ-204: Services', wod: 'Accessibility', salsa: 'Third-party API', td: 'Accessibility', ru: 'Conversation 30m' },
+        { num: 39, dates: 'Sep 24-30', learn: 'Practice Exam 1', wod: 'Community 🚀', salsa: 'Regional 🚀', td: 'Community 🚀', ru: 'B1 Checkpoint' },
+      ],
+    },
+    q4: {
+      theme: 'Get certified, monetize, job ready',
+      learning: 'AZ-204 exam + Job prep',
+      russian: 'B1 Consolidation',
+      weeks: [
+        { num: 40, dates: 'Oct 1-8', learn: 'AZ-204 intensive', wod: 'Premium planning', salsa: 'Venue ratings', td: 'Premium packs', ru: 'Maintain fluency' },
+        { num: 41, dates: 'Oct 9-15', learn: 'Practice Exam 2', wod: 'Stripe', salsa: 'Event list view', td: 'Stripe', ru: 'Daily practice' },
+        { num: 42, dates: 'Oct 16-22', learn: 'Weak areas study', wod: 'Premium packs', salsa: 'Performance list', td: 'Gift codes', ru: 'Conversation' },
+        { num: 43, dates: 'Oct 23-29', learn: 'Practice Exam 3', wod: 'Trainer profiles', salsa: 'Workshop indicators', td: 'Party host', ru: 'Reading' },
+        { num: 44, dates: 'Oct 30-Nov 5', learn: 'Final review', wod: 'Gym branding', salsa: 'Live music', td: 'Event integration', ru: 'Podcast' },
+        { num: 45, dates: 'Nov 6-12', learn: 'AZ-204 EXAM 🎓', wod: 'Analytics', salsa: 'Parking info', td: 'Analytics', ru: 'Celebrate!' },
+        { num: 46, dates: 'Nov 13-19', learn: 'Resume + LinkedIn', wod: 'A/B testing', salsa: 'Music ratio', td: 'A/B testing', ru: 'Writing' },
+        { num: 47, dates: 'Nov 20-26', learn: 'Portfolio polish', wod: 'Load testing', salsa: 'DJ info', td: 'Performance', ru: 'Thanksgiving break' },
+        { num: 48, dates: 'Nov 27-Dec 3', learn: 'Interview prep', wod: 'Security audit', salsa: 'Peak times', td: 'Security', ru: 'Practice' },
+        { num: 49, dates: 'Dec 4-10', learn: 'Job applications', wod: 'Documentation', salsa: 'Homepage redesign', td: 'Documentation', ru: 'Continue' },
+        { num: 50, dates: 'Dec 11-17', learn: 'More applications', wod: 'Open source', salsa: 'Premium venues', td: 'Marketing site', ru: 'Continue' },
+        { num: 51, dates: 'Dec 18-24', learn: 'Holiday break', wod: 'Marketing', salsa: 'Year report', td: 'Holiday pack 🎄', ru: 'Holiday break' },
+        { num: 52, dates: 'Dec 25-31', learn: 'YEAR REVIEW', wod: 'v2.0 🎉', salsa: 'v2.0 🎉', td: 'v2.0 🎉', ru: 'B1 Complete' },
+      ],
+    },
+  },
+
+  // Week 8 schedule
+  weekSchedule: [
+    { day: 'Mon', morning: 'Duolingo + food vocab', evening: 'WODCard: Write Dockerfile for backend', project: 'WODCard' },
+    { day: 'Tue', morning: 'Clean Code Ch 5', evening: 'SalsaSegura: Search + filter UI', project: 'SalsaSegura' },
+    { day: 'Wed', morning: 'Duolingo + food phrases', evening: 'WODCard: Build and run container', project: 'WODCard' },
+    { day: 'Thu', morning: 'Clean Code Ch 6', evening: 'SalsaTD: Deck filtering by spiciness', project: 'SalsaTD' },
+    { day: 'Fri', morning: 'Duolingo + review', evening: 'SalsaTD: Deck filtering polish', project: 'SalsaTD' },
+    { day: 'Sat', morning: '30 min + major work', evening: 'WODCard: Docker Compose setup (3 hrs)', project: 'WODCard' },
+    { day: 'Sun', morning: 'Review week, plan next', evening: 'Deploy + commit all projects (1 hr)', project: 'All' },
+  ],
+
+  // Week 8 deliverables
+  weekDeliverables: [
+    { text: 'WODCard: Dockerfile written and container running locally', cat: 'Project', done: false },
+    { text: 'WODCard: docker-compose.yml for backend + DB', cat: 'Project', done: false },
+    { text: 'SalsaSegura: Search and filter UI functional', cat: 'Project', done: false },
+    { text: 'SalsaTD: Deck filtering by spiciness level working', cat: 'Project', done: false },
+    { text: 'Docker: Understand images vs containers', cat: 'Learning', done: false },
+    { text: 'Docker: Write, build, and run a Dockerfile', cat: 'Learning', done: false },
+    { text: 'Docker: Run multi-container app with Docker Compose', cat: 'Learning', done: false },
+    { text: 'Git: 10+ commits across all projects', cat: 'Learning', done: false },
+    { text: 'Food vocabulary: 15 new words', cat: 'Russian', done: false },
+    { text: 'Duolingo streak: 7 days', cat: 'Russian', done: false },
+    { text: 'Phrases: ordering food, asking prices', cat: 'Russian', done: false },
+    { text: 'Clean Code: Chapters 5-6', cat: 'Reading', done: false },
+  ],
+
+  // Success metrics
+  successMetrics: [
+    { category: 'Projects', goal: '3 production apps', metric: 'Live URLs, real users' },
+    { category: 'Certification', goal: 'AZ-204', metric: 'Pass by November' },
+    { category: 'GitHub', goal: '500+ commits', metric: 'Consistent activity' },
+    { category: 'Russian', goal: 'B1 Level', metric: '30-min conversation' },
+    { category: 'Books', goal: '10-12 completed', metric: 'Notes taken' },
+    { category: 'Career', goal: 'New role', metric: 'Interviews + offers' },
+  ],
+
+  // Learning matrix
+  learningMatrix: [
+    { skill: 'React', wod: true, salsa: true, td: true },
+    { skill: 'FastAPI', wod: true, salsa: false, td: true },
+    { skill: 'Cosmos DB', wod: true, salsa: false, td: true },
+    { skill: 'Auth', wod: true, salsa: true, td: true },
+    { skill: 'CI/CD', wod: true, salsa: true, td: true },
+    { skill: 'Docker', wod: true, salsa: false, td: false },
+    { skill: 'K8s/AKS', wod: true, salsa: false, td: false },
+    { skill: 'Terraform', wod: true, salsa: false, td: false },
+  ],
+
+  // Networking
+  networking: {
+    goals: [
+      { goal: 'Attend 1 tech event per month', progress: '0/12' },
+      { goal: 'Have 2 coffee chats per month', progress: '0/24' },
+    ],
+  },
+
+  // Job applications
+  jobStats: {
+    applications_sent: 0,
+    screening_calls: 0,
+    technical_interviews: 0,
+    onsites: 0,
+    offers: 0,
+    rejections: 0,
+    pending: 0,
+  },
+
+  // Time allocation
+  timeTargets: { tech: '6-8h', russian: '3-4h', reading: '1-2h', total: '10-15h' },
+};
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS — safe DOM construction (no innerHTML)
+// ═══════════════════════════════════════════════════════════════
+
+function make(tag, cls) {
+  const el = document.createElement(tag);
+  if (cls) el.className = cls;
+  return el;
+}
+
+function text(tag, cls, str) {
+  const el = make(tag, cls);
+  el.textContent = str;
+  return el;
+}
+
+function append(parent) {
+  for (let i = 1; i < arguments.length; i++) {
+    if (arguments[i]) parent.appendChild(arguments[i]);
+  }
+  return parent;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAGES
+// ═══════════════════════════════════════════════════════════════
+
+const PAGES = [
+  { id: 'overview', label: 'Overview', icon: '◉' },
+  { id: 'thisweek', label: 'This Week', icon: '📅' },
+  { id: 'tasks', label: 'Tasks', icon: '☐' },
+  { id: 'projects', label: 'Projects', icon: '🔨' },
+  { id: 'roadmap', label: 'Roadmap', icon: '🗺' },
+  { id: 'skills', label: 'Skills', icon: '⚡' },
+  { id: 'career', label: 'Career', icon: '🎯' },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+
+function renderOverview() {
+  const page = make('div', 'page');
+  page.id = 'page-overview';
+
+  // Header
+  const header = make('div');
+  header.style.cssText = 'margin-bottom: 24px;';
+  append(header,
+    text('h1', '', '2026 Learning & Career Dashboard'),
+    (() => {
+      const p = text('p', '', 'Full-time worker · 10-15 hrs/week · Learn by building');
+      p.style.cssText = 'color: var(--text-muted); font-size: 14px; margin-top: 4px;';
+      return p;
+    })()
+  );
+  append(page, header);
+
+  // Stats row
+  const statsGrid = make('div', 'grid-4');
+  const statItems = [
+    { value: 'W' + DATA.currentWeek, label: 'Current Week', color: 'var(--accent)' },
+    { value: DATA.tasks.done.length + '/' + (DATA.tasks.active.length + DATA.tasks.done.length), label: 'Tasks Done', color: 'var(--green)' },
+    { value: DATA.projects.length, label: 'Active Projects', color: 'var(--blue)' },
+    { value: DATA.skills.certifications.length, label: 'Certifications', color: 'var(--purple)' },
+  ];
+  statItems.forEach(function(s) {
+    const box = make('div', 'stat-box');
+    const val = text('div', 'stat-value', String(s.value));
+    val.style.color = s.color;
+    append(box, val, text('div', 'stat-label', s.label));
+    append(statsGrid, box);
+  });
+  append(page, statsGrid);
+
+  // Year progress ring + Quarter progress
+  const ringCard = make('div', 'card');
+  append(ringCard, text('div', 'card-title', '◉ Year Progress'));
+  const ringGrid = make('div', 'grid-4');
+  ringGrid.style.cssText = 'justify-items: center; padding: 8px 0;';
+
+  var yearPct = Math.round((DATA.currentWeek / 52) * 100);
+  var q1Pct = Math.min(100, Math.round((DATA.currentWeek / 13) * 100));
+  var q2Pct = DATA.currentWeek > 13 ? Math.min(100, Math.round(((DATA.currentWeek - 13) / 13) * 100)) : 0;
+  var q3Pct = DATA.currentWeek > 26 ? Math.min(100, Math.round(((DATA.currentWeek - 26) / 13) * 100)) : 0;
+
+  var rings = [
+    { pct: yearPct, label: '2026', color: 'var(--accent)' },
+    { pct: q1Pct, label: 'Q1', color: 'var(--green)' },
+    { pct: q2Pct, label: 'Q2', color: 'var(--blue)' },
+    { pct: q3Pct, label: 'Q3', color: 'var(--purple)' },
+  ];
+
+  rings.forEach(function(r) {
+    var container = make('div', 'ring-container');
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'ring-svg');
+    svg.setAttribute('viewBox', '0 0 36 36');
+
+    var bgCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    bgCircle.setAttribute('class', 'ring-bg');
+    bgCircle.setAttribute('cx', '18');
+    bgCircle.setAttribute('cy', '18');
+    bgCircle.setAttribute('r', '15.9');
+
+    var fillCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    fillCircle.setAttribute('class', 'ring-fill');
+    fillCircle.setAttribute('cx', '18');
+    fillCircle.setAttribute('cy', '18');
+    fillCircle.setAttribute('r', '15.9');
+    fillCircle.setAttribute('stroke', r.color);
+    var circumference = 2 * Math.PI * 15.9;
+    fillCircle.setAttribute('stroke-dasharray', String(circumference));
+    fillCircle.setAttribute('stroke-dashoffset', String(circumference));
+    fillCircle.setAttribute('transform', 'rotate(-90 18 18)');
+    fillCircle.dataset.target = String(circumference * (1 - r.pct / 100));
+
+    var txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    txt.setAttribute('class', 'ring-text');
+    txt.setAttribute('x', '18');
+    txt.setAttribute('y', '18');
+    txt.textContent = r.pct + '%';
+
+    svg.appendChild(bgCircle);
+    svg.appendChild(fillCircle);
+    svg.appendChild(txt);
+
+    append(container, svg, text('div', 'ring-label', r.label));
+    append(ringGrid, container);
+  });
+
+  append(ringCard, ringGrid);
+  append(page, ringCard);
+
+  // Projects summary
+  var projCard = make('div', 'card');
+  append(projCard, text('div', 'card-title', '🔨 Projects'));
+  var projGrid = make('div', 'grid-3');
+
+  DATA.projects.forEach(function(p) {
+    var pc = make('div', 'project-card');
+    pc.style.borderLeftColor = p.color;
+    append(pc,
+      text('h3', '', p.name),
+      text('div', 'status', p.currentStatus)
+    );
+    var progRow = make('div');
+    progRow.style.marginTop = '8px';
+    var progLabel = make('div', 'progress-label');
+    append(progLabel, text('span', 'name', 'Q1: ' + p.q1Goal));
+    var match = p.currentStatus.match(/Week (\d+)\/(\d+)/);
+    var pctVal = match ? Math.round((parseInt(match[1]) / parseInt(match[2])) * 100) : 0;
+    append(progLabel, text('span', 'pct', pctVal + '%'));
+    append(progRow, progLabel);
+    var track = make('div', 'progress-track');
+    var fill = make('div', 'progress-fill');
+    fill.style.background = p.color;
+    fill.dataset.width = pctVal + '%';
+    append(track, fill);
+    append(progRow, track);
+    append(pc, progRow);
+    append(projGrid, pc);
+  });
+
+  append(projCard, projGrid);
+  append(page, projCard);
+
+  // Success Metrics
+  var metricCard = make('div', 'card');
+  append(metricCard, text('div', 'card-title', '🎯 End of 2026 Goals'));
+  DATA.successMetrics.forEach(function(m) {
+    var row = make('div', 'metric-row');
+    append(row,
+      text('div', 'metric-cat', m.category),
+      text('div', 'metric-goal', m.goal),
+      text('div', 'metric-measure', m.metric)
+    );
+    append(metricCard, row);
+  });
+  append(page, metricCard);
+
+  return page;
+}
+
+function renderThisWeek() {
+  var page = make('div', 'page');
+  page.id = 'page-thisweek';
+
+  append(page, text('h2', '', 'Week ' + DATA.currentWeek + ': ' + DATA.weekDates));
+  var subtitle = text('p', '', 'Focus: Docker Basics + Search Filters + Deck Filtering + Food Vocabulary');
+  subtitle.style.cssText = 'color: var(--text-muted); margin: 4px 0 20px;';
+  append(page, subtitle);
+
+  // Schedule
+  var schedCard = make('div', 'card');
+  append(schedCard, text('div', 'card-title', '📅 Daily Schedule'));
+
+  var headerRow = make('div', 'schedule-row');
+  ['Day', 'Morning (30m)', 'Evening (1hr)', 'Project'].forEach(function(h) {
+    append(headerRow, text('div', 'schedule-cell header', h));
+  });
+  append(schedCard, headerRow);
+
+  DATA.weekSchedule.forEach(function(d) {
+    var row = make('div', 'schedule-row');
+    append(row,
+      text('div', 'schedule-cell day', d.day),
+      text('div', 'schedule-cell', d.morning),
+      text('div', 'schedule-cell', d.evening),
+      text('div', 'schedule-cell', d.project)
+    );
+    append(schedCard, row);
+  });
+  append(page, schedCard);
+
+  // Deliverables
+  var delCard = make('div', 'card');
+  append(delCard, text('div', 'card-title', '☐ Week ' + DATA.currentWeek + ' Deliverables'));
+  renderTaskList(delCard, DATA.weekDeliverables);
+  append(page, delCard);
+
+  // Time tracking
+  var timeCard = make('div', 'card');
+  append(timeCard, text('div', 'card-title', '⏰ Time Tracking'));
+  var timeGrid = make('div', 'time-grid');
+
+  var timeHeaders = ['', 'Tech', 'Russian', 'Reading', 'Total'];
+  timeHeaders.forEach(function(h) {
+    append(timeGrid, text('div', 'time-cell header', h));
+  });
+
+  var days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  days.forEach(function(d) {
+    append(timeGrid, text('div', 'time-cell day-label', d));
+    for (var i = 0; i < 4; i++) {
+      append(timeGrid, text('div', 'time-cell', '-'));
+    }
+  });
+
+  append(timeGrid, text('div', 'time-cell total-row', 'Total'));
+  append(timeGrid, text('div', 'time-cell total-row', '-'));
+  append(timeGrid, text('div', 'time-cell total-row', '-'));
+  append(timeGrid, text('div', 'time-cell total-row', '-'));
+  append(timeGrid, text('div', 'time-cell total-row', '-'));
+
+  append(timeGrid, text('div', 'time-cell total-row', 'Target'));
+  append(timeGrid, text('div', 'time-cell total-row', DATA.timeTargets.tech));
+  append(timeGrid, text('div', 'time-cell total-row', DATA.timeTargets.russian));
+  append(timeGrid, text('div', 'time-cell total-row', DATA.timeTargets.reading));
+  append(timeGrid, text('div', 'time-cell total-row', DATA.timeTargets.total));
+
+  append(timeCard, timeGrid);
+  append(page, timeCard);
+
+  return page;
+}
+
+function renderTasks() {
+  var page = make('div', 'page');
+  page.id = 'page-tasks';
+
+  append(page, text('h2', '', 'Task Tracker'));
+  var subtitle = text('p', '', 'Week 1 Continuation — Active learning tasks');
+  subtitle.style.cssText = 'color: var(--text-muted); margin: 4px 0 20px;';
+  append(page, subtitle);
+
+  // Active
+  var activeCard = make('div', 'card');
+  var activeTitle = make('div', 'card-title');
+  append(activeTitle,
+    text('span', '', '☐ Active'),
+    (() => {
+      var badge = text('span', 'skill-badge badge-intermediate', String(DATA.tasks.active.length));
+      badge.style.marginLeft = '8px';
+      return badge;
+    })()
+  );
+  append(activeCard, activeTitle);
+  renderTaskList(activeCard, DATA.tasks.active);
+  append(page, activeCard);
+
+  // Done
+  var doneCard = make('div', 'card');
+  var doneTitle = make('div', 'card-title');
+  append(doneTitle,
+    text('span', '', '✓ Completed'),
+    (() => {
+      var badge = text('span', 'skill-badge badge-advanced', String(DATA.tasks.done.length));
+      badge.style.marginLeft = '8px';
+      return badge;
+    })()
+  );
+  append(doneCard, doneTitle);
+  DATA.tasks.done.forEach(function(t) {
+    var item = make('div', 'task-item');
+    var check = make('div', 'task-check done');
+    check.textContent = '✓';
+    var txt = text('span', 'task-text done', t.text);
+    var cat = text('span', 'task-category', t.cat);
+    cat.style.cssText = 'background: var(--green-light); color: var(--green);';
+    append(item, check, txt, cat);
+    append(doneCard, item);
+  });
+  append(page, doneCard);
+
+  return page;
+}
+
+function renderTaskList(container, tasks) {
+  var catColors = {
+    'React': { bg: 'var(--blue-light)', fg: 'var(--blue)' },
+    'SQL': { bg: 'var(--yellow-light)', fg: 'var(--yellow)' },
+    'Project': { bg: 'var(--accent-light)', fg: 'var(--accent)' },
+    'Reading': { bg: 'var(--purple-light)', fg: 'var(--purple)' },
+    'Deliverable': { bg: 'var(--green-light)', fg: 'var(--green)' },
+    'Learning': { bg: 'var(--blue-light)', fg: 'var(--blue)' },
+    'Russian': { bg: 'var(--red-light)', fg: 'var(--red)' },
+    'Setup': { bg: 'var(--green-light)', fg: 'var(--green)' },
+  };
+
+  tasks.forEach(function(t) {
+    var item = make('div', 'task-item');
+    var check = make('div', 'task-check' + (t.done ? ' done' : ''));
+    if (t.done) check.textContent = '✓';
+    var txt = text('span', 'task-text' + (t.done ? ' done' : ''), t.text);
+    var cat = text('span', 'task-category', t.cat);
+    var colors = catColors[t.cat] || { bg: 'var(--surface-alt)', fg: 'var(--text-muted)' };
+    cat.style.cssText = 'background: ' + colors.bg + '; color: ' + colors.fg + ';';
+    append(item, check, txt, cat);
+    append(container, item);
+  });
+}
+
+function renderProjects() {
+  var page = make('div', 'page');
+  page.id = 'page-projects';
+
+  append(page, text('h2', '', 'Projects'));
+  var subtitle = text('p', '', '3 production apps by end of 2026');
+  subtitle.style.cssText = 'color: var(--text-muted); margin: 4px 0 20px;';
+  append(page, subtitle);
+
+  DATA.projects.forEach(function(p) {
+    var card = make('div', 'card');
+    card.style.borderLeft = '4px solid ' + p.color;
+
+    var headerRow = make('div');
+    headerRow.style.cssText = 'display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;';
+    var nameEl = text('h3', '', p.name);
+    nameEl.style.fontSize = '20px';
+    var statusBadge = text('span', 'skill-badge', p.currentStatus);
+    statusBadge.style.cssText = 'background: ' + p.color + '20; color: ' + p.color + ';';
+    append(headerRow, nameEl, statusBadge);
+    append(card, headerRow);
+
+    // Progress bar
+    var match = p.currentStatus.match(/Week (\d+)\/(\d+)/);
+    var pctVal = match ? Math.round((parseInt(match[1]) / parseInt(match[2])) * 100) : 0;
+    var progLabel = make('div', 'progress-label');
+    append(progLabel, text('span', 'name', 'Q1 Goal: ' + p.q1Goal), text('span', 'pct', pctVal + '%'));
+    append(card, progLabel);
+    var track = make('div', 'progress-track');
+    track.style.marginBottom = '16px';
+    var fill = make('div', 'progress-fill');
+    fill.style.background = p.color;
+    fill.dataset.width = pctVal + '%';
+    append(track, fill);
+    append(card, track);
+
+    // Features
+    append(card, text('div', 'card-title', '✓ Completed Features'));
+    var list = make('ul', 'project-features');
+    p.features.forEach(function(f) {
+      append(list, text('li', '', f));
+    });
+    append(card, list);
+    append(page, card);
+  });
+
+  // Learning matrix
+  var matrixCard = make('div', 'card');
+  append(matrixCard, text('div', 'card-title', '📚 Skills × Projects Matrix'));
+
+  var table = make('table', 'matrix-table');
+  var thead = make('thead');
+  var headRow = make('tr');
+  ['Skill', 'WODCard', 'SalsaSegura', 'SalsaTD'].forEach(function(h) {
+    append(headRow, text('th', '', h));
+  });
+  append(thead, headRow);
+  append(table, thead);
+
+  var tbody = make('tbody');
+  DATA.learningMatrix.forEach(function(m) {
+    var row = make('tr');
+    append(row, text('td', '', m.skill));
+    [m.wod, m.salsa, m.td].forEach(function(active) {
+      var td = make('td');
+      var dot = make('span', 'matrix-dot ' + (active ? 'dot-active' : 'dot-inactive'));
+      append(td, dot);
+      append(row, td);
+    });
+    append(tbody, row);
+  });
+  append(table, tbody);
+  append(matrixCard, table);
+  append(page, matrixCard);
+
+  return page;
+}
+
+function renderRoadmap() {
+  var page = make('div', 'page');
+  page.id = 'page-roadmap';
+
+  append(page, text('h2', '', '52-Week Roadmap'));
+  var subtitle = text('p', '', 'Learning + Projects integrated week by week');
+  subtitle.style.cssText = 'color: var(--text-muted); margin: 4px 0 20px;';
+  append(page, subtitle);
+
+  // Quarter tabs
+  var tabs = make('div', 'quarter-tabs');
+  var quarters = ['q1', 'q2', 'q3', 'q4'];
+  var quarterLabels = ['Q1: Foundations', 'Q2: Features', 'Q3: Scale', 'Q4: Cert & Polish'];
+
+  quarters.forEach(function(q, i) {
+    var tab = make('div', 'quarter-tab');
+    tab.textContent = quarterLabels[i];
+    tab.dataset.quarter = q;
+    if (i === 0) tab.classList.add('active');
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.quarter-tab').forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      document.querySelectorAll('.quarter-content').forEach(function(c) { c.style.display = 'none'; });
+      var target = document.getElementById('quarter-' + q);
+      if (target) target.style.display = 'block';
+    });
+    append(tabs, tab);
+  });
+  append(page, tabs);
+
+  // Quarter content
+  quarters.forEach(function(q, qi) {
+    var qData = DATA.roadmap[q];
+    var content = make('div', 'quarter-content');
+    content.id = 'quarter-' + q;
+    content.style.display = qi === 0 ? 'block' : 'none';
+
+    // Theme card
+    var themeCard = make('div', 'card');
+    themeCard.style.cssText = 'background: var(--text); color: #fff; margin-bottom: 16px;';
+    append(themeCard,
+      text('h3', '', '"' + qData.theme + '"'),
+      (() => {
+        var p = text('p', '', 'Learning: ' + qData.learning + ' · Russian: ' + qData.russian);
+        p.style.cssText = 'font-size: 13px; opacity: 0.8; margin-top: 4px;';
+        return p;
+      })()
+    );
+    append(content, themeCard);
+
+    // Roadmap table
+    var tableCard = make('div', 'card');
+    tableCard.style.padding = '0';
+    tableCard.style.overflow = 'auto';
+
+    var table = make('table', 'roadmap-table');
+    var thead = make('thead');
+    var headRow = make('tr');
+    ['Wk', 'Dates', 'Learning', 'WODCard', 'SalsaSegura', 'SalsaTD', 'Russian'].forEach(function(h) {
+      append(headRow, text('th', '', h));
+    });
+    append(thead, headRow);
+    append(table, thead);
+
+    var tbody = make('tbody');
+    qData.weeks.forEach(function(w) {
+      var row = make('tr');
+      if (w.num === DATA.currentWeek) row.classList.add('current-week');
+      if (w.num < DATA.currentWeek) row.classList.add('past-week');
+
+      var weekCell = text('td', 'week-num', String(w.num));
+      append(row, weekCell,
+        text('td', '', w.dates),
+        text('td', '', w.learn),
+        text('td', '', w.wod),
+        text('td', '', w.salsa),
+        text('td', '', w.td),
+        text('td', '', w.ru)
+      );
+      append(tbody, row);
+    });
+    append(table, tbody);
+    append(tableCard, table);
+    append(content, tableCard);
+    append(page, content);
+  });
+
+  return page;
+}
+
+function renderSkills() {
+  var page = make('div', 'page');
+  page.id = 'page-skills';
+
+  append(page, text('h2', '', 'Skills & Certifications'));
+  var subtitle = text('p', '', 'Technical skills, soft skills, and professional certifications');
+  subtitle.style.cssText = 'color: var(--text-muted); margin: 4px 0 20px;';
+  append(page, subtitle);
+
+  var grid = make('div', 'grid-2');
+
+  // Left column — Technical skills
+  var leftCol = make('div');
+
+  DATA.skills.technical.forEach(function(cat) {
+    var card = make('div', 'card');
+    append(card, text('div', 'card-title', '⚡ ' + cat.category));
+
+    cat.skills.forEach(function(sk) {
+      var row = make('div', 'skill-row');
+      var profMap = { beginner: 25, intermediate: 50, advanced: 75, expert: 100 };
+      var pct = profMap[sk.proficiency] || 0;
+      var colorMap = {
+        beginner: 'var(--red)',
+        intermediate: 'var(--yellow)',
+        advanced: 'var(--blue)',
+        expert: 'var(--green)',
+      };
+
+      var label = make('div', 'progress-label');
+      append(label, text('span', 'name', sk.name), text('span', 'pct', sk.proficiency));
+      append(row, label);
+
+      var track = make('div', 'progress-track');
+      var fill = make('div', 'progress-fill');
+      fill.style.background = colorMap[sk.proficiency];
+      fill.dataset.width = pct + '%';
+      append(track, fill);
+      append(row, track);
+
+      var meta = make('div', 'skill-meta');
+      var badge = text('span', 'skill-badge badge-' + sk.proficiency, sk.proficiency);
+      append(meta, badge, text('span', 'skill-years', sk.years + ' yrs'));
+      append(row, meta);
+
+      append(card, row);
+    });
+    append(leftCol, card);
+  });
+
+  // Soft skills
+  var softCard = make('div', 'card');
+  append(softCard, text('div', 'card-title', '🤝 Soft Skills'));
+  DATA.skills.soft.forEach(function(sk) {
+    var row = make('div', 'skill-row');
+    var label = make('div', 'progress-label');
+    append(label, text('span', 'name', sk.name));
+    var badge = text('span', 'skill-badge badge-' + sk.proficiency, sk.proficiency);
+    append(label, badge);
+    append(row, label);
+    var track = make('div', 'progress-track');
+    var fill = make('div', 'progress-fill');
+    fill.style.background = 'var(--red)';
+    fill.dataset.width = '15%';
+    append(track, fill);
+    append(row, track);
+    append(softCard, row);
+  });
+  append(leftCol, softCard);
+  append(grid, leftCol);
+
+  // Right column — Certifications
+  var rightCol = make('div');
+  var certCard = make('div', 'card');
+  append(certCard, text('div', 'card-title', '🏆 Certifications'));
+
+  DATA.skills.certifications.forEach(function(cert) {
+    var c = make('div', 'cert-card');
+
+    var icon = make('div', 'cert-icon');
+    icon.style.background = cert.obtained ? 'var(--green-light)' : 'var(--yellow-light)';
+    icon.textContent = cert.obtained ? '🏅' : '📋';
+    append(c, icon);
+
+    var info = make('div', 'cert-info');
+    append(info, text('h4', '', cert.name));
+    var details = cert.issuer;
+    if (cert.obtained) details += ' · Obtained: ' + cert.obtained;
+    if (cert.expires && cert.expires !== 'never') details += ' · Expires: ' + cert.expires;
+    else if (cert.expires === 'never') details += ' · No expiry';
+    append(info, text('p', '', details));
+    append(c, info);
+
+    var status = make('span', 'cert-status');
+    if (!cert.obtained) {
+      status.textContent = 'Pending';
+      status.style.cssText = 'background: var(--yellow-light); color: var(--yellow);';
+    } else {
+      var expDate = new Date(cert.expires);
+      var now = new Date(DATA.currentDate);
+      if (cert.expires === 'never' || expDate > now) {
+        status.textContent = 'Active';
+        status.style.cssText = 'background: var(--green-light); color: var(--green);';
+      } else {
+        status.textContent = 'Expired';
+        status.style.cssText = 'background: var(--red-light); color: var(--red);';
+      }
+    }
+    append(c, status);
+    append(certCard, c);
+  });
+  append(rightCol, certCard);
+
+  // Monthly checkpoints
+  var checkCard = make('div', 'card');
+  append(checkCard, text('div', 'card-title', '📊 Monthly Learning Checkpoints'));
+  var checkpoints = [
+    { month: 'Jan', skill: 'React + Git', validation: '3 projects with components' },
+    { month: 'Feb', skill: 'Cosmos DB + FastAPI', validation: 'Data persisting in all projects' },
+    { month: 'Mar', skill: 'Docker + CI/CD', validation: 'Automated deployments' },
+    { month: 'Apr', skill: 'Auth + Advanced React', validation: 'User systems working' },
+    { month: 'May', skill: 'PWA + WebSockets', validation: 'Offline + real-time features' },
+    { month: 'Jun', skill: 'Performance', validation: 'Lighthouse 90+ scores' },
+    { month: 'Jul-Aug', skill: 'K8s + Terraform', validation: 'Production infrastructure' },
+    { month: 'Sep-Oct', skill: 'AZ-204 Prep', validation: 'Practice exams 75%+' },
+    { month: 'Nov', skill: 'AZ-204 EXAM', validation: 'PASS 🎓' },
+    { month: 'Dec', skill: 'Job Search', validation: 'Applications submitted' },
+  ];
+
+  checkpoints.forEach(function(cp, i) {
+    var row = make('div', 'metric-row');
+    var monthEl = text('div', 'metric-cat', cp.month);
+    if (i < 2) monthEl.style.color = 'var(--green)';
+    else monthEl.style.color = 'var(--text-muted)';
+    append(row, monthEl, text('div', 'metric-goal', cp.skill), text('div', 'metric-measure', cp.validation));
+    append(checkCard, row);
+  });
+  append(rightCol, checkCard);
+
+  append(grid, rightCol);
+  append(page, grid);
+
+  return page;
+}
+
+function renderCareer() {
+  var page = make('div', 'page');
+  page.id = 'page-career';
+
+  append(page, text('h2', '', 'Career Hub'));
+  var subtitle = text('p', '', 'Goals, networking, and job search tracking');
+  subtitle.style.cssText = 'color: var(--text-muted); margin: 4px 0 20px;';
+  append(page, subtitle);
+
+  var grid = make('div', 'grid-2');
+
+  // Left column
+  var leftCol = make('div');
+
+  // Goals
+  var goalsCard = make('div', 'card');
+  append(goalsCard, text('div', 'card-title', '🎯 Career Goals'));
+  var emptyGoals = make('div', 'empty-state');
+  append(emptyGoals,
+    text('div', 'icon', '🎯'),
+    text('p', '', 'No goals defined yet. Update goals/career-goals.yml to set your vision, long-term goals, and quarterly objectives.')
+  );
+  append(goalsCard, emptyGoals);
+  append(leftCol, goalsCard);
+
+  // Job Applications
+  var jobCard = make('div', 'card');
+  append(jobCard, text('div', 'card-title', '💼 Job Applications'));
+
+  var jobGrid = make('div', 'grid-3');
+  jobGrid.style.marginBottom = '16px';
+  var jobStats = [
+    { label: 'Applied', value: DATA.jobStats.applications_sent, color: 'var(--blue)' },
+    { label: 'Screening', value: DATA.jobStats.screening_calls, color: 'var(--yellow)' },
+    { label: 'Interviews', value: DATA.jobStats.technical_interviews, color: 'var(--purple)' },
+    { label: 'Onsites', value: DATA.jobStats.onsites, color: 'var(--accent)' },
+    { label: 'Offers', value: DATA.jobStats.offers, color: 'var(--green)' },
+    { label: 'Pending', value: DATA.jobStats.pending, color: 'var(--text-muted)' },
+  ];
+  jobStats.forEach(function(s) {
+    var box = make('div', 'stat-box');
+    var val = text('div', 'stat-value', String(s.value));
+    val.style.cssText = 'font-size: 22px; color: ' + s.color + ';';
+    append(box, val, text('div', 'stat-label', s.label));
+    append(jobGrid, box);
+  });
+  append(jobCard, jobGrid);
+
+  if (DATA.jobStats.applications_sent === 0) {
+    var emptyJobs = make('div', 'empty-state');
+    emptyJobs.style.padding = '20px';
+    append(emptyJobs,
+      text('p', '', 'No applications yet. Job search begins Week 49 (December). Update interviews/job-applications.yml when ready.')
+    );
+    append(jobCard, emptyJobs);
+  }
+  append(leftCol, jobCard);
+
+  append(grid, leftCol);
+
+  // Right column
+  var rightCol = make('div');
+
+  // Networking
+  var netCard = make('div', 'card');
+  append(netCard, text('div', 'card-title', '🤝 Networking Goals'));
+
+  DATA.networking.goals.forEach(function(g) {
+    var row = make('div', 'net-goal');
+    var textDiv = make('div', 'net-goal-text');
+    append(textDiv, text('h4', '', g.goal));
+    append(textDiv, text('p', '', 'Progress for 2026'));
+    append(row, textDiv);
+    append(row, text('div', 'net-goal-progress', g.progress));
+    append(netCard, row);
+  });
+  append(rightCol, netCard);
+
+  // Application checklist
+  var checklistCard = make('div', 'card');
+  append(checklistCard, text('div', 'card-title', '✅ Application Checklist'));
+  var checklist = [
+    'Tailor resume to job description',
+    'Research company and team',
+    'Find internal referral if possible',
+    'Write custom cover letter (for high priority)',
+    'Add to tracker before submitting',
+    'Set calendar reminder to follow up in 1 week',
+  ];
+  checklist.forEach(function(item) {
+    var taskEl = make('div', 'task-item');
+    var check = make('div', 'task-check');
+    append(taskEl, check, text('span', 'task-text', item));
+    append(checklistCard, taskEl);
+  });
+  append(rightCol, checklistCard);
+
+  // Success metrics
+  var metricsCard = make('div', 'card');
+  append(metricsCard, text('div', 'card-title', '📊 2026 Success Metrics'));
+  DATA.successMetrics.forEach(function(m) {
+    var row = make('div', 'metric-row');
+    append(row,
+      text('div', 'metric-cat', m.category),
+      text('div', 'metric-goal', m.goal),
+      text('div', 'metric-measure', m.metric)
+    );
+    append(metricsCard, row);
+  });
+  append(rightCol, metricsCard);
+
+  append(grid, rightCol);
+  append(page, grid);
+
+  return page;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// APP INIT
+// ═══════════════════════════════════════════════════════════════
+
+function init() {
+  // Date
+  document.getElementById('navDate').textContent = DATA.currentDate;
+
+  // Nav tabs
+  var navTabs = document.getElementById('navTabs');
+  PAGES.forEach(function(p, i) {
+    var tab = make('button', 'nav-tab' + (i === 0 ? ' active' : ''));
+    tab.textContent = p.icon + ' ' + p.label;
+    tab.dataset.page = p.id;
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      document.querySelectorAll('.page').forEach(function(pg) { pg.classList.remove('active'); });
+      var target = document.getElementById('page-' + p.id);
+      if (target) target.classList.add('active');
+    });
+    append(navTabs, tab);
+  });
+
+  // Render pages
+  var main = document.getElementById('appMain');
+  var renderers = {
+    overview: renderOverview,
+    thisweek: renderThisWeek,
+    tasks: renderTasks,
+    projects: renderProjects,
+    roadmap: renderRoadmap,
+    skills: renderSkills,
+    career: renderCareer,
+  };
+
+  PAGES.forEach(function(p, i) {
+    var pageEl = renderers[p.id]();
+    if (i === 0) pageEl.classList.add('active');
+    append(main, pageEl);
+  });
+
+  // Footer
+  var footer = make('div', 'footer');
+  append(footer,
+    text('p', '', 'CloudTransition Career Dashboard'),
+    text('p', '', 'Data synced from workspace YAML files · Last updated: ' + DATA.currentDate)
+  );
+  append(main, footer);
+
+  // Animate progress bars
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      document.querySelectorAll('.progress-fill[data-width]').forEach(function(el) {
+        el.style.width = el.dataset.width;
+      });
+      document.querySelectorAll('.ring-fill[data-target]').forEach(function(el) {
+        el.style.strokeDashoffset = el.dataset.target;
+      });
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

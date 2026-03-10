@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Artboard</title>
+    <defs>
+        <polygon id="path-1" points="0.0005 0 6.0005 0 6.0005 5.9997 0.0005 5.9997"></polygon>
+        <polygon id="path-3" points="0 0.0099 14.9818 0.0099 14.9818 7.9999 0 7.9999"></polygon>
+    </defs>
+    <g id="Artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group-7" transform="translate(3.667236, 4.000000)">
+            <g id="Group-3" transform="translate(5.165527, 0.016174)">
+                <mask id="mask-2" fill="white">
+                    <use xlink:href="#path-1"></use>
+                </mask>
+                <g id="Clip-2"></g>
+                <path d="M6.0005,2.9997 C6.0005,4.6567 4.6575,5.9997 3.0005,5.9997 C1.3435,5.9997 0.0005,4.6567 0.0005,2.9997 C0.0005,1.3427 1.3435,-0.0003 3.0005,-0.0003 C4.6575,-0.0003 6.0005,1.3427 6.0005,2.9997" id="Fill-1" fill="#98A4AE" mask="url(#mask-2)"></path>
+            </g>
+            <g id="Group-6" transform="translate(0.832764, 7.983826)">
+                <mask id="mask-4" fill="white">
+                    <use xlink:href="#path-3"></use>
+                </mask>
+                <g id="Clip-5"></g>
+                <path d="M7.4908,0.0099 C3.3538,0.0099 -0.0002,3.5869 -0.0002,7.9999 L14.9818,7.9999 C14.9818,3.5869 11.6288,0.0099 7.4908,0.0099" id="Fill-4" fill="#98A4AE" mask="url(#mask-4)"></path>
+            </g>
+        </g>
+    </g>
+</svg>

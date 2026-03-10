@@ -1,0 +1,85 @@
+# Skills Inventory
+# Track your skills, proficiency levels, and evidence of expertise
+
+technical_skills:
+  - category: Programming Languages
+    skills:
+      - name: Python
+        proficiency: beginner  # beginner | intermediate | advanced | expert
+        years_experience: 3
+        last_used: 2026-02
+        evidence:
+          -
+
+      - name: JavaScript
+        proficiency: beginner
+        years_experience: 3
+        last_used: 2026-01
+        evidence:
+          -
+
+  - category: Tools & Frameworks
+    skills:
+      - name: Git
+        proficiency: advanced
+        years_experience: 5
+        last_used: 2026-02
+        evidence:
+          -
+
+  - category: Cloud & Infrastructure
+    skills:
+      - name: AWS
+        proficiency: intermediate
+        years_experience: 2
+        last_used: 2025-12
+        evidence:
+          -
+
+soft_skills:
+  - name: Project Management
+    proficiency: low
+    evidence:
+
+  - name: Technical Writing
+    proficiency: low
+    evidence:
+
+  - name: Public Speaking
+    proficiency: low
+    evidence:
+
+certifications:
+  - name: AWS Certified Solutions Architect
+    issuer: Amazon Web Services
+    date_obtained: 2023-12
+    expires: 2026-12
+    credential_id:
+
+  - name: Azure fundamentals AZ-900
+    issuer: Microsoft
+    date_obtained: May 2021
+    expires: never
+    credential_id:
+
+  - name: Security+ CE
+    issuer: CompTIA
+    date_obtained: 2016
+    expires: 2019
+    credential_id:
+
+skills_to_develop:
+  # - skill:
+  #   priority:  # high | medium | low
+  #   reason:
+  #   target_proficiency:
+  #   target_date:
+  #   resources:
+  #     -
+
+notes: |
+  This inventory should be updated quarterly or when:
+  - You gain a new skill
+  - Your proficiency level changes
+  - You acquire new certifications
+  - You identify skill gaps for career goals

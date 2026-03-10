@@ -1,0 +1,201 @@
+# Career Goals
+# Long-term vision broken down into actionable milestones
+
+vision:
+  title: DevOps Engineer (Full-Stack Cloud)
+  timeframe: 3 years  # Target: 2029
+  description: |
+    Transition into a DevOps / Cloud Engineer role with deep expertise in
+    CI/CD pipelines, Infrastructure as Code, container orchestration (Kubernetes),
+    and Azure cloud services. Leverage existing AWS experience (Solutions Architect)
+    and PMP background to stand out as a well-rounded engineer who can bridge
+    development, operations, and project leadership.
+
+long_term_goals:
+  - id: LT-01
+    goal: Secure a DevOps Engineer role
+    target_date: 2028-06
+    status: in_progress
+    success_criteria:
+      - Employed as DevOps / Cloud Engineer or related title
+      - Salary meets or exceeds target range
+      - Working with Kubernetes, Terraform, and CI/CD daily
+    dependencies:
+      - LT-02  # Azure certification
+      - LT-03  # Portfolio projects
+
+  - id: LT-02
+    goal: Earn Azure DevOps Engineer Expert certification (AZ-400)
+    target_date: 2027-06
+    status: not_started
+    success_criteria:
+      - Pass AZ-204 (Developer Associate) as prerequisite
+      - Pass AZ-400 exam
+      - Update LinkedIn and resume with credential
+    dependencies:
+      - ST-03  # AZ-204 prep
+
+  - id: LT-03
+    goal: Build a production-quality portfolio with 3+ deployed cloud projects
+    target_date: 2027-01
+    status: in_progress
+    success_criteria:
+      - 3 projects live with public GitHub repos (20+ commits each)
+      - Each project uses CI/CD, IaC, and Azure deployment
+      - Portfolio site live and linked on resume/LinkedIn
+    dependencies:
+      - ST-01  # Task Manager MVP
+      - ST-02  # Docker & CI/CD skills
+
+  - id: LT-04
+    goal: Reach advanced proficiency in Python and JavaScript
+    target_date: 2027-12
+    status: in_progress
+    success_criteria:
+      - Comfortable building REST APIs with FastAPI (Python)
+      - Comfortable with React functional components and hooks
+      - At least one full-stack project deployed per language
+    dependencies: []
+
+short_term_goals:
+  - id: ST-01
+    goal: Complete Week 1 curriculum and deploy Task Manager MVP
+    target_date: 2026-03-09
+    status: in_progress
+    success_criteria:
+      - React fundamentals complete (JSX, props, useState, useEffect)
+      - SQLBolt lessons 1-12 done
+      - Task Manager CRUD app deployed to Azure Static Web Apps
+      - GitHub repo with 20+ commits
+    milestones:
+      - task: JSX syntax — build a simple component
+        due_date: 2026-03-03
+        status: not_started
+      - task: Components & Props, useState, useEffect
+        due_date: 2026-03-05
+        status: not_started
+      - task: Task Manager form and CRUD logic
+        due_date: 2026-03-07
+        status: not_started
+      - task: Deploy to Azure Static Web Apps
+        due_date: 2026-03-09
+        status: not_started
+      - task: SQLBolt lessons 1-12
+        due_date: 2026-03-09
+        status: not_started
+    dependencies: []
+    blockers: []
+
+  - id: ST-02
+    goal: Learn Docker & CI/CD fundamentals
+    target_date: 2026-05-31
+    status: not_started
+    success_criteria:
+      - Containerize at least one project with Docker
+      - Set up a GitHub Actions CI/CD pipeline
+      - Push Docker image to Azure Container Registry
+    milestones:
+      - task: Docker basics — build and run containers
+        due_date: 2026-04-15
+        status: not_started
+      - task: Write a Dockerfile for Task Manager
+        due_date: 2026-04-30
+        status: not_started
+      - task: GitHub Actions workflow for auto-deploy
+        due_date: 2026-05-15
+        status: not_started
+    dependencies:
+      - ST-01
+    blockers: []
+
+  - id: ST-03
+    goal: Begin AZ-204 Azure Developer Associate exam preparation
+    target_date: 2026-09-30
+    status: not_started
+    success_criteria:
+      - Complete Microsoft Learn AZ-204 learning path
+      - Score 70%+ on practice exams consistently
+      - Pass AZ-204 exam
+    milestones:
+      - task: Enroll in AZ-204 learning path on Microsoft Learn
+        due_date: 2026-06-01
+        status: not_started
+      - task: Complete Azure Functions and App Service modules
+        due_date: 2026-07-31
+        status: not_started
+      - task: Complete Cosmos DB and storage modules
+        due_date: 2026-08-31
+        status: not_started
+      - task: Take and pass AZ-204 exam
+        due_date: 2026-09-30
+        status: not_started
+    dependencies:
+      - ST-01
+    blockers: []
+
+  - id: ST-04
+    goal: Read The Phoenix Project and Python Crash Course (Ch 1-8+)
+    target_date: 2026-03-31
+    status: in_progress
+    success_criteria:
+      - The Phoenix Project Ch 1-8 read by end of Week 1
+      - Python Crash Course Ch 1-4 read by end of Week 1
+      - Brief reflection notes written after each book
+    milestones:
+      - task: The Phoenix Project — Ch 1-8
+        due_date: 2026-03-09
+        status: not_started
+      - task: Python Crash Course — Ch 1-4
+        due_date: 2026-03-09
+        status: not_started
+    dependencies: []
+    blockers: []
+
+quarterly_objectives:
+  q1_2026:
+    - Complete Week 1 curriculum (React, SQL, Task Manager)
+    - Deploy Task Manager to Azure Static Web Apps
+    - Start reading The Phoenix Project and Python Crash Course
+    - Reach 20+ GitHub commits across projects
+  q2_2026:
+    - Learn Docker and containerize Task Manager
+    - Set up GitHub Actions CI/CD pipeline
+    - Start Azure Pipelines exploration
+    - Begin Terraform basics (infrastructure as code)
+  q3_2026:
+    - Complete Terraform IaC project on Azure
+    - Start Kubernetes / AKS fundamentals
+    - Begin AZ-204 study and practice exams
+    - Add monitoring (Azure Monitor / Application Insights) to a project
+  q4_2026:
+    - Pass AZ-204 Azure Developer Associate exam
+    - Complete advanced DevOps capstone project (full CI/CD + IaC + monitoring)
+    - Polish portfolio — 3 live projects, README docs, LinkedIn updated
+    - Start AZ-400 DevOps Engineer Expert preparation
+
+reviews:
+  - date: 2026-02-27
+    notes: |
+      Initial goals setup based on workspace context.
+      Currently at start of Week 1 (beginning March 2, 2026).
+      Tools installed: Node.js, Python, VS Code, Git.
+      GitHub account and Azure free account created.
+      First React app built with Vite.
+      Holding AWS Solutions Architect cert (2024-06, expires 2027-06) and PMP.
+
+notes: |
+  Review this file monthly to track progress and adjust timelines.
+  Update status and add blockers as they arise.
+  Celebrate completed milestones!
+
+  Current strengths to leverage:
+    - AWS Solutions Architect cert (intermediate AWS experience)
+    - PMP certification (project management credibility)
+    - Git (advanced, 5 years)
+
+  Key skills to build:
+    - Docker → Kubernetes → AKS
+    - Terraform / IaC
+    - CI/CD (GitHub Actions, Azure Pipelines)
+    - React (front-end for portfolio projects)
+    - Python / FastAPI (back-end fundamentals)

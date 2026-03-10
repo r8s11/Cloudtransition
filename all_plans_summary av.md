@@ -1,276 +1,218 @@
 # Quick Reference: All Learning Plans
 
-> Summary of all subject plans for your 14-week career transition
+> Summary of all subject plans for your career transition to Full-Stack Cloud DevOps Engineer
+
+**Last Updated:** February 17, 2026
 
 ---
 
-## 📁 Plans Directory Structure
+## 📁 Complete Directory Structure
+
+### plans/ (Detailed Learning Plans)
 
 ```
 plans/
-├── react-learning-plan.md          [CREATED ✅]
-├── sql-learning-plan.md            [CREATED ✅]
-├── azure-az204-plan.md             [CREATE THIS]
-├── devops-learning-plan.md         [CREATE THIS]
-├── books-reading-plan.md           [CREATE THIS]
-├── weekly-goals.md                 [CREATE THIS]
-└── week1-daily-guide.md            [CREATED ✅]
+├── react_plan.md               [CREATED ✅]  — Weeks 1-16, 6 hrs/wk
+├── sql_plan.md                 [CREATED ✅]  — Weeks 1-12, 4 hrs/wk
+├── azure-az204-plan.md         [CREATED ✅]  — Weeks 3-22, 6-8 hrs/wk
+├── devops-learning-plan.md     [CREATED ✅]  — Weeks 1-28, 4-6 hrs/wk
+├── books-reading-plan.md       [CREATED ✅]  — Weeks 1-28, 1 hr/day
+├── weekly-goals.md             [CREATED ✅]  — 26-32 week tracker
+└── week1-daily-guide.md        [CREATED ✅]  — Day-by-day Week 1
+```
+
+### Subject Directories (README Files)
+
+```
+Azure/README.md                 [CREATED ✅]  — AZ-204 cert plan (486 lines)
+Books/README.md                 [CREATED ✅]  — Reading plan (640 lines)
+DevOps/README.md                [CREATED ✅]  — DevOps plan (1161 lines)
+FastAPI/README                  [CREATED ✅]  — Placeholder only
+Python/README                   [PLACEHOLDER] — Empty file
+React/README.md                 [CREATED ✅]  — React plan (701 lines)
+SQL/README.md                   [CREATED ✅]  — SQL plan (223 lines)
 ```
 
 ---
 
-## 📄 plans/azure-az204-plan.md
+## 📊 Plan Summaries at a Glance
 
-```markdown
+| Subject      | Timeline   | Hours/Week    | Location(s)                                         | Status         |
+| ------------ | ---------- | ------------- | --------------------------------------------------- | -------------- |
+| React        | Weeks 1-16 | 6 hrs         | `plans/react_plan.md`, `React/README.md`            | ✅ Complete    |
+| SQL          | Weeks 1-12 | 4 hrs         | `plans/sql_plan.md`, `SQL/README.md`                | ✅ Complete    |
+| Azure AZ-204 | Weeks 3-22 | 6-8 hrs       | `plans/azure-az204-plan.md`, `Azure/README.md`      | ✅ Complete    |
+| DevOps       | Weeks 1-28 | 4-6 hrs       | `plans/devops-learning-plan.md`, `DevOps/README.md` | ✅ Complete    |
+| Books        | Weeks 1-28 | 1 hr/day      | `plans/books-reading-plan.md`, `Books/README.md`    | ✅ Complete    |
+| FastAPI      | TBD        | TBD           | `FastAPI/README`                                    | ⚠️ Placeholder |
+| Python       | TBD        | TBD           | `Python/README`                                     | ❌ Empty       |
+| Weekly Goals | Weeks 1-28 | —             | `plans/weekly-goals.md`                             | ✅ Complete    |
+| Week 1 Guide | Week 1     | ~20 hrs total | `plans/week1-daily-guide.md`                        | ✅ Complete    |
+
+---
+
+## 📄 plans/react_plan.md & React/README.md
+
+```
+# React Learning Plan
+Timeline: Weeks 1-16 (parallel with other learning)
+Time Commitment: 6 hours/week
+Goal: Build modern, performant React applications
+
+Topics:
+  Weeks 1-4:  React Fundamentals (JSX, components, props, state, hooks)
+  Weeks 5-8:  Advanced Patterns (useEffect, useContext, custom hooks, Router)
+  Weeks 9-12: State Management (Context API, React Query)
+  Weeks 13-16: Production Ready (performance, testing, best practices)
+
+Prerequisites: JavaScript (ES6+), HTML/CSS, Node.js, terminal basics
+```
+
+---
+
+## 📄 plans/sql_plan.md & SQL/README.md
+
+```
+# SQL Learning Plan
+Timeline: Weeks 1-12 (parallel with React)
+Time Commitment: 4 hours/week
+Goal: Write efficient queries and design robust databases
+
+Topics:
+  Weeks 1-2:  SQL Fundamentals (SELECT, INSERT, UPDATE, DELETE, data types)
+  Weeks 3-4:  JOINs & Relationships (INNER, LEFT, RIGHT, foreign keys)
+  Weeks 5-6:  Advanced Queries (subqueries, aggregation, window functions)
+  Weeks 7-8:  Database Design (normalization, indexing, ERD)
+  Weeks 9-12: Azure SQL Database (cloud migration, security, monitoring)
+
+Resources: SQLBolt.com, W3Schools, Azure SQL docs
+```
+
+---
+
+## 📄 plans/azure-az204-plan.md & Azure/README.md
+
+```
 # Azure & AZ-204 Certification Plan
+Timeline: Weeks 3-22
+Exam: Week 22
+Time Commitment: 6-8 hours/week
+Study Hours: 60-80 hours total
+Goal: Pass AZ-204 exam (700/1000 minimum)
 
-**Timeline:** Weeks 2-11
-**Exam:** Week 11
-**Study Hours:** 60-80 hours total
+Exam Domains:
+  1. Compute (25-30%) — App Service, Functions, Containers, ACI, AKS
+  2. Storage (15-20%) — Blob, Cosmos DB, Azure SQL
+  3. Security (15-20%) — Azure AD, Key Vault, Managed Identity
+  4. Monitoring (5-10%) — Application Insights
+  5. Services (20-25%) — API Management, Event Grid, Service Bus
 
-## Exam Domains
-
-1. **Compute (25-30%)**
-   - App Service, Functions, Containers
-
-2. **Storage (15-20%)**
-   - Blob, Cosmos DB, Azure SQL
-
-3. **Security (15-20%)**
-   - Azure AD, Key Vault, Managed Identity
-
-4. **Monitoring (5-10%)**
-   - Application Insights
-
-5. **Services (20-25%)**
-   - API Management, Event Grid, Service Bus
-
-## Study Plan
-
-### Weeks 2-8: Learn while building
-- Use Azure services in projects
-- Follow Microsoft Learn paths
-- Hands-on labs
-
-### Week 9: First practice exam
-- Score 75%+ target
-
-### Week 10: Intensive study
-- Weak areas deep dive
-- Second practice exam (85%+ target)
-
-### Week 11: Exam
-- Light review Mon-Tue
-- Exam Wednesday
-- PASS! 🎉
-
-## Resources
-
-- Microsoft Learn (FREE)
-- "Exam Ref AZ-204" book
-- Practice exams (MeasureUp, Whizlabs)
-- Azure documentation
+Includes: Hands-on labs, practice exams strategy, exam day tips
+Prerequisites: Azure free account ($200 credit), Python, REST APIs
 ```
 
 ---
 
-## 📄 plans/devops-learning-plan.md
+## 📄 plans/devops-learning-plan.md & DevOps/README.md
 
-```markdown
+```
 # DevOps Learning Plan
+Timeline: Weeks 1-28 (integrated throughout)
+Time Commitment: 4-6 hours/week
+Goal: Complete CI/CD pipelines for all projects with IaC and monitoring
 
-**Timeline:** Weeks 1-14 (integrated throughout)
-**Goal:** Complete CI/CD pipelines for all projects
+Topics:
+  Weeks 1-2:   Git Fundamentals (branching, PRs, code review)
+  Weeks 3-6:   Docker & Containerization (Dockerfiles, Compose, registries)
+  Weeks 5-8:   CI/CD Basics (GitHub Actions, Azure Pipelines)
+  Weeks 9-12:  Terraform & IaC (Infrastructure as Code, Azure resources)
+  Weeks 13-16: Monitoring & Security (App Insights, KQL, DevSecOps)
+  Weeks 17-20: Kubernetes & AKS (orchestration, Helm charts)
+  Weeks 21-28: Advanced DevOps (GitOps, canary deployments, feature flags)
 
-## Topics by Week
-
-### Week 1: Git Fundamentals
-- Git init, add, commit, push
-- Branching basics
-- GitHub workflow
-
-### Weeks 2-3: Docker
-- Containerization basics
-- Dockerfiles
-- Docker Compose
-- Push to Azure Container Registry
-
-### Weeks 3-4: CI/CD Basics
-- Azure Pipelines setup
-- Build → Test → Deploy
-- Deployment slots
-
-### Weeks 5-6: Terraform (IaC)
-- Infrastructure as Code
-- Terraform basics
-- Deploy Azure resources via code
-
-### Weeks 7-8: Monitoring & Security
-- Application Insights
-- Log queries (KQL)
-- DevSecOps practices
-- Security scanning
-
-### Weeks 9-10: Kubernetes
-- Container orchestration
-- Deploy to AKS
-- Helm charts
-
-### Weeks 11-14: Advanced DevOps
-- GitOps workflows
-- Canary deployments
-- Feature flags
-- Advanced patterns
-
-## Key Resources
-
-- "The Phoenix Project" (novel)
-- "The DevOps Handbook" (practices)
-- "Python for DevOps" (technical)
-- Azure DevOps Labs (hands-on)
-
-## Projects
-
-All three projects will have:
-- Docker containerization
-- CI/CD pipelines
-- Infrastructure as Code
-- Monitoring setup
+Prerequisites: Command line, programming fundamentals, Azure + GitHub accounts
 ```
 
 ---
 
-## 📄 plans/books-reading-plan.md
+## 📄 plans/books-reading-plan.md & Books/README.md
 
-```markdown
+```
 # Books Reading Plan
+Timeline: Weeks 1-28
+Time Commitment: 1 hour/day (30 min morning + 30 min evening)
+Goal: 10-12 books completed with applied knowledge
 
-**Goal:** 10-12 books in 14 weeks
-**Time:** 1 hour/day (30 min morning + 30 min evening)
+Schedule:
+  Weeks 1-4:   The Phoenix Project + Python Crash Course
+  Weeks 5-8:   Clean Code (Ch 1-8) + The DevOps Handbook
+  Weeks 9-12:  Learning React + SQL in 10 Minutes
+  Weeks 13-16: Python for DevOps + Docker Deep Dive (optional)
+  Weeks 17-20: Exam Ref AZ-204 + The Pragmatic Programmer (start)
+  Weeks 21-24: Cracking the Coding Interview
+  Weeks 25-28: Accelerate + The Pragmatic Programmer (finish)
 
-## Reading Schedule
-
-### Weeks 1-2
-- **"The Phoenix Project"** (complete)
-- **"Python Crash Course"** (Ch 1-10)
-
-### Weeks 3-4
-- **"Clean Code"** (Ch 1-6)
-- **"Learning React"** (complete)
-
-### Weeks 5-6
-- **"SQL in 10 Minutes"** (complete)
-- **"The DevOps Handbook"** (Part I-II)
-
-### Weeks 7-8
-- **"Python for DevOps"** (Ch 4-6, 8-10)
-- **"Docker Deep Dive"** (optional)
-
-### Weeks 9-10
-- **"Exam Ref AZ-204"** (reference only)
-- **"The Pragmatic Programmer"** (start)
-
-### Weeks 11-14
-- **"Cracking the Coding Interview"** (algorithms)
-- **"Accelerate"** (DevOps metrics)
-- **"The Pragmatic Programmer"** (finish)
-
-## How to Read
-
-**Morning (30-40 min):**
-- Technical books
-- Take notes
-- Code along
-
-**Evening (20-30 min):**
-- Career books
-- Reflect on learnings
-- Plan applications
-
-## Budget Options
-
-**FREE:**
-- Library (inter-library loan)
-- O'Reilly trial (10 days)
-- Online docs
-
-**Affordable:**
-- Used books on Amazon
-- Humble Bundle
-- O'Reilly subscription ($49/mo for ALL books)
-
-**Priority Order ($100 budget):**
-1. Clean Code ($35)
-2. Phoenix Project ($20)
-3. Python Crash Course ($25)
-4. Pragmatic Programmer ($30)
+Categories:
+  DevOps & Culture — The Phoenix Project, DevOps Handbook, Accelerate
+  Code Quality — Clean Code, Pragmatic Programmer
+  Technical Skills — Python Crash Course, Learning React, SQL books
+  Career Development — Cracking the Coding Interview
 ```
 
 ---
 
 ## 📄 plans/weekly-goals.md
 
-```markdown
+```
 # Weekly Goals Tracker
+Timeline: 26-32 Weeks
+Commitment: 20 hours/week
+Total Hours: ~520-640 hours
 
-Simple checklist format for each week.
+Weekly Rhythm:
+  Sunday Evening — Review past week, plan upcoming week
+  Daily — Check off tasks, adjust as needed
+  Saturday — Major project work (4-6 hours)
 
-## Week 1
-**Focus:** React + SQL + Git
-**Goals:**
-- [ ] Task manager deployed
-- [ ] 20+ commits
-- [ ] SQLBolt complete
-- [ ] Books: 100 pages
-
-**Projects:**
-- Week 1 Task Manager
-
-**Books:**
-- Phoenix Project Ch 1-4
-- Python Crash Course Ch 1-4
+Commit Goals:
+  Weeks 1-8:   15-20 commits/week
+  Weeks 9-16:  15+ commits/week
+  Weeks 17-28: 10+ commits/week
+```
 
 ---
 
-## Week 2
-**Focus:** Advanced SQL + React Router
-**Goals:**
-- [ ] Multi-page app
-- [ ] Azure SQL connected
-- [ ] 15+ commits
-
-**Projects:**
-- Enhanced Task Manager
-
-**Books:**
-- Continue Phoenix Project
-- Start Clean Code
-
----
-
-[Continue for Weeks 3-14...]
-
-## Review Template
-
-```markdown
-# Week X Review
-
-## Completed ✅
-- Goal 1
-- Goal 2
-
-## Challenges 💪
-- Challenge and solution
-
-## Next Week 🎯
-- Top 3 priorities
-
-## Stats 📊
-- Commits: X
-- Hours: X
-- Pages: X
+## 📄 plans/week1-daily-guide.md
 
 ```
+# Week 1: Complete Day-by-Day Guide
+Goal: Build and deploy first full-stack app (React + FastAPI + SQL + Azure)
+Time: 2-3 hours/day + 8-10 hours weekend (~20 hours total)
+
+Deliverables:
+  ✅ Task Manager app deployed to Azure
+  ✅ GitHub repo with 20+ commits
+  ✅ React, SQL, and Git basics mastered
+  ✅ 2 books started
+
+Daily Breakdown:
+  Monday    — Setup & React Basics
+  Tuesday   — Components & Props
+  Wednesday — State & Events
+  Thursday  — SQL Fundamentals
+  Friday    — FastAPI Backend
+  Saturday  — Build Task Manager MVP
+  Sunday    — Deploy & Review
+```
+
+---
+
+## ⚠️ Plans Needing Attention
+
+| Item             | Issue                    | Action Needed                     |
+| ---------------- | ------------------------ | --------------------------------- |
+| `FastAPI/README` | Placeholder — title only | Create full FastAPI learning plan |
+| `Python/README`  | Empty file               | Create Python learning plan       |
 
 ---
 
@@ -278,26 +220,23 @@ Simple checklist format for each week.
 
 ### 1. Start with Main README
 
-- Clone repository
-- Read main README.md
-- Understand 14-week overview
+- Read `README.md` for workspace overview
+- Review `TASKS.md` for active tasks
 
-### 2. Week 1 Day-by-Day
+### 2. Week-by-Week Execution
 
-- Follow day-by-day guide
-- Check off daily tasks
-- Build first project
+- Follow `plans/weekly-goals.md` for weekly targets
+- Use `plans/week1-daily-guide.md` for detailed Day 1 guidance
 
-### 3. Subject Plans
+### 3. Subject Deep Dives
 
-- Reference as you learn each topic
-- Follow weekly breakdown
-- Practice with exercises
+- Each subject has a detailed plan in `plans/` AND a matching `Subject/README.md`
+- Plans in `plans/` and subject directories are synced (same content)
 
-### 4. Weekly Goals
+### 4. Track Progress
 
-- Review every Sunday
-- Plan upcoming week
+- Use `progress/weekly-goals.md` and `progress/week1-review.md`
+- Review every Sunday evening
 - Track progress
 
 ### 5. Books Plan
@@ -313,45 +252,44 @@ Simple checklist format for each week.
 ```markdown
 career-transition/
 │
-├── README.md                          # Main overview
+├── README.md # Main overview
 │
-├── plans/                             # All learning plans
-│   ├── react-learning-plan.md
-│   ├── sql-learning-plan.md
-│   ├── azure-az204-plan.md
-│   ├── devops-learning-plan.md
-│   ├── books-reading-plan.md
-│   ├── weekly-goals.md
-│   └── week1-daily-guide.md
+├── plans/ # All learning plans
+│ ├── react-learning-plan.md
+│ ├── sql-learning-plan.md
+│ ├── azure-az204-plan.md
+│ ├── devops-learning-plan.md
+│ ├── books-reading-plan.md
+│ ├── weekly-goals.md
+│ └── week1-daily-guide.md
 │
-├── projects/                          # Your built projects
-│   ├── week1-task-manager/
-│   │   ├── frontend/
-│   │   ├── backend/
-│   │   └── README.md
-│   ├── project1-asset-management/
-│   ├── project2-infrastructure/
-│   └── project3-portfolio/
+├── projects/ # Your built projects
+│ ├── week1-task-manager/
+│ │ ├── frontend/
+│ │ ├── backend/
+│ │ └── README.md
+│ ├── project1-asset-management/
+│ ├── project2-infrastructure/
+│ └── project3-portfolio/
 │
-├── progress/                          # Weekly reviews
-│   ├── week1-review.md
-│   ├── week2-review.md
-│   └── ...
+├── progress/ # Weekly reviews
+│ ├── week1-review.md
+│ ├── week2-review.md
+│ └── ...
 │
-├── resources/                         # Helpful materials
-│   ├── cheat-sheets/
-│   │   ├── react-hooks.md
-│   │   ├── sql-commands.md
-│   │   ├── git-commands.md
-│   │   └── azure-cli.md
-│   └── templates/
-│       ├── project-readme-template.md
-│       └── weekly-review-template.md
+├── resources/ # Helpful materials
+│ ├── cheat-sheets/
+│ │ ├── react-hooks.md
+│ │ ├── sql-commands.md
+│ │ ├── git-commands.md
+│ │ └── azure-cli.md
+│ └── templates/
+│ ├── project-readme-template.md
+│ └── weekly-review-template.md
 │
-└── certifications/                    # AZ-204 prep
-    ├── az-204-notes.md
-    └── practice-exams/
-
+└── certifications/ # AZ-204 prep
+├── az-204-notes.md
+└── practice-exams/
 ```
 
 ---
@@ -359,6 +297,7 @@ career-transition/
 ## ✅ Setup Checklist
 
 ### Initial Setup
+
 - [ ] Clone/create repository
 - [ ] Create folder structure
 - [ ] Copy all plan files
@@ -366,12 +305,14 @@ career-transition/
 - [ ] Read Week 1 guide
 
 ### Week 1 Start
+
 - [ ] Follow day-by-day guide
 - [ ] Reference React plan as needed
 - [ ] Reference SQL plan as needed
 - [ ] Track in weekly goals
 
 ### Ongoing
+
 - [ ] Update weekly goals each Sunday
 - [ ] Write weekly reviews
 - [ ] Reference subject plans

@@ -2,7 +2,7 @@
 
 > From version control basics to complete CI/CD pipelines and Infrastructure as Code
 
-**Timeline:** Weeks 1-14 (integrated throughout)
+**Timeline:** Weeks 1-28 (integrated throughout)
 **Time Commitment:** 4-6 hours/week
 **Goal:** Complete CI/CD pipelines for all projects with IaC and monitoring
 
@@ -11,13 +11,13 @@
 ## 📋 Table of Contents
 
 1. [Overview](#overview)
-2. [Week 1: Git Fundamentals](#week-1-git-fundamentals)
-3. [Weeks 2-3: Docker & Containerization](#weeks-2-3-docker--containerization)
-4. [Weeks 3-4: CI/CD Basics](#weeks-3-4-cicd-basics)
-5. [Weeks 5-6: Terraform & IaC](#weeks-5-6-terraform--iac)
-6. [Weeks 7-8: Monitoring & Security](#weeks-7-8-monitoring--security)
-7. [Weeks 9-10: Kubernetes & AKS](#weeks-9-10-kubernetes--aks)
-8. [Weeks 11-14: Advanced DevOps](#weeks-11-14-advanced-devops)
+2. [Weeks 1-2: Git Fundamentals](#weeks-1-2-git-fundamentals)
+3. [Weeks 3-6: Docker & Containerization](#weeks-3-6-docker--containerization)
+4. [Weeks 5-8: CI/CD Basics](#weeks-5-8-cicd-basics)
+5. [Weeks 9-12: Terraform & IaC](#weeks-9-12-terraform--iac)
+6. [Weeks 13-16: Monitoring & Security](#weeks-13-16-monitoring--security)
+7. [Weeks 17-20: Kubernetes & AKS](#weeks-17-20-kubernetes--aks)
+8. [Weeks 21-28: Advanced DevOps](#weeks-21-28-advanced-devops)
 9. [Resources](#resources)
 10. [Projects](#projects)
 
@@ -44,7 +44,7 @@
 
 ---
 
-## Week 1: Git Fundamentals
+## Weeks 1-2: Git Fundamentals
 
 ### Topics
 
@@ -122,7 +122,7 @@ git push -u origin main
 
 ---
 
-## Weeks 2-3: Docker & Containerization
+## Weeks 3-6: Docker & Containerization
 
 ### Topics
 
@@ -258,7 +258,7 @@ az acr repository list --name myacr
 
 ---
 
-## Weeks 3-4: CI/CD Basics
+## Weeks 5-8: CI/CD Basics
 
 ### Topics
 
@@ -440,7 +440,7 @@ az webapp config appsettings set --name myapp --resource-group myRG --slot stagi
 
 ---
 
-## Weeks 5-6: Terraform & IaC
+## Weeks 9-12: Terraform & IaC
 
 ### Topics
 
@@ -641,7 +641,7 @@ resource "azurerm_key_vault" "main" {
 
 ---
 
-## Weeks 7-8: Monitoring & Security
+## Weeks 13-16: Monitoring & Security
 
 ### Topics
 
@@ -799,7 +799,7 @@ jobs:
 
 ---
 
-## Weeks 9-10: Kubernetes & AKS
+## Weeks 17-20: Kubernetes & AKS
 
 ### Topics
 
@@ -972,7 +972,7 @@ kubectl rollout undo deployment/backend
 
 ---
 
-## Weeks 11-14: Advanced DevOps
+## Weeks 21-28: Advanced DevOps
 
 ### Topics
 
@@ -1146,14 +1146,14 @@ All three portfolio projects will include:
 
 ## 🏆 Success Metrics
 
-| Milestone                     | Target  | Status |
-| ----------------------------- | ------- | ------ |
-| Git workflow established      | Week 1  | ⬜     |
-| First app containerized       | Week 2  | ⬜     |
-| CI/CD pipeline working        | Week 4  | ⬜     |
-| Terraform for Project 1       | Week 5  | ⬜     |
-| AKS deployment complete       | Week 10 | ⬜     |
-| All projects with full DevOps | Week 14 | ⬜     |
+| Milestone                     | Target      | Status |
+| ----------------------------- | ----------- | ------ |
+| Git workflow established      | Weeks 1-2   | ⬜     |
+| First app containerized       | Weeks 3-4   | ⬜     |
+| CI/CD pipeline working        | Weeks 7-8   | ⬜     |
+| Terraform for Project 1       | Weeks 9-10  | ⬜     |
+| AKS deployment complete       | Weeks 19-20 | ⬜     |
+| All projects with full DevOps | Weeks 27-28 | ⬜     |
 
 ---
 

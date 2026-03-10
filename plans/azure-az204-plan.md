@@ -2,8 +2,8 @@
 
 > From Azure basics to certified Azure Developer Associate
 
-**Timeline:** Weeks 2-11
-**Exam:** Week 11
+**Timeline:** Weeks 3-22
+**Exam:** Week 22
 **Time Commitment:** 6-8 hours/week
 **Study Hours:** 60-80 hours total
 **Goal:** Pass AZ-204 exam (700/1000 minimum)
@@ -163,7 +163,7 @@ sender.send_messages(ServiceBusMessage("Hello, World!"))
 
 ## 📅 Week-by-Week Study Plan
 
-### Week 2-3: Compute Solutions (10 hours)
+### Weeks 3-6: Compute Solutions (10 hours)
 
 **Topics:**
 
@@ -194,7 +194,7 @@ func azure functionapp publish myfunc
 
 ---
 
-### Week 4-5: Storage Solutions (8 hours)
+### Weeks 7-10: Storage Solutions (8 hours)
 
 **Topics:**
 
@@ -223,7 +223,7 @@ items = container.query_items(
 
 ---
 
-### Week 6-7: Security Implementation (8 hours)
+### Weeks 11-14: Security Implementation (8 hours)
 
 **Topics:**
 
@@ -255,7 +255,7 @@ az webapp identity assign --name myapp --resource-group myRG
 
 ---
 
-### Week 8: Monitoring & Service Integration (6 hours)
+### Weeks 15-16: Monitoring & Service Integration (6 hours)
 
 **Topics:**
 
@@ -284,7 +284,7 @@ tc.flush()
 
 ---
 
-### Week 9: First Practice Exam (8 hours)
+### Weeks 17-18: First Practice Exam (8 hours)
 
 **Goals:**
 
@@ -302,7 +302,7 @@ tc.flush()
 
 ---
 
-### Week 10: Intensive Review (10 hours)
+### Weeks 19-20: Intensive Review (10 hours)
 
 **Goals:**
 
@@ -319,7 +319,7 @@ tc.flush()
 
 ---
 
-### Week 11: Exam Week
+### Weeks 21-22: Exam Week
 
 **Monday-Tuesday:**
 
@@ -389,13 +389,13 @@ az group delete --name az204-labs --yes --no-wait
 
 ## 📝 Practice Exams Strategy
 
-### Week 9: First Practice Exam
+### Weeks 17-18: First Practice Exam
 
 - **Goal:** 75%+ score
 - **Focus:** Identify knowledge gaps
 - **Action:** Create targeted study plan
 
-### Week 10: Second Practice Exam
+### Weeks 19-20: Second Practice Exam
 
 - **Goal:** 85%+ score
 - **Focus:** Validate improvement
@@ -472,13 +472,13 @@ az group delete --name az204-labs --yes --no-wait
 
 ## 🏆 Success Metrics
 
-| Milestone                      | Target  | Status |
-| ------------------------------ | ------- | ------ |
-| Microsoft Learn paths complete | Week 8  | ⬜     |
-| First practice exam 75%+       | Week 9  | ⬜     |
-| Second practice exam 85%+      | Week 10 | ⬜     |
-| All hands-on labs complete     | Week 10 | ⬜     |
-| **AZ-204 CERTIFIED**           | Week 11 | ⬜     |
+| Milestone                      | Target      | Status |
+| ------------------------------ | ----------- | ------ |
+| Microsoft Learn paths complete | Weeks 15-16 | ⬜     |
+| First practice exam 75%+       | Weeks 17-18 | ⬜     |
+| Second practice exam 85%+      | Weeks 19-20 | ⬜     |
+| All hands-on labs complete     | Weeks 19-20 | ⬜     |
+| **AZ-204 CERTIFIED**           | Weeks 21-22 | ⬜     |
 
 ---
 

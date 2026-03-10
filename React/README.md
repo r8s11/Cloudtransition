@@ -2,7 +2,7 @@
 
 > Complete React curriculum from fundamentals to production-ready applications
 
-**Timeline:** Weeks 1-8 (parallel with other learning)  
+**Timeline:** Weeks 1-16 (parallel with other learning)
 **Time Commitment:** 6 hours/week  
 **Goal:** Build modern, performant React applications
 
@@ -11,10 +11,10 @@
 ## 📋 Table of Contents
 
 1. [Overview](#overview)
-2. [Week 1-2: React Fundamentals](#week-1-2-react-fundamentals)
-3. [Week 3-4: Advanced Patterns](#week-3-4-advanced-patterns)
-4. [Week 5-6: State Management](#week-5-6-state-management)
-5. [Week 7-8: Production Ready](#week-7-8-production-ready)
+2. [Weeks 1-4: React Fundamentals](#weeks-1-4-react-fundamentals)
+3. [Weeks 5-8: Advanced Patterns](#weeks-5-8-advanced-patterns)
+4. [Weeks 9-12: State Management](#weeks-9-12-state-management)
+5. [Weeks 13-16: Production Ready](#weeks-13-16-production-ready)
 6. [Resources](#resources)
 7. [Practice Projects](#practice-projects)
 
@@ -38,7 +38,7 @@
 
 ---
 
-## Week 1-2: React Fundamentals
+## Weeks 1-4: React Fundamentals
 
 ### Topics
 
@@ -203,7 +203,7 @@ function LoginForm() {
 }
 ```
 
-### Week 1-2 Project: Task Manager
+### Weeks 1-4 Project: Task Manager
 Build a complete CRUD application:
 - Create, read, update, delete tasks
 - Mark tasks as complete
@@ -213,7 +213,7 @@ Build a complete CRUD application:
 
 ---
 
-## Week 3-4: Advanced Patterns
+## Weeks 5-8: Advanced Patterns
 
 ### Topics
 
@@ -311,7 +311,7 @@ function UserList() {
 - [ ] Responsive design
 - [ ] Theming
 
-### Week 3-4 Project: IT Asset Management (Frontend)
+### Weeks 5-8 Project: IT Asset Management (Frontend)
 Multi-page application with:
 - Dashboard with statistics
 - Asset list with search/filter
@@ -321,7 +321,7 @@ Multi-page application with:
 
 ---
 
-## Week 5-6: State Management
+## Weeks 9-12: State Management
 
 ### Topics
 
@@ -475,7 +475,7 @@ function TaskList() {
 }
 ```
 
-### Week 5-6 Project: Infrastructure Platform (Frontend)
+### Weeks 9-12 Project: Infrastructure Platform (Frontend)
 Advanced state management with:
 - React Query for server state
 - Context API for authentication
@@ -485,7 +485,7 @@ Advanced state management with:
 
 ---
 
-## Week 7-8: Production Ready
+## Weeks 13-16: Production Ready
 
 ### Topics
 
@@ -592,7 +592,7 @@ class ErrorBoundary extends React.Component {
 - [ ] Props validation
 - [ ] Accessibility (a11y)
 
-### Week 7-8 Project: Portfolio Website
+### Weeks 13-16 Project: Portfolio Website
 Production-ready features:
 - Optimized performance (Lighthouse 95+)
 - Error boundaries
@@ -631,21 +631,21 @@ Production-ready features:
 
 ## 🏗️ Practice Projects
 
-### Beginner Level (Week 1-2)
+### Beginner Level (Weeks 1-4)
 1. Counter app
 2. Todo list
 3. Weather app
 4. Recipe finder
 5. Portfolio page
 
-### Intermediate Level (Week 3-4)
+### Intermediate Level (Weeks 5-8)
 1. E-commerce product catalog
 2. Blog with routing
 3. Movie search app
 4. Quiz application
 5. Dashboard with charts
 
-### Advanced Level (Week 5-8)
+### Advanced Level (Weeks 9-16)
 1. Full-stack task manager
 2. Real-time chat app
 3. Social media feed
@@ -656,7 +656,7 @@ Production-ready features:
 
 ## ✅ Progress Checklist
 
-### Week 1-2: Fundamentals
+### Weeks 1-4: Fundamentals
 - [ ] Created first React app
 - [ ] Understand JSX
 - [ ] Built components with props
@@ -664,21 +664,21 @@ Production-ready features:
 - [ ] Fetched data with useEffect
 - [ ] Built task manager app
 
-### Week 3-4: Advanced
+### Weeks 5-8: Advanced
 - [ ] Implemented React Router
 - [ ] Created custom hooks
 - [ ] Used UI component library
 - [ ] Built multi-page application
 - [ ] Professional styling
 
-### Week 5-6: State Management
+### Weeks 9-12: State Management
 - [ ] Implemented Context API
 - [ ] Used useReducer
 - [ ] Set up React Query
 - [ ] Managed complex state
 - [ ] Handled authentication
 
-### Week 7-8: Production
+### Weeks 13-16: Production
 - [ ] Optimized performance
 - [ ] Added error boundaries
 - [ ] Wrote tests

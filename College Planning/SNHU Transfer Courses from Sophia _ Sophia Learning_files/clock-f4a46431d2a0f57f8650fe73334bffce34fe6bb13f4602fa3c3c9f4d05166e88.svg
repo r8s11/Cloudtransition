@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <style type="text/css">
+    #button-top { animation: button-top 4s ease 0s infinite; }
+    #big-hand {
+      transform-origin: 50% 55.85%;
+      animation: big-hand 4s cubic-bezier(.93,.3,.3,.93) .25s infinite;
+    }
+    @keyframes button-top {
+      0% {transform: translate(0,0);}
+      2% {transform: translate(0,-8px);}
+      5% {transform: translate(0px,15px);}
+      8% {transform: translate(0,-5px);}
+      10% {transform: translate(0,0);}
+    }
+    @keyframes big-hand {
+      0% {transform: rotate(0deg);}
+      25% {transform: rotate(360deg);}
+      100% {transform: rotate(360deg);}
+    }
+  </style>
+  <g id="button-top">
+    <path fill="none" stroke="#222" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="M128 8v29"/>
+    <path fill="none" stroke="#222" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="M112 8h32"/>
+  </g>
+  <circle cx="128" cy="143" r="105" fill="#FFF" stroke="#222" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/>
+  <path id="big-hand" fill="none" stroke="#222" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="M128 72v71"/>
+</svg>
