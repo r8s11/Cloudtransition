@@ -45,14 +45,14 @@
 
 ## Week 1
 
-**Focus:** React + SQL + Git Fundamentals
+**Focus:** Python + SQL + Git Fundamentals
 **Hours Target:** 20 hours
 **Theme:** "Build the foundation"
 
 ### Goals
 
-- [X] Development environment fully set up
-- [ ] Task Manager v1 deployed to Azure
+- [x] Development environment fully set up
+- [ ] Task Manager API deployed to Azure
 - [ ] 20+ GitHub commits
 - [ ] SQLBolt lessons 1-12 complete
 - [ ] 100+ pages read
@@ -61,59 +61,60 @@
 
 **Monday:** Setup Day
 
-- [X] Install Node.js, Python, VS Code, Git
-- [X] Create GitHub account and first repo
-- [X] Create Azure free account
+- [x] Install Python 3, VS Code, Git
+- [x] Create GitHub account and first repo
+- [x] Create Azure free account
+- [ ] Set up VS Code Python extensions, virtual env
 - [ ] Read Phoenix Project Ch 1
 
-**Tuesday:** React Basics
+**Tuesday:** Python Lists & Loops
 
-- [X] Create first React app with Vite
-- [ ] Learn JSX syntax
-- [ ] Build simple component
+- [ ] Learn lists, tuples, slicing
+- [ ] Practice for/while loops
+- [ ] Build skills_tracker.py
 - [ ] SQLBolt lessons 1-3
 - [ ] Read Phoenix Project Ch 2
 
-**Wednesday:** Components & Props
+**Wednesday:** Python Functions + SQL Basics
 
-- [ ] Create multiple components
-- [ ] Pass data with props
+- [ ] Write functions with parameters/returns
+- [ ] Practice string formatting
 - [ ] SQLBolt lessons 4-6
 - [ ] Read Phoenix Project Ch 3
 - [ ] Python Crash Course Ch 1
 
-**Thursday:** useState Hook
+**Thursday:** Dictionaries + More SQL
 
-- [ ] Add state to components
-- [ ] Handle button clicks
+- [ ] Practice dictionaries and nested data
+- [ ] File I/O (read/write JSON)
 - [ ] SQLBolt lessons 7-9
 - [ ] Read Phoenix Project Ch 4
 - [ ] Python Crash Course Ch 2
 
-**Friday:** Forms & Events
+**Friday:** FastAPI Intro + Azure Basics
 
-- [ ] Create task input form
-- [ ] Handle form submission
+- [ ] Install FastAPI + uvicorn
+- [ ] Build first GET/POST endpoints
 - [ ] SQLBolt lessons 10-12
 - [ ] Read: Phoenix Project Ch 5
 
 **Saturday:** Build Day (4-6 hours)
 
-- [ ] Complete Task Manager MVP
-- [ ] Add styling (CSS or Tailwind)
-- [ ] Test all CRUD operations
+- [ ] Complete Task Manager API (FastAPI + SQLite)
+- [ ] Full CRUD endpoints
+- [ ] Add pytest tests
 - [ ] Python Crash Course Ch 3-4
 
 **Sunday:** Deploy & Review (2-3 hours)
 
-- [ ] Deploy to Azure Static Web Apps
+- [ ] Deploy API to Azure App Service
 - [ ] Write Week 1 review
 - [ ] Plan Week 2
 - [ ] Finish Phoenix Project Part 1
 
 ### Projects
 
-- **Task Manager v1:** React app with local state, basic CRUD
+- **Task Manager v1:** FastAPI REST API with SQLite, basic CRUD
 
 ### Books
 
@@ -123,7 +124,7 @@
 ### Deliverables
 
 - [ ] GitHub repo with 20+ commits
-- [ ] Live deployed Task Manager URL
+- [ ] Live deployed Task Manager API URL
 - [ ] SQLBolt completion certificate
 - [ ] Week 1 review document
 
@@ -131,13 +132,13 @@
 
 ## Week 2
 
-**Focus:** Advanced SQL + React Router + FastAPI Backend
+**Focus:** Python OOP + FastAPI + Advanced SQL
 **Hours Target:** 20 hours
 **Theme:** "Connect the pieces"
 
 ### Goals
 
-- [ ] Multi-page React app with routing
+- [ ] FastAPI app with database models
 - [ ] FastAPI backend created and running
 - [ ] Azure SQL Database connected
 - [ ] 15+ GitHub commits
@@ -145,18 +146,18 @@
 
 ### Daily Breakdown
 
-**Monday:** React Router
+**Monday:** Python OOP
 
-- [ ] Install React Router
-- [ ] Create navigation
-- [ ] Add multiple pages
+- [ ] Classes and objects
+- [ ] Inheritance and methods
+- [ ] Build a data model class
 - [ ] Read Phoenix Project Ch 9-10
 
-**Tuesday:** FastAPI Basics
+**Tuesday:** FastAPI Patterns
 
-- [ ] Create FastAPI project
-- [ ] Build first endpoint
-- [ ] Test with Swagger UI
+- [ ] Pydantic models for validation
+- [ ] Dependency injection
+- [ ] Path/Query parameters
 - [ ] Python Crash Course Ch 5
 
 **Wednesday:** Database Connection
@@ -173,30 +174,30 @@
 - [ ] Start Clean Code Ch 1
 - [ ] Python Crash Course Ch 7
 
-**Friday:** Frontend + Backend
+**Friday:** API Testing + Integration
 
-- [ ] Connect React to FastAPI
-- [ ] Fetch data from API
-- [ ] Display in components
+- [ ] Write pytest tests for all endpoints
+- [ ] Test with httpx AsyncClient
+- [ ] Error handling and validation
 - [ ] Clean Code Ch 2
 
 **Saturday:** Build Day (4-6 hours)
 
-- [ ] Complete full-stack Task Manager
-- [ ] Error handling
-- [ ] Loading states
+- [ ] Complete Task Manager API v2
+- [ ] Error handling + HTTP status codes
+- [ ] Input validation with Pydantic
 - [ ] Python Crash Course Ch 8
 
 **Sunday:** Deploy & Review (2-3 hours)
 
-- [ ] Deploy backend to Azure App Service
-- [ ] Update frontend to use deployed API
+- [ ] Deploy API to Azure App Service
+- [ ] Test deployed endpoints
 - [ ] Write Week 2 review
 - [ ] Finish Phoenix Project
 
 ### Projects
 
-- **Task Manager v2:** Full-stack with React + FastAPI + Azure SQL
+- **Task Manager v2:** FastAPI + Azure SQL with full CRUD and tests
 
 ### Books
 
@@ -206,7 +207,7 @@
 
 ### Deliverables
 
-- [ ] Full-stack app deployed
+- [ ] API deployed to Azure
 - [ ] API documentation (Swagger)
 - [ ] Database schema documented
 
@@ -239,14 +240,14 @@
 
 - [ ] Write Dockerfile for backend
 - [ ] Build and run container
-- [ ] Learning React Ch 1-2
+- [ ] Python for DevOps Ch 1-2
 
 **Wednesday:** Docker Compose
 
 - [ ] Create docker-compose.yml
 - [ ] Run multi-container app
 - [ ] Push to Azure Container Registry
-- [ ] Learning React Ch 3-4
+- [ ] Python for DevOps Ch 3
 
 **Thursday:** GitHub Actions Intro
 
@@ -259,14 +260,14 @@
 - [ ] Build stage
 - [ ] Test stage
 - [ ] Deploy stage
-- [ ] Learning React Ch 5-6
+- [ ] Python for DevOps Ch 4-5
 
 **Saturday:** Project 1 Start (4-6 hours)
 
 - [ ] Set up IT Asset Management repo
 - [ ] Design database schema
-- [ ] Create initial components
-- [ ] Learning React Ch 7-8
+- [ ] Create initial API endpoints
+- [ ] Python for DevOps Ch 6-7
 
 **Sunday:** Review & Plan (2-3 hours)
 
@@ -281,7 +282,7 @@
 ### Books
 
 - Clean Code: Chapters 3-4 (~50 pages)
-- Learning React: Chapters 1-8 (~150 pages)
+- Python for DevOps: Chapters 1-7 (~150 pages)
 
 ### Deliverables
 
@@ -324,20 +325,20 @@
 
 - [ ] Backend unit tests
 - [ ] API integration tests
-- [ ] Learning React Ch 9-10
+- [ ] Python for DevOps Ch 8-9
 
 **Thursday:** CI/CD Enhancement
 
 - [ ] Add test stage to pipeline
 - [ ] Configure staging slot
-- [ ] Learning React Ch 11-12
+- [ ] Python for DevOps Ch 10-11
 
 **Friday:** Polish
 
 - [ ] Error handling
 - [ ] Loading states
 - [ ] Responsive design
-- [ ] Complete Learning React
+- [ ] Complete Python for DevOps
 
 **Saturday:** Final Touches (4-6 hours)
 
@@ -360,7 +361,7 @@
 ### Books
 
 - Clean Code: Chapters 5-6 (~50 pages)
-- Learning React: Complete (~100 pages remaining)
+- Python for DevOps: Complete (~100 pages remaining)
 
 ### Deliverables
 
@@ -373,49 +374,49 @@
 
 ## Week 5
 
-**Focus:** State Management + Terraform + Project 2 Start
+**Focus:** Terraform + DevOps Handbook + Project 2 Start
 **Hours Target:** 20 hours
 **Theme:** "Scale it up"
 
 ### Goals
 
-- [ ] React Query or Context mastered
-- [ ] Terraform basics learned
+- [ ] Terraform basics mastered
+- [ ] Infrastructure as Code working
 - [ ] Project 2 infrastructure defined
 - [ ] 15+ commits
 
 ### Daily Breakdown
 
-**Monday:** React Query Setup
-
-- [ ] Install React Query
-- [ ] Convert existing fetches
-- [ ] DevOps Handbook Part I Ch 1-2
-
-**Tuesday:** Advanced Patterns
-
-- [ ] Mutations
-- [ ] Caching
-- [ ] Optimistic updates
-- [ ] DevOps Handbook Part I Ch 3-4
-
-**Wednesday:** Terraform Basics
+**Monday:** Terraform Basics
 
 - [ ] Install Terraform
-- [ ] First configuration
+- [ ] First configuration file
 - [ ] Create resource group
-- [ ] SQL in 10 Minutes lessons 1-5
+- [ ] DevOps Handbook Part I Ch 1-2
 
-**Thursday:** Terraform Azure
+**Tuesday:** Terraform Azure Resources
 
 - [ ] App Service with Terraform
 - [ ] Database with Terraform
+- [ ] Variables and outputs
+- [ ] DevOps Handbook Part I Ch 3-4
+
+**Wednesday:** Terraform Modules
+
+- [ ] Create reusable modules
+- [ ] Remote state in Azure Storage
+- [ ] SQL in 10 Minutes lessons 1-5
+
+**Thursday:** Terraform State & Workspaces
+
+- [ ] State locking
+- [ ] Workspaces for environments
 - [ ] SQL in 10 Minutes lessons 6-10
 
-**Friday:** State Management
+**Friday:** CI/CD with Terraform
 
-- [ ] Remote state in Azure
-- [ ] State locking
+- [ ] Terraform in GitHub Actions
+- [ ] Plan and apply stages
 - [ ] SQL in 10 Minutes lessons 11-15
 
 **Saturday:** Project 2 Start (4-6 hours)
@@ -547,9 +548,9 @@
 
 **Tuesday:** Portfolio Build
 
-- [ ] Create React project
-- [ ] Build hero section
-- [ ] Build about section
+- [ ] Create FastAPI backend for portfolio
+- [ ] Build with HTML/CSS/Jinja2 templates
+- [ ] Hero and about sections
 - [ ] Docker Deep Dive Ch 1-3
 
 **Wednesday:** Projects Section
@@ -1147,22 +1148,22 @@ Notes: Why this rating?
 
 ## 📊 Progress Summary
 
-| Weeks  | Focus                        | Hours | Commits | Status |
-| ------ | ---------------------------- | ----- | ------- | ------ |
-| 1-2    | React + SQL + Git            | 20    | 20+     | ⬜     |
-| 3-4    | Advanced SQL + FastAPI       | 20    | 15+     | ⬜     |
-| 5-6    | Docker + CI/CD               | 20    | 15+     | ⬜     |
-| 7-8    | **Project 1 Complete**       | 20    | 20+     | ⬜     |
-| 9-10   | State Management + Terraform | 20    | 15+     | ⬜     |
-| 11-12  | **Kubernetes + Project 2**   | 20    | 20+     | ⬜     |
-| 13-14  | **Portfolio Website**        | 20    | 15+     | ⬜     |
-| 15-16  | Monitoring + Security        | 20    | 15+     | ⬜     |
-| 17-18  | AZ-204 Intensive             | 20    | 10+     | ⬜     |
-| 19-20  | AZ-204 Deep Dive             | 20    | 10+     | ⬜     |
-| 21-22  | **AZ-204 EXAM**              | 15    | 5+      | ⬜     |
-| 23-24  | Job Search Start             | 20    | 5+      | ⬜     |
-| 25-26  | Active Job Search            | 20    | 5+      | ⬜     |
-| 27-28  | **Final Push**               | 20    | 5+      | ⬜     |
+| Weeks | Focus                        | Hours | Commits | Status |
+| ----- | ---------------------------- | ----- | ------- | ------ |
+| 1-2   | React + SQL + Git            | 20    | 20+     | ⬜     |
+| 3-4   | Advanced SQL + FastAPI       | 20    | 15+     | ⬜     |
+| 5-6   | Docker + CI/CD               | 20    | 15+     | ⬜     |
+| 7-8   | **Project 1 Complete**       | 20    | 20+     | ⬜     |
+| 9-10  | State Management + Terraform | 20    | 15+     | ⬜     |
+| 11-12 | **Kubernetes + Project 2**   | 20    | 20+     | ⬜     |
+| 13-14 | **Portfolio Website**        | 20    | 15+     | ⬜     |
+| 15-16 | Monitoring + Security        | 20    | 15+     | ⬜     |
+| 17-18 | AZ-204 Intensive             | 20    | 10+     | ⬜     |
+| 19-20 | AZ-204 Deep Dive             | 20    | 10+     | ⬜     |
+| 21-22 | **AZ-204 EXAM**              | 15    | 5+      | ⬜     |
+| 23-24 | Job Search Start             | 20    | 5+      | ⬜     |
+| 25-26 | Active Job Search            | 20    | 5+      | ⬜     |
+| 27-28 | **Final Push**               | 20    | 5+      | ⬜     |
 
 **Legend:** ⬜ Not Started | 🟨 In Progress | ✅ Complete
 

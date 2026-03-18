@@ -1,109 +1,128 @@
 # Week 1: Complete Day-by-Day Guide
 
+> Updated 2026-03-17: Rewritten for Python-first strategy. React deferred to Weeks 17-20.
+
 ## 🎯 Week 1 Overview
 
-**Goal:** Build and deploy your first full-stack application (React + FastAPI + SQL + Azure)
+**Goal:** Build Python fundamentals, set up dev environment, and deploy your first FastAPI backend
 
 **Time Commitment:** 2-3 hours/day + 8-10 hours weekend
 **Total:** ~20 hours
 
 **Deliverables:**
-- ✅ Task Manager app deployed to Azure
+
+- ✅ Python fundamentals solid (variables, lists, functions, dictionaries)
+- ✅ FastAPI Task Manager API deployed to Azure
 - ✅ GitHub repo with 20+ commits
-- ✅ React, SQL, and Git basics mastered
+- ✅ SQL basics mastered (SQLBolt Lessons 1-12)
 - ✅ 2 books started
 
 ---
 
-## 📅 MONDAY - Day 1: Setup & React Basics
+## 📅 MONDAY - Day 1: Setup & Python Basics
 
 ### Morning (1 hour) - 6:00-7:00 AM
+
 **Reading: 30 minutes**
+
 - Start "The Phoenix Project" - Chapters 1-2
 - This is a novel, so it's an easy, engaging read
 - Take mental notes on IT challenges described
 
-**React Setup: 30 minutes**
-- Install Node.js from nodejs.org (if not installed)
-- Verify: `node --version` (should be v20.x or later)
+**Python Setup: 30 minutes**
+
+- Verify Python: `python3 --version` (should be 3.11+)
 - Install VS Code (if not installed)
 - Install VS Code extensions:
-  - ES7+ React/Redux snippets
+  - Python (Microsoft)
+  - Pylance
+  - Python Debugger
   - Prettier - Code formatter
-  - ESLint
 
 ### Evening (1.5 hours) - 7:00-8:30 PM
-**React Quick Start: 90 minutes**
 
-1. **Create your first React app (10 minutes)**
+**Python Quick Start: 90 minutes**
+
+1. **Create your first Python project (10 minutes)**
+
 ```bash
 # Open terminal
-cd ~/projects
-npm create vite@latest week1-react-practice -- --template react
-cd week1-react-practice
-npm install
-npm run dev
+mkdir -p ~/projects/week1-python-practice
+cd ~/projects/week1-python-practice
+python3 -m venv venv
+source venv/bin/activate  # Mac/Linux
+# venv\Scripts\activate   # Windows
 ```
-- Open browser to http://localhost:5173
-- You should see the Vite + React page!
 
-2. **Follow React.dev Quick Start (60 minutes)**
-- Go to react.dev/learn
-- Complete "Quick Start" section
-- Focus on:
-  - Creating components
-  - Writing JSX
-  - Adding styles
-  - Displaying data
-  - Conditional rendering
-  - Rendering lists
+2. **Python Crash Course Ch 1-2 follow-along (60 minutes)**
+
+Create `hello.py`:
+
+```python
+# Variables and data types
+name = "Roosevelt"
+age = 30
+learning = True
+
+print(f"Hello! My name is {name}.")
+print(f"I'm learning Python: {learning}")
+
+# Basic math
+hours_per_day = 3
+days_per_week = 7
+total_hours = hours_per_day * days_per_week
+print(f"Weekly study hours: {total_hours}")
+
+# Strings
+message = "  Hello, Python World!  "
+print(message.strip())
+print(message.upper())
+print(message.lower())
+print(message.title())
+```
 
 3. **Practice Exercise (20 minutes)**
-Replace App.jsx with this:
-```jsx
-function App() {
-  const skills = ["Python", "React", "SQL", "Azure", "DevOps"];
-  
-  return (
-    <div style={{ padding: '20px', fontFamily: 'Arial' }}>
-      <h1>My Tech Stack Learning Journey</h1>
-      <p>Week 1: Building foundations</p>
-      <h2>Skills I'm Learning:</h2>
-      <ul>
-        {skills.map((skill, index) => (
-          <li key={index} style={{ margin: '10px 0' }}>
-            {skill}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+   Create `skills_tracker.py`:
 
-export default App;
+```python
+skills = ["Python", "SQL", "FastAPI", "Azure", "DevOps"]
+
+print("My Tech Stack Learning Journey")
+print("=" * 40)
+print(f"Week 1: Building foundations\n")
+print("Skills I'm Learning:")
+for i, skill in enumerate(skills, 1):
+    print(f"  {i}. {skill}")
+print(f"\nTotal skills to master: {len(skills)}")
 ```
 
-Save and watch it update in browser!
+Run it: `python3 skills_tracker.py`
 
 ### Day 1 Checklist
-- [ ] Node.js installed
-- [ ] First React app running
-- [ ] Understand JSX basics
-- [ ] Created first component
+
+- [ ] Python 3.11+ verified
+- [ ] VS Code extensions installed
+- [ ] Virtual environment created
+- [ ] First Python scripts running
+- [ ] Understand variables, strings, f-strings
 - [ ] Read Phoenix Project Ch 1-2
 
 ---
 
-## 📅 TUESDAY - Day 2: Git & SQL Basics
+## 📅 TUESDAY - Day 2: Git & Python Fundamentals
 
 ### Morning (1 hour) - 6:00-7:00 AM
+
 **Reading: 30 minutes**
+
 - Continue "The Phoenix Project" - Chapter 3
-- Start "Python Crash Course" - Chapter 1 (if book arrived)
+- Start "Python Crash Course" - Chapter 3 (Lists)
 
 **Git Setup: 30 minutes**
+
 1. Install Git: git-scm.com/downloads
 2. Configure Git:
+
 ```bash
 git config --global user.name "Your Name"
 git config --global user.email "your.email@example.com"
@@ -113,33 +132,168 @@ git config --global user.email "your.email@example.com"
    - Go to github.com
    - Sign up with personal email
 
-4. Initialize your React practice project:
+4. Initialize your Python practice project:
+
 ```bash
-cd ~/projects/week1-react-practice
+cd ~/projects/week1-python-practice
 git init
+echo "venv/" >> .gitignore
+echo "__pycache__/" >> .gitignore
 git add .
-git commit -m "Initial commit: First React app"
+git commit -m "Initial commit: Python practice project"
 ```
 
 5. Create GitHub repo:
-   - GitHub → New Repository → "week1-react-practice"
+   - GitHub → New Repository → "week1-python-practice"
    - Follow instructions to push existing repo
 
 ```bash
-git remote add origin https://github.com/YOUR_USERNAME/week1-react-practice.git
+git remote add origin https://github.com/YOUR_USERNAME/week1-python-practice.git
 git branch -M main
 git push -u origin main
 ```
 
 ### Evening (1.5 hours) - 7:00-8:30 PM
-**SQL Basics: 90 minutes**
 
-1. **Setup (15 minutes)**
-- Go to sqliteonline.com (no installation needed)
-- OR install PostgreSQL locally (postgresql.org)
+**Python Lists & Loops: 90 minutes**
 
-2. **SQLBolt Tutorial (60 minutes)**
-- Go to sqlbolt.com
+1. **Lists Practice (45 minutes)**
+   Create `lists_practice.py`:
+
+```python
+# Lists — Python Crash Course Ch 3
+technologies = ["Python", "FastAPI", "SQL", "Docker", "Azure"]
+
+# Access elements
+print(f"First skill: {technologies[0]}")
+print(f"Last skill: {technologies[-1]}")
+
+# Modify lists
+technologies.append("Kubernetes")
+technologies.insert(2, "Git")
+removed = technologies.pop()
+print(f"Removed: {removed}")
+
+# List operations
+print(f"\nAll skills ({len(technologies)} total):")
+for tech in technologies:
+    print(f"  → {tech}")
+
+# Sorting
+technologies.sort()
+print(f"\nSorted: {technologies}")
+
+# List comprehensions
+upper_skills = [t.upper() for t in technologies]
+print(f"Uppercase: {upper_skills}")
+```
+
+2. **Loops & Ranges (30 minutes)**
+   Create `loops_practice.py`:
+
+```python
+# For loops with range
+days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+topics = ["Setup", "Git & Lists", "Functions & SQL", "Dictionaries", "FastAPI"]
+
+print("Week 1 Study Plan:")
+for day, topic in zip(days, topics):
+    print(f"  {day}: {topic}")
+
+# Number patterns
+print("\nStudy hours this week:")
+for day in range(1, 8):
+    hours = 3 if day < 6 else 6
+    bar = "█" * hours
+    print(f"  Day {day}: {bar} ({hours}h)")
+```
+
+3. **Commit your work:**
+
+```bash
+git add .
+git commit -m "Add lists and loops practice"
+git push
+```
+
+### Day 2 Checklist
+
+- [ ] Git installed and configured
+- [ ] GitHub account created
+- [ ] First repo pushed to GitHub
+- [ ] Understand Python lists (append, insert, pop, sort)
+- [ ] Comfortable with for loops and range
+- [ ] List comprehensions practiced
+
+---
+
+## 📅 WEDNESDAY - Day 3: Python Functions & SQL Basics
+
+### Morning (1 hour) - 6:00-7:00 AM
+**Reading: 60 minutes**
+- "Python Crash Course" Chapter 5 (If Statements)
+- OR "The Phoenix Project" Chapter 4
+
+### Evening (2 hours) - 7:00-9:00 PM
+**Python Functions: 60 minutes**
+
+Create `functions_practice.py`:
+```python
+# Functions — Python Crash Course Ch 8
+
+def greet(name, role="learner"):
+    """Generate a greeting message."""
+    return f"Hello, {name}! You're a {role}."
+
+print(greet("Roosevelt"))
+print(greet("Roosevelt", "Python developer"))
+
+# Functions with lists
+def show_skills(skills):
+    """Display skills with numbering."""
+    print(f"\n{'=' * 30}")
+    print(f"Skills Inventory ({len(skills)} total)")
+    print(f"{'=' * 30}")
+    for i, skill in enumerate(skills, 1):
+        print(f"  {i}. {skill}")
+
+my_skills = ["Python", "SQL", "Git", "FastAPI"]
+show_skills(my_skills)
+
+# Return values
+def calculate_progress(completed, total):
+    """Calculate and return progress percentage."""
+    if total == 0:
+        return 0
+    percentage = (completed / total) * 100
+    return round(percentage, 1)
+
+progress = calculate_progress(3, 10)
+print(f"\nProgress: {progress}%")
+
+# *args for flexible functions
+def log_activities(*activities):
+    """Log multiple activities."""
+    print(f"\nToday's activities ({len(activities)}):")
+    for activity in activities:
+        print(f"  ✓ {activity}")
+
+log_activities("Read Python Crash Course", "Practice SQL", "Git commit")
+```
+
+Commit:
+```bash
+git add .
+git commit -m "Add functions practice"
+git push
+```
+
+**SQL Basics: 60 minutes**
+
+1. **Setup (10 minutes)**
+- Go to sqlbolt.com (no installation needed)
+
+2. **SQLBolt Tutorial (40 minutes)**
 - Complete Lessons 1-6:
   - Lesson 1: SELECT queries 101
   - Lesson 2: Queries with constraints
@@ -148,167 +302,10 @@ git push -u origin main
   - Lesson 5: Multi-table queries with JOINs
   - Lesson 6: Outer JOINs
 
-3. **Practice Exercise (15 minutes)**
-Create your first database:
+3. **Practice Exercise (10 minutes)**
 
 ```sql
--- Create users table
-CREATE TABLE users (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    email TEXT UNIQUE,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
-);
-
--- Insert data
-INSERT INTO users (id, name, email) VALUES
-    (1, 'Alice Johnson', 'alice@email.com'),
-    (2, 'Bob Smith', 'bob@email.com'),
-    (3, 'Carol White', 'carol@email.com');
-
--- Query data
-SELECT * FROM users;
-SELECT * FROM users WHERE name LIKE 'A%';
-SELECT COUNT(*) FROM users;
-```
-
-### Day 2 Checklist
-- [ ] Git installed and configured
-- [ ] GitHub account created
-- [ ] First repo pushed to GitHub
-- [ ] SQLBolt Lessons 1-6 complete
-- [ ] Created first database table
-- [ ] Wrote 10+ SQL queries
-
----
-
-## 📅 WEDNESDAY - Day 3: React State & More SQL
-
-### Morning (1 hour) - 6:00-7:00 AM
-**Reading: 60 minutes**
-- "Python Crash Course" Chapter 2 (Variables and data types)
-- OR "The Phoenix Project" Chapter 4
-
-### Evening (2 hours) - 7:00-9:00 PM
-**React State with useState: 60 minutes**
-
-1. Create new component (src/Counter.jsx):
-```jsx
-import { useState } from 'react';
-
-function Counter() {
-  const [count, setCount] = useState(0);
-  
-  return (
-    <div style={{ textAlign: 'center', padding: '20px' }}>
-      <h2>Counter: {count}</h2>
-      <button onClick={() => setCount(count + 1)}>
-        Increment
-      </button>
-      <button onClick={() => setCount(count - 1)}>
-        Decrement
-      </button>
-      <button onClick={() => setCount(0)}>
-        Reset
-      </button>
-    </div>
-  );
-}
-
-export default Counter;
-```
-
-2. Build a To-Do List (src/TodoList.jsx):
-```jsx
-import { useState } from 'react';
-
-function TodoList() {
-  const [todos, setTodos] = useState([]);
-  const [input, setInput] = useState('');
-  
-  const addTodo = () => {
-    if (input.trim()) {
-      setTodos([...todos, { id: Date.now(), text: input, done: false }]);
-      setInput('');
-    }
-  };
-  
-  const toggleTodo = (id) => {
-    setTodos(todos.map(todo => 
-      todo.id === id ? { ...todo, done: !todo.done } : todo
-    ));
-  };
-  
-  const deleteTodo = (id) => {
-    setTodos(todos.filter(todo => todo.id !== id));
-  };
-  
-  return (
-    <div style={{ maxWidth: '500px', margin: '20px auto', padding: '20px' }}>
-      <h2>My To-Do List</h2>
-      <div>
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && addTodo()}
-          placeholder="Add a task..."
-          style={{ padding: '8px', width: '70%' }}
-        />
-        <button onClick={addTodo} style={{ padding: '8px', marginLeft: '10px' }}>
-          Add
-        </button>
-      </div>
-      
-      <ul style={{ listStyle: 'none', padding: 0, marginTop: '20px' }}>
-        {todos.map(todo => (
-          <li key={todo.id} style={{ 
-            padding: '10px', 
-            margin: '10px 0', 
-            border: '1px solid #ccc',
-            borderRadius: '4px'
-          }}>
-            <span
-              onClick={() => toggleTodo(todo.id)}
-              style={{
-                textDecoration: todo.done ? 'line-through' : 'none',
-                cursor: 'pointer',
-                flex: 1
-              }}
-            >
-              {todo.text}
-            </span>
-            <button 
-              onClick={() => deleteTodo(todo.id)}
-              style={{ float: 'right' }}
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default TodoList;
-```
-
-3. Update App.jsx to show both components
-
-4. Commit your work:
-```bash
-git add .
-git commit -m "Add Counter and TodoList components with useState"
-git push
-```
-
-**SQL Practice: 60 minutes**
-- Complete SQLBolt Lessons 7-12
-- Practice JOINs, Aggregations, GROUP BY
-- Create a tasks table and practice queries:
-
-```sql
+-- Create tasks table
 CREATE TABLE tasks (
     id INTEGER PRIMARY KEY,
     title TEXT NOT NULL,
@@ -318,142 +315,160 @@ CREATE TABLE tasks (
 );
 
 INSERT INTO tasks (id, title, description) VALUES
-    (1, 'Learn React', 'Complete React tutorial', FALSE),
+    (1, 'Learn Python', 'Complete Python Crash Course Part I', FALSE),
     (2, 'Practice SQL', 'Finish SQLBolt lessons', FALSE),
     (3, 'Setup Git', 'Push code to GitHub', TRUE);
 
--- Practice queries
+SELECT * FROM tasks;
 SELECT * FROM tasks WHERE completed = FALSE;
 SELECT COUNT(*) as total_tasks FROM tasks;
-SELECT completed, COUNT(*) FROM tasks GROUP BY completed;
 ```
 
 ### Day 3 Checklist
-- [ ] Understand useState hook
-- [ ] Built Counter component
-- [ ] Built TodoList component
-- [ ] SQLBolt Lessons 7-12 complete
-- [ ] Created tasks table
+- [ ] Python functions mastered (def, return, *args)
+- [ ] SQLBolt Lessons 1-6 complete
+- [ ] Created tasks table in SQL
 - [ ] Git commit and push
 
 ---
 
-## 📅 THURSDAY - Day 4: useEffect & API Calls
+## 📅 THURSDAY - Day 4: Dictionaries & More SQL
 
 ### Morning (1 hour) - 6:00-7:00 AM
+
 **Reading: 60 minutes**
-- "Python Crash Course" Chapter 3 (Lists)
+
+- "Python Crash Course" Chapter 6 (Dictionaries)
 - OR continue "The Phoenix Project"
 
 ### Evening (2 hours) - 7:00-9:00 PM
-**React useEffect and API Calls: 120 minutes**
 
-1. Learn useEffect basics (30 minutes)
-- Read: react.dev/reference/react/useEffect
-- Understand component lifecycle
+**Python Dictionaries & File I/O: 60 minutes**
 
-2. Build User List component (60 minutes):
-```jsx
-// src/UserList.jsx
-import { useState, useEffect } from 'react';
+Create `dictionaries_practice.py`:
 
-function UserList() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
-  useEffect(() => {
-    // Fetch users from JSONPlaceholder API
-    fetch('https://jsonplaceholder.typicode.com/users')
-      .then(response => response.json())
-      .then(data => {
-        setUsers(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []); // Empty array = run once on mount
-  
-  if (loading) return <div>Loading users...</div>;
-  if (error) return <div>Error: {error}</div>;
-  
-  return (
-    <div style={{ padding: '20px' }}>
-      <h2>User Directory</h2>
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '20px' 
-      }}>
-        {users.map(user => (
-          <div key={user.id} style={{ 
-            border: '1px solid #ddd', 
-            padding: '15px',
-            borderRadius: '8px'
-          }}>
-            <h3>{user.name}</h3>
-            <p><strong>Email:</strong> {user.email}</p>
-            <p><strong>Company:</strong> {user.company.name}</p>
-            <p><strong>City:</strong> {user.address.city}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+```python
+# Dictionaries — Python Crash Course Ch 6
+
+# Task as a dictionary
+task = {
+    "id": 1,
+    "title": "Learn Python",
+    "description": "Complete Python Crash Course Part I",
+    "completed": False,
+    "priority": "high"
 }
 
-export default UserList;
+print(f"Task: {task['title']}")
+print(f"Status: {'Done' if task['completed'] else 'In Progress'}")
+print(f"Priority: {task['priority']}")
+
+# List of dictionaries (like a database!)
+tasks = [
+    {"id": 1, "title": "Learn Python", "completed": False},
+    {"id": 2, "title": "Practice SQL", "completed": False},
+    {"id": 3, "title": "Setup Git", "completed": True},
+    {"id": 4, "title": "Build FastAPI app", "completed": False},
+    {"id": 5, "title": "Deploy to Azure", "completed": False},
+]
+
+# Filter and display
+print("\n📋 Task Manager")
+print("=" * 40)
+for t in tasks:
+    status = "✅" if t["completed"] else "⬜"
+    print(f"  {status} {t['title']}")
+
+completed = [t for t in tasks if t["completed"]]
+pending = [t for t in tasks if not t["completed"]]
+print(f"\nCompleted: {len(completed)} / {len(tasks)}")
+print(f"Remaining: {len(pending)}")
 ```
 
-3. Add search functionality (30 minutes):
-```jsx
-// Add to UserList component
-const [searchTerm, setSearchTerm] = useState('');
+Create `file_io_practice.py`:
 
-const filteredUsers = users.filter(user =>
-  user.name.toLowerCase().includes(searchTerm.toLowerCase())
-);
+```python
+import json
 
-// Add this above the user cards:
-<input
-  type="text"
-  placeholder="Search by name..."
-  value={searchTerm}
-  onChange={(e) => setSearchTerm(e.target.value)}
-  style={{ padding: '10px', width: '100%', marginBottom: '20px' }}
-/>
+# Save tasks to JSON file
+tasks = [
+    {"id": 1, "title": "Learn Python", "completed": False},
+    {"id": 2, "title": "Practice SQL", "completed": True},
+    {"id": 3, "title": "Build FastAPI app", "completed": False},
+]
 
-// Use filteredUsers instead of users in map
+# Write to file
+with open("tasks.json", "w") as f:
+    json.dump(tasks, f, indent=2)
+print("Tasks saved to tasks.json")
+
+# Read from file
+with open("tasks.json", "r") as f:
+    loaded_tasks = json.load(f)
+print(f"Loaded {len(loaded_tasks)} tasks from file")
+
+for task in loaded_tasks:
+    print(f"  - {task['title']}: {'done' if task['completed'] else 'pending'}")
 ```
 
-4. Commit:
+Commit:
+
 ```bash
 git add .
-git commit -m "Add UserList with API fetch and search"
+git commit -m "Add dictionaries and file I/O practice"
 git push
 ```
 
+**SQL Practice: 60 minutes**
+
+- Complete SQLBolt Lessons 7-12
+- Practice JOINs, Aggregations, GROUP BY
+
+```sql
+-- Advanced queries
+SELECT completed, COUNT(*) as count FROM tasks GROUP BY completed;
+
+-- Create users table for JOIN practice
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE
+);
+
+INSERT INTO users (id, name, email) VALUES
+    (1, 'Alice', 'alice@email.com'),
+    (2, 'Bob', 'bob@email.com');
+
+-- JOIN example
+SELECT u.name, COUNT(t.id) as task_count
+FROM users u
+LEFT JOIN tasks t ON t.id <= 2
+GROUP BY u.name;
+```
+
 ### Day 4 Checklist
-- [ ] Understand useEffect hook
-- [ ] Fetched data from API
-- [ ] Handled loading states
-- [ ] Implemented search filter
+
+- [ ] Python dictionaries mastered
+- [ ] JSON file I/O working
+- [ ] SQLBolt Lessons 7-12 complete
+- [ ] JOINs and GROUP BY practiced
 - [ ] Git commit and push
 
 ---
 
-## 📅 FRIDAY - Day 5: Azure Setup & FastAPI Intro
+## 📅 FRIDAY - Day 5: FastAPI Intro & Azure Setup
 
 ### Morning (1 hour) - 6:00-7:00 AM
+
 **Reading: 60 minutes**
-- "Python Crash Course" Chapter 4 (Working with lists)
-- Take notes on list operations
+
+- "Python Crash Course" Chapter 7 (User Input and While Loops)
+- Take notes on input handling patterns
 
 ### Evening (2 hours) - 7:00-9:00 PM
 
 **Azure Setup: 30 minutes**
+
 1. Go to portal.azure.com
 2. Sign up for free account ($200 credit)
 3. Complete verification
@@ -464,36 +479,25 @@ git push
 
 **FastAPI Introduction: 90 minutes**
 
-1. Install Python and FastAPI (15 minutes):
+1. Install FastAPI (15 minutes):
+
 ```bash
-# Verify Python installation
-python --version  # Should be 3.11+
-
-# Create project directory
-mkdir week1-backend
-cd week1-backend
-
-# Create virtual environment
-python -m venv venv
-
-# Activate (Windows)
-venv\Scripts\activate
-# OR Mac/Linux
+mkdir ~/projects/week1-task-api
+cd ~/projects/week1-task-api
+python3 -m venv venv
 source venv/bin/activate
-
-# Install FastAPI
 pip install fastapi uvicorn[standard]
 ```
 
 2. Create your first API (30 minutes):
+
 ```python
 # main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+app = FastAPI(title="Task Manager API", version="0.1.0")
 
-# Enable CORS for React frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -502,101 +506,140 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# In-memory tasks list
+tasks = [
+    {"id": 1, "title": "Learn Python", "completed": False},
+    {"id": 2, "title": "Learn SQL", "completed": False},
+    {"id": 3, "title": "Setup Azure", "completed": True},
+]
+
 @app.get("/")
 def read_root():
-    return {"message": "Hello from FastAPI!"}
+    return {"message": "Hello from FastAPI Task Manager!"}
 
 @app.get("/tasks")
 def get_tasks():
-    return [
-        {"id": 1, "title": "Learn React", "completed": False},
-        {"id": 2, "title": "Learn SQL", "completed": False},
-        {"id": 3, "title": "Setup Azure", "completed": True}
-    ]
+    return tasks
 
 @app.get("/tasks/{task_id}")
 def get_task(task_id: int):
-    return {"id": task_id, "title": "Sample task", "completed": False}
+    for task in tasks:
+        if task["id"] == task_id:
+            return task
+    return {"error": "Task not found"}
 ```
 
 3. Run the API (5 minutes):
+
 ```bash
 uvicorn main:app --reload
 ```
+
 - Open browser to http://localhost:8000
 - Go to http://localhost:8000/docs (Swagger UI)
 - Test your endpoints!
 
-4. Connect React to API (40 minutes):
+4. Add POST and DELETE endpoints (30 minutes):
 
-Update your React TodoList to fetch from your API:
-```jsx
-// Update TodoList.jsx
-useEffect(() => {
-  fetch('http://localhost:8000/tasks')
-    .then(response => response.json())
-    .then(data => setTodos(data))
-    .catch(err => console.error('Error:', err));
-}, []);
+```python
+from pydantic import BaseModel
+from typing import Optional
+
+class TaskCreate(BaseModel):
+    title: str
+    description: Optional[str] = ""
+    completed: bool = False
+
+@app.post("/tasks")
+def create_task(task: TaskCreate):
+    new_id = max(t["id"] for t in tasks) + 1 if tasks else 1
+    new_task = {"id": new_id, **task.model_dump()}
+    tasks.append(new_task)
+    return new_task
+
+@app.delete("/tasks/{task_id}")
+def delete_task(task_id: int):
+    for i, task in enumerate(tasks):
+        if task["id"] == task_id:
+            tasks.pop(i)
+            return {"message": "Task deleted"}
+    return {"error": "Task not found"}
 ```
 
+Test all endpoints in Swagger UI!
+
 5. Git setup for backend:
+
 ```bash
-# In week1-backend directory
 git init
 echo "venv/" >> .gitignore
 echo "__pycache__/" >> .gitignore
 git add .
-git commit -m "Initial FastAPI setup"
-
-# Create GitHub repo and push
+git commit -m "feat: initial FastAPI task manager API"
 ```
 
 ### Day 5 Checklist
+
 - [ ] Azure account created
 - [ ] FastAPI installed
-- [ ] First API created
+- [ ] First API created with GET, POST, DELETE
 - [ ] Swagger docs working
-- [ ] React connected to API
+- [ ] Pydantic models used
 - [ ] Backend code in Git
 
 ---
 
-## 📅 WEEKEND - Days 6-7: Build Task Manager App
+## 📅 WEEKEND - Days 6-7: Build & Deploy Task Manager API
 
 ### Saturday (6 hours)
 
 **Morning (3 hours) - 9:00 AM - 12:00 PM**
 
-**1. Setup PostgreSQL Database (30 minutes)**
+**1. Setup SQLite Database (30 minutes)**
+
 ```bash
-# Install PostgreSQL (or use SQLite for simplicity)
-# For SQLite (simpler):
-pip install databases[sqlite]
+cd ~/projects/week1-task-api
+pip install databases[sqlite] aiosqlite
 ```
 
-**2. Create Database Schema (30 minutes)**
-```sql
--- If using SQLite, create tasks.db
-CREATE TABLE tasks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    description TEXT,
-    completed BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+**2. Create Database Schema (15 minutes)**
+Create `database.py`:
+
+```python
+import sqlite3
+
+def get_db():
+    conn = sqlite3.connect("tasks.db")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    conn = get_db()
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT DEFAULT '',
+            completed BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.commit()
+    conn.close()
 ```
 
 **3. Build Complete FastAPI Backend (2 hours)**
+Update `main.py`:
+
 ```python
-# main.py - Complete CRUD API
+# main.py - Complete CRUD API with SQLite
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import sqlite3
 from typing import Optional
+from database import get_db, init_db
 
-app = FastAPI()
+app = FastAPI(title="Task Manager API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -606,15 +649,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class Task(BaseModel):
+# Initialize database on startup
+@app.on_event("startup")
+def startup():
+    init_db()
+
+class TaskCreate(BaseModel):
     title: str
     description: Optional[str] = ""
     completed: bool = False
 
-def get_db():
-    conn = sqlite3.connect('tasks.db')
-    conn.row_factory = sqlite3.Row
-    return conn
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    completed: Optional[bool] = None
+
+@app.get("/")
+def read_root():
+    return {"message": "Task Manager API v1.0", "docs": "/docs"}
 
 @app.get("/tasks")
 def get_tasks():
@@ -625,8 +677,19 @@ def get_tasks():
     conn.close()
     return tasks
 
-@app.post("/tasks")
-def create_task(task: Task):
+@app.get("/tasks/{task_id}")
+def get_task(task_id: int):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    task = cur.fetchone()
+    conn.close()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return dict(task)
+
+@app.post("/tasks", status_code=201)
+def create_task(task: TaskCreate):
     conn = get_db()
     cur = conn.cursor()
     cur.execute(
@@ -636,346 +699,192 @@ def create_task(task: Task):
     task_id = cur.lastrowid
     conn.commit()
     conn.close()
-    return {"id": task_id, **task.dict()}
+    return {"id": task_id, **task.model_dump()}
 
 @app.patch("/tasks/{task_id}")
-def update_task(task_id: int, completed: bool):
+def update_task(task_id: int, task: TaskUpdate):
     conn = get_db()
     cur = conn.cursor()
-    cur.execute(
-        "UPDATE tasks SET completed = ? WHERE id = ?",
-        (completed, task_id)
-    )
+    cur.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    existing = cur.fetchone()
+    if not existing:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    updates = task.model_dump(exclude_unset=True)
+    for key, value in updates.items():
+        cur.execute(f"UPDATE tasks SET {key} = ? WHERE id = ?", (value, task_id))
     conn.commit()
     conn.close()
-    return {"id": task_id, "completed": completed}
+    return {"id": task_id, **updates}
 
 @app.delete("/tasks/{task_id}")
 def delete_task(task_id: int):
     conn = get_db()
     cur = conn.cursor()
     cur.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+    if cur.rowcount == 0:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Task not found")
     conn.commit()
     conn.close()
     return {"message": "Task deleted"}
+
+@app.get("/stats")
+def get_stats():
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) as total FROM tasks")
+    total = cur.fetchone()["total"]
+    cur.execute("SELECT COUNT(*) as done FROM tasks WHERE completed = 1")
+    done = cur.fetchone()["done"]
+    conn.close()
+    return {"total": total, "completed": done, "pending": total - done}
 ```
 
-Test all endpoints in Swagger UI!
+Test all endpoints in Swagger UI (http://localhost:8000/docs)!
 
 **Afternoon (3 hours) - 1:00 PM - 4:00 PM**
 
-**4. Build Complete React Frontend (3 hours)**
+**4. Build Python CLI Client (1 hour)**
+Create `cli.py` — a command-line interface for your task manager:
 
-Create a new React project for the task manager:
+```python
+"""CLI client for Task Manager."""
+import sys
+import json
+
+TASKS_FILE = "tasks_cli.json"
+
+def load_tasks():
+    try:
+        with open(TASKS_FILE, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+def save_tasks(tasks):
+    with open(TASKS_FILE, "w") as f:
+        json.dump(tasks, f, indent=2)
+
+def list_tasks(tasks):
+    if not tasks:
+        print("  No tasks yet. Add one with: python cli.py add 'task name'")
+        return
+    print(f"\n📋 Tasks ({len(tasks)} total)")
+    print("=" * 40)
+    for t in tasks:
+        status = "✅" if t["completed"] else "⬜"
+        print(f"  {t['id']}. {status} {t['title']}")
+    completed = sum(1 for t in tasks if t["completed"])
+    print(f"\n  Progress: {completed}/{len(tasks)} completed")
+
+def add_task(tasks, title):
+    new_id = max(t["id"] for t in tasks) + 1 if tasks else 1
+    tasks.append({"id": new_id, "title": title, "completed": False})
+    save_tasks(tasks)
+    print(f"  ✅ Added: {title}")
+
+def complete_task(tasks, task_id):
+    for t in tasks:
+        if t["id"] == task_id:
+            t["completed"] = True
+            save_tasks(tasks)
+            print(f"  ✅ Completed: {t['title']}")
+            return
+    print(f"  ❌ Task {task_id} not found")
+
+def main():
+    tasks = load_tasks()
+    if len(sys.argv) < 2:
+        list_tasks(tasks)
+        return
+
+    command = sys.argv[1]
+    if command == "list":
+        list_tasks(tasks)
+    elif command == "add" and len(sys.argv) > 2:
+        add_task(tasks, " ".join(sys.argv[2:]))
+    elif command == "done" and len(sys.argv) > 2:
+        complete_task(tasks, int(sys.argv[2]))
+    else:
+        print("Usage: python cli.py [list|add <title>|done <id>]")
+
+if __name__ == "__main__":
+    main()
+```
+
+Test it:
+
 ```bash
-npm create vite@latest task-manager-app -- --template react
-cd task-manager-app
-npm install
+python cli.py add "Learn Python basics"
+python cli.py add "Build FastAPI app"
+python cli.py add "Deploy to Azure"
+python cli.py list
+python cli.py done 1
+python cli.py list
 ```
 
-Update src/App.jsx with complete task manager:
-```jsx
-import { useState, useEffect } from 'react';
-import './App.css';
+**5. Add Tests (1 hour)**
 
-const API_URL = 'http://localhost:8000';
-
-function App() {
-  const [tasks, setTasks] = useState([]);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const fetchTasks = async () => {
-    try {
-      const response = await fetch(`${API_URL}/tasks`);
-      const data = await response.json();
-      setTasks(data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-      setLoading(false);
-    }
-  };
-
-  const addTask = async (e) => {
-    e.preventDefault();
-    if (!title.trim()) return;
-
-    try {
-      const response = await fetch(`${API_URL}/tasks`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, completed: false })
-      });
-      const newTask = await response.json();
-      setTasks([newTask, ...tasks]);
-      setTitle('');
-      setDescription('');
-    } catch (error) {
-      console.error('Error adding task:', error);
-    }
-  };
-
-  const toggleTask = async (taskId, currentStatus) => {
-    try {
-      await fetch(`${API_URL}/tasks/${taskId}?completed=${!currentStatus}`, {
-        method: 'PATCH'
-      });
-      setTasks(tasks.map(task =>
-        task.id === taskId ? { ...task, completed: !currentStatus } : task
-      ));
-    } catch (error) {
-      console.error('Error updating task:', error);
-    }
-  };
-
-  const deleteTask = async (taskId) => {
-    try {
-      await fetch(`${API_URL}/tasks/${taskId}`, { method: 'DELETE' });
-      setTasks(tasks.filter(task => task.id !== taskId));
-    } catch (error) {
-      console.error('Error deleting task:', error);
-    }
-  };
-
-  if (loading) return <div className="container">Loading...</div>;
-
-  const completedCount = tasks.filter(t => t.completed).length;
-  const totalCount = tasks.length;
-
-  return (
-    <div className="container">
-      <div className="header">
-        <h1>📋 Task Manager</h1>
-        <p className="subtitle">Week 1 Full-Stack Project</p>
-        <div className="stats">
-          <span>{completedCount} / {totalCount} completed</span>
-        </div>
-      </div>
-
-      <form onSubmit={addTask} className="add-form">
-        <input
-          type="text"
-          placeholder="Task title..."
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="input"
-          required
-        />
-        <input
-          type="text"
-          placeholder="Description (optional)..."
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="input"
-        />
-        <button type="submit" className="btn-primary">
-          Add Task
-        </button>
-      </form>
-
-      <div className="task-list">
-        {tasks.length === 0 ? (
-          <p className="empty-state">No tasks yet. Add one above!</p>
-        ) : (
-          tasks.map(task => (
-            <div key={task.id} className={`task-card ${task.completed ? 'completed' : ''}`}>
-              <div className="task-content" onClick={() => toggleTask(task.id, task.completed)}>
-                <div className="checkbox">
-                  {task.completed ? '✅' : '⬜'}
-                </div>
-                <div className="task-details">
-                  <h3>{task.title}</h3>
-                  {task.description && <p>{task.description}</p>}
-                </div>
-              </div>
-              <button
-                onClick={() => deleteTask(task.id)}
-                className="btn-delete"
-              >
-                🗑️
-              </button>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
-export default App;
+```bash
+pip install pytest httpx
 ```
 
-Add styling (src/App.css):
-```css
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+Create `test_main.py`:
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
-}
+```python
+from fastapi.testclient import TestClient
+from main import app
 
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
+client = TestClient(app)
 
-.header {
-  text-align: center;
-  color: white;
-  margin-bottom: 40px;
-}
+def test_read_root():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "message" in response.json()
 
-.header h1 {
-  font-size: 3rem;
-  margin-bottom: 10px;
-}
+def test_create_task():
+    response = client.post("/tasks", json={
+        "title": "Test task",
+        "description": "A test task"
+    })
+    assert response.status_code == 201
+    assert response.json()["title"] == "Test task"
 
-.subtitle {
-  font-size: 1.2rem;
-  opacity: 0.9;
-}
+def test_get_tasks():
+    response = client.get("/tasks")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
 
-.stats {
-  margin-top: 20px;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.add-form {
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  margin-bottom: 30px;
-}
-
-.input {
-  width: 100%;
-  padding: 12px 16px;
-  margin-bottom: 15px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.3s;
-}
-
-.input:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
-.btn-primary {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-}
-
-.task-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.task-card {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: all 0.3s;
-}
-
-.task-card:hover {
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-  transform: translateY(-2px);
-}
-
-.task-card.completed {
-  opacity: 0.7;
-}
-
-.task-content {
-  display: flex;
-  align-items: flex-start;
-  gap: 15px;
-  flex: 1;
-  cursor: pointer;
-}
-
-.checkbox {
-  font-size: 1.5rem;
-}
-
-.task-details h3 {
-  font-size: 1.2rem;
-  margin-bottom: 5px;
-  text-decoration: none;
-}
-
-.completed .task-details h3 {
-  text-decoration: line-through;
-  color: #999;
-}
-
-.task-details p {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.btn-delete {
-  padding: 8px 12px;
-  background: #ff4757;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1.2rem;
-  transition: transform 0.2s;
-}
-
-.btn-delete:hover {
-  transform: scale(1.1);
-}
-
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: white;
-  font-size: 1.2rem;
-  opacity: 0.8;
-}
+def test_get_stats():
+    response = client.get("/stats")
+    assert response.status_code == 200
+    assert "total" in response.json()
 ```
 
-Test your complete app!
+Run tests:
 
-**Commit everything:**
+```bash
+pytest test_main.py -v
+```
+
+**6. Polish & Document (1 hour)**
+
+Create `requirements.txt`:
+
+```
+fastapi
+uvicorn[standard]
+pytest
+httpx
+```
+
+Commit everything:
+
 ```bash
 git add .
-git commit -m "Complete task manager frontend"
+git commit -m "feat: complete Task Manager API with CRUD, CLI, and tests"
 git push
 ```
 
@@ -983,16 +892,10 @@ git push
 
 **Morning (2 hours) - 9:00 AM - 11:00 AM**
 
-**5. Deploy Backend to Azure (2 hours)**
+**7. Deploy Backend to Azure (2 hours)**
 
-1. Create requirements.txt:
-```
-fastapi
-uvicorn[standard]
-python-multipart
-```
+1. Create Dockerfile:
 
-2. Create Dockerfile (optional but recommended):
 ```dockerfile
 FROM python:3.11-slim
 
@@ -1006,10 +909,10 @@ COPY . .
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
-3. Deploy to Azure App Service:
+2. Deploy to Azure App Service:
+
 ```bash
-# Install Azure CLI
-# Then login
+# Login
 az login
 
 # Create resource group
@@ -1030,180 +933,59 @@ az webapp create \
   --runtime "PYTHON:3.11"
 
 # Deploy code
-cd week1-backend
-zip -r app.zip .
+zip -r app.zip . -x "venv/*" "__pycache__/*" "*.pyc" ".git/*"
 az webapp deployment source config-zip \
   --resource-group TaskManagerRG \
   --name task-manager-api-[yourname] \
   --src app.zip
 ```
 
-Your API is now live at: https://task-manager-api-[yourname].azurewebsites.net
+Your API is now live at: `https://task-manager-api-[yourname].azurewebsites.net/docs`
 
 **Afternoon (2 hours) - 1:00 PM - 3:00 PM**
 
-**6. Deploy Frontend to Azure Static Web Apps (1 hour)**
+**8. Documentation & README (1 hour)**
 
-1. Build React app:
+Create a professional README.md for your repo documenting:
+
+- Tech stack (Python, FastAPI, SQLite)
+- Features (CRUD API, Swagger docs, CLI, tests)
+- Live demo URL
+- Local development instructions
+- What you learned
+- Next steps
+
+**9. Weekly Review (1 hour)**
+
+Write `week1-review.md` covering:
+
+- Achievements (Python fundamentals, FastAPI, SQL, Git, Azure)
+- Books progress (Phoenix Project + Python Crash Course)
+- Challenges faced and how you solved them
+- Week 2 goals
+
+Commit and push final documentation:
+
 ```bash
-cd task-manager-app
-npm run build
+git add .
+git commit -m "docs: add README and week 1 review"
+git push
 ```
-
-2. Update API URL in code to production URL
-
-3. Deploy to Azure Static Web Apps:
-- Go to portal.azure.com
-- Create Static Web App
-- Connect to GitHub
-- Azure will auto-deploy!
-
-OR use Azure CLI:
-```bash
-npm install -g @azure/static-web-apps-cli
-swa deploy ./dist --env production
-```
-
-**7. Final Polish & Documentation (1 hour)**
-
-Create README.md in both repos:
-```markdown
-# Task Manager - Week 1 Full-Stack Project
-
-A full-stack task management application built with React, FastAPI, and SQL.
-
-## 🚀 Tech Stack
-
-**Frontend:** React, Vite, CSS3
-**Backend:** Python, FastAPI, SQLite
-**Deployment:** Azure App Service, Azure Static Web Apps
-
-## ✨ Features
-
-- ✅ Create, read, update, delete tasks
-- ✅ Mark tasks as complete/incomplete
-- ✅ Task descriptions
-- ✅ Real-time statistics
-- ✅ Responsive design
-- ✅ Deployed to Azure
-
-## 🔗 Live Demo
-
-- **Frontend:** [URL]
-- **Backend API:** [URL]
-- **API Docs:** [URL/docs]
-
-## 📸 Screenshots
-
-[Add screenshots]
-
-## 🛠️ Local Development
-
-### Backend
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
-
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-## 📚 What I Learned
-
-- React hooks (useState, useEffect)
-- FastAPI CRUD operations
-- SQL database design
-- Azure deployment
-- Git workflow
-
-## 🎯 Next Steps
-
-- Add user authentication
-- Implement categories
-- Add due dates
-- Deploy to production
-
----
-
-Built as part of my 14-week career transition to Full-Stack Cloud DevOps Engineer.
-```
-
-Commit and push both READMEs.
-
-### Week 1 Complete! 🎉
-
-**Evening (1 hour) - 7:00 PM - 8:00 PM**
-
-**8. Weekly Review & Week 2 Prep**
-
-Create a simple checklist file (checklist.md):
-
-```markdown
-# Week 1 Review - COMPLETE ✅
-
-## Achievements
-- [x] Task Manager app built and deployed
-- [x] React fundamentals mastered
-- [x] SQL basics learned (SQLBolt Lessons 1-12)
-- [x] Git workflow established
-- [x] Azure account created
-- [x] FastAPI backend deployed
-- [x] React frontend deployed
-- [x] 30+ GitHub commits
-
-## Books Progress
-- [x] The Phoenix Project - Chapters 1-4 (20% done)
-- [x] Python Crash Course - Chapters 1-4 (40% done)
-
-## Code Stats
-- GitHub commits: 30+
-- Lines of code: ~500
-- Projects: 1 complete full-stack app
-
-## What I Learned
-- React hooks completely changed my understanding of state
-- SQL JOINs are powerful for multi-table queries
-- Azure deployment is simpler than expected
-- Git commits should be frequent and meaningful
-
-## Challenges Faced
-- CORS issues (solved with middleware)
-- Async/await in React took practice
-- Azure deployment initially confusing
-
-## Week 2 Goals
-- Learn React Router
-- Complex SQL (advanced JOINs)
-- Azure DevOps setup
-- Start Project 1 planning
-```
-
-**Celebrate! 🎉**
-- Share your deployed app with friends
-- Post on LinkedIn (optional)
-- Take screenshots for portfolio
-- Feel proud of your progress!
 
 ---
 
 ## 📊 Week 1 Success Metrics
 
 Check all that apply:
-- [ ] Task Manager fully functional
-- [ ] Frontend deployed to Azure
-- [ ] Backend deployed to Azure
+
+- [ ] FastAPI Task Manager API deployed to Azure
 - [ ] GitHub repo with 20+ commits
 - [ ] SQLBolt completed (Lessons 1-12)
-- [ ] React basics understood (hooks, components, state)
+- [ ] Python fundamentals solid (lists, dicts, functions, file I/O)
+- [ ] CLI client working
+- [ ] Tests passing
 - [ ] Read ~100 pages (Phoenix Project + Python Crash Course)
-- [ ] Can explain to someone how your app works
+- [ ] Can explain to someone how your API works
 
 **If you checked 6+, you CRUSHED Week 1!** 💪
 
@@ -1211,52 +993,59 @@ Check all that apply:
 
 ## 🎯 Key Takeaways from Week 1
 
-### React
-- Components are the building blocks
-- State changes trigger re-renders
-- useEffect runs after render
-- Props flow down, events flow up
+### Python
+
+- Lists and dictionaries are your bread and butter
+- Functions keep code organized and reusable
+- f-strings make formatting easy
+- JSON for data persistence
+- Virtual environments isolate dependencies
+
+### FastAPI
+
+- Automatic API documentation (Swagger UI)
+- Type hints with Pydantic models
+- CORS middleware for frontend access
+- Simple and fast — Python at its best
 
 ### SQL
+
 - SELECT retrieves data
 - JOIN combines tables
 - WHERE filters results
 - GROUP BY aggregates data
 
 ### Git
-- Commit frequently
-- Write meaningful messages
+
+- Commit frequently with meaningful messages
 - Push to GitHub daily
+- `.gitignore` keeps repos clean
 - Branches for features (coming Week 2)
 
 ### Azure
-- App Service for backend APIs
-- Static Web Apps for React
+
+- App Service for Python APIs
 - Resource groups organize resources
 - Free tier is generous for learning
-
-### FastAPI
-- Automatic API documentation (Swagger)
-- Type hints with Pydantic
-- CORS middleware for React
-- Simple and fast
+- CLI deployment is straightforward
 
 ---
 
 ## 📚 Reading Summary
 
 **Books Started:**
+
 1. **"The Phoenix Project"** (~100 pages)
    - Key insight: IT challenges are universal
    - DevOps mindset: Continuous improvement
    - Next: Continue to Part 2
 
-2. **"Python Crash Course"** (~80 pages)
-   - Variables, data types, lists
+2. **"Python Crash Course"** (~200 pages)
+   - Variables, lists, dictionaries, functions, file I/O
    - Python fundamentals solid
-   - Next: Dictionaries and functions
+   - Next: Classes, exceptions, testing
 
-**Total Reading:** ~180 pages
+**Total Reading:** ~300 pages
 **Time Invested:** ~7 hours (30-60 min/day)
 
 ---
@@ -1264,15 +1053,18 @@ Check all that apply:
 ## 🚀 Prepare for Week 2
 
 ### Order/Download (if you haven't):
+
 - [ ] "Clean Code" by Robert C. Martin
-- [ ] "Learning React" (or React Key Concepts)
+- [ ] Continue "Python Crash Course" (Part I remaining chapters)
 
 ### Technical Setup:
-- [ ] PostgreSQL installed (if using it)
-- [ ] Azure DevOps account created
-- [ ] VS Code extensions updated
+
+- [ ] SQLite working locally
+- [ ] Azure CLI installed
+- [ ] VS Code Python debugging configured
 
 ### Plan Week 2:
+
 - [ ] Review Week 2 goals
 - [ ] Schedule daily study time
 - [ ] Block calendar for weekend project time
@@ -1282,21 +1074,25 @@ Check all that apply:
 ## 💡 Tips for Success Going Forward
 
 ### Daily Habits:
+
 1. **Morning:** Read for 30-40 minutes
-2. **Code:** At least 1 hour/day
+2. **Code:** At least 1 hour/day of Python
 3. **Commit:** Push to GitHub daily
 4. **Evening:** Light reading 20-30 minutes
 
 ### Weekend Projects:
+
 - Saturday: Build features (6 hours)
 - Sunday: Deploy & document (4 hours)
 
 ### Weekly Review:
+
 - Sunday evening: 30 minutes
 - What worked? What didn't?
 - Adjust for next week
 
 ### Momentum:
+
 - Don't break the chain
 - Even 30 minutes counts
 - Progress over perfection
@@ -1307,26 +1103,30 @@ Check all that apply:
 ## 🎓 What's Next: Week 2 Preview
 
 **Learning:**
-- React Router (multi-page apps)
-- Advanced SQL (complex JOINs)
-- Azure SQL Database
-- Azure DevOps basics
+
+- Python classes and OOP
+- Error handling and exceptions
+- FastAPI with SQLAlchemy ORM
+- Advanced SQL (subqueries, window functions)
 
 **Building:**
-- Enhance task manager
-- Multi-page structure
-- Categories and filters
-- Statistics dashboard
+
+- Enhance Task Manager API
+- Add user model and relationships
+- Structured error responses
+- API versioning
 
 **Reading:**
+
 - Continue Phoenix Project
+- Python Crash Course Ch 9-11 (Classes, Files, Testing)
 - Start "Clean Code"
-- Finish Python Crash Course Part 1
 
 **Goals:**
+
 - 15+ new commits
-- Azure SQL connected
-- Azure DevOps org setup
+- SQLAlchemy models working
+- Python OOP practiced
 - Books: 150+ more pages
 
 ---
@@ -1334,8 +1134,9 @@ Check all that apply:
 ## ✅ Final Week 1 Checklist
 
 Before starting Week 2:
-- [ ] Task Manager deployed and working
-- [ ] GitHub repos public and documented
+
+- [ ] Task Manager API deployed and working
+- [ ] GitHub repo public and documented
 - [ ] Weekly review completed
 - [ ] Week 2 prep done
 - [ ] Rest day taken (Sunday evening - relax!)
@@ -1343,6 +1144,4 @@ Before starting Week 2:
 
 **Congratulations on completing Week 1!**
 
-You went from zero to deployed full-stack application in 7 days. That's incredible progress!
-
-**Week 2 starts tomorrow. You're ready. Let's go! 🚀**
+You went from zero to deployed Python API in 7 days. That's incredible progress!

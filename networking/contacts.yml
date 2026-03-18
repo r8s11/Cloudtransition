@@ -23,11 +23,29 @@ contacts:
   #       notes:
 
 target_connections:
-  # - role:
-  #   reason:
-  #   target_count:
-  #   current_count: 0
-  #   approach:
+  - role: DevOps / Cloud Engineers at target companies
+    reason: Referrals and insight into team culture, hiring bar
+    target_count: 10
+    current_count: 0
+    approach: LinkedIn connection + short intro message about shared interests
+
+  - role: Recruiters specializing in DevOps / Cloud / IT roles
+    reason: Pipeline access, resume feedback, interview coaching
+    target_count: 5
+    current_count: 0
+    approach: LinkedIn InMail or apply to their posted roles, then follow up
+
+  - role: Former colleagues from current/past contracts
+    reason: Referrals, references, warm introductions
+    target_count: 5
+    current_count: 0
+    approach: Personal message — catch up, share career update, ask about their company
+
+  - role: Tech community members (meetups, online communities)
+    reason: Organic networking, learning, visibility
+    target_count: 10
+    current_count: 0
+    approach: Attend events, engage in discussions, follow up with attendees
 
 networking_goals:
   - goal: Attend 1 tech event per month

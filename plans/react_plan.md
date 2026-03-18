@@ -2,7 +2,11 @@
 
 > Complete React curriculum from fundamentals to production-ready applications
 
-**Timeline:** Weeks 1-16 (parallel with other learning)
+**NOTE (Updated 2026-03-17):** React has been deferred to August-September 2026.
+> Python is the priority for DevOps roles. This plan will be used starting Phase 5.
+> See career-goals.yml ST-04a for the updated React timeline.
+
+**Timeline:** August-September 2026 (after Python + Docker + CI/CD foundation is solid)
 **Time Commitment:** 6 hours/week
 **Goal:** Build modern, performant React applications
 
@@ -39,6 +43,10 @@
 ---
 
 ## Weeks 1-4: React Fundamentals
+
+### 🎬 Videos for This Phase
+- **Traversy:** Ch 1-6 (~6h) — Intro, JS refresher, React fundamentals, forms (Notes App), useEffect, useRef (Timer)
+- **Schwarzmüller:** Ch 1-8 (~13h) — Getting started, JS refresher, essentials (components, JSX, props, state), deep dive, practice project, styling, debugging, refs & portals
 
 ### Topics
 
@@ -215,6 +223,10 @@ Build a complete CRUD application:
 
 ## Weeks 5-8: Advanced Patterns
 
+### 🎬 Videos for This Phase
+- **Traversy:** Ch 7-9 (~2.5h) — APIs (Crypto Dash Project), React Router declarative mode, build & deploy to Vercel
+- **Schwarzmüller:** Ch 9-12, 15-16 (~9h) — Project Management App, Context API & useReducer, useEffect, Quiz App, HTTP requests, custom hooks
+
 ### Topics
 
 #### React Router
@@ -322,6 +334,10 @@ Multi-page application with:
 ---
 
 ## Weeks 9-12: State Management
+
+### 🎬 Videos for This Phase
+- **Traversy:** Ch 10, 16-17 (~6h) — Context API (Shopping Cart UI), TanStack Query (GitHub Finder), TanStack Router (IdeaDrop)
+- **Schwarzmüller:** Ch 17-22, 25 (~17h) — Forms & user input, form actions, Food Order App, Redux, advanced Redux, React Router SPA, TanStack Query
 
 ### Topics
 
@@ -487,6 +503,10 @@ Advanced state management with:
 
 ## Weeks 13-16: Production Ready
 
+### 🎬 Videos for This Phase
+- **Traversy:** Ch 11-15, 18-21 (~11h) — Router framework mode (Friendly Dev), Strapi CMS, Cloudinary, MERN stack backend, JWT auth, full-stack auth & deployment
+- **Schwarzmüller:** Ch 13-14, 23-24, 26-32 (~18h) — React internals & optimization, class components, authentication, deployment, Next.js (App + Page Router), RSC, Framer Motion, patterns & best practices, testing, TypeScript
+
 ### Topics
 
 #### Performance Optimization
@@ -614,7 +634,29 @@ Production-ready features:
 - "Learning React" by Alex Banks & Eve Porcello
 - "React Key Concepts" by Maximilian Schwarzmüller
 
-### Online Courses (Optional)
+### Video Courses (O'Reilly — PDF outlines in `React/`)
+
+#### Modern React From The Beginning — Brad Traversy (25h 35m)
+Practical, project-driven. Covers fundamentals → full-stack MERN.
+
+| Plan Weeks | Chapters | ~Hours | Topics |
+|------------|----------|--------|--------|
+| Weeks 1-4 | Ch 1-6 | ~6h | Intro, JS refresher, fundamentals (state, hooks, props), forms (Notes App), useEffect, useRef (Timer) |
+| Weeks 5-8 | Ch 7-9 | ~2.5h | APIs (Crypto Dash), React Router declarative, build & deploy |
+| Weeks 9-12 | Ch 10, 16-17 | ~6h | Context API (Shopping Cart), TanStack Query (GitHub Finder), TanStack Router (IdeaDrop) |
+| Weeks 13-16 | Ch 11-15, 18-21 | ~11h | Router framework mode (Friendly Dev), Strapi CMS, MERN backend, JWT auth, full-stack deploy |
+
+#### React - The Complete Guide — Max Schwarzmüller (64h 35m)
+Comprehensive: Redux, Next.js, TypeScript, testing, animations.
+
+| Plan Weeks | Chapters | ~Hours | Topics |
+|------------|----------|--------|--------|
+| Weeks 1-4 | Ch 1-8 | ~13h | Getting started, JS refresher, essentials, deep dive, practice project, styling, debugging, refs & portals |
+| Weeks 5-8 | Ch 9-12, 15-16 | ~9h | Project Management App, Context/useReducer, useEffect, Quiz App, HTTP requests, custom hooks |
+| Weeks 9-12 | Ch 17-22, 25 | ~17h | Forms, form actions, Food Order App, Redux, advanced Redux, React Router SPA, TanStack Query |
+| Weeks 13-16 | Ch 13-14, 23-24, 26-32 | ~18h | Optimization, class components, auth, deploy, Next.js, RSC, Framer Motion, patterns, testing, TypeScript |
+
+### Online Courses (Additional)
 - Scrimba - Learn React (FREE interactive)
 - Jonas Schmedtmann - Ultimate React Course (Udemy, $15)
 
@@ -657,7 +699,7 @@ Production-ready features:
 ## ✅ Progress Checklist
 
 ### Weeks 1-4: Fundamentals
-- [ ] Created first React app
+- [x] Created first React app
 - [ ] Understand JSX
 - [ ] Built components with props
 - [ ] Used useState for state

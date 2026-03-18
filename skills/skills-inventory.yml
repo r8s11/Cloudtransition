@@ -7,14 +7,16 @@ technical_skills:
       - name: Python
         proficiency: beginner  # beginner | intermediate | advanced | expert
         years_experience: 3
-        last_used: 2026-02
+        last_used: 2026-03
+        priority: "#1 — primary learning focus for DevOps interviews and automation"
         evidence:
-          -
+          - Working through Python Crash Course
 
       - name: JavaScript
         proficiency: beginner
         years_experience: 3
         last_used: 2026-01
+        priority: "Deferred to Aug-Sep 2026 — React frontend after Python backend is solid"
         evidence:
           -
 
@@ -34,27 +36,58 @@ technical_skills:
         years_experience: 2
         last_used: 2025-12
         evidence:
-          -
+          - AWS Certified Cloud Practitioner (active through 2026-12)
+
+      - name: Azure
+        proficiency: beginner
+        years_experience: 1
+        last_used: 2026-03
+        evidence:
+          - AZ-900 Azure Fundamentals certified
+          - Azure free account active; exploring Static Web Apps
+
+  - category: Data & Databases
+    skills:
+      - name: SQL
+        proficiency: beginner
+        years_experience: 1
+        last_used: 2026-03
+        evidence:
+          - Working through SQLBolt lessons
+
+  - category: Current Role
+    skills:
+      - name: IT Support Engineering
+        proficiency: intermediate
+        years_experience: 3
+        last_used: 2026-03
+        evidence:
+          - Troubleshooting hardware, software, and network issues
+          - Managing user accounts, permissions, and system configurations
+          - Supporting cloud-based and on-premises infrastructure
 
 soft_skills:
-  - name: Project Management
-    proficiency: low
+  - name: Troubleshooting & Problem Solving
+    proficiency: intermediate
     evidence:
+      - Daily ticket resolution in IT Support role
 
   - name: Technical Writing
     proficiency: low
     evidence:
 
-  - name: Public Speaking
-    proficiency: low
+  - name: Communication
+    proficiency: intermediate
     evidence:
+      - End-user support and stakeholder interaction
 
 certifications:
-  - name: AWS Certified Solutions Architect
+  - name: AWS Certified Cloud Practitioner
     issuer: Amazon Web Services
     date_obtained: 2023-12
     expires: 2026-12
     credential_id:
+    # NOTE: Resume says "Cloud Practitioner" — update this if it's actually Solutions Architect
 
   - name: Azure fundamentals AZ-900
     issuer: Microsoft
@@ -65,17 +98,90 @@ certifications:
   - name: Security+ CE
     issuer: CompTIA
     date_obtained: 2016
-    expires: 2019
+    expires: 2019  # EXPIRED — consider renewing or pivoting to AZ-500
     credential_id:
 
 skills_to_develop:
-  # - skill:
-  #   priority:  # high | medium | low
-  #   reason:
-  #   target_proficiency:
-  #   target_date:
-  #   resources:
-  #     -
+  - skill: Docker & Containerization
+    priority: high
+    reason: Required for DevOps/Cloud roles; biggest current gap
+    target_proficiency: intermediate
+    target_date: 2026-05
+    resources:
+      - Docker official docs
+      - "Docker Deep Dive by Nigel Poulton"
+
+  - skill: CI/CD (GitHub Actions)
+    priority: high
+    reason: Standard requirement for DevOps roles; needed for portfolio projects
+    target_proficiency: intermediate
+    target_date: 2026-05
+    resources:
+      - GitHub Actions documentation
+      - Hands-on with Task Manager project
+
+  - skill: Terraform / Infrastructure as Code
+    priority: medium
+    reason: Key differentiator for DevOps roles
+    target_proficiency: beginner
+    target_date: 2026-09
+    resources:
+      - HashiCorp Learn
+      - "Terraform Up & Running"
+
+  - skill: Azure (AZ-204 Developer Associate)
+    priority: medium
+    reason: Certification path toward AZ-400; deepens cloud expertise
+    target_proficiency: intermediate
+    target_date: 2026-09
+    resources:
+      - Microsoft Learn AZ-204 path
+
+  - skill: Linux Administration
+    priority: medium
+    reason: Foundation for infrastructure and DevOps roles
+    target_proficiency: intermediate
+    target_date: 2026-06
+    resources:
+      - Linux Academy / A Cloud Guru
+
+  - skill: Kubernetes / AKS
+    priority: high
+    reason: Required for DevOps roles paying $199K+; natural next step after Docker
+    target_proficiency: intermediate
+    target_date: 2026-12
+    resources:
+      - Kubernetes official docs
+      - "Kubernetes Up & Running"
+      - Microsoft Learn AKS modules
+
+  - skill: Azure Security (AZ-500)
+    priority: high
+    reason: Cybersecurity + Cloud is highest-paying combo in NYC ($215K+); leverages expired Security+ knowledge
+    target_proficiency: intermediate
+    target_date: 2027-03
+    resources:
+      - Microsoft Learn AZ-500 path
+      - John Savill AZ-500 Study Cram (YouTube)
+
+  - skill: AI/ML Foundations (AI-102 Azure AI Engineer)
+    priority: medium
+    reason: 1 in 5 NYC tech postings require AI skills; fits Azure certification path
+    target_proficiency: beginner
+    target_date: 2027-06
+    resources:
+      - Microsoft Learn AI-102 path
+      - Microsoft Learn AI Fundamentals (AI-900) as stepping stone
+
+  - skill: SQL (intermediate)
+    priority: high
+    reason: Near-universal requirement across cloud, DevOps, and data roles
+    target_proficiency: intermediate
+    target_date: 2026-06
+    resources:
+      - SQLBolt (complete all lessons)
+      - "Mode Analytics SQL Tutorial"
+      - Build a database-backed project with PostgreSQL
 
 notes: |
   This inventory should be updated quarterly or when:

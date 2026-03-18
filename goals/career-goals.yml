@@ -3,13 +3,15 @@
 
 vision:
   title: DevOps Engineer (Full-Stack Cloud)
-  timeframe: 3 years  # Target: 2029
+  timeframe: 3 years # Target: 2029
   description: |
     Transition into a DevOps / Cloud Engineer role with deep expertise in
     CI/CD pipelines, Infrastructure as Code, container orchestration (Kubernetes),
-    and Azure cloud services. Leverage existing AWS experience (Solutions Architect)
-    and PMP background to stand out as a well-rounded engineer who can bridge
-    development, operations, and project leadership.
+    and Azure cloud services. Leverage existing AWS experience (Cloud Practitioner)
+    and IT Support background to stand out as a well-rounded engineer who can bridge
+    development, operations, and infrastructure support. Differentiate with cloud
+    security (AZ-500) and AI/ML foundations (AI-102) — the two fastest-growing
+    skill demands in the NYC market.
 
 long_term_goals:
   - id: LT-01
@@ -21,8 +23,8 @@ long_term_goals:
       - Salary meets or exceeds target range
       - Working with Kubernetes, Terraform, and CI/CD daily
     dependencies:
-      - LT-02  # Azure certification
-      - LT-03  # Portfolio projects
+      - LT-02 # Azure certification
+      - LT-03 # Portfolio projects
 
   - id: LT-02
     goal: Earn Azure DevOps Engineer Expert certification (AZ-400)
@@ -33,7 +35,7 @@ long_term_goals:
       - Pass AZ-400 exam
       - Update LinkedIn and resume with credential
     dependencies:
-      - ST-03  # AZ-204 prep
+      - ST-03 # AZ-204 prep
 
   - id: LT-03
     goal: Build a production-quality portfolio with 3+ deployed cloud projects
@@ -44,8 +46,8 @@ long_term_goals:
       - Each project uses CI/CD, IaC, and Azure deployment
       - Portfolio site live and linked on resume/LinkedIn
     dependencies:
-      - ST-01  # Task Manager MVP
-      - ST-02  # Docker & CI/CD skills
+      - ST-01 # Task Manager MVP
+      - ST-02 # Docker & CI/CD skills
 
   - id: LT-04
     goal: Reach advanced proficiency in Python and JavaScript
@@ -57,52 +59,87 @@ long_term_goals:
       - At least one full-stack project deployed per language
     dependencies: []
 
+  - id: LT-05
+    goal: Earn Azure Security Engineer Associate certification (AZ-500)
+    target_date: 2027-03
+    status: not_started
+    success_criteria:
+      - Complete Microsoft Learn AZ-500 learning path
+      - Pass AZ-500 exam
+      - Demonstrate cloud security skills in at least one portfolio project
+    dependencies:
+      - ST-03  # AZ-204 builds Azure fluency first
+
+  - id: LT-06
+    goal: Build AI/ML foundational skills and earn AI-102 certification
+    target_date: 2027-06
+    status: not_started
+    success_criteria:
+      - Complete AI-900 (Azure AI Fundamentals) as stepping stone
+      - Pass AI-102 (Azure AI Engineer Associate)
+      - Integrate an AI feature into one portfolio project
+    dependencies:
+      - ST-03  # AZ-204 prerequisite Azure knowledge
+
 short_term_goals:
   - id: ST-01
-    goal: Complete Week 1 curriculum and deploy Task Manager MVP
-    target_date: 2026-03-09
+    goal: Python foundations + SQL fundamentals + first automation script
+    target_date: 2026-04-15
     status: in_progress
     success_criteria:
-      - React fundamentals complete (JSX, props, useState, useEffect)
-      - SQLBolt lessons 1-12 done
-      - Task Manager CRUD app deployed to Azure Static Web Apps
+      - Python Crash Course Ch 1-8 complete
+      - SQLBolt lessons 1-18 done
+      - One Python automation script pushed to GitHub with clean README
       - GitHub repo with 20+ commits
     milestones:
-      - task: JSX syntax — build a simple component
-        due_date: 2026-03-03
+      - task: Python Crash Course Ch 1-4 (variables, lists, loops, functions)
+        due_date: 2026-03-24
         status: not_started
-      - task: Components & Props, useState, useEffect
-        due_date: 2026-03-05
-        status: not_started
-      - task: Task Manager form and CRUD logic
-        due_date: 2026-03-07
-        status: not_started
-      - task: Deploy to Azure Static Web Apps
-        due_date: 2026-03-09
+      - task: Python Crash Course Ch 5-8 (dictionaries, classes, files, exceptions)
+        due_date: 2026-03-31
         status: not_started
       - task: SQLBolt lessons 1-12
-        due_date: 2026-03-09
+        due_date: 2026-03-31
+        status: not_started
+      - task: SQLBolt lessons 13-18 (JOINs, subqueries, aggregations)
+        due_date: 2026-04-07
+        status: not_started
+      - task: Write and push first Python automation script
+        due_date: 2026-04-15
         status: not_started
     dependencies: []
     blockers: []
 
   - id: ST-02
-    goal: Learn Docker & CI/CD fundamentals
+    goal: Build FastAPI backend + Docker + CI/CD pipeline
     target_date: 2026-05-31
     status: not_started
     success_criteria:
-      - Containerize at least one project with Docker
-      - Set up a GitHub Actions CI/CD pipeline
-      - Push Docker image to Azure Container Registry
+      - FastAPI REST API deployed to Azure App Service
+      - Containerized with Docker, image pushed to Azure Container Registry
+      - GitHub Actions CI/CD pipeline (lint, test, deploy)
+      - PostgreSQL or SQLite database with SQLAlchemy
     milestones:
-      - task: Docker basics — build and run containers
-        due_date: 2026-04-15
-        status: not_started
-      - task: Write a Dockerfile for Task Manager
+      - task: Build FastAPI CRUD API (Task Manager backend)
         due_date: 2026-04-30
         status: not_started
+      - task: Add database integration (SQLAlchemy + PostgreSQL/SQLite)
+        due_date: 2026-05-07
+        status: not_started
+      - task: Write basic tests with pytest
+        due_date: 2026-05-14
+        status: not_started
+      - task: Docker basics — build and run containers
+        due_date: 2026-05-14
+        status: not_started
+      - task: Write Dockerfile for FastAPI project
+        due_date: 2026-05-21
+        status: not_started
       - task: GitHub Actions workflow for auto-deploy
-        due_date: 2026-05-15
+        due_date: 2026-05-28
+        status: not_started
+      - task: Deploy to Azure App Service
+        due_date: 2026-05-31
         status: not_started
     dependencies:
       - ST-01
@@ -133,6 +170,94 @@ short_term_goals:
       - ST-01
     blockers: []
 
+  - id: ST-04a
+    goal: Learn React and build full-stack portfolio project
+    target_date: 2026-09-30
+    status: not_started
+    success_criteria:
+      - React fundamentals complete (JSX, components, props, useState, useEffect)
+      - React frontend connected to FastAPI backend (from ST-02)
+      - Full-stack Task Manager deployed (React + FastAPI + PostgreSQL)
+    milestones:
+      - task: React fundamentals — JSX, components, props
+        due_date: 2026-08-15
+        status: not_started
+      - task: useState, useEffect, and API calls with fetch/axios
+        due_date: 2026-08-31
+        status: not_started
+      - task: Build React frontend for FastAPI Task Manager backend
+        due_date: 2026-09-15
+        status: not_started
+      - task: Deploy full-stack app (React Static Web Apps + API App Service)
+        due_date: 2026-09-30
+        status: not_started
+    dependencies:
+      - ST-02  # Python backend must exist before adding React frontend
+    blockers: []
+
+  - id: ST-05
+    goal: Complete SQL to intermediate level with a real project
+    target_date: 2026-06-30
+    status: not_started
+    success_criteria:
+      - SQLBolt all lessons completed
+      - Write complex queries (JOINs, subqueries, aggregations)
+      - Use SQL in at least one portfolio project backend
+    milestones:
+      - task: Complete SQLBolt lessons 1-18
+        due_date: 2026-04-30
+        status: not_started
+      - task: Practice with Mode Analytics SQL tutorial
+        due_date: 2026-05-31
+        status: not_started
+      - task: Integrate PostgreSQL into FastAPI project (ST-04a)
+        due_date: 2026-06-30
+        status: not_started
+    dependencies: []
+    blockers: []
+
+  - id: ST-06
+    goal: Begin cloud security learning path toward AZ-500
+    target_date: 2026-12-31
+    status: not_started
+    success_criteria:
+      - Complete Microsoft Learn AZ-500 modules (identity, platform protection, data/app security)
+      - Set up a security-hardened Azure project with RBAC and Key Vault
+    milestones:
+      - task: Review Security+ concepts (refresh expired knowledge)
+        due_date: 2026-10-15
+        status: not_started
+      - task: Complete AZ-500 identity & access management modules
+        due_date: 2026-11-15
+        status: not_started
+      - task: Complete AZ-500 platform protection modules
+        due_date: 2026-12-15
+        status: not_started
+    dependencies:
+      - ST-03
+    blockers: []
+
+  - id: ST-07
+    goal: Start AI foundations with AI-900 Azure AI Fundamentals
+    target_date: 2027-03-31
+    status: not_started
+    success_criteria:
+      - Complete Microsoft Learn AI-900 learning path
+      - Pass AI-900 certification exam
+      - Understand core AI/ML concepts (NLP, computer vision, generative AI)
+    milestones:
+      - task: Enroll in AI-900 learning path on Microsoft Learn
+        due_date: 2027-01-15
+        status: not_started
+      - task: Complete all AI-900 modules
+        due_date: 2027-02-28
+        status: not_started
+      - task: Take and pass AI-900 exam
+        due_date: 2027-03-31
+        status: not_started
+    dependencies: []
+    blockers: []
+
   - id: ST-04
     goal: Read The Phoenix Project and Python Crash Course (Ch 1-8+)
     target_date: 2026-03-31
@@ -153,25 +278,35 @@ short_term_goals:
 
 quarterly_objectives:
   q1_2026:
-    - Complete Week 1 curriculum (React, SQL, Task Manager)
-    - Deploy Task Manager to Azure Static Web Apps
-    - Start reading The Phoenix Project and Python Crash Course
+    - "Python foundations: Crash Course Ch 1-8, first automation script"
+    - "SQL fundamentals: SQLBolt lessons 1-18"
+    - Start reading The Phoenix Project
+    - "Quick wins: LinkedIn, GitHub profile, networking, start applying"
     - Reach 20+ GitHub commits across projects
   q2_2026:
-    - Learn Docker and containerize Task Manager
+    - "Build FastAPI REST API project with database (ST-02)"
+    - Learn Docker and containerize FastAPI project
     - Set up GitHub Actions CI/CD pipeline
-    - Start Azure Pipelines exploration
     - Begin Terraform basics (infrastructure as code)
+    - "Complete SQL to intermediate with real project use (ST-05)"
   q3_2026:
     - Complete Terraform IaC project on Azure
+    - "Learn React fundamentals and build frontend for FastAPI backend (ST-04a)"
     - Start Kubernetes / AKS fundamentals
     - Begin AZ-204 study and practice exams
-    - Add monitoring (Azure Monitor / Application Insights) to a project
   q4_2026:
     - Pass AZ-204 Azure Developer Associate exam
-    - Complete advanced DevOps capstone project (full CI/CD + IaC + monitoring)
+    - "Begin AZ-500 cloud security learning path (ST-06)"
+    - Deploy full-stack app (React + FastAPI + Docker + CI/CD)
     - Polish portfolio — 3 live projects, README docs, LinkedIn updated
+  q1_2027:
+    - Continue AZ-500 preparation and take exam
     - Start AZ-400 DevOps Engineer Expert preparation
+    - "Begin AI-900 Azure AI Fundamentals (ST-07)"
+  q2_2027:
+    - Pass AI-900 and begin AI-102 preparation
+    - Pass AZ-400 DevOps Engineer Expert exam
+    - Integrate AI feature into one portfolio project
 
 reviews:
   - date: 2026-02-27
@@ -181,7 +316,7 @@ reviews:
       Tools installed: Node.js, Python, VS Code, Git.
       GitHub account and Azure free account created.
       First React app built with Vite.
-      Holding AWS Solutions Architect cert (2024-06, expires 2027-06) and PMP.
+      Holding AWS Solutions Architect cert (expires 2026-12) and AZ-900.
 
 notes: |
   Review this file monthly to track progress and adjust timelines.
@@ -190,7 +325,8 @@ notes: |
 
   Current strengths to leverage:
     - AWS Solutions Architect cert (intermediate AWS experience)
-    - PMP certification (project management credibility)
+    - Azure Fundamentals (AZ-900)
+    - IT Support Engineer experience (troubleshooting, infrastructure, systems)
     - Git (advanced, 5 years)
 
   Key skills to build:
@@ -199,3 +335,9 @@ notes: |
     - CI/CD (GitHub Actions, Azure Pipelines)
     - React (front-end for portfolio projects)
     - Python / FastAPI (back-end fundamentals)
+
+  NYC market differentiators (added 2026-03-16):
+    - Cloud Security (AZ-500) — leverages expired Security+ foundation
+    - AI/ML Foundations (AI-900 → AI-102) — 1 in 5 NYC tech jobs require AI skills
+    - SQL intermediate+ — near-universal requirement across roles
+    - Python acceleration — scripting fluency critical for DevOps automation

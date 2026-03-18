@@ -61,88 +61,95 @@
 
 ---
 
-### Weeks 5-8: Code Quality
+### Weeks 5-8: Code Quality + Python for DevOps
 
-| Book               | Chapters             | Time    | Priority     |
-| ------------------ | -------------------- | ------- | ------------ |
-| **Clean Code**     | Ch 1-6 (150 pages)   | 5 hours | ⭐ Essential |
-| **Learning React** | Complete (300 pages) | 7 hours | High         |
+> Updated 2026-03-17: Learning React moved to Weeks 17-20 (Python-first strategy)
+
+| Book                  | Chapters                 | Time    | Priority     |
+| --------------------- | ------------------------ | ------- | ------------ |
+| **Clean Code**        | Ch 1-6 (150 pages)       | 5 hours | ⭐ Essential |
+| **Python for DevOps** | Ch 4-6, 8-10 (200 pages) | 6 hours | ⭐ Essential |
 
 **Daily Schedule:**
 
 - Morning: Clean Code (take detailed notes)
-- Evening: Learning React (code examples)
+- Evening: Python for DevOps (automation scripts, CLI tools)
 
 **Key Takeaways to Note:**
 
-- Meaningful names
-- Functions (small, do one thing)
-- Comments (when to use, when not)
-- Formatting and organization
-- React component patterns
+- Meaningful names, small functions, comments
+- Python automation for DevOps workflows
+- CLI tools and scripting patterns
+- Linux utilities with Python
 
 ---
 
-### Weeks 9-12: DevOps Deep Dive
+### Weeks 9-12: DevOps Deep Dive + Docker
 
 | Book                    | Chapters              | Time    | Priority     |
 | ----------------------- | --------------------- | ------- | ------------ |
 | **The DevOps Handbook** | Part I-II (200 pages) | 6 hours | ⭐ Essential |
-| **SQL in 10 Minutes**   | Complete (250 pages)  | 5 hours | High         |
+| **Docker Deep Dive**    | Ch 1-10 (200 pages)   | 5 hours | High         |
 
 **Daily Schedule:**
 
-- Morning: SQL in 10 Minutes (practice queries)
+- Morning: Docker Deep Dive (container concepts — pairs with hands-on Docker learning)
 - Evening: The DevOps Handbook (conceptual)
 
 **Key Takeaways to Note:**
 
 - Flow, Feedback, Continuous Learning
 - Deployment pipelines
-- Telemetry and monitoring
-- SQL query patterns
+- Docker architecture and best practices
+- Container networking and volumes
 
 ---
 
-### Weeks 13-16: Practical DevOps
+### Weeks 13-16: SQL + Terraform
 
-| Book                  | Chapters                 | Time    | Priority |
-| --------------------- | ------------------------ | ------- | -------- |
-| **Python for DevOps** | Ch 4-6, 8-10 (200 pages) | 6 hours | High     |
-| **Docker Deep Dive**  | Ch 1-10 (200 pages)      | 5 hours | Optional |
+| Book                          | Chapters             | Time    | Priority |
+| ----------------------------- | -------------------- | ------- | -------- |
+| **SQL in 10 Minutes**         | Complete (250 pages) | 5 hours | High     |
+| **Terraform: Up and Running** | Ch 1-6 (200 pages)   | 6 hours | High     |
 
 **Daily Schedule:**
 
-- Morning: Python for DevOps (automation scripts)
-- Evening: Docker Deep Dive (container concepts)
+- Morning: SQL in 10 Minutes (practice queries — deepens project SQL work)
+- Evening: Terraform: Up and Running (pairs with IaC learning phase)
 
 **Key Takeaways to Note:**
 
-- Automation with Python
-- CLI tools and scripts
-- Docker architecture
-- Container best practices
+- SQL query patterns and optimization
+- Terraform state, modules, and workflows
+- Infrastructure as Code best practices
 
 ---
 
-### Weeks 17-20: Certification Focus
+### Weeks 17-20: React + Certification Prep
 
-| Book                         | Chapters       | Time      | Priority     |
-| ---------------------------- | -------------- | --------- | ------------ |
-| **Exam Ref AZ-204**          | Reference only | As needed | ⭐ Essential |
-| **The Pragmatic Programmer** | Start (Ch 1-4) | 4 hours   | High         |
+> React starts here — after Python, Docker, CI/CD, and Terraform foundations are solid.
+
+| Book                         | Chapters             | Time      | Priority     |
+| ---------------------------- | -------------------- | --------- | ------------ |
+| **Learning React**           | Complete (300 pages) | 7 hours   | High         |
+| **Exam Ref AZ-204**          | Reference only       | As needed | ⭐ Essential |
+| **The Pragmatic Programmer** | Start (Ch 1-4)       | 4 hours   | High         |
+
+**Companion Video Courses (O'Reilly):**
+
+- _Modern React From The Beginning_ (Traversy) — Ch 1-6 (~6h): fundamentals, forms, hooks
+- _React - The Complete Guide_ (Schwarzmuller) — Ch 1-8 (~13h): essentials, deep dive
 
 **Daily Schedule:**
 
-- Morning: AZ-204 exam prep
-- Evening: Pragmatic Programmer (wisdom)
+- Morning: Learning React (code along — building frontend for your FastAPI backend)
+- Evening: AZ-204 exam prep + Pragmatic Programmer
 
 **Key Takeaways to Note:**
 
-- Azure service specifics
-- Exam question patterns
+- React component patterns, hooks, state management
+- Azure service specifics for AZ-204
 - DRY, YAGNI principles
-- Career advice
 
 ---
 
@@ -464,19 +471,19 @@ Ch 13-17: Algorithms
 
 ### Weekly Reading Goals
 
-| Weeks  | Pages Goal | Books in Progress                      |
-| ------ | ---------- | -------------------------------------- |
-| 1-2    | 150        | Phoenix Project, Python Crash Course   |
-| 3-4    | 150        | Complete Phoenix, Continue Python      |
-| 5-6    | 120        | Clean Code, Learning React             |
-| 7-8    | 120        | Continue both                          |
-| 9-10   | 100        | DevOps Handbook, SQL in 10 Min         |
-| 11-12  | 100        | Continue both                          |
-| 13-14  | 100        | Python for DevOps                      |
-| 15-16  | 100        | Docker Deep Dive                       |
-| 17-18  | 80         | AZ-204 reference, Pragmatic Programmer |
-| 19-20  | 80         | Continue Pragmatic                     |
-| 21-28  | 60/week    | Cracking Interview, Accelerate         |
+| Weeks | Pages Goal | Books in Progress                            |
+| ----- | ---------- | -------------------------------------------- |
+| 1-2   | 150        | Phoenix Project, Python Crash Course         |
+| 3-4   | 150        | Complete Phoenix, Continue Python            |
+| 5-6   | 120        | Clean Code, Python for DevOps                |
+| 7-8   | 120        | Continue both                                |
+| 9-10  | 100        | DevOps Handbook, Docker Deep Dive            |
+| 11-12 | 100        | Continue both                                |
+| 13-14 | 100        | SQL in 10 Minutes, Terraform                 |
+| 15-16 | 100        | Continue both                                |
+| 17-18 | 80         | Learning React, AZ-204, Pragmatic Programmer |
+| 19-20 | 80         | Continue all three                           |
+| 21-28 | 60/week    | Cracking Interview, Accelerate               |
 
 ---
 
@@ -594,25 +601,26 @@ def example():
 ### Weeks 5-8
 
 - [ ] Clean Code Ch 1-6
-- [ ] Learning React (complete)
+- [ ] Python for DevOps (key chapters)
 - [ ] Applied Clean Code principles
 
 ### Weeks 9-12
 
 - [ ] DevOps Handbook Part I-II
-- [ ] SQL in 10 Minutes (complete)
+- [ ] Docker Deep Dive Ch 1-10
 - [ ] 500+ total pages
 
 ### Weeks 13-16
 
-- [ ] Python for DevOps (key chapters)
-- [ ] Docker Deep Dive (optional)
+- [ ] SQL in 10 Minutes (complete)
+- [ ] Terraform: Up and Running (Ch 1-6)
 - [ ] 700+ total pages
 
 ### Weeks 17-20
 
-- [ ] Pragmatic Programmer started
+- [ ] Learning React (complete)
 - [ ] AZ-204 reference used
+- [ ] Pragmatic Programmer started
 - [ ] 900+ total pages
 
 ### Weeks 21-28

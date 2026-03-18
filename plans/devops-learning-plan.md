@@ -177,7 +177,7 @@ EXPOSE 8000
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
-### Dockerfile for React (Multi-stage)
+### Dockerfile for React (Multi-stage) — _Used in Weeks 17-20_
 
 ```dockerfile
 # Build stage

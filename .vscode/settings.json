@@ -1,0 +1,10 @@
+{
+  "chat.tools.terminal.autoApprove": {
+    "/^cd /Users/roosevelt/work/Cloudtransition && python3 -c \"\ntry:\n    from docx import Document\n    doc = Document\\('resume/Resume2511NY\\.docx'\\)\n    for para in doc\\.paragraphs:\n        print\\(para\\.text\\)\nexcept ImportError:\n    print\\('NEED_INSTALL'\\)\n\"$/": {
+      "approve": true,
+      "matchCommandLine": true
+    },
+    "pip3": true,
+    "cp": true
+  }
+}

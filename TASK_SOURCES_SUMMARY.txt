@@ -1,0 +1,214 @@
+================================================================================
+  QUICK REFERENCE: ALL TASK/CHECKLIST SOURCES IN CLOUDTRANSITION
+================================================================================
+
+GENERATED: February 27, 2026
+TOTAL ITEMS: ~1,500+ checklist items across repository
+COMPLETION: ~4% (60 items checked, 1,400 unchecked)
+
+================================================================================
+  🔥 WHAT TO FOCUS ON NOW (Week 1)
+================================================================================
+
+FILE: TASKS.md
+LOCATION: /Users/roosevelt/work/Cloudtransition/TASKS.md
+ITEMS: 15 unchecked (most critical)
+STATUS: ✅ Already started (4 items done)
+
+MUST DO:
+☐ JSX syntax — build a simple component
+☐ Components & Props — pass data with props  
+☐ useState hook — add state, handle button clicks
+☐ useEffect — API calls and side effects
+☐ Create task input form and handle form submission
+☐ SQLBolt lessons 1-12
+☐ Complete Task Manager MVP (basic CRUD)
+☐ Add styling (CSS or Tailwind)
+☐ Deploy Task Manager to Azure Static Web Apps
+☐ The Phoenix Project — Ch 1-8
+☐ Python Crash Course — Ch 1-4
+☐ GitHub repo with 20+ commits
+☐ SQLBolt completion certificate
+☐ Week 1 review document
+
+ALREADY COMPLETED: ✅
+✓ Install Node.js, Python, VS Code, Git
+✓ Create GitHub account and first repo
+✓ Create Azure free account
+✓ Create first React app with Vite
+
+================================================================================
+  📚 LEARNING PLANS (Reference - ~480 items total)
+================================================================================
+
+REACT - 16 Weeks (Start Immediately)
+  File: /plans/react_plan.md (or React/README.md - same content)
+  Items: 209 total, 0 checked
+  Weeks 1-4: Fundamentals (JSX, Props, useState, useEffect, Forms)
+  Weeks 5-8: Advanced (Router, Hooks, UI Libraries)
+  Weeks 9-12: State Management (Context, useReducer, React Query)
+  Weeks 13-16: Production (Performance, Testing, Best Practices)
+
+AZURE AZ-204 - 20 Weeks (Start Week 3)
+  File: /plans/azure-az204-plan.md (or Azure/README.md)
+  Items: 84 total, 0 checked
+  Weeks 3-22 focused study
+  5 Exam Domains: Compute, Storage, Security, Monitoring, Services
+  Weeks 17-22: Practice exams and final prep
+
+DEVOPS - 28 Weeks (Start Week 1, Git fundamentals)
+  File: /plans/devops-learning-plan.md (or DevOps/README.md)
+  Items: 132 total, 0 checked
+  Path: Git → Docker → CI/CD → Terraform → Kubernetes → Advanced
+
+SQL - 12 Weeks (Parallel with React)
+  File: /plans/sql_plan.md (or SQL/README.md)
+  Items: 12 total, 0 checked
+  Simple checklist: Basics → JOINs → Aggregations → Design → Advanced → Azure
+
+BOOKS - 28 Weeks (1 hour/day)
+  File: /plans/books-reading-plan.md (or Books/README.md)
+  Items: 40 total, 0 checked
+  10-12 books across DevOps, Code Quality, Tech Skills, Career
+
+================================================================================
+  📅 WEEKLY TRACKING
+================================================================================
+
+CURRENT: progress/weekly-goals.md
+  Location: /progress/weekly-goals.md
+  Coverage: 14 weeks (current active tracker)
+  Items: 408 items (organized by week)
+  Status: ACTIVE - use this for weekly tracking
+
+MASTER: plans/weekly-goals.md
+  Location: /plans/weekly-goals.md
+  Coverage: 28 weeks (extended plan)
+  Items: 403 items
+  Status: REFERENCE - template for longer planning
+
+ROADMAP: DASHBOARD.md
+  Location: /DASHBOARD.md
+  Coverage: 52 weeks (entire year)
+  Items: 20 cleanup + quarterly roadmap items
+  Status: CURRENT - high-level planning & priorities
+
+================================================================================
+  📋 SPECIAL TRACKERS
+================================================================================
+
+Career Goals (Structured with milestones)
+  File: goals/career-goals.yml
+  Type: YAML with hierarchical goals
+  Contains: 4 long-term goals + 4 short-term goals with 20 milestones
+  Status: in_progress (started)
+
+Week 1 Daily Guide (3 copies - NEEDS CONSOLIDATION)
+  Recommended: /plans/week1-daily-guide.md (keep this one)
+  Delete: /week1_daily_guide.md and /resources/guides/week1_daily_guide.md
+  Items: 50 each (150 total duplicated)
+
+"Yeah Learning Plan + Russian V2"
+  File: Yeah Learning Plan + Russian V2.md
+  Items: 67 unchecked, 16 checked (24% complete)
+  Status: Active with Russian language focus
+
+================================================================================
+  ⚠️  IMPORTANT: FILE CONSOLIDATION NEEDED
+================================================================================
+
+Delete These (DUPLICATES):
+  ✗ /week1_daily_guide.md (keep /plans/week1-daily-guide.md instead)
+  ✗ /resources/guides/week1_daily_guide.md (duplicate)
+  ✗ /resources/DASHBOARD.md (old version, use root DASHBOARD.md)
+  ✗ Extra copies in /projects/**/github_readme_template.md
+
+Keep Single Copies:
+  ✓ /TASKS.md - Active task queue
+  ✓ /DASHBOARD.md - 52-week roadmap
+  ✓ /plans/weekly-goals.md - OR /progress/weekly-goals.md (choose one)
+  ✓ /plans/*.md - Learning curriculum
+
+Result: Eliminate ~739 duplicate items, keep ~1,100 unique items
+
+================================================================================
+  🎯 WHERE ARE ALL YOUR TASKS?
+================================================================================
+
+ACTIVE QUEUE:              /TASKS.md (15 items - START HERE)
+WEEKLY TRACKING:           /progress/weekly-goals.md (408 items per week)
+LEARNING CURRICULUM:       /plans/*.md (React, Azure, DevOps, SQL, Books)
+LONG-TERM GOALS:          /goals/career-goals.yml (4 LT goals + 4 ST goals)
+52-WEEK ROADMAP:          /DASHBOARD.md (quarterly view)
+SPECIAL LEARNING:         /Yeah Learning Plan + Russian V2.md
+
+BY REALM/FOLDER:
+  React/                  → React learning plan (React/README.md)
+  Azure/                  → AZ-204 certification plan (Azure/README.md)
+  DevOps/                 → DevOps learning plan (DevOps/README.md)
+  SQL/                    → SQL learning plan (SQL/README.md)
+  Books/                  → Books reading tracker (Books/README.md)
+  College Planning/       → SNHU degree planning
+  plans/                  → Master learning plans (canonical location)
+  progress/               → Weekly tracking & reviews
+  goals/                  → Career goal milestones (YAML)
+  interviews/             → Job application tracking (YAML template)
+  skills/                 → Skill inventory (YAML template)
+  networking/             → Professional contacts (YAML template)
+
+================================================================================
+  📊 QUICK STATS
+================================================================================
+
+Total Checklist Items:           ~1,500+
+  ├─ Weekly Goals:               811 items
+  ├─ Learning Plans:             479 items  
+  ├─ Active Tasks:               15 items
+  ├─ Week 1 Guide:               150 items (duplicated 3x)
+  └─ Other:                      100+ items
+
+Items Completed:                 ~60 items (4%)
+Items in Progress:               ~83 items (5.5%)
+Items Not Started:               ~1,357 items (90.5%)
+
+Duplicate Items:                 ~739 items (49% of repository)
+Unique Items After Cleanup:      ~1,100 items
+
+Files with Checklists:           30 markdown files
+YAML Structured Files:           4 files
+
+Recommended Reading Time:
+  ├─ Audit Report:               20 minutes (read for context)
+  ├─ TASKS.md:                   5 minutes (immediate action)
+  ├─ learning plans:             Reference as needed
+  └─ Weekly goals:               Update every Sunday
+
+================================================================================
+  🚀 FIRST STEPS (TODAY)
+================================================================================
+
+1. READ THIS FILE (you're doing it!) - 5 min
+2. OPEN /TASKS.md - 2 min
+3. START on first 3 items:
+   ☐ JSX syntax — build a simple component
+   ☐ Components & Props — pass data with props
+   ☐ useState hook — add state, handle button clicks
+4. REFERENCE /plans/react_plan.md for detailed curriculum
+5. TRACK in /progress/weekly-goals.md as you complete items
+
+Next priority when ready:
+  ☐ Complete Task Manager MVP
+  ☐ Deploy to Azure
+  ☐ SQLBolt lessons
+  ☐ Reading assignments
+
+================================================================================
+
+For detailed information, see:
+  → CHECKLIST_AUDIT_REPORT.md (comprehensive breakdown)
+  → TASKS.md (active to-do list)
+  → DASHBOARD.md (52-week roadmap)
+  → goals/career-goals.yml (career milestones)
+
+Last Updated: February 27, 2026
+Repository: /Users/roosevelt/work/Cloudtransition

@@ -40,19 +40,151 @@ past_applications:
   #   notes:
 
 target_companies:
-  # - name:
-  #   roles_of_interest: []
-  #   priority:  # high | medium | low
-  #   connections:
-  #   notes:
+  # Mix of sizes: large (stability), mid (growth), startup (learning)
+  # Priority: high = strong match + referral possible, medium = good match, low = stretch
+  # Keep adding to this list — goal is 20-30 companies
+
+  # --- Large / Enterprise (stability, structured onboarding, benefits) ---
+  - name: City of New York (NYC DoITT / OTI)
+    roles_of_interest: [IT Systems Engineer, Systems Administrator, Cloud Engineer]
+    priority: high
+    connections:
+    notes: Government IT — active hiring, pension/benefits, posting on cityjobs.nyc.gov. Good stepping stone.
+
+  - name: JPMorgan Chase
+    roles_of_interest: [Systems Engineer, Cloud Engineer, Infrastructure Engineer]
+    priority: medium
+    connections:
+    notes: Massive tech org in NYC, heavy Azure/AWS usage, structured career tracks.
+
+  - name: Morgan Stanley
+    roles_of_interest: [Infrastructure Engineer, Systems Engineer, Cloud Platform Engineer]
+    priority: medium
+    connections:
+    notes: Strong engineering culture in finance, good comp, hybrid work.
+
+  - name: Bloomberg
+    roles_of_interest: [Systems Engineer, Infrastructure Engineer, DevOps Engineer]
+    priority: medium
+    connections:
+    notes: One of NYC's top tech employers, known for engineering excellence.
+
+  - name: Verizon
+    roles_of_interest: [Systems Engineer, Cloud Engineer, IT Engineer]
+    priority: medium
+    connections:
+    notes: HQ in NYC, large infrastructure org, invests in cloud transformation.
+
+  - name: Mount Sinai Health System
+    roles_of_interest: [IT Systems Engineer, Infrastructure Engineer, Cloud Engineer]
+    priority: medium
+    connections:
+    notes: Healthcare IT — growing cloud adoption, stable employer, mission-driven.
+
+  # --- Mid-size / Growth (learning opportunities, faster advancement) ---
+  - name: Datadog
+    roles_of_interest: [Systems Engineer, Site Reliability Engineer, Cloud Engineer]
+    priority: high
+    connections:
+    notes: NYC-based, cloud-native monitoring company, great for learning DevOps at scale.
+
+  - name: MongoDB
+    roles_of_interest: [Cloud Engineer, Systems Engineer, DevOps Engineer]
+    priority: medium
+    connections:
+    notes: NYC HQ, cloud database leader, strong engineering culture.
+
+  - name: Squarespace
+    roles_of_interest: [Systems Engineer, Infrastructure Engineer, DevOps Engineer]
+    priority: medium
+    connections:
+    notes: NYC-based, known for good work-life balance, strong infrastructure team.
+
+  - name: Etsy
+    roles_of_interest: [Systems Engineer, Cloud Infrastructure Engineer]
+    priority: medium
+    connections:
+    notes: Brooklyn-based, strong engineering blog, known for DevOps culture.
+
+  - name: Peloton
+    roles_of_interest: [Systems Engineer, Cloud Engineer, DevOps Engineer]
+    priority: low
+    connections:
+    notes: NYC-based, cloud-heavy infrastructure, may have leaner teams now.
+
+  # --- Startups / Recently Funded (steep learning, move fast) ---
+  - name: Cockroach Labs
+    roles_of_interest: [Systems Engineer, Site Reliability Engineer]
+    priority: low
+    connections:
+    notes: NYC-based, distributed database company, very technical team.
+
+  # --- Consulting / Staffing (faster placement, varied experience) ---
+  - name: Robert Half Technology
+    roles_of_interest: [IT Engineer, Systems Administrator, Cloud Engineer]
+    priority: high
+    connections:
+    notes: Recruiter network — contract-to-hire can get you in the door fast.
+
+  - name: TEKsystems
+    roles_of_interest: [Systems Engineer, IT Support Engineer, Infrastructure Engineer]
+    priority: high
+    connections:
+    notes: Large IT staffing firm in NYC, high volume of placements, good for building experience.
+
+  - name: Insight Global
+    roles_of_interest: [Systems Administrator, IT Engineer, Cloud Support Engineer]
+    priority: medium
+    connections:
+    notes: IT staffing — fast placement, good for contract roles while building DevOps skills.
 
 application_strategy:
-  weekly_goal:
+  weekly_goal: 3-5 applications per week starting NOW (March 16, 2026), scale to 5-10 by April
   focus_areas:
-    -
+    # Apply NOW — you're already qualified for these:
+    - IT Engineer / SysAdmin — closest to current experience, easiest conversion
+    - Systems Engineer / Infrastructure Engineer — leverages IT Support + AWS CCP
+    # Scale into these as portfolio and skills grow:
+    - DevOps Engineer / Cloud Engineer — stretch roles, apply where they invest in training
+    - Junior Software Engineer — broadens opportunities, leverages React/Python learning
+
+  quick_apply_searches:
+    # Bookmark these and check Tuesday-Thursday mornings:
+    - url: https://www.linkedin.com/jobs/search/?keywords=IT%20Engineer&location=New%20York
+    - url: https://www.linkedin.com/jobs/search/?keywords=Systems%20Administrator&location=New%20York
+    - url: https://www.linkedin.com/jobs/search/?keywords=Systems%20Engineer&location=New%20York
+    - url: https://www.indeed.com/jobs?q=IT+Engineer&l=New+York%2C+NY
+    - url: https://cityjobs.nyc.gov  # NYC government IT roles — great benefits, lower bar
+    - url: https://www.glassdoor.com/Job/new-york-systems-administrator-jobs-SRCH_IL.0,8_IC1132348_KO9,30.htm
+
+  resume_versions:
+    - version: devops-cloud
+      target_roles: [DevOps Engineer, Cloud Engineer, Site Reliability Engineer]
+      emphasis: AWS SA cert, AZ-900, CI/CD, Docker, IaC, automation
+
+    - version: systems-infra
+      target_roles:
+        [Systems Engineer, Infrastructure Engineer, Platform Engineer]
+      emphasis: IT Support systems work, AWS SA, troubleshooting, infrastructure
+
+    - version: it-engineer
+      target_roles:
+        [IT Engineer, Systems Administrator, Technical Support Engineer]
+      emphasis: IT Support metrics, system administration, cloud fundamentals
+
+  job_boards:
+    - name: LinkedIn
+      alert_keywords:
+        [DevOps Engineer, Cloud Engineer, Systems Engineer, IT Engineer]
+    - name: Indeed
+      alert_keywords: [DevOps Engineer, Systems Engineer, IT Engineer]
+    - name: Dice
+      alert_keywords: [DevOps, Cloud Engineer, Infrastructure]
+    - name: Built In
+      alert_keywords: [DevOps, Cloud, Systems Engineer]
 
   application_checklist:
-    - Tailor resume to job description
+    - Tailor resume to job description (use matching version)
     - Research company and team
     - Find internal referral if possible
     - Write custom cover letter (for high priority)

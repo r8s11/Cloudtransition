@@ -1,0 +1,339 @@
+# Books data for dashboard rendering
+# Each book has: title, author, category, quarter, in_plan (already in existing reading plan), tags
+
+categories:
+  - name: "React & Frontend"
+    icon: "🟢"
+    color: "#5cc98a"
+  - name: "Python & Backend"
+    icon: "🐍"
+    color: "#4a7fb5"
+  - name: "Azure & Cloud"
+    icon: "☁️"
+    color: "#0078d4"
+  - name: "DevOps, Docker & K8s"
+    icon: "🔧"
+    color: "#D97757"
+  - name: "SQL & Databases"
+    icon: "🗄️"
+    color: "#9478d4"
+  - name: "CS Fundamentals"
+    icon: "💻"
+    color: "#e0b840"
+  - name: "Code Quality"
+    icon: "🧹"
+    color: "#5a9fd4"
+  - name: "Security"
+    icon: "🔒"
+    color: "#e05555"
+  - name: "Career Development"
+    icon: "🚀"
+    color: "#7c5cbf"
+  - name: "API & Architecture"
+    icon: "🌐"
+    color: "#3aa8c1"
+
+books:
+  # React & Frontend
+  - title: "Learning React, 2nd Ed."
+    author: "Alex Banks & Eve Porcello"
+    category: "React & Frontend"
+    quarter: "Q3" # Deferred — Python first, React in Aug-Sep 2026
+    in_plan: true
+    tags: ["react", "hooks", "components"]
+
+  - title: "Learning TypeScript"
+    author: "Josh Goldberg"
+    category: "React & Frontend"
+    quarter: "Q3" # Deferred with React
+    in_plan: false
+    tags: ["typescript", "types", "frontend"]
+
+  - title: "Learning React Native"
+    author: "Bonnie Eisenman"
+    category: "React & Frontend"
+    quarter: "Q3"
+    in_plan: false
+    tags: ["mobile", "react-native"]
+
+  - title: "Fluent React"
+    author: "Tejas Kumar"
+    category: "React & Frontend"
+    quarter: "Q3" # Deferred with React
+    in_plan: false
+    tags: ["react", "advanced", "patterns"]
+
+  # Python & Backend
+  - title: "Python Crash Course, 3rd Ed."
+    author: "Eric Matthes"
+    category: "Python & Backend"
+    quarter: "Q1" # Priority #1 — primary learning focus
+    in_plan: true
+    tags: ["python", "fundamentals"]
+
+  - title: "Python for DevOps"
+    author: "Noah Gift et al."
+    category: "Python & Backend"
+    quarter: "Q1" # Moved up — directly supports DevOps scripting and automation
+    in_plan: true
+    tags: ["python", "devops", "automation"]
+
+  - title: "Robust Python"
+    author: "Patrick Viafore"
+    category: "Python & Backend"
+    quarter: "Q2"
+    in_plan: false
+    tags: ["python", "type-hints", "production"]
+
+  - title: "Using Asyncio in Python"
+    author: "Caleb Hattingh"
+    category: "Python & Backend"
+    quarter: "Q2"
+    in_plan: false
+    tags: ["python", "async", "fastapi"]
+
+  - title: "Architecture Patterns with Python"
+    author: "Harry Percival & Bob Gregory"
+    category: "Python & Backend"
+    quarter: "Q3"
+    in_plan: false
+    tags: ["python", "ddd", "architecture"]
+
+  # Azure & Cloud
+  - title: "Exam Ref AZ-204"
+    author: "Santiago Fernández Muñoz"
+    category: "Azure & Cloud"
+    quarter: "Q3"
+    in_plan: true
+    tags: ["azure", "certification", "az-204"]
+
+  - title: "Azure in Action"
+    author: "Brian Benz"
+    category: "Azure & Cloud"
+    quarter: "Q2"
+    in_plan: false
+    tags: ["azure", "practical", "deployment"]
+
+  - title: "Cloud Native Infrastructure with Azure"
+    author: "Nishant Singh & Michael Kehoe"
+    category: "Azure & Cloud"
+    quarter: "Q3"
+    in_plan: false
+    tags: ["azure", "containers", "aks", "iac"]
+
+  - title: "Designing Distributed Systems"
+    author: "Brendan Burns"
+    category: "Azure & Cloud"
+    quarter: "Q3"
+    in_plan: false
+    tags: ["distributed", "microservices", "kubernetes"]
+
+  # DevOps, Docker & K8s
+  - title: "The Phoenix Project"
+    author: "Gene Kim et al."
+    category: "DevOps, Docker & K8s"
+    quarter: "Q1"
+    in_plan: true
+    tags: ["devops", "culture", "novel"]
+
+  - title: "The DevOps Handbook, 2nd Ed."
+    author: "Gene Kim et al."
+    category: "DevOps, Docker & K8s"
+    quarter: "Q1"
+    in_plan: true
+    tags: ["devops", "practices", "ci-cd"]
+
+  - title: "Accelerate"
+    author: "Nicole Forsgren et al."
+    category: "DevOps, Docker & K8s"
+    quarter: "Q3"
+    in_plan: true
+    tags: ["devops", "metrics", "dora"]
+
+  - title: "Docker Deep Dive"
+    author: "Nigel Poulton"
+    category: "DevOps, Docker & K8s"
+    quarter: "Q2"
+    in_plan: true
+    tags: ["docker", "containers"]
+
+  - title: "Kubernetes: Up and Running, 3rd Ed."
+    author: "Brendan Burns et al."
+    category: "DevOps, Docker & K8s"
+    quarter: "Q3"
+    in_plan: false
+    tags: ["kubernetes", "aks", "orchestration"]
+
+  - title: "Learning GitHub Actions"
+    author: "Brent Laster"
+    category: "DevOps, Docker & K8s"
+    quarter: "Q2"
+    in_plan: false
+    tags: ["ci-cd", "github", "automation"]
+
+  - title: "Terraform: Up and Running, 3rd Ed."
+    author: "Yevgeniy Brikman"
+    category: "DevOps, Docker & K8s"
+    quarter: "Q2"
+    in_plan: false
+    tags: ["terraform", "iac", "infrastructure"]
+
+  - title: "Site Reliability Engineering"
+    author: "Betsy Beyer et al. (Google)"
+    category: "DevOps, Docker & K8s"
+    quarter: "Q4"
+    in_plan: false
+    tags: ["sre", "reliability", "monitoring"]
+
+  - title: "The Site Reliability Workbook"
+    author: "Betsy Beyer et al. (Google)"
+    category: "DevOps, Docker & K8s"
+    quarter: "Q4"
+    in_plan: false
+    tags: ["sre", "exercises", "hands-on"]
+
+  # SQL & Databases
+  - title: "SQL in 10 Minutes a Day, 5th Ed."
+    author: "Ben Forta"
+    category: "SQL & Databases"
+    quarter: "Q1"
+    in_plan: true
+    tags: ["sql", "fundamentals"]
+
+  - title: "Learning SQL, 3rd Ed."
+    author: "Alan Beaulieu"
+    category: "SQL & Databases"
+    quarter: "Q2"
+    in_plan: false
+    tags: ["sql", "advanced", "optimization"]
+
+  - title: "Database Internals"
+    author: "Alex Petrov"
+    category: "SQL & Databases"
+    quarter: "Q3"
+    in_plan: false
+    tags: ["databases", "internals", "architecture"]
+
+  # CS Fundamentals
+  - title: "Cracking the Coding Interview, 6th Ed."
+    author: "Gayle Laakmann McDowell"
+    category: "CS Fundamentals"
+    quarter: "Q4"
+    in_plan: true
+    tags: ["interviews", "algorithms", "data-structures"]
+
+  - title: "Grokking Algorithms"
+    author: "Aditya Bhargava"
+    category: "CS Fundamentals"
+    quarter: "Q1"
+    in_plan: false
+    tags: ["algorithms", "visual", "beginner"]
+
+  - title: "A Common-Sense Guide to Data Structures and Algorithms, 2nd Ed."
+    author: "Jay Wengrow"
+    category: "CS Fundamentals"
+    quarter: "Q2"
+    in_plan: false
+    tags: ["data-structures", "algorithms", "practical"]
+
+  - title: "Computer Science Distilled"
+    author: "Wladston Ferreira Filho"
+    category: "CS Fundamentals"
+    quarter: "Q1"
+    in_plan: false
+    tags: ["cs-foundations", "concise"]
+
+  - title: "Think Like a Programmer"
+    author: "V. Anton Spraul"
+    category: "CS Fundamentals"
+    quarter: "Q2"
+    in_plan: false
+    tags: ["problem-solving", "c++", "thinking"]
+
+  # Code Quality
+  - title: "Clean Code"
+    author: "Robert C. Martin"
+    category: "Code Quality"
+    quarter: "Q1"
+    in_plan: true
+    tags: ["clean-code", "naming", "functions"]
+
+  - title: "The Pragmatic Programmer, 20th Anniversary Ed."
+    author: "David Thomas & Andrew Hunt"
+    category: "Code Quality"
+    quarter: "Q2"
+    in_plan: true
+    tags: ["craftsmanship", "principles", "career"]
+
+  - title: "Head First Design Patterns, 2nd Ed."
+    author: "Eric Freeman & Elisabeth Robson"
+    category: "Code Quality"
+    quarter: "Q2"
+    in_plan: false
+    tags: ["design-patterns", "visual", "oop"]
+
+  - title: "Building Microservices, 2nd Ed."
+    author: "Sam Newman"
+    category: "Code Quality"
+    quarter: "Q3"
+    in_plan: false
+    tags: ["microservices", "architecture", "distributed"]
+
+  - title: "Release It!, 2nd Ed."
+    author: "Michael Nygard"
+    category: "Code Quality"
+    quarter: "Q3"
+    in_plan: false
+    tags: ["production", "patterns", "stability"]
+
+  # Security
+  - title: "Web Application Security"
+    author: "Andrew Hoffman"
+    category: "Security"
+    quarter: "Q3"
+    in_plan: false
+    tags: ["security", "web", "devsecops"]
+
+  - title: "Identity and Data Security for Web Development"
+    author: "Jonathan LeBlanc & Tim Messerschmidt"
+    category: "Security"
+    quarter: "Q3"
+    in_plan: false
+    tags: ["auth", "identity", "oauth"]
+
+  # Career Development
+  - title: "The Manager's Path"
+    author: "Camille Fournier"
+    category: "Career Development"
+    quarter: "Q4"
+    in_plan: false
+    tags: ["career", "leadership", "growth"]
+
+  - title: "Staff Engineer"
+    author: "Will Larson"
+    category: "Career Development"
+    quarter: "Q4"
+    in_plan: false
+    tags: ["senior", "staff", "career-growth"]
+
+  - title: "Apprenticeship Patterns"
+    author: "Dave Hoover & Adewale Oshineye"
+    category: "Career Development"
+    quarter: "Q4"
+    in_plan: false
+    tags: ["career-change", "learning", "craft"]
+
+  # API & Architecture
+  - title: "Designing Web APIs"
+    author: "Brenda Jin, Saurabh Sahni & Amir Shevat"
+    category: "API & Architecture"
+    quarter: "Q4"
+    in_plan: false
+    tags: ["api", "rest", "design"]
+
+  - title: "Building Progressive Web Apps"
+    author: "Tal Ater"
+    category: "API & Architecture"
+    quarter: "Q2"
+    in_plan: false
+    tags: ["pwa", "offline", "service-workers"]

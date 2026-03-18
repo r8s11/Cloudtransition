@@ -8,6 +8,34 @@
 
 ---
 
+## 🎬 Video Courses (O'Reilly — PDF outlines in this folder)
+
+### 1. Modern React From The Beginning — Brad Traversy (25h 35m, 21 chapters)
+
+Practical, project-driven course: fundamentals → full-stack MERN apps.
+
+| Plan Weeks | Chapters | ~Hours | Topics |
+|------------|----------|--------|--------|
+| **Weeks 1-4** | Ch 1-6 | ~6h | Intro & setup, JS refresher, React fundamentals (state, hooks, events, props), forms & controlled components (Notes App), component lifecycle & useEffect, useRef (Timer Project) |
+| **Weeks 5-8** | Ch 7-9 | ~2.5h | Working with APIs (Crypto Dash Project), React Router declarative mode, build & deploy to Vercel |
+| **Weeks 9-12** | Ch 10, 16-17 | ~6h | Context API (Shopping Cart UI), TanStack Query (GitHub Finder Project), TanStack Router (IdeaDrop Project) |
+| **Weeks 13-16** | Ch 11-15, 18-21 | ~11h | React Router framework mode (Friendly Dev Project), loaders/filtering/pagination, actions & markdown blog, Strapi headless CMS, Cloudinary & deployment, MERN stack backend (Express + MongoDB), JWT auth & refresh tokens, full-stack auth, MERN deployment |
+
+### 2. React - The Complete Guide (Hooks, Router, Redux) 2nd Ed. — Max Schwarzmüller (64h 35m, 35 chapters)
+
+Comprehensive deep-dive covering every major React topic including Redux, Next.js, TypeScript, testing, and animations.
+
+| Plan Weeks | Chapters | ~Hours | Topics |
+|------------|----------|--------|--------|
+| **Weeks 1-4** | Ch 1-8 | ~13h | Getting started, JS refresher, React essentials (components, JSX, props, state), deep dive (fragments, forwarding props, lifting state, immutability), practice project, styling, debugging, refs & portals |
+| **Weeks 5-8** | Ch 9-12, 15-16 | ~9h | Project Management App, Context API & useReducer, useEffect & side effects, Quiz App project, HTTP requests, custom hooks |
+| **Weeks 9-12** | Ch 17-22, 25 | ~17h | Forms & user input, form actions, Food Order App project, Redux, advanced Redux, React Router multi-page SPA, TanStack Query |
+| **Weeks 13-16** | Ch 13-14, 23-24, 26-32 | ~18h | React internals & optimization, class-based components, authentication, deployment, Next.js App Router, Next.js Page Router, React Server Components, Framer Motion animations, patterns & best practices, testing, TypeScript |
+
+**Bonus (optional):** Ch 33 — Hooks summary (3h), Ch 34 — Core feature walkthrough (3h 48m)
+
+---
+
 ## 📋 Table of Contents
 
 1. [Overview](#overview)

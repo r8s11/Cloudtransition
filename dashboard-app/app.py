@@ -7,12 +7,16 @@ Open: http://localhost:8000
 
 from pathlib import Path
 from datetime import date
+import os
+import re
+import tempfile
 
 import yaml
 from fastapi import FastAPI, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 
 # ── Paths ──────────────────────────────────────────────────────
 WORKSPACE = Path(__file__).resolve().parent.parent  # Cloudtransition/
@@ -23,6 +27,19 @@ NETWORK_FILE = WORKSPACE / "networking" / "contacts.yml"
 TASKS_FILE = WORKSPACE / "TASKS.md"
 DASHBOARD_FILE = WORKSPACE / "DASHBOARD.md"
 EDU_FILE = WORKSPACE / "College Planning" / "education-data.yml"
+BOOKS_FILE = WORKSPACE / "Books" / "books-data.yml"
+
+# ── Realm Configuration ───────────────────────────────────────
+REALMS = [
+    {"id": "tasks",     "name": "Tasks",     "file": "TASKS.md",                           "color": "#D97757", "icon": "📋"},
+    {"id": "react",     "name": "React",     "file": "plans/react_plan.md",                 "color": "#61dafb", "icon": "⚛️"},
+    {"id": "sql",       "name": "SQL",       "file": "plans/sql_plan.md",                   "color": "#e0b840", "icon": "🗄️"},
+    {"id": "azure",     "name": "Azure",     "file": "plans/azure-az204-plan.md",            "color": "#0078d4", "icon": "☁️"},
+    {"id": "devops",    "name": "DevOps",    "file": "plans/devops-learning-plan.md",        "color": "#5cc98a", "icon": "🔧"},
+    {"id": "books",     "name": "Books",     "file": "plans/books-reading-plan.md",          "color": "#9478d4", "icon": "📚"},
+    {"id": "education", "name": "Education", "file": "snhu-plan.md",                        "color": "#e05555", "icon": "🎓"},
+    {"id": "college",   "name": "College",   "file": "College Planning/education-plan.md",   "color": "#3aa8c1", "icon": "🏫"},
+]
 
 # ── App ────────────────────────────────────────────────────────
 app = FastAPI(title="Career Dashboard")
@@ -41,33 +58,78 @@ def load_yaml(path: Path) -> dict:
 
 
 # ── Task Parser ────────────────────────────────────────────────
-def parse_tasks(path: Path) -> dict:
-    """Parse TASKS.md into structured data."""
+CHECKBOX_RE = re.compile(r'^(\s*- \[)([ xX])(\] .+)$')
+
+
+def parse_tasks_from_file(path: Path, realm_id: str) -> list[dict]:
+    """Parse checklist items from any markdown file, preserving line numbers."""
     if not path.exists():
-        return {"active": [], "done": []}
+        return []
 
-    content = path.read_text()
-    active = []
-    done = []
+    items = []
     current_category = ""
-
-    for line in content.splitlines():
+    for lineno, line in enumerate(path.read_text().splitlines(), start=1):
         stripped = line.strip()
 
-        # Detect category headers (#### React Fundamentals, #### SQL, etc.)
-        if stripped.startswith("####"):
+        # Track nearest heading (any level) as category
+        if stripped.startswith("#"):
             current_category = stripped.lstrip("#").strip()
+            # Remove emoji prefixes
+            current_category = re.sub(r'^[\U0001F300-\U0001FAFF\u2600-\u27BF\u2702-\u27B0]+\s*', '', current_category).strip()
             continue
 
-        # Detect tasks
-        if stripped.startswith("- [ ]"):
-            task_text = stripped[5:].strip()
-            active.append({"text": task_text, "cat": current_category, "done": False})
-        elif stripped.startswith("- [x]") or stripped.startswith("- [X]"):
-            task_text = stripped[5:].strip()
-            done.append({"text": task_text, "cat": current_category, "done": True})
+        m = CHECKBOX_RE.match(line)
+        if m:
+            done = m.group(2) in ("x", "X")
+            text = m.group(3)[2:]  # strip "] " prefix
+            items.append({
+                "text": text,
+                "cat": current_category,
+                "done": done,
+                "realm": realm_id,
+                "line": lineno,
+            })
 
-    return {"active": active, "done": done}
+    return items
+
+
+def parse_all_realms() -> dict:
+    """Parse tasks across all realms, returning structured data."""
+    all_items = []
+    realm_stats = []
+
+    for realm in REALMS:
+        path = WORKSPACE / realm["file"]
+        items = parse_tasks_from_file(path, realm["id"])
+        active = [i for i in items if not i["done"]]
+        done = [i for i in items if i["done"]]
+        realm_stats.append({
+            **realm,
+            "total": len(items),
+            "done_count": len(done),
+            "active_count": len(active),
+            "pct": round(len(done) / len(items) * 100) if items else 0,
+        })
+        all_items.extend(items)
+
+    active = [i for i in all_items if not i["done"]]
+    done = [i for i in all_items if i["done"]]
+    return {
+        "active": active,
+        "done": done,
+        "all": all_items,
+        "realm_stats": realm_stats,
+        "total": len(all_items),
+        "total_done": len(done),
+        "total_active": len(active),
+    }
+
+
+
+class ToggleRequest(BaseModel):
+    realm: str
+    line: int
+    done: bool
 
 
 # ── Dashboard Parser ──────────────────────────────────────────
@@ -95,7 +157,7 @@ def build_context() -> dict:
     goals_data = load_yaml(GOALS_FILE)
     jobs_data = load_yaml(JOBS_FILE)
     network_data = load_yaml(NETWORK_FILE)
-    tasks_data = parse_tasks(TASKS_FILE)
+    realm_tasks = parse_all_realms()
     current_week = parse_week_number(DASHBOARD_FILE)
     today = date.today()
 
@@ -158,7 +220,7 @@ def build_context() -> dict:
     q1_pct = min(100, round((current_week / 13) * 100))
     q2_pct = max(0, min(100, round(((current_week - 13) / 13) * 100))) if current_week > 13 else 0
     q3_pct = max(0, min(100, round(((current_week - 26) / 13) * 100))) if current_week > 26 else 0
-    q4_pct = max(0, min(100, round(((current_week - 39) / 13) * 100))) if current_week > 39 else 0
+    q4_pct = max(0, min(100, round(((current_week - 39) / 13) * 100))) if current_week > 39 else 0  # noqa: used in template
 
     # Projects (from DASHBOARD.md — hardcoded since MD parsing is complex)
     projects = [
@@ -239,6 +301,41 @@ def build_context() -> dict:
     credits_completed = sum(s.get("credits", 0) for s in edu_sources if s.get("status") == "completed")
     credits_planned = sum(s.get("credits", 0) for s in edu_sources if s.get("status") != "completed")
 
+    # Books data
+    books_data = load_yaml(BOOKS_FILE)
+    books_list = books_data.get("books", [])
+    books_categories = books_data.get("categories", [])
+
+    # Build category lookup
+    cat_meta = {c["name"]: c for c in books_categories}
+
+    # Stats
+    total_books = len(books_list)
+    in_plan_count = sum(1 for b in books_list if b.get("in_plan"))
+    new_picks = total_books - in_plan_count
+
+    # Group books by category (preserve insertion order, O(n) via dict)
+    cat_groups: dict[str, dict] = {}
+    for b in books_list:
+        cat = b.get("category", "Uncategorized")
+        if cat not in cat_groups:
+            meta = cat_meta.get(cat, {})
+            cat_groups[cat] = {
+                "name": cat,
+                "icon": meta.get("icon", "📖"),
+                "color": meta.get("color", "#888"),
+                "books": [],
+            }
+        cat_groups[cat]["books"].append(b)
+    books_by_category = list(cat_groups.values())
+
+    # Quarter counts
+    q_counts = {"Q1": 0, "Q2": 0, "Q3": 0, "Q4": 0}
+    for b in books_list:
+        q = b.get("quarter", "Q1")
+        if q in q_counts:
+            q_counts[q] += 1
+
     return {
         "today": today.isoformat(),
         "edu_program": edu_program,
@@ -256,8 +353,8 @@ def build_context() -> dict:
         "q2_pct": q2_pct,
         "q3_pct": q3_pct,
         "q4_pct": q4_pct,
-        "tasks": tasks_data,
-        "total_tasks": len(tasks_data["active"]) + len(tasks_data["done"]),
+        "realm_tasks": realm_tasks,
+        "realms": REALMS,
         "technical_skills": technical_skills,
         "soft_skills": soft_skills,
         "certifications": certifications,
@@ -269,6 +366,11 @@ def build_context() -> dict:
         "learning_matrix": learning_matrix,
         "success_metrics": success_metrics,
         "app_checklist": app_checklist,
+        "books_by_category": books_by_category,
+        "total_books": total_books,
+        "in_plan_count": in_plan_count,
+        "new_picks": new_picks,
+        "q_counts": q_counts,
     }
 
 
@@ -295,29 +397,66 @@ def discover_md_files() -> list[dict]:
 
 # ── Routes ────────────────────────────────────────────────────
 @app.get("/", response_class=HTMLResponse)
-async def dashboard(request: Request):
+def dashboard(request: Request):
     ctx = build_context()
     ctx["request"] = request
     return templates.TemplateResponse("index.html", ctx)
 
 
 @app.get("/reader", response_class=HTMLResponse)
-async def reader(request: Request):
+def reader(request: Request):
     return templates.TemplateResponse("reader.html", {"request": request})
 
 
 @app.get("/api/files")
-async def api_files():
+def api_files():
     return JSONResponse(discover_md_files())
 
 
 @app.get("/api/file")
-async def api_file(path: str = Query(...)):
-    safe = Path(path)
-    # Prevent directory traversal
-    if ".." in safe.parts:
+def api_file(path: str = Query(...)):
+    # Resolve to absolute path and confirm it lives inside WORKSPACE.
+    # Using Path.resolve() handles symlinks, "..", and absolute injections
+    # (e.g. Path("/workspace") / Path("/etc/passwd") == Path("/etc/passwd")).
+    workspace = WORKSPACE.resolve()
+    target = (workspace / path).resolve()
+    if not str(target).startswith(str(workspace) + os.sep) and target != workspace:
         return JSONResponse({"error": "Invalid path"}, status_code=400)
-    target = WORKSPACE / safe
     if not target.exists() or not target.is_file():
         return JSONResponse({"error": "File not found"}, status_code=404)
     return JSONResponse({"path": path, "content": target.read_text(errors="replace")})
+
+
+@app.post("/api/tasks/toggle")
+def toggle_task(req: ToggleRequest):
+    """Toggle a checkbox in the source markdown file."""
+    # Find realm config
+    realm_cfg = next((r for r in REALMS if r["id"] == req.realm), None)
+    if not realm_cfg:
+        return JSONResponse({"error": "Unknown realm"}, status_code=400)
+
+    target = WORKSPACE / realm_cfg["file"]
+    if not target.exists():
+        return JSONResponse({"error": "File not found"}, status_code=404)
+
+    lines = target.read_text().splitlines(keepends=True)
+    idx = req.line - 1  # convert to 0-based
+
+    if idx < 0 or idx >= len(lines):
+        return JSONResponse({"error": "Line out of range"}, status_code=400)
+
+    line = lines[idx]
+    m = CHECKBOX_RE.match(line.rstrip('\n').rstrip('\r'))
+    if not m:
+        return JSONResponse({"error": "No checkbox on that line"}, status_code=400)
+
+    new_mark = "x" if req.done else " "
+    lines[idx] = m.group(1) + new_mark + m.group(3) + "\n"
+    # Write atomically: crash mid-write won't corrupt the source file.
+    with tempfile.NamedTemporaryFile(
+        "w", dir=target.parent, delete=False, suffix=".tmp"
+    ) as tf:
+        tf.write("".join(lines))
+    os.replace(tf.name, target)
+
+    return JSONResponse({"ok": True, "realm": req.realm, "line": req.line, "done": req.done})

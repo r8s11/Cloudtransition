@@ -6,36 +6,57 @@
   <title>Career Dashboard &mdash; 2026</title>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
+{%- macro metric_table(metrics) %}
+{% for m in metrics %}
+<div class="metric-row">
+  <div class="metric-cat">{{ m.category }}</div>
+  <div class="metric-goal">{{ m.goal }}</div>
+  <div class="metric-measure">{{ m.metric }}</div>
+</div>
+{% endfor %}
+{%- endmacro %}
+
+<!-- Skip Navigation -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
 <!-- ── NAV ──────────────────────────────────────────────────── -->
-<nav class="topnav">
+<nav class="topnav" aria-label="Dashboard sections">
   <div class="logo"><span>Cloud</span>Transition</div>
-  <div class="nav-tabs">
+  <div class="nav-tabs" role="tablist" aria-label="Dashboard pages">
     {% set pages = [
       ("overview", "Overview"),
       ("education", "Education"),
+      ("books", "Books"),
       ("tasks", "Tasks"),
       ("projects", "Projects"),
       ("skills", "Skills"),
       ("career", "Career"),
     ] %}
     {% for pid, plabel in pages %}
-    <button class="nav-tab {% if loop.first %}active{% endif %}" data-page="{{ pid }}">{{ plabel }}</button>
+    <button class="nav-tab {% if loop.first %}active{% endif %}"
+      role="tab"
+      id="tab-{{ pid }}"
+      aria-selected="{{ 'true' if loop.first else 'false' }}"
+      aria-controls="page-{{ pid }}"
+      data-page="{{ pid }}"
+      tabindex="{{ '0' if loop.first else '-1' }}">{{ plabel }}</button>
     {% endfor %}
     <a class="nav-tab" href="/reader">Reader</a>
   </div>
-  <div class="nav-date">{{ today }}</div>
+  <time class="nav-date" datetime="{{ today }}">{{ today }}</time>
 </nav>
 
-<div class="main">
+<main class="main" id="main-content">
 
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- OVERVIEW PAGE                                               -->
 <!-- ════════════════════════════════════════════════════════════ -->
-<div class="page active" id="page-overview">
+<div class="page active" id="page-overview" role="tabpanel" aria-labelledby="tab-overview">
 
   <!-- Restart Banner -->
   <div class="restart-banner">
@@ -46,27 +67,28 @@
     </div>
   </div>
 
-  <div class="page-header">
-    <h2>2026 Learning &amp; Career Dashboard</h2>
-    <p>Full-time worker &middot; 10-15 hrs/week &middot; Learn by building</p>
+  <!-- Hero Section -->
+  <div class="hero">
+    <h1 class="hero-title">2026 Learning &amp; <span class="accent">Career</span> Dashboard</h1>
+    <p class="hero-sub">Full-time worker &middot; 10-15 hrs/week &middot; Learn by building</p>
   </div>
 
   <!-- Stats -->
-  <div class="grid-4" style="margin-bottom: 16px;">
+  <div class="grid-4 mb-16">
     <div class="stat-box">
-      <div class="stat-value" style="color: var(--accent);">W{{ current_week }}</div>
+      <div class="stat-value color-accent">W{{ current_week }}</div>
       <div class="stat-label">Calendar Week</div>
     </div>
     <div class="stat-box">
-      <div class="stat-value" style="color: var(--green);">{{ tasks.done|length }}/{{ total_tasks }}</div>
+      <div class="stat-value color-green">{{ realm_tasks.total_done }}/{{ realm_tasks.total }}</div>
       <div class="stat-label">Tasks Done</div>
     </div>
     <div class="stat-box">
-      <div class="stat-value" style="color: var(--blue);">{{ projects|length }}</div>
+      <div class="stat-value color-blue">{{ projects|length }}</div>
       <div class="stat-label">Active Projects</div>
     </div>
     <div class="stat-box">
-      <div class="stat-value" style="color: var(--purple);">{{ certifications|length }}</div>
+      <div class="stat-value color-purple">{{ certifications|length }}</div>
       <div class="stat-label">Certifications</div>
     </div>
   </div>
@@ -74,23 +96,24 @@
   <!-- Year Progress Rings -->
   <div class="card">
     <div class="card-title">Year Progress</div>
-    <div class="grid-4" style="justify-items: center; padding: 8px 0;">
+    <div class="grid-5 justify-center pad-y-8">
       {% for ring in [
         {"pct": year_pct, "label": "2026", "color": "#D97757"},
-        {"pct": q1_pct, "label": "Q1", "color": "#4a9e6e"},
-        {"pct": q2_pct, "label": "Q2", "color": "#4a7fb5"},
-        {"pct": q3_pct, "label": "Q3", "color": "#7c5cbf"},
+        {"pct": q1_pct,   "label": "Q1",   "color": "#5cc98a"},
+        {"pct": q2_pct,   "label": "Q2",   "color": "#5a9fd4"},
+        {"pct": q3_pct,   "label": "Q3",   "color": "#9478d4"},
+        {"pct": q4_pct,   "label": "Q4",   "color": "#e0b840"},
       ] %}
       <div class="ring-container">
         {% set circ = 99.9 %}
         {% set offset = circ * (1 - ring.pct / 100) %}
-        <svg class="ring-svg" viewBox="0 0 36 36">
+        <svg class="ring-svg" viewBox="0 0 36 36" role="img" aria-label="{{ ring.label }} progress: {{ ring.pct }}%">
           <circle class="ring-bg" cx="18" cy="18" r="15.9"/>
           <circle class="ring-fill" cx="18" cy="18" r="15.9"
             stroke="{{ ring.color }}"
             stroke-dasharray="{{ circ }}"
             stroke-dashoffset="{{ offset }}"/>
-          <text class="ring-text" x="18" y="18">{{ ring.pct }}%</text>
+          <text class="ring-text" x="18" y="18" aria-hidden="true">{{ ring.pct }}%</text>
         </svg>
         <div class="ring-label">{{ ring.label }}</div>
       </div>
@@ -107,7 +130,7 @@
         <div class="project-header">
           <h3>{{ p.name }}</h3>
         </div>
-        <div class="project-status badge" style="background: {{ p.color }}20; color: {{ p.color }}; margin-bottom: 8px;">
+        <div class="project-badge mb-8" style="background: {{ p.color }}20; color: {{ p.color }};">
           {{ p.status }}
         </div>
         <div class="progress-label">
@@ -124,20 +147,14 @@
   <!-- Success Metrics -->
   <div class="card">
     <div class="card-title">End of 2026 Goals</div>
-    {% for m in success_metrics %}
-    <div class="metric-row">
-      <div class="metric-cat">{{ m.category }}</div>
-      <div class="metric-goal">{{ m.goal }}</div>
-      <div class="metric-measure">{{ m.metric }}</div>
-    </div>
-    {% endfor %}
+    {{ metric_table(success_metrics) }}
   </div>
 </div>
 
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- EDUCATION PAGE                                               -->
 <!-- ════════════════════════════════════════════════════════════ -->
-<div class="page" id="page-education">
+<div class="page" id="page-education" role="tabpanel" aria-labelledby="tab-education">
 
   <div class="page-header">
     <h2>{{ edu_program.name or 'Education Plan' }}</h2>
@@ -145,25 +162,25 @@
   </div>
 
   <!-- Stats Row -->
-  <div class="grid-5" style="margin-bottom: 16px;">
+  <div class="grid-5 mb-16">
     <div class="stat-box">
-      <div class="stat-value" style="color: var(--green);">{{ edu_stats.credits_applied or 0 }}</div>
+      <div class="stat-value color-green">{{ edu_stats.credits_applied or 0 }}</div>
       <div class="stat-label">Credits Applied</div>
     </div>
     <div class="stat-box">
-      <div class="stat-value" style="color: var(--accent);">{{ edu_stats.credits_remaining or 0 }}</div>
+      <div class="stat-value color-accent">{{ edu_stats.credits_remaining or 0 }}</div>
       <div class="stat-label">Remaining (BS)</div>
     </div>
     <div class="stat-box">
-      <div class="stat-value" style="color: var(--blue);">{{ edu_stats.progress_pct or 0 }}%</div>
+      <div class="stat-value color-blue">{{ edu_stats.progress_pct or 0 }}%</div>
       <div class="stat-label">Degree Progress</div>
     </div>
     <div class="stat-box">
-      <div class="stat-value" style="color: var(--purple);">2027</div>
+      <div class="stat-value color-purple">2027</div>
       <div class="stat-label">AS Target</div>
     </div>
     <div class="stat-box">
-      <div class="stat-value" style="color: var(--green);">2028</div>
+      <div class="stat-value color-green">2028</div>
       <div class="stat-label">BS Target</div>
     </div>
   </div>
@@ -173,21 +190,21 @@
     <!-- Progress Ring -->
     <div class="card">
       <div class="card-title">Degree Progress</div>
-      <div style="display: flex; align-items: center; gap: 24px;">
-        <div class="ring-container" style="flex-shrink: 0;">
+      <div class="items-center-gap-24">
+        <div class="ring-container flex-shrink-0">
           {% set deg_circ = 99.9 %}
           {% set deg_offset = deg_circ * (1 - (edu_stats.progress_pct or 0) / 100) %}
-          <svg class="ring-svg" viewBox="0 0 36 36" style="width: 100px; height: 100px;">
+          <svg class="ring-svg ring-100" viewBox="0 0 36 36" role="img" aria-label="Degree progress: {{ edu_stats.progress_pct or 0 }}%">
             <circle class="ring-bg" cx="18" cy="18" r="15.9"/>
             <circle class="ring-fill" cx="18" cy="18" r="15.9"
               stroke="var(--green)"
               stroke-dasharray="{{ deg_circ }}"
               stroke-dashoffset="{{ deg_offset }}"/>
-            <text class="ring-text" x="18" y="18">{{ edu_stats.progress_pct or 0 }}%</text>
+            <text class="ring-text" x="18" y="18" aria-hidden="true">{{ edu_stats.progress_pct or 0 }}%</text>
           </svg>
           <div class="ring-label">BS (120 cr)</div>
         </div>
-        <div style="flex: 1;">
+        <div class="flex-1">
           <div class="edu-stat-line">
             <span>Credits applied</span>
             <strong>{{ edu_stats.credits_applied or 0 }} / {{ edu_stats.credits_required or 120 }}</strong>
@@ -229,9 +246,9 @@
             <span class="legend-label">{{ src.source }}</span>
             <span class="legend-value">{{ src.credits }} cr</span>
             {% if src.status == "completed" %}
-            <span class="badge" style="background: var(--green-light); color: var(--green); font-size: 9px;">Done</span>
+            <span class="badge badge-status-done">Done</span>
             {% elif src.status == "not_started" %}
-            <span class="badge" style="background: var(--surface-alt); color: var(--text-muted); font-size: 9px;">Planned</span>
+            <span class="badge badge-status-planned">Planned</span>
             {% endif %}
           </div>
           {% endfor %}
@@ -243,18 +260,18 @@
   <!-- Transfer Strategy Phases -->
   <div class="card">
     <div class="card-title">Credit Strategy &mdash; Cheapest First</div>
-    <div class="grid-3" style="gap: 12px;">
+    <div class="grid-3 gap-12">
       {% set phase_colors = ["#c9a227", "#7c5cbf", "#D97757", "#4a7fb5", "#4a9e6e"] %}
       {% for ph in edu_phases %}
       <div class="phase-card" style="border-top: 3px solid {{ phase_colors[loop.index0 % 5] }};">
         <div class="phase-header">
           <span class="phase-number">Phase {{ ph.phase }}</span>
           {% if ph.status == "completed" %}
-          <span class="badge" style="background: var(--green-light); color: var(--green);">Done</span>
+          <span class="badge badge-status-done">Done</span>
           {% elif ph.status == "in_progress" %}
-          <span class="badge" style="background: var(--blue-light); color: var(--blue);">Active</span>
+          <span class="badge badge-status-active">Active</span>
           {% else %}
-          <span class="badge" style="background: var(--surface-alt); color: var(--text-muted);">Upcoming</span>
+          <span class="badge badge-status-upcoming">Upcoming</span>
           {% endif %}
         </div>
         <h4 class="phase-name">{{ ph.name }}</h4>
@@ -277,8 +294,7 @@
       <div class="edu-timeline">
         {% for m in edu_timeline %}
         <div class="timeline-item {{ 'timeline-done' if m.status == 'completed' else ('timeline-future' if m.status == 'future' else '') }}">
-          <div class="timeline-dot"
-            style="background: {{ 'var(--green)' if m.status == 'completed' else ('var(--text-muted)' if m.status == 'future' else 'var(--accent)') }};"></div>
+          <div class="timeline-dot {{ 'timeline-dot-completed' if m.status == 'completed' else ('timeline-dot-future' if m.status == 'future' else 'timeline-dot-active') }}"></div>
           <div class="timeline-content">
             <div class="timeline-milestone">{{ m.milestone }}</div>
             <div class="timeline-target">{{ m.target }}</div>
@@ -299,13 +315,13 @@
           <div class="metric-measure">${{ "{:,}".format(item.amount) }}</div>
         </div>
         {% endfor %}
-        <div class="metric-row" style="border-top: 2px solid var(--border); margin-top: 4px; padding-top: 12px;">
-          <div class="metric-goal" style="font-weight: 700;">Total estimated</div>
-          <div class="metric-measure" style="font-weight: 700; color: var(--accent);">${{ "{:,}".format(edu_cost.get("total_low", 0)) }}&ndash;${{ "{:,}".format(edu_cost.get("total_high", 0)) }}</div>
+        <div class="metric-row cost-total">
+          <div class="metric-goal">Total estimated</div>
+          <div class="metric-measure">${{ "{:,}".format(edu_cost.get("total_low", 0)) }}&ndash;${{ "{:,}".format(edu_cost.get("total_high", 0)) }}</div>
         </div>
-        <div class="metric-row" style="background: var(--green-light); border-radius: 8px; padding: 10px 12px; margin-top: 8px;">
-          <div class="metric-goal" style="color: var(--green); font-weight: 600;">After max Pell Grant</div>
-          <div class="metric-measure" style="color: var(--green); font-weight: 700;">${{ "{:,}".format(edu_cost.get("net_low", 0)) }}&ndash;${{ "{:,}".format(edu_cost.get("net_high", 0)) }}</div>
+        <div class="metric-row cost-net">
+          <div class="metric-goal">After max Pell Grant</div>
+          <div class="metric-measure">${{ "{:,}".format(edu_cost.get("net_low", 0)) }}&ndash;${{ "{:,}".format(edu_cost.get("net_high", 0)) }}</div>
         </div>
       </div>
 
@@ -317,9 +333,9 @@
         </div>
         {% for a in edu_actions %}
         <div class="task-item">
-          <div class="task-check {{ 'done' if a.done else '' }}">{{ '&#x2713;' if a.done else '' }}</div>
+          <div class="task-check {{ 'done' if a.done else '' }}" role="checkbox" aria-checked="{{ 'true' if a.done else 'false' }}" aria-label="{{ a.text }}">{{ '&#x2713;' if a.done else '' }}</div>
           <span class="task-text {{ 'done' if a.done else '' }}">{{ a.text }}</span>
-          <span class="task-cat" style="background: var(--accent-light); color: var(--accent);">P{{ a.priority }}</span>
+          <span class="task-cat task-cat-priority">P{{ a.priority }}</span>
         </div>
         {% endfor %}
       </div>
@@ -345,16 +361,16 @@
         <tr>
           <td>
             {% if c.priority == 1 %}
-            <span class="badge" style="background: var(--red-light); color: var(--red);">P1 &mdash; Major</span>
+            <span class="badge badge-p1">P1 &mdash; Major</span>
             {% elif c.priority == 2 %}
-            <span class="badge" style="background: var(--yellow-light); color: var(--yellow);">P2 &mdash; Gen Ed</span>
+            <span class="badge badge-p2">P2 &mdash; Gen Ed</span>
             {% else %}
-            <span class="badge" style="background: var(--surface-alt); color: var(--text-muted);">P3 &mdash; Elective</span>
+            <span class="badge badge-p3">P3 &mdash; Elective</span>
             {% endif %}
           </td>
           <td>{{ c.name }}</td>
-          <td style="font-family: var(--mono); font-size: 12px;">{{ c.code }}</td>
-          <td style="text-align: center;">{{ c.credits }}</td>
+          <td class="mono-sm">{{ c.code }}</td>
+          <td class="text-center">{{ c.credits }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -365,56 +381,193 @@
 </div>
 
 <!-- ════════════════════════════════════════════════════════════ -->
+<!-- BOOKS PAGE                                                  -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-books" role="tabpanel" aria-labelledby="tab-books">
+  <div class="page-header">
+    <h2>O'Reilly Reading List</h2>
+    <p>{{ total_books }} books &middot; {{ in_plan_count }} already planned &middot; {{ new_picks }} new picks &mdash; from Books/books-data.yml</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid-4 mb-16">
+    <div class="stat-box">
+      <div class="stat-value color-accent">{{ total_books }}</div>
+      <div class="stat-label">Total Books</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value color-green">{{ in_plan_count }}</div>
+      <div class="stat-label">In Current Plan</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value color-blue">{{ new_picks }}</div>
+      <div class="stat-label">New Picks</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value color-purple">{{ books_by_category|length }}</div>
+      <div class="stat-label">Categories</div>
+    </div>
+  </div>
+
+  <!-- Quarter Breakdown -->
+  <div class="card">
+    <div class="card-title">Books by Quarter</div>
+    <div class="grid-4">
+      {% for q, label, color in [("Q1", "Foundations", "#5cc98a"), ("Q2", "Features", "#5a9fd4"), ("Q3", "Scale & Cert", "#9478d4"), ("Q4", "Job Ready", "#D97757")] %}
+      <div class="stat-box" style="border-left: 3px solid {{ color }};">
+        <div class="stat-value" style="color: {{ color }};">{{ q_counts[q] }}</div>
+        <div class="stat-label">{{ q }} &mdash; {{ label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Books by Category -->
+  {% for group in books_by_category %}
+  <div class="card">
+    <div class="card-title">{{ group.icon }} {{ group.name }}</div>
+    {% for book in group.books %}
+    <div class="book-row" style="border-left: 3px solid {{ group.color }};">
+      <div class="book-info">
+        <div class="book-title">
+          {{ book.title }}
+          {% if book.in_plan %}
+          <span class="badge badge-done">In Plan</span>
+          {% else %}
+          <span class="badge badge-count">New</span>
+          {% endif %}
+        </div>
+        <div class="book-author">{{ book.author }}</div>
+      </div>
+      <div class="book-meta">
+        <span class="badge" style="background: {{ group.color }}15; color: {{ group.color }}; border-color: {{ group.color }}33;">{{ book.quarter }}</span>
+        {% for tag in book.tags[:3] %}
+        <span class="book-tag">{{ tag }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+  <!-- Platform Tip -->
+  <div class="card card-dark">
+    <div class="card-title">&#x1F4A1; O'Reilly Learning Platform</div>
+    <p>With a subscription (~$49/month) or free library access, get all {{ total_books }} books digitally plus video courses, coding sandboxes, and AZ-204 practice exams.</p>
+    <p style="margin-top: 8px; opacity: 0.8;">Many public libraries offer free O'Reilly access &mdash; check yours before subscribing!</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
 <!-- TASKS PAGE                                                  -->
 <!-- ════════════════════════════════════════════════════════════ -->
-<div class="page" id="page-tasks">
+<div class="page" id="page-tasks" role="tabpanel" aria-labelledby="tab-tasks">
   <div class="page-header">
     <h2>Task Tracker</h2>
-    <p>Week 1 Continuation &mdash; Restarting next week</p>
+    <p>{{ realm_tasks.total }} items across {{ realms|length }} realms &mdash; {{ realm_tasks.total_done }} done, {{ realm_tasks.total_active }} remaining</p>
   </div>
 
-  <!-- Active Tasks -->
-  <div class="card">
-    <div class="card-title">
-      Active
-      <span class="badge badge-count">{{ tasks.active|length }}</span>
+  <!-- Overall Stats -->
+  <div class="grid-4 mb-16">
+    <div class="stat-box">
+      <div class="stat-value color-accent">{{ realm_tasks.total }}</div>
+      <div class="stat-label">Total Items</div>
     </div>
-    {% for t in tasks.active %}
-    <div class="task-item">
-      <div class="task-check"></div>
-      <span class="task-text">{{ t.text }}</span>
-      {% set cat_cls = "cat-" + t.cat|lower|replace(" ", "-")|replace("&", "") %}
-      <span class="task-cat {{ cat_cls }}">{{ t.cat }}</span>
+    <div class="stat-box">
+      <div class="stat-value color-green">{{ realm_tasks.total_done }}</div>
+      <div class="stat-label">Completed</div>
     </div>
+    <div class="stat-box">
+      <div class="stat-value color-blue">{{ realm_tasks.total_active }}</div>
+      <div class="stat-label">Remaining</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value color-purple">
+        {% if realm_tasks.total > 0 %}{{ (realm_tasks.total_done / realm_tasks.total * 100)|round|int }}%{% else %}0%{% endif %}
+      </div>
+      <div class="stat-label">Overall Progress</div>
+    </div>
+  </div>
+
+  <!-- Realm Filter Pills -->
+  <div class="realm-filters mb-16">
+    <button class="realm-pill active" data-realm="all">
+      All <span class="pill-count">{{ realm_tasks.total }}</span>
+    </button>
+    {% for r in realm_tasks.realm_stats %}
+    {% if r.total > 0 %}
+    <button class="realm-pill" data-realm="{{ r.id }}" style="--realm-color: {{ r.color }};">
+      {{ r.icon }} {{ r.name }} <span class="pill-count">{{ r.done_count }}/{{ r.total }}</span>
+    </button>
+    {% endif %}
     {% endfor %}
-    {% if not tasks.active %}
-    <div class="empty-state">
-      <div class="empty-icon">&#x2705;</div>
-      <p>No active tasks. Update TASKS.md to add new items.</p>
+  </div>
+
+  <!-- Realm Progress Cards -->
+  <div class="card mb-16">
+    <div class="card-title">Progress by Realm</div>
+    {% for r in realm_tasks.realm_stats %}
+    {% if r.total > 0 %}
+    <div class="realm-progress-row" data-realm-row="{{ r.id }}">
+      <div class="realm-label" style="color: {{ r.color }};">{{ r.icon }} {{ r.name }}</div>
+      <div class="realm-bar-wrap">
+        <div class="progress-track">
+          <div class="progress-fill" style="background: {{ r.color }};" data-width="{{ r.pct }}%"></div>
+        </div>
+      </div>
+      <div class="realm-fraction">{{ r.done_count }}/{{ r.total }}</div>
     </div>
     {% endif %}
-  </div>
-
-  <!-- Done Tasks -->
-  <div class="card">
-    <div class="card-title">
-      Completed
-      <span class="badge badge-done">{{ tasks.done|length }}</span>
-    </div>
-    {% for t in tasks.done %}
-    <div class="task-item">
-      <div class="task-check done">&#x2713;</div>
-      <span class="task-text done">{{ t.text }}</span>
-      <span class="task-cat cat-setup">{{ t.cat }}</span>
-    </div>
     {% endfor %}
   </div>
+
+  <!-- Task List — grouped by realm then category -->
+  {% for r in realm_tasks.realm_stats %}
+  {% if r.total > 0 %}
+  {% set realm_items = realm_tasks.all | selectattr("realm", "equalto", r.id) | list %}
+
+  <div class="realm-section" data-realm-section="{{ r.id }}">
+    <div class="card">
+      <div class="card-title" style="border-left: 3px solid {{ r.color }}; padding-left: 12px;">
+        {{ r.icon }} {{ r.name }}
+        <span class="badge badge-count">{{ r.active_count }}</span>
+        {% if r.done_count > 0 %}
+        <span class="badge badge-done">{{ r.done_count }} done</span>
+        {% endif %}
+      </div>
+
+      {# Group items by category within this realm #}
+      {% set ns = namespace(current_cat="") %}
+      {% for t in realm_items %}
+        {% if t.cat != ns.current_cat %}
+          {% set ns.current_cat = t.cat %}
+          <div class="task-category-header">{{ t.cat }}</div>
+        {% endif %}
+
+        <div class="task-item {% if t.done %}task-done-row{% endif %}">
+          <div class="task-check {% if t.done %}done{% endif %}"
+               role="checkbox"
+               tabindex="0"
+               aria-checked="{{ 'true' if t.done else 'false' }}"
+               aria-label="{{ t.text }}"
+               data-realm="{{ t.realm }}"
+               data-line="{{ t.line }}"
+               data-done="{{ 'true' if t.done else 'false' }}"
+               >{% if t.done %}&#x2713;{% endif %}</div>
+          <span class="task-text {% if t.done %}done{% endif %}">{{ t.text }}</span>
+          <span class="task-cat" style="background: {{ r.color }}15; color: {{ r.color }};">{{ t.cat }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
 </div>
 
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- PROJECTS PAGE                                               -->
 <!-- ════════════════════════════════════════════════════════════ -->
-<div class="page" id="page-projects">
+<div class="page" id="page-projects" role="tabpanel" aria-labelledby="tab-projects">
   <div class="page-header">
     <h2>Projects</h2>
     <p>3 production apps by end of 2026 &mdash; Restarting from Week 1</p>
@@ -423,15 +576,15 @@
   {% for p in projects %}
   <div class="card" style="border-left: 4px solid {{ p.color }};">
     <div class="project-header">
-      <h3 style="font-size: 20px;">{{ p.name }}</h3>
-      <span class="badge" style="background: {{ p.color }}20; color: {{ p.color }};">{{ p.status }}</span>
+      <h3 class="fs-20">{{ p.name }}</h3>
+      <span class="project-badge" style="background: {{ p.color }}20; color: {{ p.color }};">{{ p.status }}</span>
     </div>
 
     <div class="progress-label">
       <span class="name">Q1 Goal: {{ p.q1_goal }}</span>
       <span class="pct">Restarting</span>
     </div>
-    <div class="progress-track" style="margin-bottom: 16px;">
+    <div class="progress-track progress-track-mb">
       <div class="progress-fill" style="background: {{ p.color }}; width: 0;"></div>
     </div>
 
@@ -473,11 +626,14 @@
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- SKILLS PAGE                                                 -->
 <!-- ════════════════════════════════════════════════════════════ -->
-<div class="page" id="page-skills">
+<div class="page" id="page-skills" role="tabpanel" aria-labelledby="tab-skills">
   <div class="page-header">
     <h2>Skills &amp; Certifications</h2>
     <p>From skills/skills-inventory.yml &mdash; updates automatically</p>
   </div>
+
+  {% set prof_pct   = {"beginner": 25, "intermediate": 50, "advanced": 75, "expert": 100} %}
+  {% set prof_color = {"beginner": "var(--red)", "intermediate": "var(--yellow)", "advanced": "var(--blue)", "expert": "var(--green)"} %}
 
   <div class="grid-2">
     <!-- Left: Technical + Soft Skills -->
@@ -490,9 +646,6 @@
           <div class="card-title">{{ sk.category }}</div>
           {% set ns.current_cat = sk.category %}
         {% endif %}
-
-        {% set prof_pct = {"beginner": 25, "intermediate": 50, "advanced": 75, "expert": 100} %}
-        {% set prof_color = {"beginner": "var(--red)", "intermediate": "var(--yellow)", "advanced": "var(--blue)", "expert": "var(--green)"} %}
 
         <div class="skill-row">
           <div class="progress-label">
@@ -522,7 +675,9 @@
             <span class="badge badge-{{ sk.proficiency }}">{{ sk.proficiency }}</span>
           </div>
           <div class="progress-track">
-            <div class="progress-fill" style="background: var(--red);" data-width="15%"></div>
+            <div class="progress-fill"
+              style="background: {{ prof_color.get(sk.proficiency, 'var(--text-muted)') }};"
+              data-width="{{ prof_pct.get(sk.proficiency, 0) }}%"></div>
           </div>
         </div>
         {% endfor %}
@@ -535,7 +690,7 @@
         <div class="card-title">Certifications</div>
         {% for cert in certifications %}
         <div class="cert-card">
-          <div class="cert-icon" style="background: {{ 'var(--green-light)' if cert.obtained else 'var(--yellow-light)' }};">
+          <div class="cert-icon {{ 'cert-icon-obtained' if cert.obtained else 'cert-icon-pending' }}">
             {{ '&#x1F3C5;' if cert.obtained else '&#x1F4CB;' }}
           </div>
           <div class="cert-info">
@@ -549,9 +704,9 @@
             </p>
           </div>
           {% if not cert.obtained %}
-          <span class="cert-status" style="background: var(--yellow-light); color: var(--yellow);">Pending</span>
+          <span class="cert-status badge-status-pending">Pending</span>
           {% else %}
-          <span class="cert-status" style="background: var(--green-light); color: var(--green);">Active</span>
+          <span class="cert-status badge-status-cert-active">Active</span>
           {% endif %}
         </div>
         {% endfor %}
@@ -581,7 +736,7 @@
         ] %}
         {% for month, skill, validation in checkpoints %}
         <div class="metric-row">
-          <div class="metric-cat" style="color: {{ 'var(--green)' if loop.index <= 2 else 'var(--text-muted)' }};">{{ month }}</div>
+          <div class="metric-cat {{ 'month-active' if loop.index <= 2 else 'color-muted' }}">{{ month }}</div>
           <div class="metric-goal">{{ skill }}</div>
           <div class="metric-measure">{{ validation }}</div>
         </div>
@@ -594,7 +749,7 @@
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- CAREER PAGE                                                 -->
 <!-- ════════════════════════════════════════════════════════════ -->
-<div class="page" id="page-career">
+<div class="page" id="page-career" role="tabpanel" aria-labelledby="tab-career">
   <div class="page-header">
     <h2>Career Hub</h2>
     <p>Goals, networking, and job search &mdash; from your YAML files</p>
@@ -620,24 +775,24 @@
       <!-- Job Applications -->
       <div class="card">
         <div class="card-title">Job Applications &mdash; 2026</div>
-        <div class="grid-3" style="margin-bottom: 12px;">
+        <div class="grid-3 mb-12">
           {% for label, key, color in [
-            ("Applied", "applied", "var(--blue)"),
-            ("Screening", "screening", "var(--yellow)"),
-            ("Interviews", "interviews", "var(--purple)"),
-            ("Onsites", "onsites", "var(--accent)"),
-            ("Offers", "offers", "var(--green)"),
-            ("Pending", "pending", "var(--text-muted)"),
+            ("Applied", "applied", "color-blue"),
+            ("Screening", "screening", "color-yellow"),
+            ("Interviews", "interviews", "color-purple"),
+            ("Onsites", "onsites", "color-accent"),
+            ("Offers", "offers", "color-green"),
+            ("Pending", "pending", "color-muted"),
           ] %}
           <div class="stat-box stat-sm">
-            <div class="stat-value" style="color: {{ color }};">{{ job_stats[key] }}</div>
+            <div class="stat-value {{ color }}">{{ job_stats[key] }}</div>
             <div class="stat-label">{{ label }}</div>
           </div>
           {% endfor %}
         </div>
 
         {% if job_stats.applied == 0 %}
-        <div class="empty-state" style="padding: 16px;">
+        <div class="empty-state empty-state-pad">
           <p>Job search begins Week 49 (December). Update interviews/job-applications.yml when ready.</p>
         </div>
         {% endif %}
@@ -672,7 +827,7 @@
         <div class="card-title">Application Checklist</div>
         {% for item in app_checklist %}
         <div class="task-item">
-          <div class="task-check"></div>
+          <div class="task-check" role="checkbox" aria-checked="false" aria-label="{{ item }}"></div>
           <span class="task-text">{{ item }}</span>
         </div>
         {% endfor %}
@@ -681,46 +836,106 @@
       <!-- Success Metrics -->
       <div class="card">
         <div class="card-title">2026 Success Metrics</div>
-        {% for m in success_metrics %}
-        <div class="metric-row">
-          <div class="metric-cat">{{ m.category }}</div>
-          <div class="metric-goal">{{ m.goal }}</div>
-          <div class="metric-measure">{{ m.metric }}</div>
-        </div>
-        {% endfor %}
+        {{ metric_table(success_metrics) }}
       </div>
     </div>
   </div>
 </div>
 
 <!-- ── Footer ──────────────────────────────────────────────── -->
-<div class="footer">
+<footer class="footer">
   <p>CloudTransition Career Dashboard &middot; Powered by FastAPI + Jinja2</p>
-  <p>Data reads from workspace YAML files on each page load &middot; {{ today }}</p>
-</div>
+  <p>Data reads from workspace YAML files on each page load &middot; <time datetime="{{ today }}">{{ today }}</time></p>
+</footer>
 
-</div><!-- .main -->
+</main><!-- .main -->
 
-<!-- ── Client JS (navigation + animations, no innerHTML) ──── -->
+<!-- ── Client JS (navigation + animations + a11y) ──────────── -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Tab navigation
-  document.querySelectorAll('.nav-tab').forEach(function(tab) {
+  var tabs = Array.from(document.querySelectorAll('.nav-tab[role="tab"]'));
+  var panels = document.querySelectorAll('[role="tabpanel"]');
+
+  function activateTab(tab, updateHash) {
+    // Deactivate all tabs
+    tabs.forEach(function(t) {
+      t.classList.remove('active');
+      t.setAttribute('aria-selected', 'false');
+      t.setAttribute('tabindex', '-1');
+    });
+
+    // Activate selected tab
+    tab.classList.add('active');
+    tab.setAttribute('aria-selected', 'true');
+    tab.setAttribute('tabindex', '0');
+
+    // Show correct panel
+    panels.forEach(function(p) { p.classList.remove('active'); });
+    var target = document.getElementById('page-' + tab.dataset.page);
+    if (target) {
+      target.classList.add('active');
+      animateBars(target);
+    }
+
+    // Update URL hash
+    if (updateHash !== false) {
+      history.replaceState(null, '', '#' + tab.dataset.page);
+    }
+  }
+
+  // Click handler
+  tabs.forEach(function(tab) {
     tab.addEventListener('click', function() {
-      document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
-      tab.classList.add('active');
-      document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
-      var target = document.getElementById('page-' + tab.dataset.page);
-      if (target) {
-        target.classList.add('active');
-        // Re-trigger progress bar animations for newly visible page
-        animateBars(target);
+      activateTab(tab);
+      tab.focus();
+    });
+  });
+
+  // Keyboard arrow navigation (WAI-ARIA Tabs pattern)
+  tabs.forEach(function(tab) {
+    tab.addEventListener('keydown', function(e) {
+      var idx = tabs.indexOf(tab);
+      var next;
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        next = tabs[(idx + 1) % tabs.length];
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        next = tabs[(idx - 1 + tabs.length) % tabs.length];
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        next = tabs[0];
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        next = tabs[tabs.length - 1];
+      }
+
+      if (next) {
+        activateTab(next);
+        next.focus();
       }
     });
   });
 
+  // Restore tab from URL hash on load
+  var hash = window.location.hash.replace('#', '');
+  if (hash) {
+    var matchingTab = tabs.find(function(t) { return t.dataset.page === hash; });
+    if (matchingTab) {
+      activateTab(matchingTab, false);
+    }
+  }
+
+  // Handle browser back/forward
+  window.addEventListener('hashchange', function() {
+    var h = window.location.hash.replace('#', '');
+    var t = tabs.find(function(tab) { return tab.dataset.page === h; });
+    if (t) activateTab(t, false);
+  });
+
   // Animate progress bars on load
-  animateBars(document);
+  animateBars(document.querySelector('.page.active') || document);
 });
 
 function animateBars(scope) {
@@ -732,6 +947,87 @@ function animateBars(scope) {
     });
   });
 }
+
+// ── Realm filter pills ────────────────────────────────────────
+(function() {
+  var pills = document.querySelectorAll('.realm-pill');
+  var sections = document.querySelectorAll('.realm-section');
+
+  pills.forEach(function(pill) {
+    pill.addEventListener('click', function() {
+      pills.forEach(function(p) { p.classList.remove('active'); });
+      pill.classList.add('active');
+
+      var realm = pill.dataset.realm;
+      sections.forEach(function(sec) {
+        if (realm === 'all' || sec.dataset.realmSection === realm) {
+          sec.style.display = '';
+        } else {
+          sec.style.display = 'none';
+        }
+      });
+    });
+  });
+})();
+
+// ── Interactive task checkboxes ───────────────────────────────
+(function() {
+  document.querySelectorAll('.task-check[data-realm]').forEach(function(box) {
+    function handleToggle() {
+      var isDone = box.dataset.done === 'true';
+      var newDone = !isDone;
+
+      // Optimistic UI update
+      box.dataset.done = String(newDone);
+      box.setAttribute('aria-checked', String(newDone));
+      box.innerHTML = newDone ? '&#x2713;' : '';
+      box.classList.toggle('done', newDone);
+
+      var textEl = box.nextElementSibling;
+      if (textEl) textEl.classList.toggle('done', newDone);
+
+      var row = box.closest('.task-item');
+      if (row) row.classList.toggle('task-done-row', newDone);
+
+      // API call to persist
+      fetch('/api/tasks/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          realm: box.dataset.realm,
+          line: parseInt(box.dataset.line, 10),
+          done: newDone
+        })
+      }).then(function(res) {
+        if (!res.ok) {
+          // Revert on failure
+          box.dataset.done = String(isDone);
+          box.setAttribute('aria-checked', String(isDone));
+          box.innerHTML = isDone ? '&#x2713;' : '';
+          box.classList.toggle('done', isDone);
+          if (textEl) textEl.classList.toggle('done', isDone);
+          if (row) row.classList.toggle('task-done-row', isDone);
+        }
+      }).catch(function() {
+        // Revert on error
+        box.dataset.done = String(isDone);
+        box.setAttribute('aria-checked', String(isDone));
+        box.innerHTML = isDone ? '&#x2713;' : '';
+        box.classList.toggle('done', isDone);
+        if (textEl) textEl.classList.toggle('done', isDone);
+        if (row) row.classList.toggle('task-done-row', isDone);
+      });
+    }
+
+    box.addEventListener('click', handleToggle);
+    box.addEventListener('keydown', function(e) {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        handleToggle();
+      }
+    });
+  });
+})();
 </script>
 </body>
 </html>

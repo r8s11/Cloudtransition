@@ -165,8 +165,8 @@ _Pace: ~2 courses per 2 weeks. Adjust based on difficulty. Python and Java may t
 **Total Sophia cost:** $99 × 3-4 months = **$297-$396**
 
 **Parallel actions during Phase 1:**
-- [ ] File FAFSA at studentaid.gov
-- [ ] Apply to SNHU (free, takes 5 minutes)
+- [x] File FAFSA at studentaid.gov
+- [x] Apply to SNHU (free, takes 5 minutes)
 - [ ] Request transfer credit evaluation from SNHU (send Sophia transcripts via Parchment + cert documentation via Credly)
 - [ ] Check if your employer offers tuition reimbursement
 - [ ] Verify MAT-240 (Statistics) equivalency status with SNHU advisor
