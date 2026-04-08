@@ -6,7 +6,7 @@ Brooklyn, NY 11232 | mail@roosevelt.info | [chinola.app](https://www.chinola.app
 
 ## Professional Summary
 
-Reliable IT Engineer with 7+ years of experience delivering hands-on technical support across healthcare, biotech, and scientific organizations. Expert in end-user support, Microsoft 365 administration, and IT service management across distributed teams. Known for high customer satisfaction, strong troubleshooting instincts, and a track record of implementing process improvements that reduce recurring issues. AWS Cloud Practitioner and Azure Fundamentals (AZ-900) certified. Bilingual (English/Spanish). Seeking a full-time IT Engineer or Systems Administrator position.
+Reliable IT Engineer with 7+ years of experience delivering hands-on technical support across finance, healthcare, biotech, and scientific organizations. Currently providing white-glove desktop support to 1,700+ end users at a major quantitative finance firm. Expert in end-user support, Microsoft 365 administration, and IT service management across distributed teams. Known for high customer satisfaction, strong troubleshooting instincts, and a track record of implementing process improvements that reduce recurring issues. AWS Cloud Practitioner and Azure Fundamentals (AZ-900) certified. Bilingual (English/Spanish). Seeking a full-time IT Engineer or Systems Administrator position.
 
 ---
 
@@ -35,9 +35,18 @@ Reliable IT Engineer with 7+ years of experience delivering hands-on technical s
 
 ## Professional Experience
 
+### Desktop Support Engineer
+
+**Two Sigma** — New York, NY | Feb 2026 – Present
+
+- Provide white-glove, customer-facing technical support to 1,700+ end users at all levels including C-suite, handling walk-up requests, floor walks, and VIP assistance
+- Deliver on-site hardware deployment and IMAC support, managing the full lifecycle from automated PC builds and new hire desk setups to workstation relocations and trader floor support
+- Maintain SLA-driven Jira ticket queues with detailed documentation, performing diagnostic troubleshooting and network connectivity testing
+- Manage IT asset inventory across local and global locations, coordinating equipment staging, storage room audits, and hardware preparation for deployments in partnership with Workplace Services and Technology Operations Engineering teams
+
 ### IT Service Delivery Specialist
 
-**Peak Scientific** — Westford, MA (Remote) | Apr 2024 – Present
+**Peak Scientific** — Westford, MA (Remote) | Apr 2024 – Feb 2026
 
 - Deliver Tier 1 and Tier 2 IT support to 200+ employees across North America, collaborating with global IT teams in India and Europe
 - Maintain 95%+ SLA compliance by efficiently triaging and resolving service requests and incidents in Zendesk

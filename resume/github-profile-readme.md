@@ -1,8 +1,8 @@
 # Hi, I'm Roosevelt
 
-**IT Support Engineer transitioning into DevOps & Cloud Engineering**
+**Desktop Support Engineer @ Two Sigma | Transitioning into DevOps & Cloud Engineering**
 
-I'm building hands-on skills in cloud infrastructure, automation, and CI/CD — with the goal of becoming a DevOps Engineer. Currently based in NYC.
+Currently supporting 1,700+ end users at a major quantitative finance firm. Building hands-on skills in cloud infrastructure, automation, and CI/CD — with the goal of becoming a DevOps Engineer. Based in NYC.
 
 ## What I'm Working On
 

@@ -64,7 +64,7 @@
 - [x] Install Python 3, VS Code, Git
 - [x] Create GitHub account and first repo
 - [x] Create Azure free account
-- [ ] Set up VS Code Python extensions, virtual env
+- [X] Set up VS Code Python extensions, virtual env
 - [ ] Read Phoenix Project Ch 1
 
 **Tuesday:** Python Lists & Loops

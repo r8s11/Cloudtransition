@@ -2,16 +2,19 @@
 
 ## Headline (120 chars max)
 
-IT Support Engineer | AWS & Azure Certified | Pursuing DevOps & Cloud Engineering | Python, CI/CD, IaC
+Desktop Support Engineer @ Two Sigma | AWS & Azure Certified | Pursuing DevOps & Cloud Engineering | Python, CI/CD, IaC
 
 ## About / Summary
 
-IT Support Engineer with 3+ years of experience managing cloud and on-premises infrastructure, troubleshooting complex technical issues, and supporting enterprise environments. Currently transitioning into DevOps and Cloud Engineering.
+Desktop Support Engineer at Two Sigma with 7+ years of experience managing enterprise infrastructure, troubleshooting complex technical issues, and supporting large-scale environments across finance, healthcare, and biotech. Currently transitioning into DevOps and Cloud Engineering.
+
+I provide white-glove technical support to 1,700+ end users at a major quantitative finance firm — managing hardware deployments, automated PC builds, and infrastructure operations while partnering with Technology Operations Engineering teams.
 
 I'm building hands-on skills in CI/CD pipelines, containerization (Docker), Infrastructure as Code (Terraform), and cloud-native deployments on Azure — backed by AWS and Azure certifications.
 
 What I bring to the table:
-- Real-world infrastructure experience from IT Support (troubleshooting, system administration, user management)
+- Enterprise-scale infrastructure experience supporting 1,700+ users in a high-performance finance environment
+- 7+ years across healthcare, biotech, and scientific organizations
 - AWS Certified Cloud Practitioner + Azure Fundamentals (AZ-900)
 - Growing proficiency in Python, JavaScript, SQL, and automation scripting
 - A builder's mindset — I'm shipping projects, not just collecting certifications

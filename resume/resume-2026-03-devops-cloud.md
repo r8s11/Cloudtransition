@@ -1,12 +1,12 @@
 # Roosevelt Segura
 
-Bronx, NY 10473 | mail@roosevelt.info | [chinola.app](https://www.chinola.app) | [GitHub](https://github.com/r8s11) | [LinkedIn](https://linkedin.com/in/YOUR-LINKEDIN)
+Brooklyn, NY 11232 | mail@roosevelt.info | [chinola.app](https://www.chinola.app) | [GitHub](https://github.com/r8s11) | [LinkedIn](https://linkedin.com/in/YOUR-LINKEDIN)
 
 ---
 
 ## Professional Summary
 
-Cloud-certified IT professional with 7+ years of experience supporting enterprise infrastructure across healthcare, biotech, and scientific industries. AWS Certified Cloud Practitioner and Microsoft Azure Fundamentals (AZ-900) certified. Proven ability to manage cloud environments (Azure, AWS, M365), automate IT workflows, and deliver high-quality support across globally distributed teams. Actively building DevOps skills in CI/CD, Docker, and Infrastructure as Code — seeking a full-time Cloud or DevOps Engineering role.
+Cloud-certified IT professional with 7+ years of experience supporting enterprise infrastructure across finance, healthcare, biotech, and scientific industries. AWS Certified Cloud Practitioner and Microsoft Azure Fundamentals (AZ-900) certified. Currently serving as Desktop Support Engineer at a major quantitative finance firm supporting 1,700+ end users. Proven ability to manage cloud environments (Azure, AWS, M365), automate IT workflows, and deliver high-quality support across globally distributed teams. Actively building DevOps skills in CI/CD, Docker, and Infrastructure as Code — seeking a full-time Cloud or DevOps Engineering role.
 
 ---
 
@@ -35,9 +35,18 @@ Cloud-certified IT professional with 7+ years of experience supporting enterpris
 
 ## Professional Experience
 
+### Desktop Support Engineer
+
+**Two Sigma** — New York, NY | Feb 2026 – Present
+
+- Deliver on-site hardware deployment and IMAC support for 1,700+ end users at a major quantitative finance firm, managing the full lifecycle from automated PC builds and new hire desk setups to workstation relocations and trader floor support
+- Maintain SLA-driven Jira ticket queues with detailed documentation, performing diagnostic troubleshooting and network connectivity testing
+- Provide white-glove, customer-facing technical support at all levels including C-suite, handling walk-up requests, floor walks, and VIP assistance while communicating status updates and managing expectations
+- Manage IT asset inventory across local and global locations, coordinating equipment staging, storage room audits, and hardware preparation for deployments in partnership with Workplace Services and Technology Operations Engineering teams
+
 ### IT Service Delivery Specialist
 
-**Peak Scientific** — Westford, MA (Remote) | Apr 2024 – Present
+**Peak Scientific** — Westford, MA (Remote) | Apr 2024 – Feb 2026
 
 - Deliver Tier 1/Tier 2 support to 200+ North American employees while coordinating with global IT teams across India and Europe in a 24/7 support model
 - Maintain 95%+ SLA compliance by triaging and resolving service requests and incidents tracked in Zendesk

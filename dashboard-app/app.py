@@ -12,7 +12,7 @@ import re
 import tempfile
 
 import yaml
-from fastapi import FastAPI, Query, Request
+from fastapi import FastAPI, Header, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -420,16 +420,23 @@ def api_file(path: str = Query(...)):
     # (e.g. Path("/workspace") / Path("/etc/passwd") == Path("/etc/passwd")).
     workspace = WORKSPACE.resolve()
     target = (workspace / path).resolve()
-    if not str(target).startswith(str(workspace) + os.sep) and target != workspace:
+    try:
+        target.relative_to(workspace)
+    except ValueError:
         return JSONResponse({"error": "Invalid path"}, status_code=400)
     if not target.exists() or not target.is_file():
         return JSONResponse({"error": "File not found"}, status_code=404)
+    ALLOWED_EXTENSIONS = {".md", ".txt", ".yaml", ".yml", ".json", ".csv", ".html", ".py"}
+    if target.suffix.lower() not in ALLOWED_EXTENSIONS:
+        return JSONResponse({"error": "File type not allowed"}, status_code=403)
     return JSONResponse({"path": path, "content": target.read_text(errors="replace")})
 
 
 @app.post("/api/tasks/toggle")
-def toggle_task(req: ToggleRequest):
+def toggle_task(req: ToggleRequest, x_requested_with: str = Header()):
     """Toggle a checkbox in the source markdown file."""
+    if x_requested_with != "XMLHttpRequest":
+        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
     # Find realm config
     realm_cfg = next((r for r in REALMS if r["id"] == req.realm), None)
     if not realm_cfg:

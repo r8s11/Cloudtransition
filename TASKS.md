@@ -9,10 +9,10 @@
 #### LinkedIn & Visibility (2-3 hours total)
 
 - [ ] Update LinkedIn headline: `IT Support Engineer | AWS & Azure Certified | Pursuing DevOps & Cloud Engineering`
-- [ ] Add summary emphasizing: cloud certs, automation interest, IT troubleshooting background
+- [X] Add summary emphasizing: cloud certs, automation interest, IT troubleshooting background
 - [x] Add all certifications to LinkedIn (AWS CCP, AZ-900, Security+ with dates)
-- [ ] Add skills keywords: Python, AWS, Azure, Docker, CI/CD, Terraform, Linux, Git, SQL
-- [ ] Turn on "Open to Work" (visible to recruiters only)
+- [X] Add skills keywords: Python, AWS, Azure, Docker, CI/CD, Terraform, Linux, Git, SQL
+- [X] Turn on "Open to Work" (visible to recruiters only)
 - [ ] Post first LinkedIn update: share your career transition journey or a learning win
 
 #### GitHub Profile (1-2 hours)
@@ -25,7 +25,7 @@
 
 - [ ] Reach out to 5 former colleagues: *"Hey, exploring DevOps/Cloud roles in NYC — would love to catch up"*
 - [ ] Add those contacts to networking/contacts.yml
-- [ ] Join 1 NYC tech community (NYC Devs Slack, DevOps NYC Meetup, or r/nyctech)
+- [X] Join 1 NYC tech community (NYC Devs Slack, DevOps NYC Meetup, or r/nyctech)
 - [ ] Send 5 LinkedIn connection requests to people at target companies
 
 #### Start Applying Now (ongoing)

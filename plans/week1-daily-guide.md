@@ -100,11 +100,11 @@ Run it: `python3 skills_tracker.py`
 
 ### Day 1 Checklist
 
-- [ ] Python 3.11+ verified
-- [ ] VS Code extensions installed
-- [ ] Virtual environment created
-- [ ] First Python scripts running
-- [ ] Understand variables, strings, f-strings
+- [X] Python 3.11+ verified
+- [X] VS Code extensions installed
+- [X] Virtual environment created
+- [X] First Python scripts running
+- [X] Understand variables, strings, f-strings
 - [ ] Read Phoenix Project Ch 1-2
 
 ---
@@ -218,9 +218,9 @@ git push
 
 ### Day 2 Checklist
 
-- [ ] Git installed and configured
-- [ ] GitHub account created
-- [ ] First repo pushed to GitHub
+- [X] Git installed and configured
+- [X] GitHub account created
+- [X] First repo pushed to GitHub
 - [ ] Understand Python lists (append, insert, pop, sort)
 - [ ] Comfortable with for loops and range
 - [ ] List comprehensions practiced

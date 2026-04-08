@@ -6,7 +6,7 @@ Brooklyn, NY 11232 | mail@roosevelt.info | [chinola.app](https://www.chinola.app
 
 ## Professional Summary
 
-Systems and infrastructure professional with 7+ years of hands-on experience managing enterprise IT environments across healthcare, biotech, and scientific organizations. Skilled in Active Directory, Microsoft 365 administration, cloud infrastructure (AWS, Azure), and end-to-end systems lifecycle management. Proven track record of maintaining high availability, leading infrastructure projects, and supporting 200+ users across globally distributed teams. AWS Cloud Practitioner and Azure Fundamentals (AZ-900) certified. Seeking a full-time Systems or Infrastructure Engineering role.
+Systems and infrastructure professional with 7+ years of hands-on experience managing enterprise IT environments across finance, healthcare, biotech, and scientific organizations. Currently managing hardware deployment and infrastructure operations for 1,700+ end users at a major quantitative finance firm. Skilled in Active Directory, Microsoft 365 administration, cloud infrastructure (AWS, Azure), and end-to-end systems lifecycle management. Proven track record of maintaining high availability, leading infrastructure projects, and supporting distributed teams. AWS Cloud Practitioner and Azure Fundamentals (AZ-900) certified. Seeking a full-time Systems or Infrastructure Engineering role.
 
 ---
 
@@ -35,9 +35,18 @@ Systems and infrastructure professional with 7+ years of hands-on experience man
 
 ## Professional Experience
 
+### Desktop Support Engineer
+
+**Two Sigma** — New York, NY | Feb 2026 – Present
+
+- Deliver on-site hardware deployment and IMAC support for 1,700+ end users at a major quantitative finance firm, managing the full lifecycle from automated PC builds and new hire desk setups to workstation relocations and trader floor support
+- Perform diagnostic troubleshooting and network connectivity testing, maintaining SLA-driven Jira ticket queues with detailed documentation
+- Manage IT asset inventory across local and global locations, coordinating equipment staging, storage room audits, and hardware preparation for deployments in partnership with Workplace Services and Technology Operations Engineering teams
+- Provide white-glove, customer-facing technical support at all levels including C-suite, handling walk-up requests, floor walks, and VIP assistance while communicating status updates and managing expectations
+
 ### IT Service Delivery Specialist
 
-**Peak Scientific** — Westford, MA (Remote) | Apr 2024 – Present
+**Peak Scientific** — Westford, MA (Remote) | Apr 2024 – Feb 2026
 
 - Manage Tier 1/Tier 2 infrastructure support for 200+ North American employees, coordinating with global IT teams across 3 time zones in a 24/7 operations model
 - Maintain 95%+ SLA compliance across all service requests and incidents tracked in Zendesk

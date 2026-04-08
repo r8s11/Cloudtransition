@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/static/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -25,9 +25,15 @@
 <a href="#main-content" class="skip-link">Skip to main content</a>
 
 <!-- ── NAV ──────────────────────────────────────────────────── -->
-<nav class="topnav" aria-label="Dashboard sections">
-  <div class="logo"><span>Cloud</span>Transition</div>
-  <div class="nav-tabs" role="tablist" aria-label="Dashboard pages">
+<nav class="masthead" aria-label="Dashboard sections">
+  <div class="masthead-bar">
+    <div class="masthead-brand">
+      <span class="brand-name">CloudTransition</span>
+      <span class="brand-issue">Issue No. {{ current_week }}</span>
+    </div>
+    <time class="masthead-date" datetime="{{ today }}">{{ today }}</time>
+  </div>
+  <div class="section-nav" role="tablist" aria-label="Dashboard pages">
     {% set pages = [
       ("overview", "Overview"),
       ("education", "Education"),
@@ -46,9 +52,8 @@
       data-page="{{ pid }}"
       tabindex="{{ '0' if loop.first else '-1' }}">{{ plabel }}</button>
     {% endfor %}
-    <a class="nav-tab" href="/reader">Reader</a>
+    <a class="nav-tab nav-tab-reader" href="/reader">Reader</a>
   </div>
-  <time class="nav-date" datetime="{{ today }}">{{ today }}</time>
 </nav>
 
 <main class="main" id="main-content">
@@ -853,7 +858,7 @@
 <!-- ── Client JS (navigation + animations + a11y) ──────────── -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  var tabs = Array.from(document.querySelectorAll('.nav-tab[role="tab"]'));
+  var tabs = Array.from(document.querySelectorAll('.section-nav [role="tab"]'));
   var panels = document.querySelectorAll('[role="tabpanel"]');
 
   function activateTab(tab, updateHash) {
@@ -992,31 +997,24 @@ function animateBars(scope) {
       // API call to persist
       fetch('/api/tasks/toggle', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
         body: JSON.stringify({
           realm: box.dataset.realm,
           line: parseInt(box.dataset.line, 10),
           done: newDone
         })
       }).then(function(res) {
-        if (!res.ok) {
-          // Revert on failure
-          box.dataset.done = String(isDone);
-          box.setAttribute('aria-checked', String(isDone));
-          box.innerHTML = isDone ? '&#x2713;' : '';
-          box.classList.toggle('done', isDone);
-          if (textEl) textEl.classList.toggle('done', isDone);
-          if (row) row.classList.toggle('task-done-row', isDone);
-        }
-      }).catch(function() {
-        // Revert on error
+        if (!res.ok) revert();
+      }).catch(revert);
+
+      function revert() {
         box.dataset.done = String(isDone);
         box.setAttribute('aria-checked', String(isDone));
-        box.innerHTML = isDone ? '&#x2713;' : '';
+        box.textContent = isDone ? '\u2713' : '';
         box.classList.toggle('done', isDone);
         if (textEl) textEl.classList.toggle('done', isDone);
         if (row) row.classList.toggle('task-done-row', isDone);
-      });
+      }
     }
 
     box.addEventListener('click', handleToggle);
