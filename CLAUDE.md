@@ -20,11 +20,17 @@ When working in this repository:
 
 ### Key Files
 
-- `resume/` - Resume files (current: `Resume2511NY.docx`)
-- `resources/DASHBOARD.md` - Career dashboard with curated resources
+- `DASHBOARD.md` - Operational at-a-glance view (current context, pipeline, workstreams)
 - `TASKS.md` - Active task tracking (Active / Waiting On / Someday / Done)
-- `dashboard.html` - Visual career dashboard
-- `College Planning/README.md` - Education planning summary and program comparison
+- `routine.md` - Daily anchor and weekly rhythm
+- `IT Mgmt /` + `bogatyr-build-guide/` - The two alternating project builds (IT Mgmt Playbook is its own git repo; MANIFEST.md tracks modules)
+- `resume/` - Resume variants; see `resume/CLAUDE.md` for the variant map and conventions
+- `interviews/job-applications.yml` - Live application tracker
+- `dashboard-app/` - FastAPI dashboard app — read `dashboard-app/CLAUDE.md` before touching it
+
+### Current Status (as of July 2026 refocus)
+
+**Employed** — full-time contractor at Ross (computer refresh project, started Jun 2026; open-ended duration). **Two lanes:** IT management pays the bills (the job, the `IT Mgmt /` playbook, MD-102 depth); DevOps is the journey (weekly Python/PowerShell automation builds; cloud-infra lane long-term). Project work alternates weekly between the IT Mgmt Playbook and Bogatyr, and **all builds are tutorial-driven** (HTML guides). AZ-104 was shelved 2026-07-15 (reopens on a cert window); the Russian language track was archived the same day — Bogatyr's language module swaps to French or Arabic (pick pending). **Job search is closed** (close-out complete); do not propose applications unless the user reopens it. Near-term life priorities: debt paydown (start now) and confirming the June move/address updates. SNHU was discontinued 2026-05-24 (materials kept in `College Planning/` for a future return). Folder-level CLAUDE.md files exist in `resume/`, `plans/`, `interviews/`, and `College Planning/` — read them when working in those areas.
 
 ### Directory Structure
 
@@ -41,7 +47,7 @@ When working in this repository:
 
 #### Education Planning
 
-- `College Planning/` - SNHU degree program catalogs, transfer credit docs, and certification mappings
+- `College Planning/` - SNHU degree program catalogs, transfer credit docs, and certification mappings (SNHU discontinued 2026-05-24; kept for a future return)
   - Program catalogs (AS/BS) for Computer Science, Cybersecurity, Data Analytics, IT, and Business Administration
   - Saylor Academy transfer credit equivalencies
   - Credit for Prior Learning (CPL) documentation
@@ -60,65 +66,9 @@ When working in this repository:
 - `plans/` - Learning and project plans
 - `progress/` - Progress tracking
 
-## Working with Claude
-
-Claude can help you:
-
-- Draft and refine resumes and cover letters
-- Prepare for interviews
-- Set and track career goals
-- Reflect on career decisions
-- Develop skills and learning plans
-- Craft networking messages
-- Plan education pathways and compare degree programs
-- Map certifications and experience to transfer credits
-
 ## Common Tasks
 
-### Resume Review and Editing
-
-- Review resume files for clarity, impact, and ATS optimization
-- Suggest stronger action verbs and quantifiable achievements
-- Tailor resume content to specific job descriptions when provided
-
-### Cover Letter Drafting
-
-- Craft compelling, personalized cover letters connecting experience to job requirements
-- Maintain authentic voice while highlighting relevant qualifications
-
-### Interview Preparation
-
-- Create mock interview questions based on job descriptions
-- Help prepare STAR method responses for behavioral questions
-- Suggest questions to ask interviewers
-
-### Goal Setting and Planning
-
-- Articulate short-term and long-term career goals
-- Break down large goals into actionable steps with tracking in `TASKS.md`
-
-### Skills Development
-
-- Assess current skills and identify gaps
-- Recommend learning resources and create development plans
-
-### Networking Support
-
-- Draft networking emails and LinkedIn messages
-- Suggest conversation starters and follow-up strategies
-
-### Career Reflection
-
-- Support thoughtful career reflection and help process transitions
-- Identify patterns and insights from experiences
-
-### Education and Degree Planning
-
-- Compare degree programs (SNHU and others) based on career goals
-- Map existing certifications, work experience, and coursework to transfer credits
-- Identify the most cost-effective path using Saylor Academy, CLEP, and CPL options
-- Plan course sequences and concentration choices
-- Evaluate ROI of different degree paths for career advancement
+Typical coaching work: resume tailoring and ATS review · cover letters · interview prep (mock questions, STAR responses) · goal setting tracked in `TASKS.md` · skills-gap plans · networking messages · career reflection · education planning (transfer credits via Saylor/CLEP/CPL, program comparison, ROI). Always tailor to the user's actual context (see Current Status above) — never generic advice.
 
 ## File Organization
 
@@ -135,3 +85,70 @@ Claude can help you:
 - Honest but tactful when giving constructive feedback
 - Empowering - help the user develop their own insights
 - Patient - career development is a process, not a one-time event
+
+## Behavioral Guidelines
+
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+
+Tradeoff: These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+
+### 1. Think Before Coding
+
+Don't assume. Don't hide confusion. Surface tradeoffs.
+
+Before implementing:
+
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them — don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
+
+### 2. Simplicity First
+
+Minimum code that solves the problem. Nothing speculative.
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+### 3. Surgical Changes
+
+Touch only what you must. Clean up only your own mess.
+
+When editing existing code:
+
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it — don't delete it.
+
+When your changes create orphans:
+
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+### 4. Goal-Driven Execution
+
+Define success criteria. Loop until verified.
+
+Transform tasks into verifiable goals:
+
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+These guidelines are working if: fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.

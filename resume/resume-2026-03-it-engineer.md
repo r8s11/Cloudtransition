@@ -6,7 +6,7 @@ Brooklyn, NY 11232 | mail@roosevelt.info | [chinola.app](https://www.chinola.app
 
 ## Professional Summary
 
-Reliable IT Engineer with 7+ years of experience delivering hands-on technical support across finance, healthcare, biotech, and scientific organizations. Currently providing white-glove desktop support to 1,700+ end users at a major quantitative finance firm. Expert in end-user support, Microsoft 365 administration, and IT service management across distributed teams. Known for high customer satisfaction, strong troubleshooting instincts, and a track record of implementing process improvements that reduce recurring issues. AWS Cloud Practitioner and Azure Fundamentals (AZ-900) certified. Bilingual (English/Spanish). Seeking a full-time IT Engineer or Systems Administrator position.
+Reliable IT Engineer with 7+ years of experience delivering hands-on technical support across finance, healthcare, biotech, and scientific organizations. Most recently provided white-glove desktop support to 1,700+ end users at Two Sigma, a major quantitative finance firm. Expert in end-user support, Microsoft 365 administration, and IT service management across distributed teams. Known for high customer satisfaction, strong troubleshooting instincts, and a track record of implementing process improvements that reduce recurring issues. AWS Cloud Practitioner and Azure Fundamentals (AZ-900) certified. Bilingual (English/Spanish). Actively seeking a full-time IT Engineer or Systems Administrator position.
 
 ---
 
@@ -37,7 +37,7 @@ Reliable IT Engineer with 7+ years of experience delivering hands-on technical s
 
 ### Desktop Support Engineer
 
-**Two Sigma** — New York, NY | Feb 2026 – Present
+**Two Sigma** — New York, NY | Feb 2026 – Apr 2026
 
 - Provide white-glove, customer-facing technical support to 1,700+ end users at all levels including C-suite, handling walk-up requests, floor walks, and VIP assistance
 - Deliver on-site hardware deployment and IMAC support, managing the full lifecycle from automated PC builds and new hire desk setups to workstation relocations and trader floor support

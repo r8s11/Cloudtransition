@@ -2,17 +2,18 @@
 
 ## Headline (120 chars max)
 
-Desktop Support Engineer @ Two Sigma | AWS & Azure Certified | Pursuing DevOps & Cloud Engineering | Python, CI/CD, IaC
+IT Engineer | AWS & Azure Certified | Pursuing DevOps & Cloud Engineering | Python, CI/CD, IaC | Open to Work
 
 ## About / Summary
 
-Desktop Support Engineer at Two Sigma with 7+ years of experience managing enterprise infrastructure, troubleshooting complex technical issues, and supporting large-scale environments across finance, healthcare, and biotech. Currently transitioning into DevOps and Cloud Engineering.
+IT Engineer with 7+ years of experience managing enterprise infrastructure across finance, healthcare, and biotech. Most recently served as Desktop Support Engineer at Two Sigma, a major quantitative finance firm, supporting 1,700+ end users before a role elimination in April 2026. Now actively seeking my next opportunity in DevOps, Cloud Engineering, or Systems/IT Engineering.
 
-I provide white-glove technical support to 1,700+ end users at a major quantitative finance firm — managing hardware deployments, automated PC builds, and infrastructure operations while partnering with Technology Operations Engineering teams.
+I've provided white-glove technical support to enterprise users while also building systems from scratch: Jira Service Management platforms, GitHub Enterprise deployments, and centralized SQL Server infrastructure. I bridge the gap between hands-on support and infrastructure engineering.
 
-I'm building hands-on skills in CI/CD pipelines, containerization (Docker), Infrastructure as Code (Terraform), and cloud-native deployments on Azure — backed by AWS and Azure certifications.
+I'm building skills in CI/CD pipelines, containerization (Docker), Infrastructure as Code (Terraform), and cloud-native deployments on Azure — backed by AWS and Azure certifications.
 
 What I bring to the table:
+
 - Enterprise-scale infrastructure experience supporting 1,700+ users in a high-performance finance environment
 - 7+ years across healthcare, biotech, and scientific organizations
 - AWS Certified Cloud Practitioner + Azure Fundamentals (AZ-900)

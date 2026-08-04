@@ -6,7 +6,7 @@ Brooklyn, NY 11232 | mail@roosevelt.info | [chinola.app](https://www.chinola.app
 
 ## Professional Summary
 
-Cloud-certified IT professional with 7+ years of experience supporting enterprise infrastructure across finance, healthcare, biotech, and scientific industries. AWS Certified Cloud Practitioner and Microsoft Azure Fundamentals (AZ-900) certified. Currently serving as Desktop Support Engineer at a major quantitative finance firm supporting 1,700+ end users. Proven ability to manage cloud environments (Azure, AWS, M365), automate IT workflows, and deliver high-quality support across globally distributed teams. Actively building DevOps skills in CI/CD, Docker, and Infrastructure as Code — seeking a full-time Cloud or DevOps Engineering role.
+Cloud-certified IT professional with 7+ years of experience supporting enterprise infrastructure across finance, healthcare, biotech, and scientific industries. AWS Certified Cloud Practitioner and Microsoft Azure Fundamentals (AZ-900) certified. Most recently served as Desktop Support Engineer at Two Sigma, a major quantitative finance firm, supporting 1,700+ end users. Proven ability to manage cloud environments (Azure, AWS, M365), automate IT workflows, and deliver high-quality support across globally distributed teams. Actively building DevOps skills in CI/CD, Docker, and Infrastructure as Code — seeking a full-time Cloud or DevOps Engineering role.
 
 ---
 
@@ -37,7 +37,7 @@ Cloud-certified IT professional with 7+ years of experience supporting enterpris
 
 ### Desktop Support Engineer
 
-**Two Sigma** — New York, NY | Feb 2026 – Present
+**Two Sigma** — New York, NY | Feb 2026 – Apr 2026
 
 - Deliver on-site hardware deployment and IMAC support for 1,700+ end users at a major quantitative finance firm, managing the full lifecycle from automated PC builds and new hire desk setups to workstation relocations and trader floor support
 - Maintain SLA-driven Jira ticket queues with detailed documentation, performing diagnostic troubleshooting and network connectivity testing

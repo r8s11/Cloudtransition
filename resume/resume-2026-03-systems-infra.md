@@ -6,7 +6,7 @@ Brooklyn, NY 11232 | mail@roosevelt.info | [chinola.app](https://www.chinola.app
 
 ## Professional Summary
 
-Systems and infrastructure professional with 7+ years of hands-on experience managing enterprise IT environments across finance, healthcare, biotech, and scientific organizations. Currently managing hardware deployment and infrastructure operations for 1,700+ end users at a major quantitative finance firm. Skilled in Active Directory, Microsoft 365 administration, cloud infrastructure (AWS, Azure), and end-to-end systems lifecycle management. Proven track record of maintaining high availability, leading infrastructure projects, and supporting distributed teams. AWS Cloud Practitioner and Azure Fundamentals (AZ-900) certified. Seeking a full-time Systems or Infrastructure Engineering role.
+Systems and infrastructure professional with 7+ years of hands-on experience managing enterprise IT environments across finance, healthcare, biotech, and scientific organizations. Most recently managed hardware deployment and infrastructure operations for 1,700+ end users at Two Sigma, a major quantitative finance firm. Skilled in Active Directory, Microsoft 365 administration, cloud infrastructure (AWS, Azure), and end-to-end systems lifecycle management. Proven track record of maintaining high availability, leading infrastructure projects, and supporting distributed teams. AWS Cloud Practitioner and Azure Fundamentals (AZ-900) certified. Actively seeking a full-time Systems or Infrastructure Engineering role.
 
 ---
 
@@ -37,7 +37,7 @@ Systems and infrastructure professional with 7+ years of hands-on experience man
 
 ### Desktop Support Engineer
 
-**Two Sigma** — New York, NY | Feb 2026 – Present
+**Two Sigma** — New York, NY | Feb 2026 – Apr 2026
 
 - Deliver on-site hardware deployment and IMAC support for 1,700+ end users at a major quantitative finance firm, managing the full lifecycle from automated PC builds and new hire desk setups to workstation relocations and trader floor support
 - Perform diagnostic troubleshooting and network connectivity testing, maintaining SLA-driven Jira ticket queues with detailed documentation
