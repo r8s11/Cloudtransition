@@ -45,8 +45,34 @@ Computer setup · Network/router setup · Smart home device installation · Gene
 
 ---
 
+## Rate sheet (set 2026-08-10, market-checked)
+
+- **Upwork hourly:** start at **$45–50/hr** to win the first 2–3 reviews fast (new profile, zero rating = trust gap); raise to **$60–70/hr** once you have 3+ five-star jobs. Comparable US-market Intune/Entra/M365 admin work runs $45–70/hr for solid intermediate work, $75–125+/hr once specialized/reviewed. Note Upwork takes a service fee off the top (~10% at your volume) — price with that in mind.
+- **TaskRabbit:** TaskRabbit doesn't publish a category rate — before listing, open the Computer Help category for NYC/Brooklyn and price **at or slightly under the median of the top 5 Taskers with 50+ reviews** (undercutting a new, unreviewed profile is how you get picked). As a starting anchor: **$50–65/hr**, one-hour minimum. Client pays your rate + TaskRabbit's service fee on top; TaskRabbit also takes a cut of your payout — check the current split in-app before confirming your listed rate so your take-home is what you expect.
+- **Flat-rate local (Nextdoor/FB groups/word of mouth):** **$50–75 flat** per basic visit (setup, WiFi fix, printer, smart-home device) — no platform fee, fastest to convert, best for building the first reviews/testimonials to paste into Upwork/TaskRabbit later.
+
+## $3,000-in-2–4-weeks sprint (locked 2026-08-10)
+
+Math: at a $50–65 blended hourly rate you need ~45–60 billable hours over 2–4 weeks around a full-time job — realistic only if freelance IT work ramps AND is backed by faster local/flat-rate gigs and a staffing-agency backstop. Run all four lanes in parallel, not sequentially.
+
+**This week (days 1–2):**
+- [ ] Publish the Upwork profile (copy above) at $45–50/hr; submit 8–10 proposals to active Intune/Entra/M365/device-setup/help-desk postings same day
+- [ ] Create the TaskRabbit account, upload photo, submit background check (takes a few business days — start it now so it's not the bottleneck), list at the rate above
+- [ ] Post local flat-rate offer ($50–75) on Nextdoor + NYC/Brooklyn FB groups + personal socials: "IT pro, 10+ yrs, background-checked — computer setup/WiFi/printer/smart-home help"
+- [ ] Send 5 direct messages to friends/former colleagues: "Taking on freelance IT/tech-help gigs right now — know anyone who needs a hand?" (repurpose [networking/outreach-templates.md](../networking/outreach-templates.md) template #2, freelance framing not job-search framing)
+- [ ] Register with 1–2 NYC IT staffing agencies for short-term/weekend desktop-support contract coverage (leads: ONIT IT Staffing, TEKsystems NYC) — backstop if freelance is slow to convert
+
+**Ongoing (weeks 1–4):**
+- [ ] Keep 8–10 Upwork proposals/week going out — new-profile conversion is a numbers game
+- [ ] Ask every completed TaskRabbit/flat-rate client for a review immediately after the job — reviews compound into higher-rate, higher-conversion later jobs
+- [ ] Track running total toward $3,000 below
+
+**Backstop if the pipeline is too slow by day 7–10:** gig-app driving/delivery (DoorDash/Instacart/Uber) on evenings/weekends for guaranteed cash while the freelance pipeline warms up — lower $/hr but zero ramp time.
+
+**Running total:** $0 / $3,000
+
 ## Open items
 
-- [ ] Rate sheet (Upwork hourly vs. TaskRabbit per-task, NYC market)
+- [x] Rate sheet (Upwork hourly vs. TaskRabbit per-task, NYC market) — done above, 2026-08-10
 - [ ] Create/verify accounts, upload photo, run background check (TaskRabbit)
 - [ ] No client names from the active Ross contract used above — keep it that way while the contract is live
