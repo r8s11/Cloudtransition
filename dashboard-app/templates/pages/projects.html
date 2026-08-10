@@ -1,0 +1,58 @@
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- PROJECTS PAGE                                               -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-projects" role="tabpanel" aria-labelledby="tab-projects">
+  <div class="page-header">
+    <h2>Projects</h2>
+    <p>3 production apps by end of 2026 &mdash; Restarting from Week 1</p>
+  </div>
+
+  {% for p in projects %}
+  <div class="card" style="border-left: 4px solid {{ p.color }};">
+    <div class="project-header">
+      <h3 class="fs-20">{{ p.name }}</h3>
+      <span class="project-badge" style="background: {{ p.color }}20; color: {{ p.color }};">{{ p.status }}</span>
+    </div>
+
+    <div class="progress-label">
+      <span class="name">Q1 Goal: {{ p.q1_goal }}</span>
+      <span class="pct">Restarting</span>
+    </div>
+    <div class="progress-track progress-track-mb">
+      <div class="progress-fill" style="background: {{ p.color }}; width: 0;"></div>
+    </div>
+
+    <div class="card-title">Completed Features</div>
+    <ul class="feature-list">
+      {% for f in p.features %}
+      <li>{{ f }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+
+  <!-- Learning Matrix -->
+  <div class="card">
+    <div class="card-title">Skills x Projects Matrix</div>
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>Skill</th>
+          <th>WODCard</th>
+          <th>SalsaSegura</th>
+          <th>SalsaTD</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in learning_matrix %}
+        <tr>
+          <td>{{ m.skill }}</td>
+          <td><span class="dot {{ 'dot-on' if m.wod else 'dot-off' }}"></span></td>
+          <td><span class="dot {{ 'dot-on' if m.salsa else 'dot-off' }}"></span></td>
+          <td><span class="dot {{ 'dot-on' if m.td else 'dot-off' }}"></span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

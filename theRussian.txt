@@ -1,0 +1,1222 @@
+App Concept: CodeKremlin
+
+A cyberpunk-style language + IT mastery game where every mission teaches coding, scripting, Russian, and enterprise support skills.
+
+The hook:
+You’re a junior “systems operator” recruited into a fictional Eastern European tech megacorp. To unlock systems, you must:
+
+write code
+automate tasks
+speak/read Russian
+troubleshoot Windows environments
+eventually pass real-world IT cert scenarios like Microsoft MD-102
+
+Instead of learning these separately, the app merges them into one progression loop.
+
+Core Premise
+
+You learn through missions, not lessons.
+
+Example mission:
+
+“A Moscow office workstation failed BitLocker recovery after a Windows update. Read the Russian support ticket, write a PowerShell script to collect logs, then choose the correct Intune remediation.”
+
+That single mission teaches:
+
+Russian vocabulary
+scripting
+systems administration
+troubleshooting logic
+Microsoft endpoint concepts
+Main Gameplay Loop
+1. Receive a Ticket
+
+You get:
+
+a support request
+terminal output
+chat logs
+Russian text/audio
+broken code
+Windows policies
+2. Translate + Understand
+
+The app highlights Russian words contextually.
+
+Example:
+
+“пользователь” → user
+“ошибка” → error
+“обновление” → update
+
+Instead of Duolingo-style isolated vocab, you learn Russian in technical contexts.
+
+3. Solve Technically
+
+Depending on your level:
+
+Python
+Bash
+PowerShell
+CMD
+JavaScript
+SQL
+
+You might:
+
+automate fixes
+parse logs
+configure policies
+write regex
+repair scripts
+4. Deploy the Fix
+
+The app simulates:
+
+Active Directory
+Intune
+Windows 11
+Azure AD / Entra ID
+Defender
+Exchange
+Group Policy
+
+This is where MD-102 content naturally fits.
+
+Why This Could Be Addictive
+
+Most learning apps separate:
+
+coding
+certifications
+languages
+IT skills
+
+This combines all four into a “career RPG.”
+
+You’re effectively:
+
+leveling up as a sysadmin
+learning Russian organically
+building scripting skills
+preparing for real certifications
+The Skill Trees
+🧠 Russian Tree
+
+Focus on:
+
+technical vocabulary
+keyboard familiarity
+reading comprehension
+support conversations
+pronunciation
+
+Levels:
+
+User
+Technician
+Engineer
+Analyst
+Administrator
+💻 Coding Tree
+
+Tracks:
+
+Python automation
+PowerShell
+Bash
+APIs
+regex
+debugging
+Git
+
+Mini-bosses:
+
+malware cleanup
+ransomware response
+log parsing
+broken deployment scripts
+🖥️ MD-102 Tree
+
+Real-world Microsoft admin scenarios:
+
+Windows deployment
+Intune
+device compliance
+authentication
+remote support
+Defender
+update rings
+Autopilot
+
+You can even have:
+
+“exam mode”
+timed troubleshooting labs
+simulated enterprise outages
+The Killer Feature
+“Dual Subtitles Terminal”
+
+Imagine:
+
+terminal commands on left
+Russian explanations on right
+hover for translations
+AI explains WHY commands work
+
+Example:
+
+Get-Process | Where-Object {$_.CPU -gt 100}
+
+Russian side:
+
+Найдите процессы с высоким использованием процессора.
+
+Then:
+
+visual CPU spike animation
+explanation of pipes
+translation of syntax concepts
+AI Features
+AI Support Coworker
+
+You can ask:
+
+“Explain this PowerShell line”
+“Translate this ticket”
+“Why did this Intune policy fail?”
+
+The AI responds in:
+
+English
+simplified Russian
+or mixed mode
+Voice Missions
+
+You speak Russian commands:
+
+“перезагрузите компьютер”
+“откройте PowerShell”
+
+Speech recognition grades pronunciation.
+
+Modes
+Story Mode
+
+Narrative campaign with escalating incidents.
+
+Think:
+
+Mr. Robot
+Papers Please
+Hacknet
+Duolingo
+Microsoft Learn
+
+combined.
+
+Sandbox Lab
+
+Spawn:
+
+fake endpoints
+users
+malware
+broken policies
+
+Practice freely.
+
+Raid Missions (Multiplayer)
+
+Friends join to solve:
+
+enterprise outages
+ransomware attacks
+network failures
+
+Roles:
+
+translator
+scripter
+admin
+incident commander
+Monetization
+Free
+basic missions
+beginner Russian
+Python fundamentals
+Premium
+full enterprise labs
+AI tutor
+cert prep
+multiplayer
+advanced scripting
+Corporate Version
+
+Companies train:
+
+help desk staff
+SOC analysts
+junior sysadmins
+Tech Stack (ironically)
+Frontend
+React Native
+Electron desktop mode
+Monaco Editor
+Backend
+Node.js or Go
+Docker sandboxing
+VM simulation layer
+AI
+LLM tutor
+speech recognition
+adaptive mission generation
+Expansion Ideas
+Other Languages
+
+After Russian:
+
+Japanese cybersecurity mode
+German enterprise IT
+Mandarin DevOps
+Other Certs
+
+After MD-102:
+
+AZ-104
+Security+
+RHCSA
+CCNA
+AWS SysOps
+Even Better Name Ideas
+Terminal Tongue
+ScriptSlav
+PowerShell Passport
+Intune Interceptor
+Cyrillic CLI
+AdminCraft
+Endpoint Ops
+ByteBureau
+Polyglot Ops
+Kremlin Console
+MVP Version
+
+Keep it tiny at first:
+
+Phase 1
+
+Just:
+
+PowerShell
+beginner Russian
+Windows troubleshooting
+
+3 mission types:
+
+password resets
+Windows updates
+disk cleanup
+
+That alone is already unique.
+
+What Makes This Actually Viable
+
+Most edtech apps fail because:
+
+learning feels disconnected from reality
+no emotional engagement
+no progression fantasy
+
+This idea solves that by making users feel like:
+
+a real technician
+in a real environment
+solving real problems
+while accidentally learning a language
+
+
+# Product Plan Document — “CodeKremlin” (Working Title)
+
+## Vision
+
+Build the first immersive learning platform that combines:
+
+* coding & scripting
+* enterprise IT administration
+* Russian language acquisition
+* certification-style troubleshooting
+
+inside a single mission-based RPG experience.
+
+The app should feel like:
+
+* a cyberpunk IT simulator
+* a language-learning game
+* a practical coding bootcamp
+* a Microsoft endpoint lab
+
+all at once.
+
+---
+
+# 1. Executive Summary
+
+### Problem
+
+Most learning platforms isolate skills:
+
+* Duolingo teaches vocabulary without technical context
+* coding platforms ignore real IT workflows
+* certification prep is dry and memorization-heavy
+* enterprise labs are expensive and intimidating
+
+Learners struggle to:
+
+* stay motivated
+* connect concepts
+* gain practical experience
+
+---
+
+### Solution
+
+A mission-driven platform where users solve realistic enterprise support incidents using:
+
+* PowerShell
+* Python
+* Bash
+* Windows administration
+* Russian technical communication
+
+while progressing through a story-driven career simulator.
+
+---
+
+# 2. Product Goals
+
+## Primary Goals
+
+1. Make technical learning addictive
+2. Teach practical scripting through repetition
+3. Teach Russian naturally through context
+4. Prepare users for real-world IT work
+5. Gamify enterprise troubleshooting
+
+---
+
+## Secondary Goals
+
+* Build community
+* Enable multiplayer troubleshooting
+* Create cert prep pathways
+* Provide AI-guided mentoring
+* Support future language/cert expansions
+
+---
+
+# 3. Target Audience
+
+## Primary Audience
+
+### Aspiring IT Professionals
+
+Age:
+
+* 16–35
+
+Interests:
+
+* cybersecurity
+* scripting
+* system administration
+* hacking culture
+* gaming
+
+Pain Points:
+
+* overwhelmed by certifications
+* bored by tutorials
+* lack practical labs
+
+---
+
+## Secondary Audience
+
+### Language Learners
+
+People wanting:
+
+* technical Russian
+* immersion-based learning
+* practical language usage
+
+---
+
+## Tertiary Audience
+
+### Enterprises
+
+Internal training for:
+
+* help desk teams
+* junior admins
+* SOC analysts
+* MSP onboarding
+
+---
+
+# 4. Core Product Concept
+
+## Narrative Premise
+
+The player joins a multinational technology organization managing endpoints, infrastructure, and incidents across global offices.
+
+The world is:
+
+* semi-fictional
+* cyberpunk-inspired
+* enterprise-focused
+
+Users rise through ranks:
+
+* Support Intern
+* Help Desk Tech
+* Systems Operator
+* Endpoint Engineer
+* Incident Commander
+
+---
+
+# 5. Core Gameplay Loop
+
+## Step 1 — Receive Incident
+
+User receives:
+
+* support tickets
+* chats
+* logs
+* voice calls
+* screenshots
+* policy alerts
+
+Some content appears partially in Russian.
+
+---
+
+## Step 2 — Investigate
+
+Player:
+
+* translates text
+* reads logs
+* inspects systems
+* navigates simulated Windows environments
+
+---
+
+## Step 3 — Execute Technical Tasks
+
+Examples:
+
+* write PowerShell
+* deploy scripts
+* configure Intune policies
+* fix Active Directory issues
+* automate repetitive tasks
+
+---
+
+## Step 4 — Validate Solution
+
+System grades:
+
+* correctness
+* efficiency
+* security
+* language comprehension
+
+---
+
+## Step 5 — Earn Progression
+
+Rewards:
+
+* XP
+* new tools
+* certifications
+* ranks
+* cosmetic upgrades
+* unlocked labs
+
+---
+
+# 6. Learning Architecture
+
+## A. Coding Layer
+
+### Topics
+
+* Python fundamentals
+* PowerShell scripting
+* Bash
+* APIs
+* JSON
+* regex
+* automation
+* debugging
+
+### Teaching Style
+
+* mission-based
+* contextual explanations
+* immediate feedback
+* visualized execution
+
+---
+
+## B. Russian Language Layer
+
+### Focus
+
+Technical Russian:
+
+* support terminology
+* system vocabulary
+* troubleshooting language
+* enterprise communication
+
+### Features
+
+* hover translations
+* contextual grammar
+* pronunciation practice
+* dual subtitles
+* spaced repetition
+
+---
+
+## C. IT Certification Layer
+
+## Initial Certification Focus
+
+### Microsoft MD-102
+
+Topics:
+
+* Windows deployment
+* Intune
+* device management
+* compliance
+* update rings
+* Defender
+* authentication
+* troubleshooting
+
+---
+
+# 7. Core Features
+
+## 7.1 Mission Engine
+
+Dynamic scenario generation.
+
+Mission types:
+
+* malware cleanup
+* broken update deployments
+* password reset automation
+* compliance failures
+* phishing response
+* VPN outages
+
+---
+
+## 7.2 Embedded Code Editor
+
+Features:
+
+* syntax highlighting
+* AI hints
+* execution sandbox
+* debugging tools
+
+---
+
+## 7.3 Simulated Enterprise Environment
+
+Includes:
+
+* fake Active Directory
+* virtual endpoints
+* Intune-style dashboard
+* Defender alerts
+* ticketing system
+
+---
+
+## 7.4 AI Tutor
+
+Capabilities:
+
+* explain scripts
+* translate Russian
+* provide hints
+* simulate coworkers
+* adapt difficulty
+
+Modes:
+
+* beginner
+* mentor
+* strict exam mode
+
+---
+
+## 7.5 Language Overlay System
+
+Displays:
+
+* inline Russian
+* pronunciation guides
+* transliteration
+* grammar notes
+
+---
+
+## 7.6 Voice Interaction
+
+Users can:
+
+* speak commands
+* answer calls
+* practice pronunciation
+
+---
+
+## 7.7 Career Progression
+
+Ranks unlock:
+
+* harder incidents
+* enterprise environments
+* multiplayer missions
+* advanced cert tracks
+
+---
+
+# 8. Game Design Elements
+
+## Progression Systems
+
+* XP
+* skill trees
+* unlockable tools
+* certifications
+* achievement badges
+
+---
+
+## Skill Trees
+
+### Technical Operations
+
+* scripting
+* endpoint management
+* automation
+* security
+
+### Language Mastery
+
+* reading
+* listening
+* pronunciation
+* technical vocabulary
+
+### Incident Response
+
+* diagnostics
+* triage
+* escalation
+* remediation
+
+---
+
+# 9. MVP Scope
+
+## Goal
+
+Launch within 4–6 months with a focused experience.
+
+---
+
+## MVP Features
+
+### Included
+
+* Windows support missions
+* beginner PowerShell
+* beginner Russian
+* ticketing UI
+* simple terminal
+* AI hints
+* progression system
+
+---
+
+### Excluded
+
+* multiplayer
+* advanced voice AI
+* full enterprise simulation
+* additional certs
+* mobile-first optimization
+
+---
+
+# 10. MVP User Journey
+
+## Example Mission
+
+### Ticket
+
+“User cannot install updates after reboot.”
+
+---
+
+### Tasks
+
+1. Read partially Russian ticket
+2. Identify update failure
+3. Run PowerShell diagnostics
+4. Repair Windows Update service
+5. Submit resolution notes
+
+---
+
+### Learning Outcomes
+
+* PowerShell basics
+* Windows services
+* Russian vocabulary
+* troubleshooting workflow
+
+---
+
+# 11. Technical Architecture
+
+## Frontend
+
+### Recommended
+
+* React
+* Electron
+* Monaco Editor
+
+Reason:
+
+* desktop-first experience
+* integrated terminal feel
+
+---
+
+## Backend
+
+### Recommended
+
+* Node.js or Go
+* PostgreSQL
+* Redis
+
+---
+
+## Sandbox Execution
+
+### Options
+
+* Docker containers
+* Firecracker microVMs
+* isolated execution workers
+
+---
+
+## AI Layer
+
+### Components
+
+* LLM tutoring
+* translation engine
+* adaptive mission generation
+* hint systems
+
+---
+
+# 12. Content Pipeline
+
+## Mission Authoring Tools
+
+Internal editor for:
+
+* writing incidents
+* adding scripts
+* defining grading logic
+* inserting Russian phrases
+
+---
+
+## Difficulty Scaling
+
+Adjust based on:
+
+* response speed
+* error frequency
+* vocabulary mastery
+* scripting competency
+
+---
+
+# 13. Monetization Strategy
+
+## Free Tier
+
+* core missions
+* beginner scripting
+* limited AI hints
+
+---
+
+## Premium Subscription
+
+Includes:
+
+* advanced labs
+* certification tracks
+* multiplayer
+* voice mode
+* unlimited AI coaching
+
+---
+
+## Enterprise Licensing
+
+Sell to:
+
+* MSPs
+* IT departments
+* training organizations
+
+---
+
+# 14. Competitive Landscape
+
+## Competitors
+
+* Duolingo
+* Codecademy
+* Microsoft Learn
+* TryHackMe
+* Hack The Box
+
+---
+
+## Competitive Advantage
+
+No platform currently combines:
+
+* coding
+* enterprise troubleshooting
+* certifications
+* language immersion
+* gamification
+
+in a unified system.
+
+---
+
+# 15. Risks
+
+## Technical Risks
+
+* sandbox security
+* AI hallucinations
+* maintaining realistic labs
+
+---
+
+## Product Risks
+
+* scope creep
+* balancing fun vs education
+* overcomplicated onboarding
+
+---
+
+# 16. Success Metrics
+
+## Engagement
+
+* daily active users
+* session length
+* mission completion rate
+
+---
+
+## Learning
+
+* scripting accuracy
+* vocabulary retention
+* certification pass rates
+
+---
+
+## Business
+
+* conversion rate
+* subscription retention
+* enterprise contracts
+
+---
+
+# 17. Future Expansion
+
+## Additional Certifications
+
+* AZ-104
+* Security+
+* CCNA
+* RHCSA
+* AWS SysOps
+
+---
+
+## Additional Languages
+
+* Japanese
+* German
+* Mandarin
+
+---
+
+## Advanced Features
+
+* multiplayer raids
+* SOC simulator
+* red team vs blue team
+* AI-generated incidents
+
+---
+
+# 18. Branding Direction
+
+## Visual Style
+
+* cyberpunk enterprise
+* dark terminal aesthetic
+* holographic dashboards
+* subtle Soviet/post-Soviet influence
+
+---
+
+## Tone
+
+* immersive
+* technical
+* intelligent
+* slightly dystopian
+* humorous but grounded
+
+---
+
+# 19. Suggested Roadmap
+
+## Phase 1 — Prototype (Month 1–2)
+
+Build:
+
+* terminal
+* ticket system
+* simple missions
+* PowerShell execution
+
+---
+
+## Phase 2 — MVP (Month 3–6)
+
+Add:
+
+* progression
+* AI hints
+* Russian overlay
+* mission grading
+
+---
+
+## Phase 3 — Beta (Month 6–9)
+
+Add:
+
+* certification mode
+* more missions
+* analytics
+* onboarding improvements
+
+---
+
+## Phase 4 — Expansion (Year 2)
+
+Add:
+
+* multiplayer
+* additional certs
+* mobile companion app
+* enterprise licensing
+
+---
+
+# 20. Final Vision Statement
+
+CodeKremlin aims to become:
+
+> the most immersive technical learning platform ever built — where users naturally learn coding, systems administration, and language skills by solving realistic enterprise problems inside a living simulated world.
+
+
+------------
+
+ADMIN: MOSCOW
+PRODUCT DEVELOPMENT & GAME DESIGN DOCUMENT
+Codename: Bogatyr Systems
+
+Admin: Moscow is a first-of-its-kind gamified simulation platform that intersects three distinct learning
+domains: foreign language acquisition (Russian), IT scripting (PowerShell/Python), and enterprise
+infrastructure mastery (Microsoft MD-102 Endpoint Administrator Certification). By blending the friction of
+language learning with the dopamine hits of puzzle-solving and system administration, the application
+creates a highly engaging, sticky learning loop.
+
+1. The Core Mechanics (The Three Pillars)
+The application relies on a tripartite learning model where progress in one domain directly fuels
+progression in the others. Users cannot advance the narrative without utilizing all three skill sets.
+
+Russian Language
+Mechanism: Audio-first
+Helpdesk Tickets.
+Users receive voicemails and
+text tickets from "employees"
+entirely in Russian. Instead of
+starting with an alphabet slog,
+users learn via context clues
+and keyword extraction (e.g.,
+"пароль" for password,
+"доступ" for access).
+Translations are unlocked by
+correctly categorizing the IT
+issue.
+
+Scripting & Coding
+Mechanism: Visual Logic
+Blocks.
+To fix the tickets, users build
+scripts using a drag-and-drop
+interface mapping directly to
+PowerShell and Python. This
+removes the "syntax tax"
+(typing out brackets and exact
+case) and forces the user to
+focus purely on programmatic
+logic and automation flow.
+
+MD-102 Mastery
+Mechanism: Cloud
+Infrastructure Sim.
+The game environment maps
+1:1 with the Microsoft 365
+ecosystem. Users must apply
+modern endpoint
+management strategies—
+such as Entra ID Conditional
+Access, Intune Autopilot, and
+Defender policies—to secure
+the fictional company.
+
+2. The Gameplay Loop (Example Scenario)
+
+Phase 1: The Intake (Comprehension)
+A priority 1 ticket lands in the queue. The user plays the attached audio file.
+"Алло? Это директор. Мне нужен доступ к моей почте. Я сейчас в командировке за рубежом,
+но система просит какой-то код."
+The UI prompts the user to tag the core issues. The user selects "доступ" (access) and
+"командировке" (business trip). The system confirms the tags, rewards XP, and provides the
+objective: The CFO is traveling abroad and is blocked from Exchange Online. Implement a secure
+Conditional Access policy.
+
+Phase 2: The Block Builder (Execution)
+The user transitions to the Terminal interface. Instead of typing raw Graph API JSON, they drag
+logic blocks into the workspace:
+Target: Exchange Online
+Condition: Location - Outside Trusted IPs
+Grant Control: Require MFA
+As the blocks snap together, the UI dynamically generates the underlying code, helping the user
+passively absorb proper syntax.
+Invoke-MgGraphRequest -Method POST -Uri "https://graph.microsoft.com/v1.0/
+identity/conditionalAccess/policies" -Body $PolicyJSON
+•
+•
+•
+
+Phase 3: Validation (MD-102 Assessment)
+The user hits "Deploy." The app runs a simulation of the CFO's sign-in attempt against the newly
+created policy. A flow-chart visualizer pops up, showing the Entra ID evaluation process. If the
+policy successfully prompts for MFA without blocking the CFO entirely, the ticket is resolved, and
+the user gains rank.
+
+3. Narrative & Progression System
+Gamification requires a compelling wrapper. The user begins as a Tier 1 Helpdesk Tech for "Bogatyr
+Systems," a massive, slightly chaotic logistics firm based in Moscow.
+Level 1-10 (Local Admin): Focuses on basic Windows client troubleshooting, local user
+management, and foundational Russian vocabulary (colors, directions, office items, basic verbs).
+Level 11-30 (SysAdmin): The company starts a cloud migration. MD-102 concepts are introduced.
+Scripts get more complex (loops, conditionals). Russian vocabulary shifts to business and technical
+terms.
+Level 31-50 (Cloud Architect): Full Intune and Entra ID deployment. Audio tickets feature regional
+accents, slang, and panicked executives. Advanced automation via Graph API.
+
+4. Development Roadmap
+Milestone 1: Proof of Concept (MVP) - Build the block-to-script engine and a 5-ticket queue with
+synthetic AI voiceovers. Implement basic dictionary tagging.
+Milestone 2: The Microsoft Graph Integration - Map the logic builder to actual MD-102 curriculum
+objectives (Identity, Devices, Apps).
+Milestone 3: Spaced Repetition System (SRS) - Implement a backend algorithm that tracks which
+Russian words the user struggles with, dynamically generating new IT tickets that reuse those specific
+words.
+Milestone 4: Beta Release - Target IT students and language enthusiasts for A/B testing of the UI
+friction.
+
+--------- gemini
+
+Concept: "Admin: Moscow" (or Bogatyr Systems)
+The Pitch: A gamified simulation where you are the newly hired Endpoint Administrator for a fictional, sprawling Russian tech conglomerate. The corporate environment, user tickets, and system logs are entirely in Russian. To keep the company running, you must manage their infrastructure using Python, PowerShell, and modern Microsoft 365 endpoint strategies.
+
+How the Mechanics Blend
+1. The Ticket Queue (Russian Language Acquisition)
+Employees submit helpdesk tickets and "voicemails." You start with foundational vocabulary (basic verbs, greetings, simple nouns like "password" or "screen") and progress to complex technical issues.
+
+Audio-First: Tickets are fully voice-acted by native speakers. This trains your ear to the rhythm of the language and builds listening comprehension without forcing you to slog through reading dense Cyrillic text right out of the gate.
+
+Contextual Translation: You unlock translations by correctly identifying the core issue in the ticket, turning the helpdesk queue into a practical spaced-repetition system.
+
+2. The Terminal (Scripting & Automation)
+To resolve tickets, you must deploy scripts. Instead of a blank terminal that requires tedious, error-prone typing, the app uses a visual block-builder interface (think Scratch, but for PowerShell and Python).
+
+You drag and drop commands (like Get-LocalUser or Invoke-RestMethod), snap them into ForEach loops, and pipe the outputs to solve the problem.
+
+This keeps the momentum fast and focuses your brain on the logic of the code and the automation flow, rather than fighting minor syntax typos.
+
+3. The Infrastructure (MD-102 Mastery)
+As you level up, the company migrates to the cloud, and the scenarios begin mirroring the exact domains of the MD-102 exam. You must translate the Russian business requirements into technical implementations:
+
+Domain 1 (Deploy Clients): A ticket arrives in Russian requesting 50 new laptops for a department. You must visually configure the correct Windows Autopilot profile and Enrollment Status Page.
+
+Domain 2 (Identity & Compliance): An executive's voicemail demands access to a secure app while traveling. You snap together the logic for an Entra ID Conditional Access policy requiring MFA and device compliance.
+
+Domain 3 (Protect Devices): You receive an alert (in Russian) about a potential vulnerability. You use the visual builder to deploy a Defender Antivirus policy and configure update rings via a simulated Intune portal.
+
+Here is how a mid-level scenario — let's call it "The Traveling Executive" — would play out in the app, integrating all three learning tracks.1.The Intake:Listening comprehension and vocabulary extraction.A high-priority ticket lands in your queue with an attached audio voicemail. You play it and hear a panicked executive:"Алло? Это директор. Мне нужен доступ к моей почте. Я сейчас в командировке за рубежом, но система просит какой-то код."You don't need to understand every word yet. The app rewards you for picking out the keywords:доступ (dostup): accessкомандировке (komandirovke): business trip / travelпочте (pochte): email (Exchange Online)By identifying these, the ticket translates the core objective: The CFO is traveling outside the corporate network and is being blocked from Exchange Online.2.The Block Builder:Scripting without the syntax tax.Now you need to deploy the fix. To resolve this, you must construct an Entra ID Conditional Access policy via the Microsoft Graph API.Instead of forcing you to type out lengthy JSON payloads or Cyrillic strings from scratch — which creates unnecessary friction, especially if you prefer to think through the architecture rather than hunt-and-peck on a keyboard — the app provides a visual builder.You drag the "Target: Exchange Online" block, snap it to the "Condition: Outside Trusted IPs" block, and finalize it with the "Grant: Require MFA" block. The app generates the clean PowerShell script in the background and executes it against the simulated environment.3.The MD-102 Logic Check:Validating the architecture.The app doesn't just check if your script ran; it tests your understanding of the MD-102 Conditional Access flow.Once you submit the policy, the app simulates the CFO trying to log in again. You watch the sign-in logs evaluate against the standard Entra ID flow:Assignments: Did you target the right user and app? (Yes, the CFO and Exchange).Conditions: Did the location trigger match? (Yes, the IP is foreign).Access Controls: Was MFA prompted? (Yes).The CFO gets an SMS code, logs in, and the ticket closes. You earn XP for Russian vocabulary, PowerShell logic, and MD-102 Identity Management.

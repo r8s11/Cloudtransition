@@ -5,11 +5,11 @@ Run:  uvicorn app:app --reload
 Open: http://localhost:8000
 """
 
-from pathlib import Path
-from datetime import date
 import os
 import re
 import tempfile
+from datetime import date
+from pathlib import Path
 
 import yaml
 from fastapi import FastAPI, Header, Query, Request
@@ -25,25 +25,102 @@ GOALS_FILE = WORKSPACE / "goals" / "career-goals.yml"
 JOBS_FILE = WORKSPACE / "interviews" / "job-applications.yml"
 NETWORK_FILE = WORKSPACE / "networking" / "contacts.yml"
 TASKS_FILE = WORKSPACE / "TASKS.md"
-DASHBOARD_FILE = WORKSPACE / "DASHBOARD.md"
 EDU_FILE = WORKSPACE / "College Planning" / "education-data.yml"
 BOOKS_FILE = WORKSPACE / "Books" / "books-data.yml"
 
 # ── Realm Configuration ───────────────────────────────────────
 REALMS = [
-    {"id": "tasks",     "name": "Tasks",     "file": "TASKS.md",                           "color": "#D97757", "icon": "📋"},
-    {"id": "react",     "name": "React",     "file": "plans/react_plan.md",                 "color": "#61dafb", "icon": "⚛️"},
-    {"id": "sql",       "name": "SQL",       "file": "plans/sql_plan.md",                   "color": "#e0b840", "icon": "🗄️"},
-    {"id": "azure",     "name": "Azure",     "file": "plans/azure-az204-plan.md",            "color": "#0078d4", "icon": "☁️"},
-    {"id": "devops",    "name": "DevOps",    "file": "plans/devops-learning-plan.md",        "color": "#5cc98a", "icon": "🔧"},
-    {"id": "books",     "name": "Books",     "file": "plans/books-reading-plan.md",          "color": "#9478d4", "icon": "📚"},
-    {"id": "education", "name": "Education", "file": "snhu-plan.md",                        "color": "#e05555", "icon": "🎓"},
-    {"id": "college",   "name": "College",   "file": "College Planning/education-plan.md",   "color": "#3aa8c1", "icon": "🏫"},
+    {
+        "id": "tasks",
+        "name": "Tasks",
+        "file": "TASKS.md",
+        "color": "#D97757",
+        "icon": "📋",
+    },
+    {
+        "id": "year-plan",
+        "name": "Year Plan",
+        "file": "plans/year-plan-2026-2027.md",
+        "color": "#c87dff",
+        "icon": "🗓️",
+    },
+    {
+        "id": "eng190",
+        "name": "ENG-190",
+        "file": "College Planning/eng190-tracker.md",
+        "color": "#e05555",
+        "icon": "📝",
+    },
+    {
+        "id": "regeneron",
+        "name": "Regeneron",
+        "file": "plans/regeneron-cloud-devops-roadmap_2.md",
+        "color": "#5cc98a",
+        "icon": "🔧",
+    },
+    {
+        "id": "sc900",
+        "name": "SC-900",
+        "file": "plans/sc900-study-plan.md",
+        "color": "#0078d4",
+        "icon": "🛡️",
+    },
+    {
+        "id": "azure",
+        "name": "Azure AZ-204",
+        "file": "plans/azure-az204-plan.md",
+        "color": "#0078d4",
+        "icon": "☁️",
+    },
+    {
+        "id": "devops",
+        "name": "DevOps Plan",
+        "file": "plans/devops-learning-plan.md",
+        "color": "#5cc98a",
+        "icon": "⚙️",
+    },
+    {
+        "id": "books",
+        "name": "Books",
+        "file": "plans/books-reading-plan.md",
+        "color": "#9478d4",
+        "icon": "📚",
+    },
+    {
+        "id": "react",
+        "name": "React",
+        "file": "plans/react_plan.md",
+        "color": "#61dafb",
+        "icon": "⚛️",
+    },
+    {
+        "id": "sql",
+        "name": "SQL",
+        "file": "plans/sql_plan.md",
+        "color": "#e0b840",
+        "icon": "🗄️",
+    },
+    {
+        "id": "az104",
+        "name": "AZ-104",
+        "file": "plans/az104-study-plan.md",
+        "color": "#e05555",
+        "icon": "🎓",
+    },
+    {
+        "id": "college",
+        "name": "College",
+        "file": "College Planning/education-plan.md",
+        "color": "#3aa8c1",
+        "icon": "🏫",
+    },
 ]
 
 # ── App ────────────────────────────────────────────────────────
 app = FastAPI(title="Career Dashboard")
-app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
+app.mount(
+    "/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static"
+)
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 
@@ -58,7 +135,7 @@ def load_yaml(path: Path) -> dict:
 
 
 # ── Task Parser ────────────────────────────────────────────────
-CHECKBOX_RE = re.compile(r'^(\s*- \[)([ xX])(\] .+)$')
+CHECKBOX_RE = re.compile(r"^(\s*- \[)([ xX])(\] .+)$")
 
 
 def parse_tasks_from_file(path: Path, realm_id: str) -> list[dict]:
@@ -75,20 +152,26 @@ def parse_tasks_from_file(path: Path, realm_id: str) -> list[dict]:
         if stripped.startswith("#"):
             current_category = stripped.lstrip("#").strip()
             # Remove emoji prefixes
-            current_category = re.sub(r'^[\U0001F300-\U0001FAFF\u2600-\u27BF\u2702-\u27B0]+\s*', '', current_category).strip()
+            current_category = re.sub(
+                r"^[\U0001F300-\U0001FAFF\u2600-\u27BF\u2702-\u27B0]+\s*",
+                "",
+                current_category,
+            ).strip()
             continue
 
         m = CHECKBOX_RE.match(line)
         if m:
             done = m.group(2) in ("x", "X")
             text = m.group(3)[2:]  # strip "] " prefix
-            items.append({
-                "text": text,
-                "cat": current_category,
-                "done": done,
-                "realm": realm_id,
-                "line": lineno,
-            })
+            items.append(
+                {
+                    "text": text,
+                    "cat": current_category,
+                    "done": done,
+                    "realm": realm_id,
+                    "line": lineno,
+                }
+            )
 
     return items
 
@@ -103,13 +186,15 @@ def parse_all_realms() -> dict:
         items = parse_tasks_from_file(path, realm["id"])
         active = [i for i in items if not i["done"]]
         done = [i for i in items if i["done"]]
-        realm_stats.append({
-            **realm,
-            "total": len(items),
-            "done_count": len(done),
-            "active_count": len(active),
-            "pct": round(len(done) / len(items) * 100) if items else 0,
-        })
+        realm_stats.append(
+            {
+                **realm,
+                "total": len(items),
+                "done_count": len(done),
+                "active_count": len(active),
+                "pct": round(len(done) / len(items) * 100) if items else 0,
+            }
+        )
         all_items.extend(items)
 
     active = [i for i in all_items if not i["done"]]
@@ -125,28 +210,21 @@ def parse_all_realms() -> dict:
     }
 
 
-
 class ToggleRequest(BaseModel):
     realm: str
     line: int
     done: bool
 
 
-# ── Dashboard Parser ──────────────────────────────────────────
-def parse_week_number(path: Path) -> int:
-    """Extract current week number from DASHBOARD.md."""
-    if not path.exists():
-        return 1
-    content = path.read_text()
-    for line in content.splitlines():
-        if "(Week" in line:
-            try:
-                start = line.index("(Week") + 5
-                end = line.index(")", start)
-                return int(line[start:end].strip())
-            except (ValueError, IndexError):
-                pass
-    return 1
+# ── Week Computation ──────────────────────────────────────────
+def current_week_of_year(today: date | None = None) -> int:
+    """Return the 1-indexed week of the current calendar year (1..53).
+
+    Replaces the old DASHBOARD.md "(Week N)" parser. Now derived from the
+    current date so progress bars stay correct without manual edits.
+    """
+    today = today or date.today()
+    return today.isocalendar().week
 
 
 # ── Build Context ─────────────────────────────────────────────
@@ -158,38 +236,44 @@ def build_context() -> dict:
     jobs_data = load_yaml(JOBS_FILE)
     network_data = load_yaml(NETWORK_FILE)
     realm_tasks = parse_all_realms()
-    current_week = parse_week_number(DASHBOARD_FILE)
     today = date.today()
+    current_week = current_week_of_year(today)
 
     # Skills — flatten for template
     technical_skills = []
     for cat in skills_data.get("technical_skills", []):
         category_name = cat.get("category", "Other")
         for sk in cat.get("skills", []):
-            technical_skills.append({
-                "name": sk.get("name", ""),
-                "category": category_name,
-                "proficiency": sk.get("proficiency", "beginner"),
-                "years": sk.get("years_experience", 0),
-                "last_used": sk.get("last_used", ""),
-            })
+            technical_skills.append(
+                {
+                    "name": sk.get("name", ""),
+                    "category": category_name,
+                    "proficiency": sk.get("proficiency", "beginner"),
+                    "years": sk.get("years_experience", 0),
+                    "last_used": sk.get("last_used", ""),
+                }
+            )
 
     soft_skills = []
     for sk in skills_data.get("soft_skills", []):
-        soft_skills.append({
-            "name": sk.get("name", ""),
-            "proficiency": sk.get("proficiency", "low"),
-        })
+        soft_skills.append(
+            {
+                "name": sk.get("name", ""),
+                "proficiency": sk.get("proficiency", "low"),
+            }
+        )
 
     certifications = []
     for cert in skills_data.get("certifications", []):
-        certifications.append({
-            "name": cert.get("name", ""),
-            "issuer": cert.get("issuer", ""),
-            "obtained": cert.get("date_obtained"),
-            "expires": cert.get("expires"),
-            "credential_id": cert.get("credential_id"),
-        })
+        certifications.append(
+            {
+                "name": cert.get("name", ""),
+                "issuer": cert.get("issuer", ""),
+                "obtained": cert.get("date_obtained"),
+                "expires": cert.get("expires"),
+                "credential_id": cert.get("credential_id"),
+            }
+        )
 
     # Job stats
     stats = jobs_data.get("statistics", {}).get("2026", {})
@@ -206,10 +290,12 @@ def build_context() -> dict:
     # Networking goals
     net_goals = []
     for g in network_data.get("networking_goals", []):
-        net_goals.append({
-            "goal": g.get("goal", ""),
-            "progress": g.get("progress", "0/0"),
-        })
+        net_goals.append(
+            {
+                "goal": g.get("goal", ""),
+                "progress": g.get("progress", "0/0"),
+            }
+        )
 
     # Vision/goals
     vision = goals_data.get("vision", {})
@@ -218,16 +304,28 @@ def build_context() -> dict:
     # Year/quarter progress
     year_pct = round((current_week / 52) * 100)
     q1_pct = min(100, round((current_week / 13) * 100))
-    q2_pct = max(0, min(100, round(((current_week - 13) / 13) * 100))) if current_week > 13 else 0
-    q3_pct = max(0, min(100, round(((current_week - 26) / 13) * 100))) if current_week > 26 else 0
-    q4_pct = max(0, min(100, round(((current_week - 39) / 13) * 100))) if current_week > 39 else 0  # noqa: used in template
+    q2_pct = (
+        max(0, min(100, round(((current_week - 13) / 13) * 100)))
+        if current_week > 13
+        else 0
+    )
+    q3_pct = (
+        max(0, min(100, round(((current_week - 26) / 13) * 100)))
+        if current_week > 26
+        else 0
+    )
+    q4_pct = (
+        max(0, min(100, round(((current_week - 39) / 13) * 100)))
+        if current_week > 39
+        else 0
+    )  # noqa: used in template
 
-    # Projects (from DASHBOARD.md — hardcoded since MD parsing is complex)
+    # Projects (deprioritized — maintenance only while school + job search + roadmap are priorities)
     projects = [
         {
             "name": "WODCard",
-            "status": "Restarting Week 1",
-            "q1_goal": "MVP Live",
+            "status": "Deprioritized — maintenance only",
+            "q1_goal": "Resume after school stabilizes",
             "color": "#D97757",
             "features": [
                 "React + Vite + TypeScript frontend",
@@ -238,8 +336,8 @@ def build_context() -> dict:
         },
         {
             "name": "SalsaSegura",
-            "status": "Restarting Week 1",
-            "q1_goal": "50 events",
+            "status": "Deprioritized — maintenance only",
+            "q1_goal": "Resume after school stabilizes",
             "color": "#4a7fb5",
             "features": [
                 "React TypeScript app deployed to Azure",
@@ -249,8 +347,8 @@ def build_context() -> dict:
         },
         {
             "name": "SalsaTD",
-            "status": "Restarting Week 1",
-            "q1_goal": "MVP v1.0",
+            "status": "Deprioritized — maintenance only",
+            "q1_goal": "Resume after school stabilizes",
             "color": "#7c5cbf",
             "features": [
                 "Game board with turn-based play (2-30 players)",
@@ -258,6 +356,19 @@ def build_context() -> dict:
                 "Dark mode, scroll indicator, mobile optimized",
                 "Card UI with animations, deck reshuffling",
                 "Penalty system, Azure Cosmos DB prototype",
+            ],
+        },
+        {
+            "name": "Capstone (genomics-style batch pipeline)",
+            "status": "Planned — Phase 7 of roadmap, builds in 2027",
+            "q1_goal": "Public GitHub repo by end of 2027",
+            "color": "#5cc98a",
+            "features": [
+                "Terraform-managed VPC + EKS cluster",
+                "Fan-out workflow: S3 → SQS → Karpenter worker pods",
+                "Argo Workflows or AWS Batch (Fargate)",
+                "Prometheus + Grafana + Loki + AWS X-Ray",
+                "GitHub Actions CI/CD with Trivy + ArgoCD",
             ],
         },
     ]
@@ -274,18 +385,44 @@ def build_context() -> dict:
         {"skill": "Terraform", "wod": True, "salsa": False, "td": False},
     ]
 
-    # Success metrics
+    # Success metrics — aligned to plans/year-plan-2026-2027.md (Regeneron-class role by end of 2027)
     success_metrics = [
-        {"category": "Projects", "goal": "3 production apps", "metric": "Live URLs, real users"},
-        {"category": "Certification", "goal": "AZ-204", "metric": "Pass by November"},
-        {"category": "GitHub", "goal": "500+ commits", "metric": "Consistent activity"},
-        {"category": "Russian", "goal": "B1 Level", "metric": "30-min conversation"},
-        {"category": "Books", "goal": "10-12 completed", "metric": "Notes taken"},
-        {"category": "Career", "goal": "New role", "metric": "Interviews + offers"},
+        {
+            "category": "Career",
+            "goal": "Stepping-stone role (IT eng / sysadmin / cloud-adjacent)",
+            "metric": "Offer signed by end of 2026",
+        },
+        {
+            "category": "Long-term Career",
+            "goal": "Lead Cloud DevOps Engineer (Regeneron-class)",
+            "metric": "Apply by Q4 2027",
+        },
+        {
+            "category": "School",
+            "goal": "SNHU CS BS (or Cybersecurity BS)",
+            "metric": "1 course/term, on track each term",
+        },
+        {
+            "category": "Roadmap",
+            "goal": "Phases 1–7 + capstone complete",
+            "metric": "End of 2027 — see year plan",
+        },
+        {
+            "category": "Certifications",
+            "goal": "CKA, Terraform Associate, AWS DOP",
+            "metric": "Stack alongside roadmap phases",
+        },
+        {
+            "category": "Projects",
+            "goal": "Genomics-style batch pipeline (capstone)",
+            "metric": "Public GitHub repo by end of 2027",
+        },
     ]
 
     # Application checklist
-    app_checklist = jobs_data.get("application_strategy", {}).get("application_checklist", [])
+    app_checklist = jobs_data.get("application_strategy", {}).get(
+        "application_checklist", []
+    )
 
     # Education data
     edu_data = load_yaml(EDU_FILE)
@@ -298,8 +435,12 @@ def build_context() -> dict:
     edu_actions = edu_data.get("actions", [])
 
     # Compute total credits by status for stacked bar
-    credits_completed = sum(s.get("credits", 0) for s in edu_sources if s.get("status") == "completed")
-    credits_planned = sum(s.get("credits", 0) for s in edu_sources if s.get("status") != "completed")
+    credits_completed = sum(
+        s.get("credits", 0) for s in edu_sources if s.get("status") == "completed"
+    )
+    credits_planned = sum(
+        s.get("credits", 0) for s in edu_sources if s.get("status") != "completed"
+    )
 
     # Books data
     books_data = load_yaml(BOOKS_FILE)
@@ -386,12 +527,14 @@ def discover_md_files() -> list[dict]:
         rel = md.relative_to(WORKSPACE)
         if any(part in EXCLUDED_DIRS for part in rel.parts):
             continue
-        files.append({
-            "path": str(rel),
-            "name": md.name,
-            "folder": str(rel.parent) if str(rel.parent) != "." else "",
-            "size": md.stat().st_size,
-        })
+        files.append(
+            {
+                "path": str(rel),
+                "name": md.name,
+                "folder": str(rel.parent) if str(rel.parent) != "." else "",
+                "size": md.stat().st_size,
+            }
+        )
     return files
 
 
@@ -399,13 +542,12 @@ def discover_md_files() -> list[dict]:
 @app.get("/", response_class=HTMLResponse)
 def dashboard(request: Request):
     ctx = build_context()
-    ctx["request"] = request
-    return templates.TemplateResponse("index.html", ctx)
+    return templates.TemplateResponse(request, "index.html", ctx)
 
 
 @app.get("/reader", response_class=HTMLResponse)
 def reader(request: Request):
-    return templates.TemplateResponse("reader.html", {"request": request})
+    return templates.TemplateResponse(request, "reader.html")
 
 
 @app.get("/api/files")
@@ -426,7 +568,16 @@ def api_file(path: str = Query(...)):
         return JSONResponse({"error": "Invalid path"}, status_code=400)
     if not target.exists() or not target.is_file():
         return JSONResponse({"error": "File not found"}, status_code=404)
-    ALLOWED_EXTENSIONS = {".md", ".txt", ".yaml", ".yml", ".json", ".csv", ".html", ".py"}
+    ALLOWED_EXTENSIONS = {
+        ".md",
+        ".txt",
+        ".yaml",
+        ".yml",
+        ".json",
+        ".csv",
+        ".html",
+        ".py",
+    }
     if target.suffix.lower() not in ALLOWED_EXTENSIONS:
         return JSONResponse({"error": "File type not allowed"}, status_code=403)
     return JSONResponse({"path": path, "content": target.read_text(errors="replace")})
@@ -453,7 +604,7 @@ def toggle_task(req: ToggleRequest, x_requested_with: str = Header()):
         return JSONResponse({"error": "Line out of range"}, status_code=400)
 
     line = lines[idx]
-    m = CHECKBOX_RE.match(line.rstrip('\n').rstrip('\r'))
+    m = CHECKBOX_RE.match(line.rstrip("\n").rstrip("\r"))
     if not m:
         return JSONResponse({"error": "No checkbox on that line"}, status_code=400)
 
@@ -466,4 +617,6 @@ def toggle_task(req: ToggleRequest, x_requested_with: str = Header()):
         tf.write("".join(lines))
     os.replace(tf.name, target)
 
-    return JSONResponse({"ok": True, "realm": req.realm, "line": req.line, "done": req.done})
+    return JSONResponse(
+        {"ok": True, "realm": req.realm, "line": req.line, "done": req.done}
+    )

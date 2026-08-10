@@ -1,0 +1,122 @@
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SKILLS PAGE                                                 -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-skills" role="tabpanel" aria-labelledby="tab-skills">
+  <div class="page-header">
+    <h2>Skills &amp; Certifications</h2>
+    <p>From skills/skills-inventory.yml &mdash; updates automatically</p>
+  </div>
+
+  {% set prof_pct   = {"beginner": 25, "intermediate": 50, "advanced": 75, "expert": 100} %}
+  {% set prof_color = {"beginner": "var(--red)", "intermediate": "var(--yellow)", "advanced": "var(--blue)", "expert": "var(--green)"} %}
+
+  <div class="grid-2">
+    <!-- Left: Technical + Soft Skills -->
+    <div>
+      {% set ns = namespace(current_cat="") %}
+      {% for sk in technical_skills %}
+        {% if sk.category != ns.current_cat %}
+          {% if ns.current_cat != "" %}</div>{% endif %}
+          <div class="card">
+          <div class="card-title">{{ sk.category }}</div>
+          {% set ns.current_cat = sk.category %}
+        {% endif %}
+
+        <div class="skill-row">
+          <div class="progress-label">
+            <span class="name">{{ sk.name }}</span>
+            <span class="pct">{{ sk.proficiency }}</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill"
+              style="background: {{ prof_color.get(sk.proficiency, 'var(--text-muted)') }};"
+              data-width="{{ prof_pct.get(sk.proficiency, 0) }}%"></div>
+          </div>
+          <div class="skill-meta">
+            <span class="badge badge-{{ sk.proficiency }}">{{ sk.proficiency }}</span>
+            <span class="skill-years">{{ sk.years }} yrs</span>
+          </div>
+        </div>
+      {% endfor %}
+      {% if ns.current_cat != "" %}</div>{% endif %}
+
+      <!-- Soft Skills -->
+      <div class="card">
+        <div class="card-title">Soft Skills</div>
+        {% for sk in soft_skills %}
+        <div class="skill-row">
+          <div class="progress-label">
+            <span class="name">{{ sk.name }}</span>
+            <span class="badge badge-{{ sk.proficiency }}">{{ sk.proficiency }}</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill"
+              style="background: {{ prof_color.get(sk.proficiency, 'var(--text-muted)') }};"
+              data-width="{{ prof_pct.get(sk.proficiency, 0) }}%"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right: Certifications -->
+    <div>
+      <div class="card">
+        <div class="card-title">Certifications</div>
+        {% for cert in certifications %}
+        <div class="cert-card">
+          <div class="cert-icon {{ 'cert-icon-obtained' if cert.obtained else 'cert-icon-pending' }}">
+            {{ '&#x1F3C5;' if cert.obtained else '&#x1F4CB;' }}
+          </div>
+          <div class="cert-info">
+            <h4>{{ cert.name }}</h4>
+            <p>
+              {{ cert.issuer }}
+              {% if cert.obtained %} &middot; Obtained: {{ cert.obtained }}{% endif %}
+              {% if cert.expires and cert.expires != 'never' %} &middot; Expires: {{ cert.expires }}
+              {% elif cert.expires == 'never' %} &middot; No expiry
+              {% endif %}
+            </p>
+          </div>
+          {% if not cert.obtained %}
+          <span class="cert-status badge-status-pending">Pending</span>
+          {% else %}
+          <span class="cert-status badge-status-cert-active">Active</span>
+          {% endif %}
+        </div>
+        {% endfor %}
+
+        {% if not certifications %}
+        <div class="empty-state">
+          <div class="empty-icon">&#x1F3C6;</div>
+          <p>No certifications yet. Update skills/skills-inventory.yml to add them.</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Monthly Checkpoints -->
+      <div class="card">
+        <div class="card-title">Monthly Learning Checkpoints</div>
+        {% set checkpoints = [
+          ("Jan", "React + Git", "3 projects with components"),
+          ("Feb", "Cosmos DB + FastAPI", "Data persisting"),
+          ("Mar", "Docker + CI/CD", "Automated deployments"),
+          ("Apr", "Auth + Adv React", "User systems working"),
+          ("May", "PWA + WebSockets", "Offline + real-time"),
+          ("Jun", "Performance", "Lighthouse 90+"),
+          ("Jul-Aug", "K8s + Terraform", "Production infra"),
+          ("Sep-Oct", "AZ-204 Prep", "Practice exams 75%+"),
+          ("Nov", "AZ-204 EXAM", "PASS"),
+          ("Dec", "Job Search", "Applications submitted"),
+        ] %}
+        {% for month, skill, validation in checkpoints %}
+        <div class="metric-row">
+          <div class="metric-cat {{ 'month-active' if loop.index <= 2 else 'color-muted' }}">{{ month }}</div>
+          <div class="metric-goal">{{ skill }}</div>
+          <div class="metric-measure">{{ validation }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>

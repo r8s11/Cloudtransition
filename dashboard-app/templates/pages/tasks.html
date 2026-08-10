@@ -1,0 +1,105 @@
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- TASKS PAGE                                                  -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-tasks" role="tabpanel" aria-labelledby="tab-tasks">
+  <div class="page-header">
+    <h2>Task Tracker</h2>
+    <p>{{ realm_tasks.total }} items across {{ realms|length }} realms &mdash; {{ realm_tasks.total_done }} done, {{ realm_tasks.total_active }} remaining</p>
+  </div>
+
+  <!-- Overall Stats -->
+  <div class="grid-4 mb-16">
+    <div class="stat-box">
+      <div class="stat-value color-accent">{{ realm_tasks.total }}</div>
+      <div class="stat-label">Total Items</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value color-green">{{ realm_tasks.total_done }}</div>
+      <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value color-blue">{{ realm_tasks.total_active }}</div>
+      <div class="stat-label">Remaining</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value color-purple">
+        {% if realm_tasks.total > 0 %}{{ (realm_tasks.total_done / realm_tasks.total * 100)|round|int }}%{% else %}0%{% endif %}
+      </div>
+      <div class="stat-label">Overall Progress</div>
+    </div>
+  </div>
+
+  <!-- Realm Filter Pills -->
+  <div class="realm-filters mb-16">
+    <button class="realm-pill active" data-realm="all">
+      All <span class="pill-count">{{ realm_tasks.total }}</span>
+    </button>
+    {% for r in realm_tasks.realm_stats %}
+    {% if r.total > 0 %}
+    <button class="realm-pill" data-realm="{{ r.id }}" style="--realm-color: {{ r.color }};">
+      {{ r.icon }} {{ r.name }} <span class="pill-count">{{ r.done_count }}/{{ r.total }}</span>
+    </button>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Realm Progress Cards -->
+  <div class="card mb-16">
+    <div class="card-title">Progress by Realm</div>
+    {% for r in realm_tasks.realm_stats %}
+    {% if r.total > 0 %}
+    <div class="realm-progress-row" data-realm-row="{{ r.id }}">
+      <div class="realm-label" style="color: {{ r.color }};">{{ r.icon }} {{ r.name }}</div>
+      <div class="realm-bar-wrap">
+        <div class="progress-track">
+          <div class="progress-fill" style="background: {{ r.color }};" data-width="{{ r.pct }}%"></div>
+        </div>
+      </div>
+      <div class="realm-fraction">{{ r.done_count }}/{{ r.total }}</div>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Task List — grouped by realm then category -->
+  {% for r in realm_tasks.realm_stats %}
+  {% if r.total > 0 %}
+  {% set realm_items = realm_tasks.all | selectattr("realm", "equalto", r.id) | list %}
+
+  <div class="realm-section" data-realm-section="{{ r.id }}">
+    <div class="card">
+      <div class="card-title" style="border-left: 3px solid {{ r.color }}; padding-left: 12px;">
+        {{ r.icon }} {{ r.name }}
+        <span class="badge badge-count">{{ r.active_count }}</span>
+        {% if r.done_count > 0 %}
+        <span class="badge badge-done">{{ r.done_count }} done</span>
+        {% endif %}
+      </div>
+
+      {# Group items by category within this realm #}
+      {% set ns = namespace(current_cat="") %}
+      {% for t in realm_items %}
+        {% if t.cat != ns.current_cat %}
+          {% set ns.current_cat = t.cat %}
+          <div class="task-category-header">{{ t.cat }}</div>
+        {% endif %}
+
+        <div class="task-item {% if t.done %}task-done-row{% endif %}">
+          <div class="task-check {% if t.done %}done{% endif %}"
+               role="checkbox"
+               tabindex="0"
+               aria-checked="{{ 'true' if t.done else 'false' }}"
+               aria-label="{{ t.text }}"
+               data-realm="{{ t.realm }}"
+               data-line="{{ t.line }}"
+               data-done="{{ 'true' if t.done else 'false' }}"
+               >{% if t.done %}&#x2713;{% endif %}</div>
+          <span class="task-text {% if t.done %}done{% endif %}">{{ t.text }}</span>
+          <span class="task-cat" style="background: {{ r.color }}15; color: {{ r.color }};">{{ t.cat }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>

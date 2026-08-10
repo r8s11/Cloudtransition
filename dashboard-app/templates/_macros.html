@@ -1,0 +1,10 @@
+{# Shared Jinja macros — import with: {% from "_macros.html" import metric_table %} #}
+{%- macro metric_table(metrics) %}
+{% for m in metrics %}
+<div class="metric-row">
+  <div class="metric-cat">{{ m.category }}</div>
+  <div class="metric-goal">{{ m.goal }}</div>
+  <div class="metric-measure">{{ m.metric }}</div>
+</div>
+{% endfor %}
+{%- endmacro %}

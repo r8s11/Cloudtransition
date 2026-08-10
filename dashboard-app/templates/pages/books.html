@@ -1,0 +1,77 @@
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- BOOKS PAGE                                                  -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-books" role="tabpanel" aria-labelledby="tab-books">
+  <div class="page-header">
+    <h2>O'Reilly Reading List</h2>
+    <p>{{ total_books }} books &middot; {{ in_plan_count }} already planned &middot; {{ new_picks }} new picks &mdash; from Books/books-data.yml</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid-4 mb-16">
+    <div class="stat-box">
+      <div class="stat-value color-accent">{{ total_books }}</div>
+      <div class="stat-label">Total Books</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value color-green">{{ in_plan_count }}</div>
+      <div class="stat-label">In Current Plan</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value color-blue">{{ new_picks }}</div>
+      <div class="stat-label">New Picks</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value color-purple">{{ books_by_category|length }}</div>
+      <div class="stat-label">Categories</div>
+    </div>
+  </div>
+
+  <!-- Quarter Breakdown -->
+  <div class="card">
+    <div class="card-title">Books by Quarter</div>
+    <div class="grid-4">
+      {% for q, label, color in [("Q1", "Foundations", "#5cc98a"), ("Q2", "Features", "#5a9fd4"), ("Q3", "Scale & Cert", "#9478d4"), ("Q4", "Job Ready", "#D97757")] %}
+      <div class="stat-box" style="border-left: 3px solid {{ color }};">
+        <div class="stat-value" style="color: {{ color }};">{{ q_counts[q] }}</div>
+        <div class="stat-label">{{ q }} &mdash; {{ label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Books by Category -->
+  {% for group in books_by_category %}
+  <div class="card">
+    <div class="card-title">{{ group.icon }} {{ group.name }}</div>
+    {% for book in group.books %}
+    <div class="book-row" style="border-left: 3px solid {{ group.color }};">
+      <div class="book-info">
+        <div class="book-title">
+          {{ book.title }}
+          {% if book.in_plan %}
+          <span class="badge badge-done">In Plan</span>
+          {% else %}
+          <span class="badge badge-count">New</span>
+          {% endif %}
+        </div>
+        <div class="book-author">{{ book.author }}</div>
+      </div>
+      <div class="book-meta">
+        <span class="badge" style="background: {{ group.color }}15; color: {{ group.color }}; border-color: {{ group.color }}33;">{{ book.quarter }}</span>
+        {% for tag in book.tags[:3] %}
+        <span class="book-tag">{{ tag }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+  <!-- Platform Tip -->
+  <div class="card card-dark">
+    <div class="card-title">&#x1F4A1; O'Reilly Learning Platform</div>
+    <p>With a subscription (~$49/month) or free library access, get all {{ total_books }} books digitally plus video courses, coding sandboxes, and AZ-204 practice exams.</p>
+    <p style="margin-top: 8px; opacity: 0.8;">Many public libraries offer free O'Reilly access &mdash; check yours before subscribing!</p>
+  </div>
+</div>

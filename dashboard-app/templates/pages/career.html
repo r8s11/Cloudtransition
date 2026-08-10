@@ -1,0 +1,96 @@
+{% from "_macros.html" import metric_table %}
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- CAREER PAGE                                                 -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-career" role="tabpanel" aria-labelledby="tab-career">
+  <div class="page-header">
+    <h2>Career Hub</h2>
+    <p>Goals, networking, and job search &mdash; from your YAML files</p>
+  </div>
+
+  <div class="grid-2">
+    <!-- Left -->
+    <div>
+      <!-- Goals -->
+      <div class="card">
+        <div class="card-title">Career Goals</div>
+        {% if has_goals %}
+        <h3>{{ vision.title }}</h3>
+        <p>{{ vision.description }}</p>
+        {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">&#x1F3AF;</div>
+          <p>No goals defined yet. Update goals/career-goals.yml to set your vision and milestones.</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Job Applications -->
+      <div class="card">
+        <div class="card-title">Job Applications &mdash; 2026</div>
+        <div class="grid-3 mb-12">
+          {% for label, key, color in [
+            ("Applied", "applied", "color-blue"),
+            ("Screening", "screening", "color-yellow"),
+            ("Interviews", "interviews", "color-purple"),
+            ("Onsites", "onsites", "color-accent"),
+            ("Offers", "offers", "color-green"),
+            ("Pending", "pending", "color-muted"),
+          ] %}
+          <div class="stat-box stat-sm">
+            <div class="stat-value {{ color }}">{{ job_stats[key] }}</div>
+            <div class="stat-label">{{ label }}</div>
+          </div>
+          {% endfor %}
+        </div>
+
+        {% if job_stats.applied == 0 %}
+        <div class="empty-state empty-state-pad">
+          <p>Job search begins Week 49 (December). Update interviews/job-applications.yml when ready.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right -->
+    <div>
+      <!-- Networking -->
+      <div class="card">
+        <div class="card-title">Networking Goals</div>
+        {% for g in net_goals %}
+        <div class="net-goal">
+          <div class="net-goal-text">
+            <h4>{{ g.goal }}</h4>
+            <p>Progress for 2026</p>
+          </div>
+          <div class="net-goal-progress">{{ g.progress }}</div>
+        </div>
+        {% endfor %}
+
+        {% if not net_goals %}
+        <div class="empty-state">
+          <div class="empty-icon">&#x1F91D;</div>
+          <p>Add networking goals in networking/contacts.yml</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Application Checklist -->
+      <div class="card">
+        <div class="card-title">Application Checklist</div>
+        {% for item in app_checklist %}
+        <div class="task-item">
+          <div class="task-check" role="checkbox" aria-checked="false" aria-label="{{ item }}"></div>
+          <span class="task-text">{{ item }}</span>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Success Metrics -->
+      <div class="card">
+        <div class="card-title">2026 Success Metrics</div>
+        {{ metric_table(success_metrics) }}
+      </div>
+    </div>
+  </div>
+</div>

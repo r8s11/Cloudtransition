@@ -1,0 +1,228 @@
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- EDUCATION PAGE                                               -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-education" role="tabpanel" aria-labelledby="tab-education">
+
+  <div class="page-header">
+    <h2>{{ edu_program.name or 'Education Plan' }}</h2>
+    <p>{{ edu_program.school or 'SNHU' }} &middot; {{ edu_program.pathway or 'AS → BS' }} &middot; Catalog {{ edu_program.catalog or '' }}</p>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="grid-5 mb-16">
+    <div class="stat-box">
+      <div class="stat-value color-green">{{ edu_stats.credits_applied or 0 }}</div>
+      <div class="stat-label">Credits Applied</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value color-accent">{{ edu_stats.credits_remaining or 0 }}</div>
+      <div class="stat-label">Remaining (BS)</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value color-blue">{{ edu_stats.progress_pct or 0 }}%</div>
+      <div class="stat-label">Degree Progress</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value color-purple">2027</div>
+      <div class="stat-label">AS Target</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value color-green">2028</div>
+      <div class="stat-label">BS Target</div>
+    </div>
+  </div>
+
+  <!-- Degree Progress + Credit Sources -->
+  <div class="grid-2">
+    <!-- Progress Ring -->
+    <div class="card">
+      <div class="card-title">Degree Progress</div>
+      <div class="items-center-gap-24">
+        <div class="ring-container flex-shrink-0">
+          {% set deg_circ = 99.9 %}
+          {% set deg_offset = deg_circ * (1 - (edu_stats.progress_pct or 0) / 100) %}
+          <svg class="ring-svg ring-100" viewBox="0 0 36 36" role="img" aria-label="Degree progress: {{ edu_stats.progress_pct or 0 }}%">
+            <circle class="ring-bg" cx="18" cy="18" r="15.9"/>
+            <circle class="ring-fill" cx="18" cy="18" r="15.9"
+              stroke="var(--green)"
+              stroke-dasharray="{{ deg_circ }}"
+              stroke-dashoffset="{{ deg_offset }}"/>
+            <text class="ring-text" x="18" y="18" aria-hidden="true">{{ edu_stats.progress_pct or 0 }}%</text>
+          </svg>
+          <div class="ring-label">BS (120 cr)</div>
+        </div>
+        <div class="flex-1">
+          <div class="edu-stat-line">
+            <span>Credits applied</span>
+            <strong>{{ edu_stats.credits_applied or 0 }} / {{ edu_stats.credits_required or 120 }}</strong>
+          </div>
+          <div class="edu-stat-line">
+            <span>AS remaining (est.)</span>
+            <strong>~{{ edu_stats.as_credits_remaining or 0 }} cr</strong>
+          </div>
+          <div class="edu-stat-line">
+            <span>BS remaining</span>
+            <strong>{{ edu_stats.credits_remaining or 0 }} cr</strong>
+          </div>
+          <div class="edu-stat-line">
+            <span>Max transferable</span>
+            <strong>90 cr (SNHU cap)</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Credit Sources Stacked Bar -->
+    <div class="card">
+      <div class="card-title">Credits by Source</div>
+      <div class="stacked-bar-container">
+        <div class="stacked-bar">
+          {% for src in edu_sources %}
+          {% if src.credits > 0 %}
+          <div class="stacked-segment"
+            style="width: {{ (src.credits / (edu_stats.credits_required or 120) * 100)|round(1) }}%; background: {{ src.color }};"
+            title="{{ src.source }}: {{ src.credits }} cr">
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+        <div class="stacked-legend">
+          {% for src in edu_sources %}
+          <div class="legend-item">
+            <span class="legend-dot" style="background: {{ src.color }};"></span>
+            <span class="legend-label">{{ src.source }}</span>
+            <span class="legend-value">{{ src.credits }} cr</span>
+            {% if src.status == "completed" %}
+            <span class="badge badge-status-done">Done</span>
+            {% elif src.status == "not_started" %}
+            <span class="badge badge-status-planned">Planned</span>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transfer Strategy Phases -->
+  <div class="card">
+    <div class="card-title">Credit Strategy &mdash; Cheapest First</div>
+    <div class="grid-3 gap-12">
+      {% set phase_colors = ["#c9a227", "#7c5cbf", "#D97757", "#4a7fb5", "#4a9e6e"] %}
+      {% for ph in edu_phases %}
+      <div class="phase-card" style="border-top: 3px solid {{ phase_colors[loop.index0 % 5] }};">
+        <div class="phase-header">
+          <span class="phase-number">Phase {{ ph.phase }}</span>
+          {% if ph.status == "completed" %}
+          <span class="badge badge-status-done">Done</span>
+          {% elif ph.status == "in_progress" %}
+          <span class="badge badge-status-active">Active</span>
+          {% else %}
+          <span class="badge badge-status-upcoming">Upcoming</span>
+          {% endif %}
+        </div>
+        <h4 class="phase-name">{{ ph.name }}</h4>
+        <p class="phase-desc">{{ ph.description }}</p>
+        <div class="phase-stats">
+          <div><strong>{{ ph.credits }}</strong> credits</div>
+          <div><strong>{{ ph.cost }}</strong></div>
+          <div>{{ ph.duration }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Timeline + Cost/Actions -->
+  <div class="grid-2">
+    <!-- Timeline -->
+    <div class="card">
+      <div class="card-title">Timeline</div>
+      <div class="edu-timeline">
+        {% for m in edu_timeline %}
+        <div class="timeline-item {{ 'timeline-done' if m.status == 'completed' else ('timeline-future' if m.status == 'future' else '') }}">
+          <div class="timeline-dot {{ 'timeline-dot-completed' if m.status == 'completed' else ('timeline-dot-future' if m.status == 'future' else 'timeline-dot-active') }}"></div>
+          <div class="timeline-content">
+            <div class="timeline-milestone">{{ m.milestone }}</div>
+            <div class="timeline-target">{{ m.target }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Cost + Actions -->
+    <div>
+      <!-- Cost -->
+      <div class="card">
+        <div class="card-title">Cost Projection</div>
+        {% for item in edu_cost.get("breakdown", []) %}
+        <div class="metric-row">
+          <div class="metric-goal">{{ item.item }}</div>
+          <div class="metric-measure">${{ "{:,}".format(item.amount) }}</div>
+        </div>
+        {% endfor %}
+        <div class="metric-row cost-total">
+          <div class="metric-goal">Total estimated</div>
+          <div class="metric-measure">${{ "{:,}".format(edu_cost.get("total_low", 0)) }}&ndash;${{ "{:,}".format(edu_cost.get("total_high", 0)) }}</div>
+        </div>
+        <div class="metric-row cost-net">
+          <div class="metric-goal">After max Pell Grant</div>
+          <div class="metric-measure">${{ "{:,}".format(edu_cost.get("net_low", 0)) }}&ndash;${{ "{:,}".format(edu_cost.get("net_high", 0)) }}</div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card">
+        <div class="card-title">
+          Action Items
+          <span class="badge badge-count">{{ edu_actions|length }}</span>
+        </div>
+        {% for a in edu_actions %}
+        <div class="task-item">
+          <div class="task-check {{ 'done' if a.done else '' }}" role="checkbox" aria-checked="{{ 'true' if a.done else 'false' }}" aria-label="{{ a.text }}">{{ '&#x2713;' if a.done else '' }}</div>
+          <span class="task-text {{ 'done' if a.done else '' }}">{{ a.text }}</span>
+          <span class="task-cat task-cat-priority">P{{ a.priority }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Course Detail (Sophia) -->
+  <div class="card">
+    <div class="card-title">Sophia Sprint &mdash; Course Priorities</div>
+    {% set sophia_src = edu_sources|selectattr("source", "equalto", "Sophia Learning")|first %}
+    {% if sophia_src %}
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>Priority</th>
+          <th>Course</th>
+          <th>SNHU Equiv</th>
+          <th>Credits</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in sophia_src.courses|sort(attribute="priority") %}
+        <tr>
+          <td>
+            {% if c.priority == 1 %}
+            <span class="badge badge-p1">P1 &mdash; Major</span>
+            {% elif c.priority == 2 %}
+            <span class="badge badge-p2">P2 &mdash; Gen Ed</span>
+            {% else %}
+            <span class="badge badge-p3">P3 &mdash; Elective</span>
+            {% endif %}
+          </td>
+          <td>{{ c.name }}</td>
+          <td class="mono-sm">{{ c.code }}</td>
+          <td class="text-center">{{ c.credits }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+
+</div>

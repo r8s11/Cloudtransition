@@ -1,7 +1,164 @@
 # Job Applications Tracker
 # Monitor application status, interviews, and follow-ups
 
+# Reconciled from Gmail inbox on 2026-05-24. IT pipeline below; service-industry
+# (survival/bridge income) tracked separately at the bottom. Hottest first.
+
 active_applications:
+  # ====== 🔥 LIVE — needs action this week ======
+  - company: Generate:Biomedicines
+    role: IT Engineer II
+    status: interviewing
+    location: Somerville, MA / hybrid (confirm remote feasibility from NYC)
+    priority: high
+    contacts:
+      - name: Heather McBrinn
+        role: Recruiter
+        email: hmcbrinn@generatebiomedicines.com
+    timeline:
+      - date: 2026-05-06
+        stage: hiring_manager_screen_offered
+        notes: 30-min HM interview; scheduled for 5/8 2:00 PM (ModernLoop).
+      - date: 2026-05-08
+        stage: rescheduled
+        notes: Rescheduled due to personal matters. Heather offered "next Friday" (~5/15). No confirmation since.
+    next_steps:
+      - task: "FOLLOW UP NOW — email Heather to re-confirm a time. ~2+ weeks cold; salvage it."
+        date: 2026-05-24
+    notes: |
+      DIRECTION-ALIGNED: IT Engineer at a biotech (Regeneron-class adjacency).
+      Highest-value live thread. Risk: gone quiet after the reschedule. She noted
+      your location — be ready to address commute/remote.
+
+  - company: The Farmer's Dog
+    role: IT Helpdesk Technician
+    status: interviewing
+    location: New York, NY
+    priority: high
+    contacts:
+      - name: Jenny Carvajal
+        role: Recruiter
+        email: jcarvajal@thefarmersdog.com
+      - name: Alex Watkins
+        role: IT Systems Administrator 2 (interviewer)
+    timeline:
+      - date: 2026-05-15
+        stage: recruiter_screen
+        notes: Screen with Jenny; confidentiality agreement; moved to next round.
+      - date: 2026-05-19
+        stage: hiring_manager_interview
+        notes: 45-min interview with Alex Watkins.
+      - date: 2026-05-20
+        stage: thank_you_sent
+        notes: Thank-you sent to Jenny. Awaiting next-round/decision.
+    next_steps:
+      - task: "Follow up with Jenny if no word by ~5/27 (1 wk post-interview)."
+        date: 2026-05-27
+
+  - company: Rokt
+    role: (confirm role)
+    status: assessment
+    location:
+    priority: medium
+    timeline:
+      - date: 2026-04-30
+        stage: assessment_requested
+        notes: CCAT & EPP (Criteria) assessments requested.
+      - date: 2026-05-02
+        stage: reminder
+        notes: Reminder to complete. Incomplete = passive drop-out.
+    next_steps:
+      - task: "Complete CCAT & EPP if still interested, or close it out."
+        date: 2026-05-24
+
+  - company: Milestone Technologies
+    role: Service Desk Technician L2 (temp-to-hire)
+    status: screening
+    salary_range: $37/hr (~$77K annualized) — clears $70K floor
+    location: New York, NY (100% onsite, client site)
+    priority: high
+    contacts:
+      - name: Chandler Tonner
+        role: Recruiter
+        email: chandler.tonner@milestone.tech
+    timeline:
+      - date: 2026-05-05
+        stage: interview_requested
+        notes: Requested interview. Temp-to-hire — fast route to a paycheck.
+    next_steps:
+      - task: "Confirm whether you replied; if not, respond to schedule."
+        date: 2026-05-24
+
+  - company: Object Win (via Dice)
+    role: End User Computing (EUC) Operations Lead
+    status: new_lead
+    location: New York, NY (onsite)
+    priority: medium
+    contacts:
+      - name: Shankar A
+        role: IT Recruiter
+    timeline:
+      - date: 2026-05-22
+        stage: recruiter_outreach
+        notes: Inbound via Dice re posted resume. Senior EUC lead — strong fit.
+    next_steps:
+      - task: "Reply while warm; ask for rate/JD."
+        date: 2026-05-24
+
+  - company: Ground Up International
+    role: Senior IT Support Specialist
+    application_date: 2026-05-05
+    status: screening
+    salary_range: target $95-115K, floor $70K (lowered 2026-05-24)
+    location: New York, NY (onsite)
+    priority: high
+    interview_prep:
+      - interviews/Ground Up/prep.md
+      - interviews/Ground Up/jd-senior-it-support-specialist.md
+    next_steps:
+      - task: "Confirm recruiter-screen outcome; capture comp/team/timeline; thank-you."
+        date:
+    notes: |
+      Strong JD match: M365 admin (Intune/Entra/Exchange/SharePoint), Mac MDM
+      (ABM+Intune ADE done at Peak), ITSM depth. Gaps: PowerShell depth, Power
+      Automate, ZohoDesk, Synology, KnowBe4 — frame with closest comparable + appetite.
+
+  - company: Solarus Technologies
+    role: (IT role — confirm) — 1st round preliminary
+    status: interviewing
+    location:
+    priority: low
+    timeline:
+      - date: 2026-04-28
+        stage: preliminary_interview
+        notes: 1st round with HR (Taylor Roma). Verify if still active.
+
+  - company: Kronia Technologies
+    role: (confirm role)
+    status: screening
+    priority: low
+    timeline:
+      - date: 2026-05-05
+        stage: recruiter_outreach
+        notes: LinkedIn "next steps"; you replied. Verify status.
+
+  # ====== APPLIED — awaiting response (direct/meaningful IT) ======
+  # Wilson Elser (IT Support Analyst) · PBS Radiology (IT Support Specialist) ·
+  # xAI (IT Services Technician) · Calance (Systems Administrator) ·
+  # MSH (Client Services Engineer) · Articulate (IT Automations & Support Specialist
+  #   — note: direction-aligned "automations" role) · Effy Jewelry (IT Help Desk L2) ·
+  # GNC (Service Desk Analyst) · Atlas Search (Desktop Support) ·
+  # Madison-Davis (Help Desk Specialist) · Futran (Desktop Engineer) ·
+  # CRH (VIP Executive IT/AV Support) · Generate counted above.
+  # Plus ~25 LinkedIn EasyApply to staffing firms (Kforce, Insight Global,
+  #   Motion Recruitment, Eliassen, Franklin Fitch, Premier Talent, Prestige,
+  #   Clarity, Summit, KPG99, Akraya, Astreya, 360X, Engage Partners, etc.) —
+  #   low-signal auto-confirmations; don't chase individually.
+
+  # ====== REJECTED / CLOSED ======
+  # Third Bridge (Desktop Support Engineer — position filled, 5/11)
+  # CD PROJEKT RED (IT Specialist — update 2/6, likely closed)
+
   # - company:
   #   role:
   #   job_id:
@@ -191,15 +348,22 @@ application_strategy:
     - Add to tracker before submitting
     - Set calendar reminder to follow up in 1 week
 
+# Service-industry / survival stream (bridge income — tracked loosely, lower priority
+# than the live IT interviews above which already clear the $70K floor):
+#   Chipotle (in-person interview scheduled) · T-Mobile Mobile Associate (skills
+#   assessment) · Marriott Marquis & Manhatta/USHG barback (interviews) · Starbucks ·
+#   Eataly host · Hire Finder front desk · RR Donnelley · NAYA/Something Green ·
+#   (rejected: Cipriani cashier, Kimpton room attendant)
+
 statistics:
   2026:
-    applications_sent: 0
-    screening_calls: 0
-    technical_interviews: 0
-    onsites: 0
+    # Estimates from inbox reconciliation 2026-05-24 (not exact):
+    it_applications_sent: ~35
+    service_industry_applications: ~12
+    active_it_interviews: 5   # Generate, Farmer's Dog, Milestone, Solarus, Kronia
+    assessments_pending: 1    # Rokt
+    rejections: 4+
     offers: 0
-    rejections: 0
-    pending: 0
 
 notes: |
   Track everything to identify patterns:

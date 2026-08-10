@@ -1,0 +1,12 @@
+.DS_Store
+__pycache__/
+*.pyc
+~$*
+.playwright-mcp/
+venv/
+.venv/
+
+# standalone nested repos — tracked separately, not embedded here
+/IT Mgmt/
+/andrej-karpathy-skills/
+node_modules/
