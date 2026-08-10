@@ -13,7 +13,7 @@ _Last updated: 2026-07-15 (refocus)_
 | Slot | What | Notes |
 |---|---|---|
 | **Workday** | Ross refresh project | The job IS study: every Autopilot/Intune/provisioning task is MD-102 prep on the clock. Work log daily — 3 bullets is enough. It feeds the playbook, the automation list, and the next resume. |
-| **1 project block/week (60–90 min)** | Alternating build | **Week A:** IT Mgmt Playbook — next module per [MANIFEST build order](IT%20Mgmt%20/MANIFEST.md). **Week B:** Bogatyr — next phase step. Tutorial format both ways. |
+| **1 project block/week (60–90 min)** | Alternating build | **Week A:** IT Mgmt Playbook — 9 commits in, next module per [MANIFEST build order](IT%20Mgmt%20/MANIFEST.md) (mostly maturing DRAFT→FINAL now). **Week B:** Bogatyr — ⚠️ `bogatyr-build-guide/` missing on disk, confirm/rebuild before resuming. Tutorial format both ways. |
 | **1 DevOps block/week (45–60 min)** | Automation build | One manual step from the work log → small Python/PowerShell tool → tutorial guide. This is the DevOps journey now — a build, not a course. |
 | **Weekend (~30 min)** | Money + review | Debt tracker check, TASKS.md tidy, work-log skim, note next week's A/B. |
 
@@ -48,6 +48,6 @@ _Last updated: 2026-07-15 (refocus)_
 
 | Date | Event | What to do |
 |---|---|---|
-| **Jul 2026** | Catch-up week | Confirm move status + address pass; start debt plan; first playbook commit; pick French vs Arabic |
+| **Jul 2026** | Catch-up week | Confirm move status + address pass; start debt plan; ~~first playbook commit~~ (done, 9 commits); pick French vs Arabic; confirm/rebuild missing Bogatyr dir |
 | **~Sep 2026** | 3-month mark at Ross | Decide MD-102 exam date from on-the-job readiness; ask about contract runway; review playbook manifest progress |
 | **Q4 2026** | If MD-102 scheduled | Shift project blocks toward exam prep for the final 4–6 weeks |

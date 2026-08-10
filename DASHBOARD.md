@@ -2,7 +2,7 @@
 
 **At-a-glance operational view.** Phase: **employed — perform, build, pay down.**
 
-_Last updated: 2026-07-15 (refocus)_
+_Last updated: 2026-08-10 (repo review: verified IT Mgmt Playbook state, flagged missing Bogatyr dir)_
 
 ---
 
@@ -34,8 +34,8 @@ _Last updated: 2026-07-15 (refocus)_
 Work log daily (3 bullets). It feeds everything: MD-102 readiness, playbook modules, automation candidates, resume bullets.
 
 ### 2. Project block — two builds, alternating weeks
-- **Week A — [IT Mgmt Playbook](IT%20Mgmt%20/):** the "pays the bills" artifact. Follow the MANIFEST build order (next: 10.3 risk register → 30.1 universal SOP template). ⚠️ Repo has **zero commits** — first commit is the next session's opener.
-- **Week B — [Bogatyr](bogatyr-build-guide/):** Phase 1 tutorial built. Before Phase 2: swap the Russian track for the replacement language (French or Arabic — your pick).
+- **Week A — [IT Mgmt Playbook](IT%20Mgmt%20/):** the "pays the bills" artifact. ✅ Has its own git history (9 commits, last 2026-07-27) — the "zero commits" flag is stale. Per its MANIFEST, nearly every module in the build order is at DRAFT/REVIEW (80.1 backup-restore-verification is FINAL); first full pass through the build order is essentially done. It also has **uncommitted work** sitting in the working tree (new 20.8–20.10, 60.4, 70.4–70.5, 80-continuity-ops/ modules, plus an `Employer-IT-Playbook-Private/` folder) — commit or triage next session. Next real decision: mature DRAFT→REVIEW→FINAL, not "which module to draft."
+- **Week B — Bogatyr:** ⚠️ **`bogatyr-build-guide/` does not exist on disk.** "Phase 1 tutorial built" is unverified/stale — either it was never committed, lost, or the claim is wrong. `theRussian.txt` (root) holds the original "Bogatyr Systems" game-design doc but is not a tutorial build. Treat Week B as **not started** until confirmed otherwise.
 
 ### 3. DevOps block — automation builds (weekly)
 One manual step from the Ross work log → small Python/PowerShell tool → tutorial-format guide. This **replaces** the AZ-104 block.
@@ -53,7 +53,7 @@ AZ-104 plan (shelved 2026-07-15 — reopens when a cert window appears) · SC-90
 - [TASKS.md](TASKS.md) — active task list
 - [routine.md](routine.md) — weekly rhythm
 - [IT Mgmt Playbook](IT%20Mgmt%20/) — MANIFEST.md is the source of truth for module status
-- [bogatyr-build-guide/](bogatyr-build-guide/) — Bogatyr phase tutorials
+- Bogatyr — no `bogatyr-build-guide/` on disk; see Week B note above before trusting this link
 - [plans/](plans/) — study/roadmap plans ([plans/CLAUDE.md](plans/CLAUDE.md) has the inventory)
 - [resume/](resume/) — variants ([resume/CLAUDE.md](resume/CLAUDE.md)); **address pass pending move confirmation**
 - [interviews/job-applications.yml](interviews/job-applications.yml) — closed out, archived in place
@@ -69,8 +69,8 @@ AZ-104 plan (shelved 2026-07-15 — reopens when a cert window appears) · SC-90
 
 | Horizon | Milestone |
 |---|---|
-| **Now → end of Jul** | Move status confirmed + address pass done · debt plan running · first IT Mgmt Playbook commit · language picked (French/Arabic) |
-| **~Sep 2026 (3-month mark)** | Decide MD-102 exam date from on-the-job readiness · playbook core modules (10.x, 20.x, 30.1) at DRAFT+ · ask about contract runway |
+| **Now → end of Jul** | Move status confirmed + address pass done · debt plan running · ~~first IT Mgmt Playbook commit~~ (done — 9 commits) · language picked (French/Arabic) · confirm/rebuild Bogatyr Phase 1 |
+| **~Sep 2026 (3-month mark)** | Decide MD-102 exam date from on-the-job readiness · ~~playbook core modules (10.x, 20.x, 30.1) at DRAFT+~~ (done — most of the build order is DRAFT/REVIEW already) — next is maturing DRAFT→REVIEW→FINAL · ask about contract runway |
 | **Contract-end signal** | The re-plan trigger: refresh resumes (with Ross + Intune depth), re-open the pipeline early — don't wait for the last week. |
 
 ---

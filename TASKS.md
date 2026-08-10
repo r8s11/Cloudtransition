@@ -1,6 +1,6 @@
 # Tasks
 
-_Last updated: 2026-07-15 (refocus)_
+_Last updated: 2026-08-10 (repo review: corrected IT Mgmt commit/module status, flagged missing Bogatyr build dir)_
 
 > Phase: **employed — perform, build, pay down.** Operational view: [DASHBOARD.md](DASHBOARD.md). Rhythm: [routine.md](routine.md).
 
@@ -20,13 +20,15 @@ _Last updated: 2026-07-15 (refocus)_
 
 ### IT Mgmt Playbook (project block — Week A)
 
-- [ ] **First git commit** in `IT Mgmt /` — repo exists but has zero commits; commit the ~10 drafted modules as the baseline
-- [ ] Next modules per MANIFEST build order: 10.3 risk register → 30.1 universal SOP template
+- [x] **First git commit** — stale flag; repo actually has 9 commits, last 2026-07-27
+- [ ] **Commit pending work-in-progress** in `IT Mgmt /`: modified `.gitignore`, `00-meta/BLUEPRINT.md`, `00-meta/TOKENS.md`, `10-day1-takeover/10.3-risk-register.md`, `MANIFEST.md`; untracked `20-hardware-lifecycle/20.8–20.10`, `60-people-lifecycle/60.4`, `70-change-incident/70.4–70.5`, `80-continuity-ops/`, `Employer-IT-Playbook-Private/`
+- [ ] Per MANIFEST, the build order's first pass is essentially done (DRAFT/REVIEW across the board, 80.1 is FINAL) — pick modules to mature DRAFT→REVIEW→FINAL, not new drafts
 - [ ] Feed real Ross refresh patterns into 20.x hardware-lifecycle modules (anonymized/vendor-neutral)
 
 ### Bogatyr (project block — Week B)
 
-- [ ] Swap the Russian track in the Phase 1 guide + `_context` for the replacement language (after the pick above)
+- [ ] ⚠️ **`bogatyr-build-guide/` not found on disk** — the "Phase 1 tutorial built" claim (below, Done log) can't be verified. Confirm whether it's lost, uncommitted elsewhere, or was never actually built before doing anything else in this lane.
+- [ ] Swap the Russian track in the Phase 1 guide + `_context` for the replacement language (after the pick above) — blocked on the item above
 - [ ] Then: Phase 2 tutorial (SRS flashcard drill), same tutorial format
 
 ### DevOps block — automation builds (weekly)
@@ -71,10 +73,10 @@ _Last updated: 2026-07-15 (refocus)_
 
 - [x] **Job-search close-out complete** — withdrawals sent to all 5 interviews, LinkedIn "Open to Work" off, tracker closed (confirmed 2026-07-15)
 - [x] **Refocus locked (2026-07-15):** two lanes (IT mgmt pays / DevOps journey), alternating project blocks, automation-build DevOps block, Russian archived
-- [x] IT Mgmt Playbook scaffolded — ~10 modules drafted, manifest + build order in place (2026-07-09 → 07-13)
+- [x] IT Mgmt Playbook scaffolded — grown well past initial ~10 modules; MANIFEST now covers the full build order at DRAFT/REVIEW/FINAL (2026-07-09 → 07-27, 9 commits)
 - [x] **Job landed — full-time contractor at Ross, computer refresh project (Jun 2026)** 🎉
 - [x] Job search ran 2026-04 → 2026-06: ~35 IT apps, 5 interviews reached, offer accepted
-- [x] Bogatyr build plan locked (2026-05-23); Phase 1 tutorial built
+- [x] Bogatyr build plan locked (2026-05-23); Phase 1 tutorial claimed built — ⚠️ **unverified: no `bogatyr-build-guide/` exists on disk as of 2026-08-10**
 - [x] Resume folder organized; 7 variants + dated batches (2026-06-09)
 - [x] LinkedIn: headline, summary, certs, keywords
 
