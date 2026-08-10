@@ -13,7 +13,7 @@ _Last updated: 2026-08-10 (repo review: verified IT Mgmt Playbook state, flagged
 | **Job status** | **EMPLOYED** — full-time contractor at Ross, computer refresh project (started Jun 2026). Open-ended; no contract news yet. |
 | **The two lanes** | **IT management pays the bills** — the job, the [IT Mgmt Playbook](IT%20Mgmt%20/), MD-102 depth. **DevOps is the journey** — Python/PowerShell automation now, cloud lane long-term. Both run weekly; the first outranks the second when time collides. |
 | **Job search** | **CLOSED** — close-out complete (withdrawals sent, LinkedIn updated). Reopens only on a contract-end signal. |
-| **Life priorities** | 1) **$3,000 income sprint (locked 2026-08-10, 2–4 wk target)** — freelance IT/TaskRabbit/local flat-rate + staffing-agency backstop, see [freelance/profiles-2026-08.md](freelance/profiles-2026-08.md). 2) Perform at Ross. 3) Debt paydown — income is flowing; set the plan now. 4) Confirm move status + do the address pass. |
+| **Life priorities** | 1) **$3,000 net income sprint (locked 2026-08-10, 2–4 wk target)** — freelance IT/TaskRabbit/local flat-rate + contingent staffing-agency/gig-app fallbacks (none instant — see plan), see [freelance/profiles-2026-08.md](freelance/profiles-2026-08.md). 2) Perform at Ross. 3) Debt paydown — income is flowing; set the plan now. 4) Confirm move status + do the address pass. |
 | **Format rule** | All project work is **tutorial-driven** (HTML build guides, learn by building) — the Bogatyr format, applied to every project. |
 | **Language track** | Russian **archived** (2026-07-15 → `plans/archive/`). **Replacement: French — locked 2026-08-10.** Arabic is off the table. |
 

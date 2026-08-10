@@ -8,14 +8,14 @@ _Last updated: 2026-08-10 (repo review: corrected IT Mgmt commit/module status, 
 
 ### 🔴 $3,000 income sprint (locked 2026-08-10, target: 2–4 weeks — TOP PRIORITY)
 
-Full plan + rate sheet: [freelance/profiles-2026-08.md](freelance/profiles-2026-08.md). Runs on the existing weekend "Money" slot + evenings ([routine.md](routine.md)) — parallel to Ross, not instead of it.
+Full plan + rate sheet: [freelance/profiles-2026-08.md](freelance/profiles-2026-08.md). Runs on the existing weekend "Money" slot + evenings ([routine.md](routine.md)) — parallel to Ross, not instead of it. **Target is $3,000 net cash-in-hand — gross billings need to run higher (~$3,600–4,200) after platform fees, travel, and tax set-aside; see the plan for the breakdown.**
 
 - [ ] Publish Upwork profile ($45–50/hr to start) + submit 8–10 proposals today
 - [ ] Start TaskRabbit account/background check today (multi-day lead time — don't let it be the bottleneck)
 - [ ] Post local flat-rate offer ($50–75) on Nextdoor/FB groups/personal socials
 - [ ] Message 5 friends/former colleagues asking for freelance IT referrals
-- [ ] Register with 1–2 NYC IT staffing agencies (ONIT, TEKsystems) for short-term/weekend desktop-support backstop
-- [ ] Day 7–10 checkpoint: if pipeline is too slow, activate gig-app driving/delivery as cash backstop
+- [ ] Apply to 1–2 gig-delivery apps as a contingency (not guaranteed): background check takes 1–7 business days, and NYC access is capped/zoned post minimum-pay-standard — apply now, don't expect week-1 shifts
+- [ ] Register with 1–2 NYC IT staffing agencies (ONIT, TEKsystems) for short-term/weekend desktop-support work — also runs its own hiring timeline, not instant
 - [ ] Track running total in [freelance/profiles-2026-08.md](freelance/profiles-2026-08.md)
 
 ### Status catch-up (this week, ~30 min)
