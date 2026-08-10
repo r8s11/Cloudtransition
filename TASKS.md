@@ -10,7 +10,7 @@ _Last updated: 2026-08-10 (repo review: corrected IT Mgmt commit/module status, 
 
 - [ ] Confirm move status: done / delayed / date — then update DASHBOARD.md
 - [ ] If moved: address pass — resumes ([resume/CLAUDE.md](resume/CLAUDE.md)), LinkedIn, bank, USPS
-- [ ] Pick the Bogatyr replacement language: **French or Arabic** (Russian archived 2026-07-15)
+- [x] Pick the Bogatyr replacement language: **French** (locked 2026-08-10; Arabic dropped, Russian archived 2026-07-15)
 
 ### Debt plan (overdue — income flowing since June)
 
@@ -28,7 +28,7 @@ _Last updated: 2026-08-10 (repo review: corrected IT Mgmt commit/module status, 
 ### Bogatyr (project block — Week B)
 
 - [ ] ⚠️ **`bogatyr-build-guide/` not found on disk** — the "Phase 1 tutorial built" claim (below, Done log) can't be verified. Confirm whether it's lost, uncommitted elsewhere, or was never actually built before doing anything else in this lane.
-- [ ] Swap the Russian track in the Phase 1 guide + `_context` for the replacement language (after the pick above) — blocked on the item above
+- [ ] Swap the Russian track in the Phase 1 guide + `_context` for **French** — blocked on confirming/rebuilding the missing `bogatyr-build-guide/` dir above
 - [ ] Then: Phase 2 tutorial (SRS flashcard drill), same tutorial format
 
 ### DevOps block — automation builds (weekly)
@@ -90,5 +90,5 @@ Not attending. Materials kept in [College Planning/](College%20Planning/) for a 
 
 - Active-application rhythm (8–10/week, tiers) — **job search is closed**; plan preserved in [plans/job-search-plan-2026-05.md](plans/job-search-plan-2026-05.md) for contract-end re-ignition
 - AZ-104 weekly keep-alive block — replaced 2026-07-15 by the automation-build DevOps block
-- Russian language track — archived 2026-07-15 ([plans/archive/](plans/archive/)); Bogatyr's language module swaps to French or Arabic
+- Russian language track — archived 2026-07-15 ([plans/archive/](plans/archive/)); Bogatyr's language module swaps to **French** (locked 2026-08-10)
 - SNHU year plan ([plans/year-plan-2026-2027.md](plans/year-plan-2026-2027.md)) — superseded

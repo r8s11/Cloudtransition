@@ -19,7 +19,7 @@ A "plan" is a study/work curriculum or a multi-month roadmap. A "task" is a sing
 - **Intune/MD-102** — work-driven; topics in the order the refresh project surfaces them. No standalone study plan; the job + builds cover it.
 - **Project block (1×/week, alternating):** Week A = IT Mgmt Playbook (`../IT Mgmt /`, its own repo — MANIFEST.md is the module tracker); Week B = Bogatyr (`../bogatyr-build-guide/`). All builds tutorial-format (HTML guides).
 - **DevOps block (1×/week): automation builds** — one manual step from the Ross work log → small Python/PowerShell tool + tutorial guide. This replaced the AZ-104 keep-alive block on 2026-07-15.
-- **Language track:** Russian archived 2026-07-15 (`archive/`); Bogatyr's language module swaps to **French or Arabic** (user's pick pending).
+- **Language track:** Russian archived 2026-07-15 (`archive/`); Bogatyr's language module swaps to **French** (locked 2026-08-10, Arabic dropped).
 
 Superseded, kept as reference:
 - [job-search-plan-2026-05.md](job-search-plan-2026-05.md) — the income-track plan that landed the Ross role; **re-open at contract end**
@@ -41,7 +41,7 @@ Capacity check before suggesting new commitments: ~2–3 hr/wk study total aroun
 | `sql_plan.md` | SQL learning plan. |
 | `react_plan.md` | React fundamentals plan. |
 | `books-reading-plan.md` | Reading list / sequencing for technical books. |
-| `archive/Learning Plan + Russian V2.md` | **Archived 2026-07-15** — Russian track dropped (replacement language: French or Arabic, TBD). Kept for reference. |
+| `archive/Learning Plan + Russian V2.md` | **Archived 2026-07-15** — Russian track dropped (replacement: **French**, locked 2026-08-10). Kept for reference. |
 | `weekly-goals.md` | Weekly goal-setting template. |
 | `week1-daily-guide.md` | First-week daily breakdown (likely from the original 20 hr/wk plan). |
 

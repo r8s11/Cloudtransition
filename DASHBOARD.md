@@ -15,7 +15,7 @@ _Last updated: 2026-08-10 (repo review: verified IT Mgmt Playbook state, flagged
 | **Job search** | **CLOSED** — close-out complete (withdrawals sent, LinkedIn updated). Reopens only on a contract-end signal. |
 | **Life priorities** | 1) Perform at Ross. 2) **Debt paydown** — income is flowing; set the plan now. 3) Confirm move status + do the address pass. |
 | **Format rule** | All project work is **tutorial-driven** (HTML build guides, learn by building) — the Bogatyr format, applied to every project. |
-| **Language track** | Russian **archived** (2026-07-15 → `plans/archive/`). Replacement: **French or Arabic — pick before the next Bogatyr session.** |
+| **Language track** | Russian **archived** (2026-07-15 → `plans/archive/`). **Replacement: French — locked 2026-08-10.** Arabic is off the table. |
 
 ---
 
@@ -69,7 +69,7 @@ AZ-104 plan (shelved 2026-07-15 — reopens when a cert window appears) · SC-90
 
 | Horizon | Milestone |
 |---|---|
-| **Now → end of Jul** | Move status confirmed + address pass done · debt plan running · ~~first IT Mgmt Playbook commit~~ (done — 9 commits) · language picked (French/Arabic) · confirm/rebuild Bogatyr Phase 1 |
+| **Now → end of Jul** | Move status confirmed + address pass done · debt plan running · ~~first IT Mgmt Playbook commit~~ (done — 9 commits) · ~~language picked (French/Arabic)~~ (done — French) · confirm/rebuild Bogatyr Phase 1 |
 | **~Sep 2026 (3-month mark)** | Decide MD-102 exam date from on-the-job readiness · ~~playbook core modules (10.x, 20.x, 30.1) at DRAFT+~~ (done — most of the build order is DRAFT/REVIEW already) — next is maturing DRAFT→REVIEW→FINAL · ask about contract runway |
 | **Contract-end signal** | The re-plan trigger: refresh resumes (with Ross + Intune depth), re-open the pipeline early — don't wait for the last week. |
 

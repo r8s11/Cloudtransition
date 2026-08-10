@@ -48,6 +48,6 @@ _Last updated: 2026-07-15 (refocus)_
 
 | Date | Event | What to do |
 |---|---|---|
-| **Jul 2026** | Catch-up week | Confirm move status + address pass; start debt plan; ~~first playbook commit~~ (done, 9 commits); pick French vs Arabic; confirm/rebuild missing Bogatyr dir |
+| **Jul 2026** | Catch-up week | Confirm move status + address pass; start debt plan; ~~first playbook commit~~ (done, 9 commits); ~~pick French vs Arabic~~ (done — French); confirm/rebuild missing Bogatyr dir |
 | **~Sep 2026** | 3-month mark at Ross | Decide MD-102 exam date from on-the-job readiness; ask about contract runway; review playbook manifest progress |
 | **Q4 2026** | If MD-102 scheduled | Shift project blocks toward exam prep for the final 4–6 weeks |
