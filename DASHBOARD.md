@@ -30,6 +30,9 @@ _Last updated: 2026-08-10 (repo review: verified IT Mgmt Playbook state, flagged
 
 ## Active Workstreams
 
+### 🚨 SECURITY — `pstools` secrets exposure (2026-08-10, outranks everything)
+`~/work/pstools` is pushed to `github.com/r8s11/pstools` with a former employer's AD structure (`DC=peakscientific,DC=local`), a real personal address, and a plaintext default password (`Newaduser.ps1:172`). Repo reads Private (unauth = 404) so it's **contained, not remediated** — the material is on GitHub and in git history permanently. Actions: [TASKS.md](TASKS.md) · detail: [freelance/monetization-plan.md](freelance/monetization-plan.md).
+
 ### 0. 🔴 $3,000 income sprint (top priority, 2026-08-10 → ~end of Aug)
 Freelance IT work (Upwork, TaskRabbit, local flat-rate) stacked with an IT-staffing-agency backstop, run on the weekend Money slot + evenings — alongside Ross, not instead of it. Plan + rate sheet + running total: [freelance/profiles-2026-08.md](freelance/profiles-2026-08.md). Checklist: [TASKS.md](TASKS.md).
 
@@ -37,7 +40,7 @@ Freelance IT work (Upwork, TaskRabbit, local flat-rate) stacked with an IT-staff
 Work log daily (3 bullets). It feeds everything: MD-102 readiness, playbook modules, automation candidates, resume bullets.
 
 ### 2. Project block — two builds, alternating weeks
-- **Week A — [IT Mgmt Playbook](IT%20Mgmt%20/):** the "pays the bills" artifact. ✅ Has its own git history (9 commits, last 2026-07-27) — the "zero commits" flag is stale. Per its MANIFEST, nearly every module in the build order is at DRAFT/REVIEW (80.1 backup-restore-verification is FINAL); first full pass through the build order is essentially done. It also has **uncommitted work** sitting in the working tree (new 20.8–20.10, 60.4, 70.4–70.5, 80-continuity-ops/ modules, plus an `Employer-IT-Playbook-Private/` folder) — commit or triage next session. Next real decision: mature DRAFT→REVIEW→FINAL, not "which module to draft."
+- **Week A — [IT Mgmt Playbook](IT%20Mgmt%20/):** the "pays the bills" artifact, and the **primary monetizable asset** (55 files, ~40k words). ✅ Has its own git history (9 commits, last 2026-07-27). Per its MANIFEST, nearly every module is at DRAFT/REVIEW (80.1 is FINAL); first pass essentially done. Uncommitted work still in the tree (20.8–20.10, 60.4, 70.4–70.5, 80-continuity-ops/) — commit, then push to Gitea. ⚠️ **Not verified anonymized**: `tools/validate.py` was never built and BLUEPRINT V3 is still open (`10.2:26` Name column) — describe it as **"vendor-neutral by design"**, never "anonymized", until the screen exists. Monetization: [freelance/monetization-plan.md](freelance/monetization-plan.md).
 - **Week B — Bogatyr:** ⚠️ **`bogatyr-build-guide/` does not exist on disk.** "Phase 1 tutorial built" is unverified/stale — either it was never committed, lost, or the claim is wrong. `theRussian.txt` (root) holds the original "Bogatyr Systems" game-design doc but is not a tutorial build. Treat Week B as **not started** until confirmed otherwise.
 
 ### 3. DevOps block — automation builds (weekly)

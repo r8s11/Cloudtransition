@@ -6,6 +6,15 @@ _Last updated: 2026-08-10 (repo review: corrected IT Mgmt commit/module status, 
 
 ## Active
 
+### 🚨 SECURITY — `pstools` secrets exposure (found 2026-08-10, OUTRANKS EVERYTHING)
+
+`~/work/pstools` is tracked + pushed to `github.com/r8s11/pstools`. Repo reads as **Private** (unauth fetch = 404), so contained — but a former employer's AD structure and a default password are on GitHub and in git history. Detail: [freelance/monetization-plan.md](freelance/monetization-plan.md).
+
+- [ ] Confirm `github.com/r8s11/pstools` is Private with no outside collaborators
+- [ ] Decide the disclosure question: is `Peakstarter1!` (`Newaduser.ps1:172`) still a live password pattern at that employer? If yes, notify them
+- [ ] Mark `pstools` as private source material — **never** push to Gitea, never use as product input
+- [ ] Any future product version = rewritten from scratch in a clean repo, tokenized, zero copy-paste (history rewrite can't be trusted to clear it)
+
 ### 🔴 $3,000 income sprint (locked 2026-08-10, target: 2–4 weeks — TOP PRIORITY)
 
 Full plan + rate sheet: [freelance/profiles-2026-08.md](freelance/profiles-2026-08.md). Runs on the existing weekend "Money" slot + evenings ([routine.md](routine.md)) — parallel to Ross, not instead of it. **Target is $3,000 net cash-in-hand — gross billings need to run higher (~$3,600–4,200) after platform fees, travel, and tax set-aside; see the plan for the breakdown.**
@@ -33,9 +42,34 @@ Full plan + rate sheet: [freelance/profiles-2026-08.md](freelance/profiles-2026-
 ### IT Mgmt Playbook (project block — Week A)
 
 - [x] **First git commit** — stale flag; repo actually has 9 commits, last 2026-07-27
-- [ ] **Commit pending work-in-progress** in `IT Mgmt /`: modified `.gitignore`, `00-meta/BLUEPRINT.md`, `00-meta/TOKENS.md`, `10-day1-takeover/10.3-risk-register.md`, `MANIFEST.md`; untracked `20-hardware-lifecycle/20.8–20.10`, `60-people-lifecycle/60.4`, `70-change-incident/70.4–70.5`, `80-continuity-ops/`, `Employer-IT-Playbook-Private/`
+- [ ] **Commit pending work-in-progress** in `IT Mgmt /`: modified `.gitignore` (now excludes the private folder — fixed 2026-08-10), `00-meta/BLUEPRINT.md`, `00-meta/TOKENS.md`, `10-day1-takeover/10.3-risk-register.md`, `MANIFEST.md`; untracked `20-hardware-lifecycle/20.8–20.10`, `60-people-lifecycle/60.4`, `70-change-incident/70.4–70.5`, `80-continuity-ops/`
+- [ ] **Push to Gitea** — then verify `Employer-IT-Playbook-Private/` (107 files, ~73k words) is absent from the pushed tree. It was untracked by luck only until the gitignore fix
 - [ ] Per MANIFEST, the build order's first pass is essentially done (DRAFT/REVIEW across the board, 80.1 is FINAL) — pick modules to mature DRAFT→REVIEW→FINAL, not new drafts
-- [ ] Feed real Ross refresh patterns into 20.x hardware-lifecycle modules (anonymized/vendor-neutral)
+- [ ] Feed real Ross refresh patterns into 20.x hardware-lifecycle modules — **vendor-neutral + tokenized, no employer specifics**. `pstools` is the cautionary case: employer domain/OU/password went into a repo and is now permanently in git history. Write generic from the start; never paste-then-scrub
+
+### Monetization — playbook → income (plan: [freelance/monetization-plan.md](freelance/monetization-plan.md))
+
+**Publishing gate — all four before ANY module goes public, samples included:**
+
+- [ ] Build the name/confidentiality screen (BLUEPRINT Step 2–4 validator, or a minimal standalone version) — `tools/validate.py` was never built, so there is currently **zero** automated screen
+- [ ] Fix V3 violation: `10.2-stakeholder-map.md:26` `[Stakeholder_Name]` column → anonymized `Ref` (`S-01`); STYLE-GUIDE:44 forbids a Name column
+- [ ] Human read-through of every module slated for publication
+- [ ] Verify export pipeline excludes `Employer-IT-Playbook-Private/`
+- [ ] ⚠️ Stop describing the playbook as "anonymized" anywhere — correct phrasing is **"vendor-neutral by design"** until the screen exists
+
+**Lane A — services (fast, do first):**
+
+- [ ] Add "IT SOP / documentation buildout" + "Day-1 IT takeover audit" service line to the Upwork profile — fixed-scope packages, not hourly
+
+**Lane B — publish chinola.app/playbook (lead-gen, $0 direct) — STARTING:**
+
+- [ ] Gate must be green first
+- [ ] Pick 2–3 sample modules (candidates: 30.1 universal SOP template, 10.1 discovery audit, 80.1 backup-restore — the only FINAL one)
+- [ ] Static export to chinola.app/playbook (subpath, not subdomain); Lane A call-to-action on each page
+
+**Lane C — digital product (slow, after Lane B):**
+
+- [ ] Gumroad/Lemon Squeezy pack ($49–149) or Leanpub/KDP ebook — sequence after Lane B so packaging follows real demand signal, not guesswork
 
 ### Bogatyr (project block — Week B)
 
