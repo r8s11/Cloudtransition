@@ -36,11 +36,14 @@ _Last updated: 2026-08-10 (repo review: verified IT Mgmt Playbook state, flagged
 ### 0. 🔴 $3,000 income sprint (top priority, 2026-08-10 → ~end of Aug)
 Freelance IT work (Upwork, TaskRabbit, local flat-rate) stacked with an IT-staffing-agency backstop, run on the weekend Money slot + evenings — alongside Ross, not instead of it. Plan + rate sheet + running total: [freelance/profiles-2026-08.md](freelance/profiles-2026-08.md). Checklist: [TASKS.md](TASKS.md).
 
+### 0b. Lane A — productized IT services (the monetization lane that pays now)
+Fixed-scope packages built on the playbook: **P1** Day-1 Takeover Audit $1,500–2,500 (the wedge) · **P2** IT Ops Documentation Buildout $3,000–5,000 (*one clears the sprint target*) · **P3** Fractional IT Ops $1,000–2,000/mo retainer. Sell the documented department, never the playbook itself; clients get tokenized copies. Full plan: [freelance/lane-a-services.md](freelance/lane-a-services.md).
+
 ### 1. Ross computer refresh (the job)
 Work log daily (3 bullets). It feeds everything: MD-102 readiness, playbook modules, automation candidates, resume bullets.
 
 ### 2. Project block — two builds, alternating weeks
-- **Week A — [IT Mgmt Playbook](IT%20Mgmt%20/):** the "pays the bills" artifact, and the **primary monetizable asset** (55 files, ~40k words). ✅ Has its own git history (9 commits, last 2026-07-27). Per its MANIFEST, nearly every module is at DRAFT/REVIEW (80.1 is FINAL); first pass essentially done. Uncommitted work still in the tree (20.8–20.10, 60.4, 70.4–70.5, 80-continuity-ops/) — commit, then push to Gitea. ⚠️ **Not verified anonymized**: `tools/validate.py` was never built and BLUEPRINT V3 is still open (`10.2:26` Name column) — describe it as **"vendor-neutral by design"**, never "anonymized", until the screen exists. Monetization: [freelance/monetization-plan.md](freelance/monetization-plan.md).
+- **Week A — [IT Mgmt Playbook](IT%20Mgmt%20/):** the "pays the bills" artifact, and the **primary monetizable asset** (~40k words across 9 families). 14 commits. ✅ **Confidentiality gate GREEN** (`tools/validate.py` set D + staged-snapshot pre-commit hook); **structural backlog cleared 2026-08-10, 123 findings → 5** (all word-cap warnings awaiting your trim-vs-except call). Still say **"vendor-neutral by design"**, not "anonymized" — human read-through is the remaining publish gate. Income: [freelance/lane-a-services.md](freelance/lane-a-services.md) · [freelance/monetization-plan.md](freelance/monetization-plan.md).
 - **Week B — Bogatyr:** ⚠️ **`bogatyr-build-guide/` does not exist on disk.** "Phase 1 tutorial built" is unverified/stale — either it was never committed, lost, or the claim is wrong. `theRussian.txt` (root) holds the original "Bogatyr Systems" game-design doc but is not a tutorial build. Treat Week B as **not started** until confirmed otherwise.
 
 ### 3. DevOps block — automation builds (weekly)

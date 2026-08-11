@@ -74,9 +74,11 @@ Evidence, from the repo's own `00-meta/BLUEPRINT.md`:
 
 ## Lane A — Services (fast, highest $/hr) ⭐ start here
 
+> **Full elaboration: [lane-a-services.md](lane-a-services.md)** — packages, pricing, positioning, sourcing, proposal shape, confidentiality rules.
+
 The playbook's real leverage is **delivery speed on consulting work**, not unit sales. A client paying for
 "document our IT department" or "we inherited an IT mess, where do we start" is a **$1,500–5,000
-engagement** you deliver far faster because 55 modules of structure already exist.
+engagement** you deliver far faster because ~40k words of structure across 9 families already exist.
 
 Stacks directly onto the Upwork profile already launching in the cash sprint — same profile, higher-ticket
 service line.

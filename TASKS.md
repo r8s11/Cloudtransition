@@ -62,17 +62,25 @@ Full plan + rate sheet: [freelance/profiles-2026-08.md](freelance/profiles-2026-
 - [ ] Verify export pipeline excludes `Employer-IT-Playbook-Private/` at export time (gitignored now, but re-check when the static export is built)
 - [ ] ⚠️ Keep describing the playbook as **"vendor-neutral by design"** — the automated screen raises confidence but doesn't make it "certified anonymized"
 
-**Structural backlog (separate from publishing, 123 findings — not blocking):**
+**Structural backlog — CLEARED 2026-08-10 (123 findings → 5):**
 
-- [ ] `SOP ID:` → `ID:` across ~23 SOP files (BLUEPRINT S2/Steps 9–10) — drives 35 A2 + 25 A3 + 23 C2 findings
-- [ ] Declare or convert 31 undeclared tokens (B1) + 2 fill-ins to `<angle>` notation (B2)
-- [ ] Add MANIFEST row for `00-meta/AGENT-CONTRACT.md` (C1)
-- [ ] 6 word-cap breaches (C5) — add the Cap Exceptions table per BLUEPRINT Step 5, or trim
-- [ ] Once clean: flip the hook to `--gate all` and add CI
+- [x] `SOP ID:` → `ID:` sweep across 22 SOP files + V4 effective-date fix + missing keys added (BLUEPRINT Steps 9–10)
+- [x] Declared `[Prior_Employer]` + `[Migration_Batch_ID]`; converted 12 per-record values to `<angle>` fill-ins (Steps 6–8); `30.4` format is now `SOP-<domain>-<###>`
+- [x] MANIFEST row added for `00-meta/AGENT-CONTRACT.md` (00.6); TAXONOMY keys capitalized (Step 11)
+- [x] `### Cap Exceptions` table added to STYLE-GUIDE + machine-read by C5 (Step 5) — only the pre-authorized 20.7/1600 is listed
+- [ ] **Your call: 5 word-cap warnings** — 70.4 (956w), 70.5 (964w), 80.1 (808w), 80.2 (844w), 80.4 (1155w) against the 800 cap. Trim, or add rows to the Cap Exceptions table. Left visible rather than silently excepted
+- [ ] Once those are decided: flip the hook to `--gate all` and add CI
 
-**Lane A — services (fast, do first):**
+**Lane A — services (fast, the only lane that pays inside the sprint) → full plan: [freelance/lane-a-services.md](freelance/lane-a-services.md):**
 
-- [ ] Add "IT SOP / documentation buildout" + "Day-1 IT takeover audit" service line to the Upwork profile — fixed-scope packages, not hourly
+- [ ] Add the P1/P2 service line to the Upwork profile — **fixed-scope packages, never hourly** (hourly punishes you for the playbook's speed advantage)
+- [ ] Write the P1 proposal template (scope / timeline / price / exclusions / client-provides)
+- [ ] Send 5 warm-network messages — highest-conversion channel and currently empty ([networking/contacts.yml](networking/contacts.yml) has zero contacts)
+- [ ] Search Upwork for "IT documentation", "SOP", "IT policy", "asset management", "offboarding process" — process work, not helpdesk
+- [ ] Approach 2–3 MSPs about subcontracted documentation work (no platform fee, repeat business)
+- [ ] Per-client repo + denylist entry on day 1 of any engagement — client data never touches the playbook repo
+
+Packages: **P1** Day-1 Takeover Audit $1,500–2,500 (~1wk, the wedge) · **P2** IT Ops Documentation Buildout $3,000–5,000 (2–3wk, *one clears the sprint target*) · **P3** Fractional IT Ops $1,000–2,000/mo (earn from P1/P2, don't pitch cold).
 
 **Lane B — publish chinola.app/playbook (lead-gen, $0 direct) — STARTING:**
 
