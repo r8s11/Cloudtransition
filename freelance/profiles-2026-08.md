@@ -54,7 +54,26 @@ Computer setup · Network/router setup · Smart home device installation · Gene
 
 ## $3,000-in-2–4-weeks sprint (locked 2026-08-10)
 
-**Target clarification: $3,000 net cash-in-hand, not $3,000 gross billed.** After Upwork's ~10% fee, NYC transit/travel costs, and setting aside ~25–30% for taxes on top of that (see above), the realistic **gross billing target is closer to $3,600–4,200** depending on the lane mix, to actually clear $3,000 spendable. Lean on TaskRabbit/local flat-rate (near-100% net) over Upwork (90% net) where possible. At a $50–65 blended rate that's roughly **55–75 billable hours** over 2–4 weeks around a full-time job — aggressive; success depends on running all lanes in parallel and converting clients in week 1, since Upwork payouts alone lag ~10 days behind hours worked.
+**First: define the target.** "$3,000" means two very different numbers depending on whether tax
+set-aside counts. Pick one and track against it — the earlier "$3,600–4,200 gross" figure in this
+doc was **wrong** (it nets only ~$2,350–2,740 spendable) and has been replaced:
+
+| What you actually want | Direct / local (no fee) | Upwork (~10% fee) |
+|---|---|---|
+| $3,000 **received**, tax handled later | **$3,000** billed | **$3,333** billed |
+| $3,000 **spendable** after 25% tax reserve | **$4,000** billed | **$4,444** billed |
+| $3,000 **spendable** after 30% tax reserve | **$4,286** billed | **$4,762** billed |
+
+Default assumption for this sprint: **$3,000 received**, with 25–30% mentally reserved for tax
+owed next filing season. If the $3,000 must be genuinely free-and-clear, use the lower two rows
+and expect $4,000–4,800 in billings.
+
+Lean on TaskRabbit/local flat-rate (no platform fee) over Upwork where the work is equivalent —
+the fee column above is the whole reason. At a $50–65 blended rate, $3,333 is roughly **50–65
+billable hours** over 2–4 weeks around a full-time job; the "spendable" rows are 65–95 hours,
+which is not realistic on evenings and weekends. **Track cash received and its date, not
+billings** — Upwork hourly lags ~10 days, and fixed-price milestones only release on client
+approval plus a security hold.
 
 **This week (days 1–2):**
 - [ ] Publish the Upwork profile (copy above) at $45–50/hr; submit 8–10 proposals to active Intune/Entra/M365/device-setup/help-desk postings same day
@@ -71,7 +90,18 @@ Computer setup · Network/router setup · Smart home device installation · Gene
 
 **If the pipeline is too slow by day 7–10:** re-check gig-app approval status and staffing-agency response; neither is instant, so the check-in is about whether they're in motion, not a switch you flip that day.
 
-**Running total (net cash received, not gross billed):** $0 / $3,000
+## Ledger — cash received (not billed)
+
+Counts money **in the account**, with the date. Signed contracts, approved milestones, and
+invoices sent are all $0 until they clear.
+
+| Date received | Source | Channel | Billed | Received |
+|---|---|---|---|---|
+| — | — | — | — | — |
+
+**Running total: $0 received / $3,000 target** (see the target-definition table above — $3,000
+*received* needs ~$3,000 direct or ~$3,333 Upwork billed; $3,000 *spendable after tax reserve*
+needs $4,000–4,800 billed).
 
 ## Open items
 

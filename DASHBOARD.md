@@ -37,7 +37,7 @@ _Last updated: 2026-08-10 (repo review: verified IT Mgmt Playbook state, flagged
 Freelance IT work (Upwork, TaskRabbit, local flat-rate) stacked with an IT-staffing-agency backstop, run on the weekend Money slot + evenings — alongside Ross, not instead of it. Plan + rate sheet + running total: [freelance/profiles-2026-08.md](freelance/profiles-2026-08.md). Checklist: [TASKS.md](TASKS.md).
 
 ### 0b. Lane A — productized IT services (the monetization lane that pays now)
-Fixed-scope packages built on the playbook: **P1** Day-1 Takeover Audit $1,500–2,500 (the wedge) · **P2** IT Ops Documentation Buildout $3,000–5,000 (*one clears the sprint target*) · **P3** Fractional IT Ops $1,000–2,000/mo retainer. Sell the documented department, never the playbook itself; clients get tokenized copies. Full plan: [freelance/lane-a-services.md](freelance/lane-a-services.md).
+Fixed-scope packages built on the playbook: **P1** Day-1 Takeover Audit $1,500–2,500 (the wedge) · **P2** IT Ops Documentation Buildout **$3,500–5,000** · **P3** Fractional IT Ops $1,000–2,000/mo retainer. Sell the documented department, never the playbook itself; clients get tokenized copies. ⚠️ **No single $3,000 P2 clears the sprint** — single-engagement clearance needs ~$4,000+ billed direct, and the cash may land after the window. Lane A covers *part* of the $3,000; hourly lanes cover the rest. Full plan: [freelance/lane-a-services.md](freelance/lane-a-services.md).
 
 ### 1. Ross computer refresh (the job)
 Work log daily (3 bullets). It feeds everything: MD-102 readiness, playbook modules, automation candidates, resume bullets.

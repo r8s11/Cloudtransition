@@ -58,7 +58,7 @@ Low commitment for them, high signal for you — and it _generates_ P2 and P3 sc
 
 ---
 
-### P2 — "IT Operations Documentation Buildout" · $3,000–5,000 · 2–3 weeks
+### P2 — "IT Operations Documentation Buildout" · $3,500–5,000 · 2–3 weeks
 
 **For:** a 20–150 person company running IT on tribal knowledge.
 
@@ -66,7 +66,18 @@ Low commitment for them, high signal for you — and it _generates_ P2 and P3 sc
 20.x/40.x/60.x, an asset register schema (20.1), a tool-mapping doc for their stack (50.x).
 
 **Why it sells:** the pain is real and recurring — onboarding takes a week, offboarding gets
-missed, nobody knows what's licensed. Note **one P2 clears the $3,000 target on its own.**
+missed, nobody knows what's licensed.
+
+> ⚠️ **A $3,000 P2 does NOT clear the $3,000 sprint target.** Billed at $3,000 through Upwork
+> it returns $2,700, and ~$1,890–2,025 once 25–30% is reserved for tax. To clear $3,000 in
+> genuinely spendable cash from a single engagement you need roughly **$4,000–4,300 billed
+> direct, or $4,450–4,750 through Upwork** — i.e. the very top of this range, sold direct.
+> To clear $3,000 *received* (tax reserved separately) it's **$3,000 direct / $3,333 Upwork**.
+> See the table in [profiles-2026-08.md](profiles-2026-08.md).
+>
+> Practical read: **price P2 at $4,000+ and sell it direct** if it's meant to carry the sprint
+> alone. Otherwise treat it as the largest contributor, not the whole answer — and note the
+> cash may land *after* the sprint window closes (milestone approval + payout hold).
 
 ---
 
@@ -156,8 +167,14 @@ a review.
 **Month 2+** — raise P1 to the top of its range once 2–3 reviews exist; introduce P3 to
 delivered clients.
 
-**Realistic:** the first P1 closes in weeks 2–3 and contributes to the $3,000 sprint. The first
-P2 more likely lands month 2. Don't bank the sprint on P2.
+**Realistic:** the first P1 closes in weeks 2–3 and *contributes* to the sprint — at $1,500–2,500
+billed it lands roughly $1,350–2,250 received via Upwork, or full value direct. The first P2 more
+likely lands month 2, and its cash may arrive after the sprint window regardless of when it's
+signed. **Don't bank the sprint on P2.** Lane A realistically covers part of the $3,000; the
+hourly lanes in [profiles-2026-08.md](profiles-2026-08.md) cover the rest.
+
+**Structure milestones for cash timing, not just scope:** a 40% deposit on signature that clears
+inside the window beats 100% on delivery that clears after it.
 
 ---
 
@@ -175,5 +192,7 @@ P2 more likely lands month 2. Don't bank the sprint on P2.
 
 ## Tracking
 
-Log engagements and revenue against the sprint total in
-[profiles-2026-08.md](profiles-2026-08.md) (**net received**, not gross billed).
+Log every engagement in [profiles-2026-08.md](profiles-2026-08.md) with four fields:
+**billed · received · date received · channel**. The sprint total counts **cash actually
+received and its date** — not signed contracts, not approved milestones, not invoices sent.
+A $4,000 P2 signed in week 3 that pays in week 6 contributes **$0** to a 4-week sprint.

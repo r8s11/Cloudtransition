@@ -19,7 +19,7 @@ _Last updated: 2026-08-10 (repo review: corrected IT Mgmt commit/module status, 
 
 ### 🔴 $3,000 income sprint (locked 2026-08-10, target: 2–4 weeks — TOP PRIORITY)
 
-Full plan + rate sheet: [freelance/profiles-2026-08.md](freelance/profiles-2026-08.md). Runs on the existing weekend "Money" slot + evenings ([routine.md](routine.md)) — parallel to Ross, not instead of it. **Target is $3,000 net cash-in-hand — gross billings need to run higher (~$3,600–4,200) after platform fees, travel, and tax set-aside; see the plan for the breakdown.**
+Full plan + rate sheet: [freelance/profiles-2026-08.md](freelance/profiles-2026-08.md). Runs on the existing weekend "Money" slot + evenings ([routine.md](routine.md)) — parallel to Ross, not instead of it. **Define the target before tracking it:** $3,000 *received* ≈ $3,000 billed direct / $3,333 via Upwork. $3,000 *spendable after 25–30% tax reserve* ≈ **$4,000–4,800 billed**. (The earlier "$3,600–4,200" figure was wrong — it nets ~$2,350–2,740.) Count **cash received and its date**, not invoices sent.
 
 - [ ] Publish Upwork profile ($45–50/hr to start) + submit 8–10 proposals today
 - [ ] Start TaskRabbit account/background check today (multi-day lead time — don't let it be the bottleneck)
@@ -74,13 +74,13 @@ Full plan + rate sheet: [freelance/profiles-2026-08.md](freelance/profiles-2026-
 **Lane A — services (fast, the only lane that pays inside the sprint) → full plan: [freelance/lane-a-services.md](freelance/lane-a-services.md):**
 
 - [ ] Add the P1/P2 service line to the Upwork profile — **fixed-scope packages, never hourly** (hourly punishes you for the playbook's speed advantage)
-- [ ] Write the P1 proposal template (scope / timeline / price / exclusions / client-provides)
-- [ ] Send 5 warm-network messages — highest-conversion channel and currently empty ([networking/contacts.yml](networking/contacts.yml) has zero contacts)
+- [x] **P1/P2 proposal templates + 5 warm-network messages written** → [freelance/lane-a-templates.md](freelance/lane-a-templates.md) (also: 15-min discovery-call script with package routing, and a per-engagement confidentiality checklist)
+- [ ] Send the 5 warm-network messages — highest-conversion channel and currently empty ([networking/contacts.yml](networking/contacts.yml) has zero contacts). Log each with a date; follow up **once** after 5–7 days
 - [ ] Search Upwork for "IT documentation", "SOP", "IT policy", "asset management", "offboarding process" — process work, not helpdesk
 - [ ] Approach 2–3 MSPs about subcontracted documentation work (no platform fee, repeat business)
 - [ ] Per-client repo + denylist entry on day 1 of any engagement — client data never touches the playbook repo
 
-Packages: **P1** Day-1 Takeover Audit $1,500–2,500 (~1wk, the wedge) · **P2** IT Ops Documentation Buildout $3,000–5,000 (2–3wk, *one clears the sprint target*) · **P3** Fractional IT Ops $1,000–2,000/mo (earn from P1/P2, don't pitch cold).
+Packages: **P1** Day-1 Takeover Audit $1,500–2,500 (~1wk, the wedge) · **P2** IT Ops Documentation Buildout **$3,500–5,000** (2–3wk) · **P3** Fractional IT Ops $1,000–2,000/mo (earn from P1/P2, don't pitch cold). ⚠️ **A $3,000 P2 does not clear the sprint** — via Upwork it returns $2,700, ~$1,890–2,025 after tax reserve. Single-engagement clearance needs **$4,000+ billed direct**. Track **cash received + date**, not billings.
 
 **Lane B — publish chinola.app/playbook (lead-gen, $0 direct) — STARTING:**
 
