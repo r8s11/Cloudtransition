@@ -8,12 +8,14 @@ _Last updated: 2026-08-10 (repo review: corrected IT Mgmt commit/module status, 
 
 ### 🚨 SECURITY — `pstools` secrets exposure (found 2026-08-10, OUTRANKS EVERYTHING)
 
-`~/work/pstools` is tracked + pushed to `github.com/r8s11/pstools`. Repo reads as **Private** (unauth fetch = 404), so contained — but a former employer's AD structure and a default password are on GitHub and in git history. Detail: [freelance/monetization-plan.md](freelance/monetization-plan.md).
+`~/work/pstools` is tracked + pushed to `github.com/r8s11/pstools`. An unauth fetch returns 404 — that proves only "not publicly readable", **not** Private (equally consistent with deleted/renamed/transferred). A former employer's AD structure and a default password are on GitHub and in git history. Detail: [freelance/monetization-plan.md](freelance/monetization-plan.md).
 
-- [ ] Confirm `github.com/r8s11/pstools` is Private with no outside collaborators
-- [ ] Decide the disclosure question: is `Peakstarter1!` (`Newaduser.ps1:172`) still a live password pattern at that employer? If yes, notify them
+- [ ] **Authenticated check**: `gh repo view r8s11/pstools --json visibility,collaborators,forks` — confirm real visibility, collaborators, and any forks. The 404 is not evidence
+- [ ] Decide the disclosure question: is `Peakstarter1!` (`Newaduser.ps1:172`) still a live password pattern at that employer? If yes, notify them — **highest-priority action regardless of repo visibility**
+- [ ] Rotate the credential / confirm it's dead. Purge can't recall existing clones, forks, or caches, so rotation is required either way
 - [ ] Mark `pstools` as private source material — **never** push to Gitea, never use as product input
-- [ ] Any future product version = rewritten from scratch in a clean repo, tokenized, zero copy-paste (history rewrite can't be trusted to clear it)
+- [ ] Optional cleanup: `git filter-repo` + force-push + remote GC *can* purge reachable history — but treat it as defense-in-depth after rotation, not as the fix
+- [ ] Any product version = rewritten from scratch in a clean repo, tokenized (cleaner provenance than trusting a scrub)
 
 ### 🔴 $3,000 income sprint (locked 2026-08-10, target: 2–4 weeks — TOP PRIORITY)
 
@@ -49,13 +51,24 @@ Full plan + rate sheet: [freelance/profiles-2026-08.md](freelance/profiles-2026-
 
 ### Monetization — playbook → income (plan: [freelance/monetization-plan.md](freelance/monetization-plan.md))
 
-**Publishing gate — all four before ANY module goes public, samples included:**
+**Publishing gate — automated portion is BUILT and GREEN as of 2026-08-10:**
 
-- [ ] Build the name/confidentiality screen (BLUEPRINT Step 2–4 validator, or a minimal standalone version) — `tools/validate.py` was never built, so there is currently **zero** automated screen
-- [ ] Fix V3 violation: `10.2-stakeholder-map.md:26` `[Stakeholder_Name]` column → anonymized `Ref` (`S-01`); STYLE-GUIDE:44 forbids a Name column
-- [ ] Human read-through of every module slated for publication
-- [ ] Verify export pipeline excludes `Employer-IT-Playbook-Private/`
-- [ ] ⚠️ Stop describing the playbook as "anonymized" anywhere — correct phrasing is **"vendor-neutral by design"** until the screen exists
+- [x] **Confidentiality screen built** — `IT Mgmt/tools/validate.py` (stdlib, check sets A–D). Set D is the publishing gate: name columns, emails, directory DNs, credential patterns, private IPs, UNC paths, + employer denylist. Scans **raw markdown including code fences** (that's where the `pstools` secrets hid)
+- [x] **Pre-commit hook wired** — `tools/hooks/pre-commit`, validates the **staged snapshot** via `git checkout-index` (not the worktree — staging a secret then cleaning the worktree copy would otherwise commit it). Fails closed if the denylist env var is unset. Activate in a fresh clone: `git config core.hooksPath tools/hooks`
+- [x] **V3 fixed** — `10.2` Name column → anonymized `Ref` (`S-01`); also fixed the broken `10.1-people-process.md` link
+- [x] **Denylist created** at `~/.config/playbook-exclusions.txt` (outside the repo, never committed). **Add `export PLAYBOOK_EXCLUSION_LIST=~/.config/playbook-exclusions.txt` to your shell rc** — without it the hook blocks every commit
+- [x] Confidentiality gate **GREEN**: 0 blockers across 53 files
+- [ ] **Human read-through** of each module slated for publication — automation catches patterns, not judgment. Still required, still the real gate
+- [ ] Verify export pipeline excludes `Employer-IT-Playbook-Private/` at export time (gitignored now, but re-check when the static export is built)
+- [ ] ⚠️ Keep describing the playbook as **"vendor-neutral by design"** — the automated screen raises confidence but doesn't make it "certified anonymized"
+
+**Structural backlog (separate from publishing, 123 findings — not blocking):**
+
+- [ ] `SOP ID:` → `ID:` across ~23 SOP files (BLUEPRINT S2/Steps 9–10) — drives 35 A2 + 25 A3 + 23 C2 findings
+- [ ] Declare or convert 31 undeclared tokens (B1) + 2 fill-ins to `<angle>` notation (B2)
+- [ ] Add MANIFEST row for `00-meta/AGENT-CONTRACT.md` (C1)
+- [ ] 6 word-cap breaches (C5) — add the Cap Exceptions table per BLUEPRINT Step 5, or trim
+- [ ] Once clean: flip the hook to `--gate all` and add CI
 
 **Lane A — services (fast, do first):**
 

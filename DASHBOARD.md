@@ -31,7 +31,7 @@ _Last updated: 2026-08-10 (repo review: verified IT Mgmt Playbook state, flagged
 ## Active Workstreams
 
 ### 🚨 SECURITY — `pstools` secrets exposure (2026-08-10, outranks everything)
-`~/work/pstools` is pushed to `github.com/r8s11/pstools` with a former employer's AD structure (`DC=peakscientific,DC=local`), a real personal address, and a plaintext default password (`Newaduser.ps1:172`). Repo reads Private (unauth = 404) so it's **contained, not remediated** — the material is on GitHub and in git history permanently. Actions: [TASKS.md](TASKS.md) · detail: [freelance/monetization-plan.md](freelance/monetization-plan.md).
+`~/work/pstools` is pushed to `github.com/r8s11/pstools` with a former employer's AD structure (`DC=peakscientific,DC=local`), a real personal address, and a plaintext default password (`Newaduser.ps1:172`). Unauth fetch = 404, which proves only "not publicly readable" — **visibility is unconfirmed** pending an authenticated check. Credential rotation/notification is required regardless, since purging history can't recall existing clones or forks. Actions: [TASKS.md](TASKS.md) · detail: [freelance/monetization-plan.md](freelance/monetization-plan.md).
 
 ### 0. 🔴 $3,000 income sprint (top priority, 2026-08-10 → ~end of Aug)
 Freelance IT work (Upwork, TaskRabbit, local flat-rate) stacked with an IT-staffing-agency backstop, run on the weekend Money slot + evenings — alongside Ross, not instead of it. Plan + rate sheet + running total: [freelance/profiles-2026-08.md](freelance/profiles-2026-08.md). Checklist: [TASKS.md](TASKS.md).

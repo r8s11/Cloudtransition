@@ -24,10 +24,12 @@ _Created 2026-08-10. Companion to [profiles-2026-08.md](profiles-2026-08.md) (th
 
 ## 🔴 Incident: `pstools` contains live secrets, already pushed
 
-**Status: contained (private repo), not remediated.** All affected files are tracked and pushed to
-`github.com/r8s11/pstools` (local HEAD `94b6a89` == origin). Unauthenticated fetch returns 404, so the
-repo is **private** — this is not a public disclosure. But the material sits on GitHub's servers and in
-git history permanently.
+**Status: not publicly readable; visibility unconfirmed.** All affected files are tracked and pushed to
+`github.com/r8s11/pstools` (local HEAD `94b6a89` == origin). An unauthenticated fetch returns HTTP 404 —
+that proves only that the URL is **not publicly readable**. It does *not* prove the repo is Private: 404 is
+equally consistent with deleted, renamed, or transferred. GitHub also returns 404 for private repos
+specifically to avoid confirming existence. **An authenticated visibility + collaborator/fork check is still
+required.** Regardless of outcome, the material is on GitHub's servers and in git history.
 
 | File | Exposure |
 | --- | --- |
@@ -40,10 +42,11 @@ This is a **former employer's** internal directory design and a default credenti
 
 **Required actions (in order):**
 
-- [ ] Confirm `github.com/r8s11/pstools` visibility is Private and has no outside collaborators
+- [ ] **Authenticated check** (`gh repo view r8s11/pstools --json visibility,collaborators,forks`) — confirm actual visibility, collaborator list, and whether any fork exists. The 404 is not sufficient evidence
 - [ ] If `Peakstarter1!` is still a live password pattern at that employer, notify them — this outranks everything else here
 - [ ] Treat `pstools/` as **private source material**. It is not a product input
-- [ ] Do **not** attempt to sanitize in place — secrets persist in git history. Any product version is **rewritten from scratch** in a clean repo, tokenized like the playbook (`[IdP]`, `[Domain]`, `<username>`), with zero copy-paste from these files
+- [ ] Purge is **possible but not sufficient**: `git filter-repo` + force-push + remote ref/GC cleanup can remove the secrets from reachable history. It cannot recall existing clones, forks, or third-party caches — so **credential rotation and notification are required either way**, and are the higher-priority action
+- [ ] Prefer rewriting any product version from scratch in a clean repo (tokenized: `[IdP]`, `[Domain]`, `<username>`) over trusting a scrub of this one — cleaner provenance, and no dependency on the purge having been complete
 - [ ] Never push `pstools` to Gitea or anywhere else in current form
 
 ---
