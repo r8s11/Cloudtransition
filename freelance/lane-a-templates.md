@@ -5,9 +5,45 @@ _Fill the `<angle>` slots. Never paste a template unedited — the specificity i
 
 ---
 
+## Payment terms — pick by channel, they are not interchangeable
+
+Getting this wrong on Upwork is a **terms-of-service violation**, not a style choice.
+
+### Upwork (or any platform-sourced client)
+
+- **Fixed-price contract with milestones. The first milestone must be funded in escrow before
+  any work starts.** Escrow funding is the platform's version of a deposit.
+- **All payment stays on-platform.** Never invoice an Upwork-sourced client directly, never ask
+  for a deposit outside the platform, never move the relationship off Upwork to dodge the fee.
+  It violates their ToS, voids payment protection, and risks the account you're building
+  reviews on.
+- Phrase it as: *"I'll set up the first milestone; work begins once it's funded."* Never
+  *"40% up front."*
+- **Escrow-funded is NOT cash received.** Funds release on client approval, then sit through a
+  security period before withdrawal. Plan on roughly 1–2 weeks from approval to usable cash.
+- Accept the ~10% fee as the cost of dispute protection and review-building. It is priced into
+  the tables in [lane-a-services.md](lane-a-services.md).
+
+### Direct clients (warm network, MSP subcontract, local)
+
+- **40% deposit on signature, remainder on delivery** (or per milestone on P2).
+- Work starts when the deposit **clears** — not when it's promised or "sent".
+- No platform fee, and payment can clear same-week, which is why direct is the channel to
+  favour when a deadline matters.
+- Get scope in writing anyway. You have no platform dispute process here; the written scope
+  *is* your protection.
+
+### Both
+
+Count money on the **date it lands in your account**. Escrow funded, milestone approved, and
+invoice sent are all $0 in the ledger in [profiles-2026-08.md](profiles-2026-08.md).
+
+---
+
 ## P1 proposal — "Day-1 IT Takeover Audit"
 
-Use for Upwork proposals and direct clients. Keep it under one screen; length reads as padding.
+Two channels, **two different payment mechanics** — see the Payment terms box below before
+sending. Keep it under one screen; length reads as padding.
 
 > **Subject / opening line:** Day-1 IT Audit — know exactly what you inherited, in one week
 >
@@ -28,7 +64,7 @@ Use for Upwork proposals and direct clients. Keep it under one screen; length re
 > 4. **30-60-90 plan** — sequenced actions with owners, derived from the risk register.
 >
 > **Timeline:** <5-7> business days from access.
-> **Price:** $<1,500-2,500> fixed. <40>% on start, remainder on delivery.
+> **Price:** $`<1,500-2,500>` fixed. Payment terms per the box below — `<escrow milestone / deposit>`.
 > **Not included:** implementing the fixes, tool purchases, ongoing support. Implementation is
 > quotable separately once we both know what's actually there.
 > **I need from you:** read access to `<IdP/MDM/ticketing>`, ~2 hours total of SME time, and a
@@ -48,7 +84,8 @@ Use for Upwork proposals and direct clients. Keep it under one screen; length re
 - Lead with the deliverable list, not your bio. Buyers scan for "what do I get".
 - The exclusions paragraph prevents the most common scope creep and signals experience.
 - Never name a current or former employer. "finance, healthcare, and biotech" is the ceiling.
-- **Take the deposit.** A client who won't pay 40% up front is the one who disputes on delivery.
+- **Never start unfunded.** On Upwork that means the first milestone is funded in escrow; direct,
+  it means the deposit has cleared. A client who won't do either is the one who disputes later.
 
 ---
 
