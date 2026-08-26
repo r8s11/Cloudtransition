@@ -10,3 +10,10 @@ venv/
 /IT Mgmt/
 /andrej-karpathy-skills/
 node_modules/
+*.json
+*.pickle
+Python/gsheets/token*.pickle
+Python/gsheets/client_secret*.json
+
+Python/gsheets/*.json
+Python/gsheets/*.pickle
