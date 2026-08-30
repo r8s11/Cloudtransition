@@ -23,3 +23,9 @@ __pycache__/
 *.tgz
 *.tar.gz
 .github/
+
+# Agentic OS runtime database
+.agentic-os/
+
+# TypeScript build info
+*.tsbuildinfo

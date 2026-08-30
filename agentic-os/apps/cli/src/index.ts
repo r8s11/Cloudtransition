@@ -1,2 +1,5 @@
-// Stub for empty app — CLI not implemented in V1
-export {};
+// Public exports for @agentic-os/cli
+
+export { MissionCli, openMissionCli } from "./mission-cli.js";
+export { formatMissionLine, formatMissionDetail } from "./format.js";
+export { main } from "./cli.js";

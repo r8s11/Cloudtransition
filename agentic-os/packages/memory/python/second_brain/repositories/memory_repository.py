@@ -1,17 +1,16 @@
 """Repository for Memory persistence."""
-
 from datetime import datetime, timezone
 
-from second_brain.types.models import Memory
+from second_brain.types.models import Memory, MemoryClaimType
 from second_brain.types.validation import (
-    validate_enum_value,
     validate_not_blank,
     validate_confidence,
     validate_importance,
+    validate_claim_type,
+    validate_enum_value,
 )
 from second_brain.types.enums import (
     VALID_MEMORY_TYPES,
-    VALID_CLAIM_TYPES,
     VALID_MEMORY_STATUSES,
 )
 
@@ -36,7 +35,7 @@ class MemoryRepository:
         entity_id: int | None = None,
         title: str = "",
         content: str = "",
-        claim_type: str = "",
+        claim_type: MemoryClaimType | None = None,
         status: str = "candidate",
         importance: float | None = None,
         confidence_baseline: float | None = None,
@@ -48,8 +47,7 @@ class MemoryRepository:
     ) -> Memory:
         """Create a new memory."""
         validate_enum_value(type, VALID_MEMORY_TYPES, "type")
-        if claim_type:
-            validate_enum_value(claim_type, VALID_CLAIM_TYPES, "claim_type")
+        validate_claim_type(claim_type)
         validate_enum_value(status, VALID_MEMORY_STATUSES, "status")
         validate_confidence(confidence_baseline, "confidence_baseline")
         validate_confidence(confidence_final, "confidence_final")
@@ -103,7 +101,7 @@ class MemoryRepository:
         entity_id: int | None = None,
         title: str | None = None,
         content: str | None = None,
-        claim_type: str | None = None,
+        claim_type: MemoryClaimType | None = None,
         status: str | None = None,
         importance: float | None = None,
         confidence_baseline: float | None = None,
@@ -143,7 +141,7 @@ class MemoryRepository:
             memory.content = content.strip()
 
         if claim_type is not None:
-            validate_enum_value(claim_type, VALID_CLAIM_TYPES, "claim_type")
+            validate_claim_type(claim_type)
             memory.claim_type = claim_type
 
         if status is not None:

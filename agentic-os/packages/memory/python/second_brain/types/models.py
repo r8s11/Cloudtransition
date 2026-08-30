@@ -1,8 +1,13 @@
-"""Domain types for Phase 1 — dataclasses representing the structured memory model."""
+"""Domain types for Phase 1 — dataclasses representing the structured memory model.
 
+ claim_type is now MemoryClaimType | None (was empty-string "").
+ None means "not provided"; when set it must be a valid MemoryClaimType value.
+"""
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
+
+from second_brain.types.enums import MemoryClaimType
 
 
 @dataclass
@@ -67,6 +72,9 @@ class Memory:
     Memories belong to an area (for organisational grouping) and optionally
     to an entity (for semantic anchoring). Confidence and importance are
     bounded 0..1. Superseded_by supports a soft chain without enforcing it.
+
+    claim_type is optional: None means "not specified". When set it must be
+    a valid MemoryClaimType value.
     """
 
     id: int | None = None
@@ -75,7 +83,7 @@ class Memory:
     entity_id: int | None = None
     title: str = ""
     content: str = ""
-    claim_type: str = ""
+    claim_type: MemoryClaimType | None = None
     status: str = "candidate"
     importance: float | None = None
     confidence_baseline: float | None = None
@@ -138,6 +146,8 @@ class MemoryCandidate:
     Candidates are separate from permanent memories. Their schema supports a
     later approval workflow; in Phase 1 they are created and stored but not
     automatically promoted.
+
+    claim_type is optional: None means "not specified".
     """
 
     id: int | None = None
@@ -146,7 +156,7 @@ class MemoryCandidate:
     proposed_entity_id: int | None = None
     title: str = ""
     content: str = ""
-    claim_type: str = ""
+    claim_type: MemoryClaimType | None = None
     suggested_importance: float | None = None
     confidence_baseline: float | None = None
     confidence_final: float | None = None

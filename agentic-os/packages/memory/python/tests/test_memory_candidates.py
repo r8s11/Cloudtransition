@@ -1,6 +1,6 @@
 """Tests for MemoryCandidate creation, review states, and validation."""
 
-from second_brain.types.enums import MemoryCandidateReviewStatus
+from second_brain.types.enums import MemoryCandidateReviewStatus, MemoryClaimType
 
 
 class TestMemoryCandidateCreation:
@@ -17,7 +17,7 @@ class TestMemoryCandidateCreation:
         assert candidate.proposed_type == "fact"
         assert candidate.title == "The sky is blue"
         assert candidate.content == "Based on observation, the sky appears blue during the day."
-        assert candidate.claim_type == "fact"
+        assert candidate.claim_type == MemoryClaimType.FACT
         assert candidate.suggested_importance is None
         assert candidate.confidence_baseline is None
         assert candidate.review_status == "pending"
@@ -43,7 +43,7 @@ class TestMemoryCandidateCreation:
         assert candidate.proposed_type == "decision"
         assert candidate.proposed_area_id == 1
         assert candidate.proposed_entity_id == 2
-        assert candidate.claim_type == "decision"
+        assert candidate.claim_type == MemoryClaimType.DECISION
         assert candidate.suggested_importance == 0.85
         assert candidate.confidence_baseline == 0.7
         assert candidate.confidence_final == 0.8

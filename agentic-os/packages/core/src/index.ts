@@ -1,6 +1,6 @@
 // Public exports for @agentic-os/core
 
-export * from "./types";
+export * from "./types.js";
 export {
   MissionStatusSchema,
   TaskStatusSchema,
@@ -18,11 +18,11 @@ export {
   PlanSchema,
   CreateMissionInputSchema,
   parseMissionStatus,
-} from "./schemas";
+} from "./schemas.js";
 export {
   createMission,
   transitionMission,
   canTransition,
   validateMissionStatus,
-} from "./mission";
-export { parsePlan } from "./plan";
+} from "./mission.js";
+export { parsePlan } from "./plan.js";

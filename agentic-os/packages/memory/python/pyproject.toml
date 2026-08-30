@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "second-brain"
+version = "0.1.0"
+description = "Phase 1 Structured Memory Engine for Agentic OS"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "Internal — not distributed"}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"

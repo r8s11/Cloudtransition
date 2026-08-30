@@ -1,0 +1,31 @@
+database:
+  provider: sqlite
+  path: .agentic-os/os.db
+
+policy:
+  default: require_approval
+
+  capabilities:
+    filesystem.read:
+      decision: allow
+
+    filesystem.write:
+      decision: allow
+
+    filesystem.delete:
+      decision: require_approval
+
+    web.search:
+      decision: allow
+
+    email.send:
+      decision: require_approval
+
+    git.commit:
+      decision: require_approval
+
+    deployment.production:
+      decision: require_approval
+
+    database.destructive:
+      decision: deny

@@ -1,5 +1,5 @@
-import { PlanSchema, PlanTaskSchema } from "./schemas";
-import type { Plan, PlanTask } from "./types";
+import { PlanSchema, PlanTaskSchema } from "./schemas.js";
+import type { Plan, PlanTask } from "./types.js";
 
 // ── parsePlan ────────────────────────────────────────────────────────────
 

@@ -1,5 +1,5 @@
-import { type Mission, type MissionStatus, type CreateMissionInput } from "./types";
-import { MissionStatusSchema } from "./schemas";
+import { type Mission, type MissionStatus, type CreateMissionInput } from "./types.js";
+import { MissionStatusSchema } from "./schemas.js";
 
 // ── Legal transitions ───────────────────────────────────────────────────
 

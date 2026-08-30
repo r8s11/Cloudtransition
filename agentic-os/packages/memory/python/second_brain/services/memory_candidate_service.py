@@ -2,13 +2,11 @@
 
 Phase 1: candidates are stored and listed but not automatically approved.
 """
-
 from second_brain.repositories.memory_candidate_repository import (
     MemoryCandidateRepository,
 )
 from second_brain.types.enums import (
     VALID_MEMORY_TYPES,
-    VALID_CLAIM_TYPES,
     VALID_CANDIDATE_REVIEW_STATUSES,
 )
 from second_brain.types.validation import (
@@ -16,8 +14,9 @@ from second_brain.types.validation import (
     validate_not_blank,
     validate_confidence,
     validate_importance,
+    validate_claim_type,
 )
-from second_brain.types.models import MemoryCandidate
+from second_brain.types.models import MemoryCandidate, MemoryClaimType
 
 
 class MemoryCandidateService:
@@ -40,7 +39,7 @@ class MemoryCandidateService:
         proposed_entity_id: int | None = None,
         title: str = "",
         content: str = "",
-        claim_type: str = "",
+        claim_type: MemoryClaimType | None = None,
         suggested_importance: float | None = None,
         confidence_baseline: float | None = None,
         confidence_final: float | None = None,
@@ -49,10 +48,12 @@ class MemoryCandidateService:
         detection_reason: str = "",
         review_status: str = "pending",
     ) -> MemoryCandidate:
-        """Create a new memory candidate after validation and normalization."""
+        """Create a new memory candidate after validation and normalization.
+
+        claim_type is optional: None means "not specified".
+        """
         validate_enum_value(proposed_type, VALID_MEMORY_TYPES, "proposed_type")
-        if claim_type:
-            validate_enum_value(claim_type, VALID_CLAIM_TYPES, "claim_type")
+        validate_claim_type(claim_type)
         validate_enum_value(review_status, VALID_CANDIDATE_REVIEW_STATUSES, "review_status")
         validate_confidence(confidence_baseline, "confidence_baseline")
         validate_confidence(confidence_final, "confidence_final")
@@ -66,7 +67,7 @@ class MemoryCandidateService:
             proposed_entity_id=proposed_entity_id,
             title=title.strip(),
             content=content.strip(),
-            claim_type=claim_type.strip(),
+            claim_type=claim_type,
             suggested_importance=suggested_importance,
             confidence_baseline=confidence_baseline,
             confidence_final=confidence_final,

@@ -1,11 +1,9 @@
 """Memory service — validates input, normalizes fields, delegates to repository."""
-
 from datetime import datetime
 
 from second_brain.repositories.memory_repository import MemoryRepository
 from second_brain.types.enums import (
     VALID_MEMORY_TYPES,
-    VALID_CLAIM_TYPES,
     VALID_MEMORY_STATUSES,
 )
 from second_brain.types.validation import (
@@ -13,8 +11,9 @@ from second_brain.types.validation import (
     validate_not_blank,
     validate_confidence,
     validate_importance,
+    validate_claim_type,
 )
-from second_brain.types.models import Memory
+from second_brain.types.models import Memory, MemoryClaimType
 
 
 class MemoryService:
@@ -37,7 +36,7 @@ class MemoryService:
         entity_id: int | None = None,
         title: str = "",
         content: str = "",
-        claim_type: str = "",
+        claim_type: MemoryClaimType | None = None,
         status: str = "candidate",
         importance: float | None = None,
         confidence_baseline: float | None = None,
@@ -47,10 +46,13 @@ class MemoryService:
         valid_until: datetime | None = None,
         superseded_by: int | None = None,
     ) -> Memory:
-        """Create a new memory after validation and normalization."""
+        """Create a new memory after validation and normalization.
+
+        claim_type is optional: None means "not specified". An empty string
+        is NOT valid and will be rejected.
+        """
         validate_enum_value(type, VALID_MEMORY_TYPES, "type")
-        if claim_type:
-            validate_enum_value(claim_type, VALID_CLAIM_TYPES, "claim_type")
+        validate_claim_type(claim_type)
         validate_enum_value(status, VALID_MEMORY_STATUSES, "status")
         validate_confidence(confidence_baseline, "confidence_baseline")
         validate_confidence(confidence_final, "confidence_final")
@@ -64,7 +66,7 @@ class MemoryService:
             entity_id=entity_id,
             title=title.strip(),
             content=content.strip(),
-            claim_type=claim_type.strip(),
+            claim_type=claim_type,
             status=status.strip(),
             importance=importance,
             confidence_baseline=confidence_baseline,
@@ -86,7 +88,7 @@ class MemoryService:
         entity_id: int | None = None,
         title: str | None = None,
         content: str | None = None,
-        claim_type: str | None = None,
+        claim_type: MemoryClaimType | None = None,
         status: str | None = None,
         importance: float | None = None,
         confidence_baseline: float | None = None,
@@ -99,8 +101,7 @@ class MemoryService:
         """Update a memory after validation."""
         if type is not None:
             validate_enum_value(type, VALID_MEMORY_TYPES, "type")
-        if claim_type is not None:
-            validate_enum_value(claim_type, VALID_CLAIM_TYPES, "claim_type")
+        validate_claim_type(claim_type)
         if status is not None:
             validate_enum_value(status, VALID_MEMORY_STATUSES, "status")
         if confidence_baseline is not None:

@@ -1,15 +1,5 @@
 """Validation utilities for Phase 1 domain constraints."""
 
-from second_brain.types.enums import (
-    VALID_AREA_KINDS,
-    VALID_ENTITY_TYPES,
-    VALID_CLAIM_TYPES,
-    VALID_MEMORY_STATUSES,
-    VALID_MEMORY_TYPES,
-    VALID_SOURCE_TYPES,
-    VALID_CANDIDATE_REVIEW_STATUSES,
-)
-
 
 def validate_confidence(value: float | None, field_name: str = "confidence") -> float | None:
     """Validate a confidence value is in [0, 1]."""
@@ -36,6 +26,20 @@ def validate_not_blank(value: str, field_name: str = "value") -> str:
     """Validate a string is non-empty and not only whitespace."""
     if value is None or not isinstance(value, str) or not value.strip():
         raise ValueError(f"{field_name} must be a non-blank string")
+    return value
+
+
+def validate_claim_type(value: str | None) -> str | None:
+    """Validate claim_type is a valid MemoryClaimType value or None."""
+    if value is None:
+        return None
+    valid = {
+        "fact", "inference", "opinion", "decision", "hypothesis",
+    }
+    if value not in valid:
+        raise ValueError(
+            f"claim_type must be one of {sorted(valid)}, got '{value}'"
+        )
     return value
 
 

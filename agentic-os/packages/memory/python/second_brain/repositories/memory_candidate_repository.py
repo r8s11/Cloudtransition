@@ -1,17 +1,16 @@
 """Repository for MemoryCandidate persistence."""
-
 from datetime import datetime, timezone
 
-from second_brain.types.models import MemoryCandidate
+from second_brain.types.models import MemoryCandidate, MemoryClaimType
 from second_brain.types.validation import (
     validate_enum_value,
     validate_not_blank,
     validate_confidence,
     validate_importance,
+    validate_claim_type,
 )
 from second_brain.types.enums import (
     VALID_MEMORY_TYPES,
-    VALID_CLAIM_TYPES,
     VALID_CANDIDATE_REVIEW_STATUSES,
 )
 
@@ -41,7 +40,7 @@ class MemoryCandidateRepository:
         proposed_entity_id: int | None = None,
         title: str = "",
         content: str = "",
-        claim_type: str = "",
+        claim_type: MemoryClaimType | None = None,
         suggested_importance: float | None = None,
         confidence_baseline: float | None = None,
         confidence_final: float | None = None,
@@ -52,8 +51,7 @@ class MemoryCandidateRepository:
     ) -> MemoryCandidate:
         """Create a new memory candidate."""
         validate_enum_value(proposed_type, VALID_MEMORY_TYPES, "proposed_type")
-        if claim_type:
-            validate_enum_value(claim_type, VALID_CLAIM_TYPES, "claim_type")
+        validate_claim_type(claim_type)
         validate_enum_value(review_status, VALID_CANDIDATE_REVIEW_STATUSES, "review_status")
         validate_confidence(confidence_baseline, "confidence_baseline")
         validate_confidence(confidence_final, "confidence_final")

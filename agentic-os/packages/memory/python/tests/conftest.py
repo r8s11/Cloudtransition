@@ -1,6 +1,17 @@
-"""Shared test fixtures for second_brain tests."""
+"""Shared test fixtures for second_brain tests.
 
+The second_brain package lives at packages/memory/python/second_brain/.
+This conftest adds the parent directory to sys.path so imports resolve
+when running pytest from any working directory.
+"""
+import os
+import sys
 import pytest
+
+_HERE = os.path.abspath(os.path.dirname(__file__))
+_PACKAGE_PARENT = os.path.abspath(os.path.join(_HERE, ".."))
+if _PACKAGE_PARENT not in sys.path:
+    sys.path.insert(0, _PACKAGE_PARENT)
 
 from second_brain.repositories.area_repository import AreaRepository
 from second_brain.repositories.entity_repository import EntityRepository

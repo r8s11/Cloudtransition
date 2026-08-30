@@ -19,7 +19,7 @@ class TestMemoryCreation:
         assert memory.title == "Water boils at 100°C at sea level"
         assert memory.content == "At standard atmospheric pressure, water boils at 100°C."
         assert memory.status == "candidate"
-        assert memory.claim_type == ""
+        assert memory.claim_type is None
         assert memory.importance is None
         assert memory.confidence_baseline is None
         assert memory.confidence_final is None
@@ -46,7 +46,7 @@ class TestMemoryCreation:
         assert memory.type == "decision"
         assert memory.area_id == 1
         assert memory.entity_id == 2
-        assert memory.claim_type == "decision"
+        assert memory.claim_type == MemoryClaimType.DECISION
         assert memory.status == "active"
         assert memory.importance == 0.9
         assert memory.confidence_baseline == 0.7
