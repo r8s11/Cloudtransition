@@ -16,4 +16,6 @@ Python/gsheets/token*.pickle
 Python/gsheets/client_secret*.json
 
 Python/gsheets/*.json
+Python/gsheets/*
+Python/gsheets/*.json
 Python/gsheets/*.pickle
