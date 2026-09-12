@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mission Control</title>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --panel: #131722;
+    --panel2: #1b2130;
+    --border: #232838;
+    --text: #e6e9ef;
+    --muted: #8b93a7;
+    --accent: #7c9eff;
+    --accent2: #63e6be;
+    --danger: #ff6b6b;
+    --warn: #ffa94d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: radial-gradient(1200px 600px at 20% -10%, #16203a 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    min-height: 100vh;
+  }
+  header {
+    padding: 1.75rem 1.5rem 0.75rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  header .sub {
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+  #errorStrip {
+    display: none;
+    margin: 0.5rem 1.5rem;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--danger);
+    background: rgba(255, 107, 107, 0.08);
+    color: var(--danger);
+    border-radius: 8px;
+    font-size: 0.85rem;
+  }
+  #errorStrip.show { display: block; }
+  main {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 1.25rem;
+    padding: 0.5rem 1.5rem 3rem;
+    align-items: start;
+  }
+  @media (max-width: 980px) {
+    main { grid-template-columns: 1fr; }
+  }
+  .lane-column { display: flex; flex-direction: column; gap: 1.25rem; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem;
+  }
+  .panel h2 {
+    margin: 0 0 0.9rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--accent2);
+  }
+  .board {
+    display: flex;
+    gap: 0.9rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+  .lane {
+    flex: 0 0 210px;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.7rem;
+  }
+  .lane header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0.25rem 0.6rem;
+  }
+  .lane h3 {
+    margin: 0;
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .lane .count {
+    font-size: 0.74rem;
+    color: var(--muted);
+    background: #10141f;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.05rem 0.5rem;
+  }
+  .mission-card {
+    background: #10141f;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 0.7rem;
+    margin-bottom: 0.55rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .mission-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .mission-card.selected { border-color: var(--accent2); }
+  .mission-card .title {
+    font-size: 0.86rem;
+    font-weight: 600;
+    margin-bottom: 0.45rem;
+  }
+  .mission-card .meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .pri {
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+    border: 1px solid var(--border);
+  }
+  .pri.critical { color: var(--danger); border-color: var(--danger); }
+  .pri.high { color: var(--warn); border-color: var(--warn); }
+  .pri.medium { color: var(--accent); border-color: var(--accent); }
+  .pri.low { color: var(--muted); }
+  .empty {
+    color: var(--muted);
+    font-size: 0.78rem;
+    padding: 0.5rem 0.25rem;
+    text-align: center;
+  }
+  .approval {
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 0.7rem;
+    margin-bottom: 0.6rem;
+    background: #10141f;
+  }
+  .approval .action {
+    font-size: 0.86rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  .approval .action code {
+    color: var(--accent);
+    font-size: 0.8rem;
+  }
+  .approval .detail {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.45;
+    margin-bottom: 0.55rem;
+  }
+  .approval .row {
+    display: flex;
+    gap: 0.45rem;
+  }
+  .btn {
+    flex: 1;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    border-radius: 7px;
+    padding: 0.42rem 0.6rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn.approve { border-color: var(--accent2); color: var(--accent2); }
+  .btn.approve:hover { background: rgba(99, 230, 190, 0.12); }
+  .btn.reject { border-color: var(--danger); color: var(--danger); }
+  .btn.reject:hover { background: rgba(255, 107, 107, 0.1); }
+  .btn.primary {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border: none;
+    color: #0b0e14;
+    font-weight: 700;
+  }
+  .btn.primary:hover { opacity: 0.9; }
+  .btn.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .field { margin-bottom: 0.8rem; }
+  .field label {
+    display: block;
+    font-size: 0.74rem;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    background: #10141f;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 0.5rem 0.65rem;
+    font-size: 0.84rem;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .detail-line {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+  }
+  .detail-line b { color: var(--text); font-weight: 600; }
+  .criteria-list {
+    list-style: none;
+    margin: 0.4rem 0 0;
+    padding: 0;
+  }
+  .criteria-list li {
+    font-size: 0.8rem;
+    color: var(--muted);
+    padding: 0.25rem 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .timeline { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+  .timeline li {
+    position: relative;
+    padding-left: 1.2rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    padding-bottom: 0.5rem;
+  }
+  .timeline li::before {
+    content: "";
+    position: absolute;
+    left: 0.3rem;
+    top: 0.34rem;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .timeline li .arrow { color: var(--accent2); }
+  .hidden { display: none; }
+  .section-h {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin: 0.8rem 0 0.4rem;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Mission Control</h1>
+    <span class="sub" id="clockLine"></span>
+  </header>
+  <div id="errorStrip"></div>
+
+  <main>
+    <div class="lane-column">
+      <section class="panel">
+        <h2>Mission Board</h2>
+        <div class="board" id="board"></div>
+      </section>
+    </div>
+
+    <div class="lane-column">
+      <section class="panel">
+        <h2>Approvals Queue</h2>
+        <div id="approvals"></div>
+      </section>
+
+      <section class="panel" id="detailPanel">
+        <h2>Mission Detail</h2>
+        <div id="detail"></div>
+        <div id="detailEmpty" class="empty">Select a mission card to inspect it.</div>
+        <div id="transitionForm" class="hidden"></div>
+      </section>
+
+      <section class="panel">
+        <h2>New Mission</h2>
+        <form id="newMissionForm">
+          <div class="field">
+            <label for="nmTitle">Title *</label>
+            <input id="nmTitle" type="text" placeholder="e.g. Improve event search" required />
+          </div>
+          <div class="field">
+            <label for="nmDescription">Description</label>
+            <textarea id="nmDescription" rows="2" placeholder="Objective (optional)"></textarea>
+          </div>
+          <div class="field">
+            <label for="nmPriority">Priority</label>
+            <select id="nmPriority">
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="medium" selected>Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="nmCriteria">Acceptance criteria (one per line) *</label>
+            <textarea id="nmCriteria" rows="3" placeholder="Users can search events by title&#10;Results paginate"></textarea>
+          </div>
+          <button type="submit" class="btn primary" id="nmSubmit">Create Mission</button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const LANES = ["queued", "running", "awaiting_approval", "paused", "failed", "completed", "cancelled"];
+    const LANE_COLORS = {
+      queued: "var(--muted)", running: "var(--accent)",
+      awaiting_approval: "var(--warn)", paused: "var(--muted)",
+      failed: "var(--danger)", completed: "var(--accent2)", cancelled: "var(--muted)",
+    };
+
+    let missions = [];
+    let approvals = [];
+    let matrix = {};
+    let selectedId = null;
+
+    const $ = (id) => document.getElementById(id);
+
+    function esc(s) {
+      return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+      }[c]));
+    }
+
+    function showError(msg) {
+      const strip = $("errorStrip");
+      strip.textContent = msg;
+      strip.classList.add("show");
+    }
+    function clearError() { $("errorStrip").classList.remove("show"); }
+
+    async function api(path, opts = {}) {
+      const res = await fetch(path, {
+        headers: { "content-type": "application/json" },
+        ...opts,
+      });
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`;
+        try { msg = (await res.json()).error || msg; } catch { /* keep default */ }
+        throw new Error(msg);
+      }
+      return res.json();
+    }
+
+    async function refresh() {
+      try {
+        const [ms, as, mx] = await Promise.all([
+          api("/api/missions"),
+          api("/api/approvals"),
+          api("/api/transitions"),
+        ]);
+        missions = ms;
+        approvals = as;
+        matrix = mx;
+        clearError();
+      } catch (err) {
+        showError(err.message);
+      }
+      renderBoard();
+      renderApprovals();
+      if (selectedId) renderDetail(selectedId);
+    }
+
+    function renderBoard() {
+      const board = $("board");
+      board.innerHTML = "";
+      for (const lane of LANES) {
+        const col = document.createElement("div");
+        col.className = "lane";
+        const laneMissions = missions.filter((m) => m.status === lane);
+        const head = document.createElement("header");
+        head.innerHTML = `<h3 style="color:${LANE_COLORS[lane]}">${lane.replace("_", " ")}</h3><span class="count">${laneMissions.length}</span>`;
+        col.appendChild(head);
+        if (laneMissions.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = "—";
+          col.appendChild(empty);
+        } else {
+          for (const m of laneMissions) {
+            const card = document.createElement("div");
+            card.className = "mission-card" + (m.id === selectedId ? " selected" : "");
+            card.innerHTML = `
+              <div class="title">${esc(m.title)}</div>
+              <div class="meta"><span class="pri ${esc(m.priority)}">${esc(m.priority)}</span><span>${new Date(m.createdAt).toLocaleDateString()}</span></div>`;
+            card.addEventListener("click", () => { selectedId = m.id; renderDetail(m.id); renderBoard(); });
+            col.appendChild(card);
+          }
+        }
+        board.appendChild(col);
+      }
+    }
+
+    function renderApprovals() {
+      const wrap = $("approvals");
+      wrap.innerHTML = "";
+      const pending = approvals.filter((a) => a.status === "pending");
+      if (pending.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "All clear — no pending approvals.";
+        wrap.appendChild(empty);
+        return;
+      }
+      for (const a of pending) {
+        const card = document.createElement("div");
+        card.className = "approval";
+        card.innerHTML = `
+          <div class="action">${esc(a.capability)} <code>${esc(a.action)}</code></div>
+          <div class="detail">${esc(a.reason)}<br />risk: ${esc(a.risk)} · mission: <span class="mono">${esc(a.missionId)}</span></div>
+          <div class="row">
+            <button class="btn approve">Approve</button>
+            <button class="btn reject">Reject</button>
+          </div>`;
+        const approveBtn = card.querySelector(".approve");
+        const rejectBtn = card.querySelector(".reject");
+        const action = (status) => async () => {
+          try {
+            await api(`/api/approvals/${a.id}/resolve`, {
+              method: "POST",
+              body: JSON.stringify({ status }),
+            });
+            await refresh();
+          } catch (err) { showError(err.message); }
+        };
+        approveBtn.addEventListener("click", action("approved"));
+        rejectBtn.addEventListener("click", action("rejected"));
+        wrap.appendChild(card);
+      }
+    }
+
+    async function renderDetail(id) {
+      $("detailEmpty").classList.add("hidden");
+      const detail = $("detail");
+      const tform = $("transitionForm");
+      let m;
+      try {
+        m = await api(`/api/missions/${id}`);
+      } catch (err) {
+        showError(err.message);
+        return;
+      }
+      selectedId = id;
+      const plan = await api(`/api/missions/${id}/plan`);
+      const history = await api(`/api/missions/${id}/history`);
+
+      detail.innerHTML = `
+        <div class="detail-line"><b>${esc(m.title)}</b></div>
+        <div class="detail-line">id: ${esc(m.id)} · status: <b>${esc(m.status)}</b> · priority: <span class="pri ${esc(m.priority)}">${esc(m.priority)}</span></div>
+        ${m.description ? `<div class="detail-line">${esc(m.description)}</div>` : ""}
+        <div class="section-h">Acceptance criteria</div>
+        <ul class="criteria-list">${m.acceptanceCriteria.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>
+        <div class="section-h">Latest plan${plan ? ` (${plan.tasks.length} task(s))` : ""}</div>
+        ${plan ? `<ul class="criteria-list">${plan.tasks.map((t) => `<li>${esc(t.title)}</li>`).join("")}</ul>` : `<div class="empty">No plan yet.</div>`}
+        <div class="section-h">Transition history</div>
+        ${history.length
+          ? `<ul class="timeline">${history.map((h) => `<li><span class="arrow">${esc(h.fromStatus)} → ${esc(h.toStatus)}</span> · ${new Date(h.createdAt).toLocaleString()}${h.reason ? ` — ${esc(h.reason)}` : ""}</li>`).join("")}</ul>`
+          : `<div class="empty">No transitions yet.</div>`}`;
+
+      const legal = (matrix[m.status] || []).filter((s) => s !== m.status);
+      if (legal.length === 0) {
+        tform.classList.add("hidden");
+        tform.innerHTML = "";
+      } else {
+        tform.classList.remove("hidden");
+        tform.innerHTML = `
+          <div class="section-h">Transition mission</div>
+          <div class="field">
+            <label for="tfStatus">Next status</label>
+            <select id="tfStatus">${legal.map((s) => `<option value="${esc(s)}">${esc(s)}</option>`).join("")}</select>
+          </div>
+          <div class="field">
+            <label for="tfReason">Reason (optional)</label>
+            <input id="tfReason" type="text" placeholder="e.g. Plan accepted" />
+          </div>
+          <button class="btn primary" id="tfSubmit">Transition</button>`;
+        $("tfSubmit").addEventListener("click", async () => {
+          try {
+            await api(`/api/missions/${id}/transition`, {
+              method: "POST",
+              body: JSON.stringify({ to: $("tfStatus").value, reason: $("tfReason").value || undefined }),
+            });
+            await refresh();
+          } catch (err) { showError(err.message); }
+        });
+      }
+    }
+
+    function updateClockLine() {
+      $("clockLine").textContent = new Date().toLocaleString();
+    }
+
+    $("newMissionForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const criteria = $("nmCriteria").value.split("\n").map((s) => s.trim()).filter(Boolean);
+      if (criteria.length === 0) { showError("Add at least one acceptance criterion"); return; }
+      const submit = $("nmSubmit");
+      submit.disabled = true;
+      submit.textContent = "Creating\u2026";
+      try {
+        await api("/api/missions", {
+          method: "POST",
+          body: JSON.stringify({
+            title: $("nmTitle").value,
+            description: $("nmDescription").value || undefined,
+            priority: $("nmPriority").value,
+            acceptanceCriteria: criteria,
+          }),
+        });
+        e.target.reset();
+        await refresh();
+      } catch (err) { showError(err.message); }
+      submit.disabled = false;
+      submit.textContent = "Create Mission";
+    });
+
+    refresh();
+    updateClockLine();
+    setInterval(updateClockLine, 1000);
+    setInterval(refresh, 5000);
+  </script>
+</body>
+</html>
