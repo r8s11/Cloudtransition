@@ -81,6 +81,24 @@ node apps/cli/src/cli.ts mission transition <id> running --reason "Plan accepted
 
 Illegal transitions call Core validation and do **not** modify the database.
 
+### apps/api
+
+Mission Control HTTP server + dashboard (read/write).
+
+```bash
+# seed a mission via the CLI, then open the dashboard
+npx tsx apps/api/src/server.ts
+# → http://localhost:8787  (PORT env var overrides)
+```
+
+Endpoints under `/api/`: `GET/POST /api/missions`, `GET /api/missions/:id`,
+`GET /api/missions/:id/plan`, `GET /api/missions/:id/history`,
+`POST /api/missions/:id/transition`, `GET/POST /api/approvals`,
+`POST /api/approvals/:id/resolve`, `GET /api/transitions`.
+All writes go through the same Core validation as the CLI. Dashboard widgets:
+mission board (status lanes), approvals queue (approve/reject), mission detail
+(plan + history + transition control), new-mission form. Autorefreshes every 5s.
+
 ## packages/memory/python
 
 Structured Second Brain engine (Phase 1, unchanged by Phase 2). Python package with
