@@ -30,9 +30,7 @@ async function main(argv: string[]): Promise<void> {
   process.on("SIGTERM", shutdown);
 }
 
-if (process.argv[1] !== undefined && import.meta.url === `file://${process.argv[1]}`) {
-  main(process.argv.slice(2)).catch((err) => {
-    console.error(err instanceof Error ? err.message : String(err));
-    process.exit(1);
-  });
-}
+main(process.argv.slice(2)).catch((err) => {
+  console.error(err instanceof Error ? err.message : String(err));
+  process.exit(1);
+});
