@@ -5,3 +5,7 @@ __pycache__/
 .env
 tasks.db
 *.tmp
+
+# Skill-runner output (one file per run) — transcripts, not source
+runs/
+.pytest_cache/
