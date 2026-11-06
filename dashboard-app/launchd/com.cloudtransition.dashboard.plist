@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Keeps the dashboard up on loopback (127.0.0.1:8000) so the phone can reach it
+  through `tailscale serve`. Runs only while the USB drive is mounted
+  (KeepAlive/PathState); logs and working directory live in $HOME so they never
+  depend on the drive. PATH carries claude, codex, opencode, graft and node
+  for Run-tab buttons (~/.local/bin has codex, ~/.opencode/bin has opencode).
+  Starts through venv/bin/python (a symlink to the framework Python, which
+  holds the removable-volume grant): launchd's /bin/sh may not exec the
+  `venv/bin/uvicorn` script off the USB drive ("Operation not permitted").
+
+  Install:  cp dashboard-app/launchd/com.cloudtransition.dashboard.plist ~/Library/LaunchAgents/
+            launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.cloudtransition.dashboard.plist
+  Restart:  launchctl kickstart -k gui/$(id -u)/com.cloudtransition.dashboard
+  Remove:   launchctl bootout gui/$(id -u)/com.cloudtransition.dashboard
+-->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.cloudtransition.dashboard</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Volumes/SANDISK USB/work/Cloudtransition/dashboard-app/venv/bin/python</string>
+		<string>-m</string>
+		<string>uvicorn</string>
+		<string>app:app</string>
+		<string>--app-dir</string>
+		<string>/Volumes/SANDISK USB/work/Cloudtransition/dashboard-app</string>
+		<string>--host</string>
+		<string>127.0.0.1</string>
+		<string>--port</string>
+		<string>8000</string>
+	</array>
+	<key>WorkingDirectory</key>
+	<string>/Users/roosevelt/.local-routines/dashboard</string>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/Users/roosevelt/.local/bin:/Users/roosevelt/.opencode/bin:/Users/roosevelt/.volta/bin:/Library/Frameworks/Python.framework/Versions/3.14/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<dict>
+		<key>PathState</key>
+		<dict>
+			<key>/Volumes/SANDISK USB/work/Cloudtransition/dashboard-app/app.py</key>
+			<true/>
+		</dict>
+	</dict>
+	<key>ThrottleInterval</key>
+	<integer>30</integer>
+	<key>StandardOutPath</key>
+	<string>/Users/roosevelt/.local-routines/dashboard/dashboard.out.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/roosevelt/.local-routines/dashboard/dashboard.err.log</string>
+</dict>
+</plist>
