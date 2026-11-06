@@ -1,0 +1,13 @@
+{
+  "name": "CloudTransition Dashboard",
+  "short_name": "Sheet",
+  "start_url": "/#today",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8f1e3",
+  "theme_color": "#b3212e",
+  "icons": [
+    { "src": "/static/icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

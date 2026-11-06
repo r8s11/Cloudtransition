@@ -1,3 +1,4 @@
+{% from "_macros.html" import task_check %}
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- TASKS PAGE                                                  -->
 <!-- ════════════════════════════════════════════════════════════ -->
@@ -76,6 +77,21 @@
         {% endif %}
       </div>
 
+      {# Multi-select prompt generation for Future Prompts realm #}
+      {% if r.id == "prompts" %}
+      <div class="prompt-gen-bar" id="promptGenBar" data-realm="prompts" hidden>
+        <div class="prompt-gen-count">
+          <span id="promptSelCount">0</span> selected
+        </div>
+        <button type="button" id="generatePromptBtn" class="action-btn" disabled aria-label="Generate prompt from selected items">
+          🪄 Generate Prompt
+        </button>
+        <button type="button" id="clearSelectionBtn" class="action-btn action-btn-ghost" aria-label="Clear selection">
+          Clear
+        </button>
+      </div>
+      {% endif %}
+
       {# Group items by category within this realm #}
       {% set ns = namespace(current_cat="") %}
       {% for t in realm_items %}
@@ -84,18 +100,18 @@
           <div class="task-category-header">{{ t.cat }}</div>
         {% endif %}
 
-        <div class="task-item {% if t.done %}task-done-row{% endif %}">
-          <div class="task-check {% if t.done %}done{% endif %}"
-               role="checkbox"
-               tabindex="0"
-               aria-checked="{{ 'true' if t.done else 'false' }}"
-               aria-label="{{ t.text }}"
-               data-realm="{{ t.realm }}"
-               data-line="{{ t.line }}"
-               data-done="{{ 'true' if t.done else 'false' }}"
-               >{% if t.done %}&#x2713;{% endif %}</div>
+        <div class="task-item {% if t.done %}task-done-row{% endif %}" data-task-line="{{ t.line }}" data-task-realm="{{ t.realm }}">
+          {{ task_check(t) }}
           <span class="task-text {% if t.done %}done{% endif %}">{{ t.text }}</span>
           <span class="task-cat" style="background: {{ r.color }}15; color: {{ r.color }};">{{ t.cat }}</span>
+          
+          {# Selection checkbox for prompt generation (prompts realm only) #}
+          {% if r.id == "prompts" and not t.done %}
+          <label class="task-select" title="Select for prompt generation">
+            <input type="checkbox" class="task-select-input" data-line="{{ t.line }}" data-realm="{{ t.realm }}" data-text="{{ t.text | e }}">
+            <span class="task-select-box"></span>
+          </label>
+          {% endif %}
         </div>
       {% endfor %}
     </div>

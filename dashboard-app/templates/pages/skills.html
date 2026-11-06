@@ -34,7 +34,7 @@
           </div>
           <div class="skill-meta">
             <span class="badge badge-{{ sk.proficiency }}">{{ sk.proficiency }}</span>
-            <span class="skill-years">{{ sk.years }} yrs</span>
+            {% if sk.years is number %}<span class="skill-years">{{ sk.years }} yrs</span>{% endif %}
           </div>
         </div>
       {% endfor %}

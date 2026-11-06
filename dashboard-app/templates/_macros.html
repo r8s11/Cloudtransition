@@ -8,3 +8,18 @@
 </div>
 {% endfor %}
 {%- endmacro %}
+
+{# One toggleable task checkbox. app.js binds every .task-check[data-realm];
+   data-text lets the server follow the item if its line number moved. #}
+{%- macro task_check(t) -%}
+<div class="task-check {% if t.done %}done{% endif %}"
+     role="checkbox"
+     tabindex="0"
+     aria-checked="{{ 'true' if t.done else 'false' }}"
+     aria-label="{{ t.text }}"
+     data-realm="{{ t.realm }}"
+     data-line="{{ t.line }}"
+     data-text="{{ t.text }}"
+     data-done="{{ 'true' if t.done else 'false' }}"
+     >{% if t.done %}&#x2713;{% endif %}</div>
+{%- endmacro %}

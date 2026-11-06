@@ -5,18 +5,37 @@ Run:  uvicorn app:app --reload
 Open: http://localhost:8000
 """
 
+import json
 import os
 import re
+import shlex
+import subprocess
+import sys
 import tempfile
-from datetime import date
+import threading
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from datetime import date, datetime, timezone
 from pathlib import Path
+from uuid import uuid4
 
 import yaml
 from fastapi import FastAPI, Header, Query, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import (
+    FileResponse,
+    HTMLResponse,
+    JSONResponse,
+    PlainTextResponse,
+    RedirectResponse,
+    Response,
+)
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
+
+import workspace_content as wc
 
 # ── Paths ──────────────────────────────────────────────────────
 WORKSPACE = Path(__file__).resolve().parent.parent  # Cloudtransition/
@@ -27,6 +46,11 @@ NETWORK_FILE = WORKSPACE / "networking" / "contacts.yml"
 TASKS_FILE = WORKSPACE / "TASKS.md"
 EDU_FILE = WORKSPACE / "College Planning" / "education-data.yml"
 BOOKS_FILE = WORKSPACE / "Books" / "books-data.yml"
+
+# ── Connected systems (dashboard-as-shell) ─────────────────────
+SECOND_BRAIN_FILE = WORKSPACE / "robonugget-second-brain-app" / "index.html"
+MISSION_CONTROL_UPSTREAM = "http://127.0.0.1:8787"
+MISSION_CONTROL_TIMEOUT = 3  # seconds
 
 # ── Realm Configuration ───────────────────────────────────────
 REALMS = [
@@ -99,6 +123,13 @@ REALMS = [
         "file": "plans/sql_plan.md",
         "color": "#e0b840",
         "icon": "🗄️",
+    },
+    {
+        "id": "prompts",
+        "name": "Future Prompts",
+        "file": "prompts/todo-prompts.md",
+        "color": "#7c5cbf",
+        "icon": "💡",
     },
     {
         "id": "az104",
@@ -214,6 +245,64 @@ class ToggleRequest(BaseModel):
     realm: str
     line: int
     done: bool
+    # Task text as rendered. Lines shift when a capture or an outside edit lands
+    # after the page loaded; the text lets the server find the item again.
+    text: str | None = None
+
+
+# ── Inbox capture ─────────────────────────────────────────────
+INBOX_HEADING = "## Inbox"
+CAPTURE_MAX = 300
+
+
+class CaptureRequest(BaseModel):
+    text: str
+
+
+def insert_inbox_item(source: str, item: str) -> tuple[str, int]:
+    """Append `- [ ] item` to the `## Inbox` section of a markdown file.
+
+    Creates the section just above `## Active` (or at the end) when missing.
+    Returns the new text and the 1-based line number of the inserted item.
+    """
+    lines = source.splitlines()
+    entry = f"- [ ] {item}"
+    start = next((i for i, ln in enumerate(lines) if ln.strip() == INBOX_HEADING), None)
+    if start is None:
+        at = next(
+            (i for i, ln in enumerate(lines) if ln.strip() == "## Active"), len(lines)
+        )
+        block = [INBOX_HEADING, "", entry, ""]
+        if at and lines[at - 1].strip():
+            block.insert(0, "")
+        lines[at:at] = block
+        return "\n".join(lines) + "\n", at + block.index(entry) + 1
+
+    end = next(
+        (i for i in range(start + 1, len(lines)) if lines[i].lstrip().startswith("#")),
+        len(lines),
+    )
+    while end > start + 1 and not lines[end - 1].strip():
+        end -= 1
+    if end == start + 1:  # empty section: keep a blank line under the heading
+        lines[end:end] = ["", entry]
+        return "\n".join(lines) + "\n", end + 2
+    lines.insert(end, entry)
+    return "\n".join(lines) + "\n", end + 1
+
+
+# One writer at a time for workspace markdown: toggle and capture both
+# read-modify-write TASKS.md, and FastAPI runs sync handlers in a thread pool.
+_FILE_WRITE_LOCK = threading.Lock()
+
+
+def _atomic_write(target: Path, text: str) -> None:
+    """Temp-file + os.replace: a crash mid-write never corrupts the source."""
+    with tempfile.NamedTemporaryFile(
+        "w", dir=target.parent, delete=False, suffix=".tmp"
+    ) as tf:
+        tf.write(text)
+    os.replace(tf.name, target)
 
 
 # ── Week Computation ──────────────────────────────────────────
@@ -225,6 +314,253 @@ def current_week_of_year(today: date | None = None) -> int:
     """
     today = today or date.today()
     return today.isocalendar().week
+
+
+# ── Routine Folds ────────────────────────────────────────────
+WEEKDAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+DEFAULT_ROUTINE = {
+    "workday": "Job search + career portfolio",
+    "project": "Alternating build",
+    "devops": "Automation build",
+    "weekend": "Money + review",
+}
+
+
+def parse_routine_slots() -> dict:
+    """Extract the 'What' column of routine.md's working-rhythm table.
+
+    Falls back to the default weekly plan if routine.md is missing or the
+    markdown table cannot be read. The folds stay honest to the source file.
+    """
+    slots = dict(DEFAULT_ROUTINE)
+    path = WORKSPACE / "routine.md"
+    if not path.exists():
+        return slots
+    try:
+        in_rhythm = False
+        for line in path.read_text().splitlines():
+            stripped = line.strip()
+            if "working rhythm" in stripped.lower():
+                in_rhythm = True
+                continue
+            if in_rhythm and stripped.startswith("|"):
+                cells = [c.strip() for c in stripped.strip("|").split("|")]
+                if len(cells) < 2:
+                    continue
+                slot = cells[0].lower()
+                # skip header row and the separator row
+                if slot == "slot" or all(ch in "-:" for ch in slot):
+                    continue
+                what = cells[1].strip()
+                if not what or what.lower() == "what":
+                    continue
+                if "workday" in slot:
+                    slots["workday"] = what
+                elif "project" in slot:
+                    slots["project"] = what
+                elif "devops" in slot:
+                    slots["devops"] = what
+                elif "weekend" in slot:
+                    slots["weekend"] = what
+    except (OSError, UnicodeDecodeError):
+        pass
+    return slots
+
+
+def parse_routine_folds(today: date | None = None) -> list[dict]:
+    """Map this week's routine to numbered fold steps.
+
+    Mon-Fri: Workday folds. Sat: project block (Week A/B by ISO parity) and
+    DevOps block. Sun: weekend money + review. The gold dot marks today —
+    the first fold whose weekday matches the current date is the active step.
+    """
+    today = today or date.today()
+    week_no = today.isocalendar().week
+    week_a = week_no % 2 == 1
+    project_side = "Week A — IT Mgmt Playbook" if week_a else "Week B — Bogatyr"
+    slots = parse_routine_slots()
+
+    plan = [
+        (0, f"Workday — {slots['workday']}"),
+        (1, f"Workday — {slots['workday']}"),
+        (2, f"Workday — {slots['workday']}"),
+        (3, f"Workday — {slots['workday']}"),
+        (4, f"Workday — {slots['workday']}"),
+        (5, f"Project block — {project_side}"),
+        (5, f"DevOps — {slots['devops']}"),
+        (6, f"Weekend — {slots['weekend']}"),
+    ]
+
+    today_idx = today.weekday()  # Mon=0 .. Sun=6
+    dot_placed = False
+    steps = []
+    for n, (day_idx, label) in enumerate(plan, start=1):
+        is_today = (not dot_placed) and day_idx == today_idx
+        if is_today:
+            dot_placed = True
+        steps.append(
+            {
+                "step_num": n,
+                "day": WEEKDAY_NAMES[day_idx],
+                "label": label,
+                "is_today": is_today,
+            }
+        )
+    return steps
+
+
+# ── Today view ────────────────────────────────────────────────
+TODAY_NEXT_UP = 8
+# Run-tab tools surfaced as one-tap buttons on the Today page.
+QUICK_TOOLS = ("plan-today", "triage-inbox", "brain-index")
+
+
+def build_today_view(realm_tasks: dict, fold_steps: list[dict], today: date) -> dict:
+    """Today page data: routine blocks, Inbox, and the top open TASKS.md items.
+
+    TASKS.md is written in priority order, so file order is the ranking.
+    """
+    weekday = WEEKDAY_NAMES[today.weekday()]
+    open_tasks = [t for t in realm_tasks["active"] if t["realm"] == "tasks"]
+    return {
+        "today_weekday": weekday,
+        "today_blocks": [s["label"] for s in fold_steps if s["day"] == weekday],
+        "inbox_items": [t for t in open_tasks if t["cat"] == "Inbox"],
+        "next_up": [t for t in open_tasks if t["cat"] != "Inbox"][:TODAY_NEXT_UP],
+        "quick_tools": QUICK_TOOLS,
+    }
+
+
+# ── Command centre (Today): daily destinations, recent artifacts, map freshness ──
+# Each source is read on its own; a failure blanks only its own section.
+# To add a destination, append a row in command_centre(); to add a widget, add a
+# key here and a card in templates/pages/today.html.
+RECENT_ARTIFACTS = 8
+INDEX_STALE_DAYS = 7
+MAP_REFRESH_COMMAND = f'"{Path(__file__).parent / "venv" / "bin" / "python"}" "{wc.VIEWER_DIR / "refresh-index.py"}"'
+ARTIFACT_KINDS = {
+    "html": "HTML",
+    "pdf": "PDF",
+    "svg": "SVG",
+    "png": "Image",
+    "jpg": "Image",
+    "jpeg": "Image",
+}
+
+
+def workspace_file_href(rel: str) -> str:
+    return "/workspace-file/" + urllib.parse.quote(rel)
+
+
+def map_index_summary(now: datetime) -> dict:
+    """Snapshot facts for the Workspace map; never claims the index is live."""
+    try:
+        data = json.loads(wc.INDEX_FILE.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {"ok": False, "reason": "Index unavailable"}
+    if not isinstance(data, dict) or data.get("schemaVersion") != wc.INDEX_SCHEMA:
+        return {"ok": False, "reason": "Index format outdated"}
+    try:
+        generated = datetime.fromisoformat(data["generated"])
+        files = int(data["fileCount"])
+        age_days = (now - generated).total_seconds() / 86400
+    except (KeyError, TypeError, ValueError):
+        return {"ok": False, "reason": "Index damaged"}
+    return {
+        "ok": True,
+        "files": files,
+        "generated": f"{generated.day} {generated:%b %Y, %H:%M}",
+        "stale": age_days >= INDEX_STALE_DAYS,
+    }
+
+
+def recent_artifacts() -> dict:
+    """Newest artifacts/ files by modification time (not authorship)."""
+    try:
+        rows = wc.artifact_entries()
+    except OSError:
+        return {"ok": False, "rows": [], "count": 0}
+    items = []
+    for row in rows[:RECENT_ARTIFACTS]:
+        modified = datetime.fromisoformat(row["modified"])
+        items.append(
+            {
+                **row,
+                "href": workspace_file_href(row["relativePath"]),
+                "kind": ARTIFACT_KINDS.get(row["extension"], row["extension"].upper()),
+                "when": f"{modified.day} {modified:%b %Y}",
+            }
+        )
+    return {"ok": True, "rows": items, "count": len(rows)}
+
+
+def command_centre(realm_tasks: dict, today_view: dict, project_count: int) -> dict:
+    now = datetime.now(timezone.utc).astimezone()
+    index = map_index_summary(now)
+    artifacts = recent_artifacts()
+    open_count = realm_tasks["total_active"]
+    blocks = today_view["today_blocks"]
+    daily = [
+        {
+            "label": "Tasks",
+            "href": "#tasks",
+            "value": f"{open_count} open · {len(today_view['inbox_items'])} in inbox",
+        },
+        {
+            "label": "Routine",
+            "href": workspace_file_href("routine.md"),
+            "new_tab": True,
+            "value": "; ".join(blocks) if blocks else "Nothing scheduled today",
+            "note": "routine.md",
+        },
+        {
+            "label": "Active projects",
+            "href": "#projects",
+            "value": f"{project_count} configured",
+        },
+        {
+            "label": "Recent artifacts",
+            "href": "#workspace-map",
+            "map_query": "folder=artifacts",
+            "value": f"{artifacts['count']} files in artifacts/"
+            if artifacts["ok"]
+            else "Unavailable",
+        },
+        {
+            "label": "Workspace map",
+            "href": "#workspace-map",
+            "value": f"{index['files']} files · snapshot {index['generated']}"
+            if index["ok"]
+            else index["reason"],
+            "warn": not index["ok"] or index["stale"],
+        },
+        {
+            "label": "Metrics",
+            "href": "#metrics",
+            "value": "Not read here: open for live server readings",
+            "placeholder": True,
+        },
+    ]
+    return {
+        "daily": daily,
+        "artifacts": artifacts,
+        "map_index": index,
+        "map_refresh": MAP_REFRESH_COMMAND,
+    }
+
+
+# ── Money Data ────────────────────────────────────────────────
+MONEY_CANDIDATES = [
+    WORKSPACE / "finance" / "tracker.yml",
+    WORKSPACE / "money" / "tracker.yml",
+    WORKSPACE / "goals" / "money-goals.yml",
+]
+
+
+def money_available() -> bool:
+    """True when a money/debt tracker exists in the workspace."""
+    return any(p.exists() for p in MONEY_CANDIDATES)
 
 
 # ── Build Context ─────────────────────────────────────────────
@@ -477,8 +813,16 @@ def build_context() -> dict:
         if q in q_counts:
             q_counts[q] += 1
 
+    # Routine folds
+    fold_steps = parse_routine_folds(today)
+    today_view = build_today_view(realm_tasks, fold_steps, today)
+
     return {
         "today": today.isoformat(),
+        "fold_steps": fold_steps,
+        **today_view,
+        **command_centre(realm_tasks, today_view, len(projects)),
+        "money_available": money_available(),
         "edu_program": edu_program,
         "edu_stats": edu_stats,
         "edu_sources": edu_sources,
@@ -523,9 +867,11 @@ def discover_md_files() -> list[dict]:
     """Walk workspace and return .md files grouped by directory."""
     files = []
     for md in sorted(WORKSPACE.rglob("*.md")):
-        # Skip excluded directories
+        # Skip excluded directories and anything the privacy rules protect
         rel = md.relative_to(WORKSPACE)
-        if any(part in EXCLUDED_DIRS for part in rel.parts):
+        if md.is_symlink() or any(part in EXCLUDED_DIRS for part in rel.parts) or wc.privacy_violation(
+            rel.as_posix()
+        ):
             continue
         files.append(
             {
@@ -550,6 +896,71 @@ def reader(request: Request):
     return templates.TemplateResponse(request, "reader.html")
 
 
+@app.get("/second-brain", response_class=HTMLResponse)
+def second_brain():
+    return serve_second_brain()
+
+
+# ── Workspace map (visual-second-brain) + safe file access ─────
+# Read-only. Eligibility and privacy rules live in workspace_content.py.
+@app.get("/workspace-map", include_in_schema=False)
+def workspace_map_redirect():
+    return RedirectResponse("/workspace-map/")
+
+
+@app.get("/workspace-map/")
+def workspace_map():
+    return FileResponse(
+        wc.VIEWER_HTML, media_type="text/html", headers={"Cache-Control": "no-cache"}
+    )
+
+
+@app.get("/workspace-map/workspace-index.json")
+def workspace_map_index():
+    if not wc.INDEX_FILE.is_file():
+        return JSONResponse(
+            {"error": "Workspace index missing; run refresh-index.py"}, status_code=503
+        )
+    # X-Workspace-Open tells the viewer where its Open/Download links point.
+    return FileResponse(
+        wc.INDEX_FILE,
+        media_type="application/json",
+        headers={"Cache-Control": "no-store", "X-Workspace-Open": "/workspace-file"},
+    )
+
+
+@app.get("/workspace-file/{path:path}")
+def workspace_file(path: str, download: bool = False):
+    """Serve one indexed file or live artifact; relative links inside artifacts resolve here too."""
+    try:
+        target = wc.resolve_file(WORKSPACE, wc.INDEX_FILE, path)
+    except wc.ContentError as exc:
+        return PlainTextResponse(
+            str(exc),
+            status_code=exc.status,
+            headers={"X-Content-Type-Options": "nosniff"},
+        )
+    media, headers = wc.file_headers(target, download)
+    return FileResponse(target, media_type=media, headers=headers)
+
+
+@app.get("/api/workspace/artifacts")
+def workspace_artifacts():
+    try:
+        return JSONResponse({"artifacts": wc.artifact_entries()})
+    except OSError:
+        return JSONResponse(
+            {"error": "artifacts/ could not be read; is the drive mounted?"},
+            status_code=503,
+        )
+
+
+@app.get("/mission-control")
+@app.get("/mission-control/{path:path}", response_class=HTMLResponse)
+def mission_control(path: str = ""):
+    return proxy_mission_control(path)
+
+
 @app.get("/api/files")
 def api_files():
     return JSONResponse(discover_md_files())
@@ -563,9 +974,12 @@ def api_file(path: str = Query(...)):
     workspace = WORKSPACE.resolve()
     target = (workspace / path).resolve()
     try:
-        target.relative_to(workspace)
+        resolved_rel = target.relative_to(workspace).as_posix()
     except ValueError:
         return JSONResponse({"error": "Invalid path"}, status_code=400)
+    # Same privacy rules as the Workspace map, on the requested and the real path.
+    if wc.privacy_violation(path.strip("/")) or wc.privacy_violation(resolved_rel):
+        return JSONResponse({"error": "File not available"}, status_code=403)
     if not target.exists() or not target.is_file():
         return JSONResponse({"error": "File not found"}, status_code=404)
     ALLOWED_EXTENSIONS = {
@@ -597,26 +1011,1011 @@ def toggle_task(req: ToggleRequest, x_requested_with: str = Header()):
     if not target.exists():
         return JSONResponse({"error": "File not found"}, status_code=404)
 
-    lines = target.read_text().splitlines(keepends=True)
-    idx = req.line - 1  # convert to 0-based
+    with _FILE_WRITE_LOCK:
+        lines = target.read_text().splitlines(keepends=True)
+        idx = req.line - 1  # convert to 0-based
 
-    if idx < 0 or idx >= len(lines):
-        return JSONResponse({"error": "Line out of range"}, status_code=400)
+        def text_at(i: int) -> str | None:
+            m = CHECKBOX_RE.match(lines[i].rstrip("\r\n"))
+            return m.group(3)[2:] if m else None
 
-    line = lines[idx]
-    m = CHECKBOX_RE.match(line.rstrip("\n").rstrip("\r"))
-    if not m:
-        return JSONResponse({"error": "No checkbox on that line"}, status_code=400)
+        if req.text is not None and not (
+            0 <= idx < len(lines) and text_at(idx) == req.text
+        ):
+            # The file moved under the page. Follow the text, but only if unique.
+            hits = [i for i in range(len(lines)) if text_at(i) == req.text]
+            if len(hits) != 1:
+                return JSONResponse(
+                    {"error": "Task moved or changed — reload the page"},
+                    status_code=409,
+                )
+            idx = hits[0]
 
-    new_mark = "x" if req.done else " "
-    lines[idx] = m.group(1) + new_mark + m.group(3) + "\n"
-    # Write atomically: crash mid-write won't corrupt the source file.
-    with tempfile.NamedTemporaryFile(
-        "w", dir=target.parent, delete=False, suffix=".tmp"
-    ) as tf:
-        tf.write("".join(lines))
-    os.replace(tf.name, target)
+        if idx < 0 or idx >= len(lines):
+            return JSONResponse({"error": "Line out of range"}, status_code=400)
+
+        m = CHECKBOX_RE.match(lines[idx].rstrip("\n").rstrip("\r"))
+        if not m:
+            return JSONResponse({"error": "No checkbox on that line"}, status_code=400)
+
+        new_mark = "x" if req.done else " "
+        lines[idx] = m.group(1) + new_mark + m.group(3) + "\n"
+        _atomic_write(target, "".join(lines))
 
     return JSONResponse(
-        {"ok": True, "realm": req.realm, "line": req.line, "done": req.done}
+        {"ok": True, "realm": req.realm, "line": idx + 1, "done": req.done}
     )
+
+
+@app.post("/api/capture")
+def capture(req: CaptureRequest, x_requested_with: str = Header(default="")):
+    """Append one item to the Inbox section of TASKS.md."""
+    if x_requested_with != "XMLHttpRequest":
+        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
+    # Collapse newlines/tabs: one capture is exactly one checkbox line.
+    text = " ".join(req.text.split())
+    if not text:
+        return JSONResponse({"error": "Nothing to capture"}, status_code=400)
+    if len(text) > CAPTURE_MAX:
+        return JSONResponse(
+            {"error": f"Keep it under {CAPTURE_MAX} characters"}, status_code=400
+        )
+
+    with _FILE_WRITE_LOCK:
+        source = TASKS_FILE.read_text() if TASKS_FILE.exists() else "# Tasks\n"
+        new_text, line = insert_inbox_item(source, text)
+        _atomic_write(TASKS_FILE, new_text)
+
+    return JSONResponse({"ok": True, "realm": "tasks", "line": line, "text": text})
+
+
+# ── Second brain (second-brain/brain.py, deterministic, no model) ──
+BRAIN_CLI = WORKSPACE / "second-brain" / "brain.py"
+BRAIN_TIMEOUT = 60
+
+
+class RememberRequest(BaseModel):
+    title: str
+    summary: str
+    body: str
+
+
+def _brain(*args: str) -> JSONResponse:
+    """Run one brain.py subcommand and relay its JSON. Arguments go in as
+    separate argv elements with no shell, so input cannot become a command."""
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(BRAIN_CLI), *args],
+            cwd=WORKSPACE,
+            capture_output=True,
+            text=True,
+            timeout=BRAIN_TIMEOUT,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return JSONResponse({"error": f"brain.py failed: {exc}"}, status_code=500)
+    try:
+        data = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        detail = (proc.stderr or proc.stdout).strip()[-400:] or "no output"
+        return JSONResponse({"error": detail}, status_code=500)
+    return JSONResponse(data, status_code=200 if proc.returncode == 0 else 422)
+
+
+@app.get("/api/brain/query")
+def brain_query(q: str = Query(..., min_length=2, max_length=200)):
+    return _brain("query", q)
+
+
+@app.post("/api/brain/remember")
+def brain_remember(req: RememberRequest, x_requested_with: str = Header(default="")):
+    if x_requested_with != "XMLHttpRequest":
+        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
+    return _brain(
+        "remember", "--title", req.title, "--summary", req.summary, "--body", req.body
+    )
+
+
+# ── Connected systems: Second Brain + Mission Control ──────────
+def serve_second_brain():
+    """Serve the static RoboNuggets second-brain reference page."""
+    if not SECOND_BRAIN_FILE.exists():
+        return HTMLResponse("Second brain not found.", status_code=404)
+    return HTMLResponse(
+        SECOND_BRAIN_FILE.read_text(errors="replace"), media_type="text/html"
+    )
+
+
+OFFLINE_CARD = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Mission Control offline</title>
+<style>
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+       background:#131722;color:#e6e9ef;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;}
+  .card{max-width:420px;text-align:center;padding:2rem;border:1px solid #232838;border-radius:14px;}
+  h1{font-size:1.15rem;margin:0 0 .5rem;color:#7c9eff;}
+  p{color:#8b93a7;font-size:.9rem;line-height:1.5;margin:.4rem 0;}
+  code{background:#1b2130;border:1px solid #232838;padding:.15em .45em;border-radius:6px;font-size:.85em;}
+</style></head>
+<body><div class="card">
+  <h1>&#x1F6AB; Mission Control offline</h1>
+  <p>Start the agentic-os server to open it:</p>
+  <p><code>cd agentic-os/apps/api &amp;&amp; npm start</code></p>
+  <p>Then this tab will load the live mission board.</p>
+</div></body></html>"""
+
+
+def proxy_mission_control(path: str = ""):
+    """Reverse proxy to the agentic-os Mission Control server (:8787).
+
+    HTML responses are rewritten so the dashboard's root-absolute /api/*
+    fetches land back through this proxy. API routes forward byte-for-byte.
+    """
+    upstream = MISSION_CONTROL_UPSTREAM + "/" + path.lstrip("/")
+    try:
+        with urllib.request.urlopen(upstream, timeout=MISSION_CONTROL_TIMEOUT) as resp:
+            ctype = resp.headers.get("Content-Type", "")
+            body = resp.read()
+    except (urllib.error.URLError, urllib.error.HTTPError, OSError):
+        return HTMLResponse(OFFLINE_CARD, status_code=502)
+
+    if path.startswith("api/"):
+        return Response(content=body, media_type=ctype, status_code=200)
+
+    html = body.decode(errors="replace")
+    html = html.replace('"/api/', '"/mission-control/api/').replace(
+        "'/api/", "'/mission-control/api/"
+    )
+    return HTMLResponse(html, status_code=200)
+
+
+# ══════════════════════════════════════════════════════════════
+# Skill runner — fire Claude Code skills headlessly from buttons
+# ══════════════════════════════════════════════════════════════
+# Security model: the browser sends a skill *id* from the allowlist below,
+# never an arbitrary prompt or command. Inputs are validated and passed as
+# subprocess arguments, without shell=True.
+
+RUNS_DIR = Path(__file__).parent / "runs"
+RUNS_LOG = WORKSPACE / "runs.log"
+RUN_TIMEOUT = 1800  # 30 min — real skill passes take minutes, not seconds
+MAX_RUNS_KEPT = 50
+
+# ── Model providers for Run executions ───────────────────────────
+# Claude keeps its existing aliases; Codex/OpenCode/OpenRouter are
+# provider-labelled as "provider:model_id" (e.g. "codex:gpt-6.1-sol",
+# "opencode:opencode/beam-free", "openrouter:nvidia/...:free").
+PROVIDERS = ("claude", "codex", "opencode", "openrouter")
+
+# `claude --model` takes an alias or a full name. Aliases stay valid as
+# models are replaced; pinned full names rot.
+ALLOWED_MODELS = ("sonnet", "opus", "fable")
+ALLOWED_EFFORT = ("default", "low", "medium", "high")
+
+# Local catalogue locations (no credentials, no network at build time).
+CODEX_CACHE = Path.home() / ".codex" / "models_cache.json"
+OPENROUTER_CATALOG = Path.home() / ".hermes.bak" / "cache" / "openrouter_curated_catalog.json"
+OPENROUTER_METADATA = Path.home() / ".hermes.bak" / "cache" / "openrouter_model_metadata.json"
+OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_API_KEY_ENV = "OPENROUTER_API_KEY"
+
+
+def _is_free_model_id(model_id: str) -> bool:
+    """OpenCode/OpenRouter free models are marked with -free or :free."""
+    return model_id.endswith(":free") or model_id.endswith("-free")
+
+
+def _load_codex_models():
+    """Visible Codex catalogue entries: [{id, label, efforts}], available, reason."""
+    if _resolve_codex_exe() is None:
+        return [], False, "codex executable not on PATH"
+    try:
+        raw = json.loads(CODEX_CACHE.read_text())
+    except (FileNotFoundError, json.JSONDecodeError, OSError) as exc:
+        return [], False, f"Codex catalogue unreadable: {exc}"
+    entries = raw.get("models") if isinstance(raw, dict) else raw
+    if not isinstance(entries, list):
+        return [], False, "Codex catalogue has no model list"
+    seen = set()
+    models = []
+    for m in entries:
+        if not isinstance(m, dict):
+            continue
+        if m.get("visibility") != "list" or not m.get("supported_in_api"):
+            continue
+        slug = m.get("slug") or m.get("id")
+        if not slug or slug in seen:
+            continue
+        seen.add(slug)
+        levels = m.get("supported_reasoning_levels") or []
+        efforts = ["default"]
+        for lv in levels:
+            if isinstance(lv, dict) and lv.get("effort") and lv["effort"] not in efforts:
+                efforts.append(lv["effort"])
+        models.append({"id": slug, "label": m.get("display_name") or slug, "efforts": efforts})
+    models.sort(key=lambda x: x["label"])
+    return (models, True, None) if models else ([], False, "Codex catalogue has no visible entries")
+
+
+def _resolve_executable(name: str, fallbacks: tuple[Path, ...]) -> str | None:
+    """Locate an executable on PATH, then at known install locations.
+
+    launchd starts the dashboard with a minimal PATH that does not include
+    per-user bin directories, so PATH alone is not enough.
+    """
+    try:
+        proc = subprocess.run(["which", name], capture_output=True, text=True, timeout=5)
+        if proc.returncode == 0 and proc.stdout.strip():
+            return proc.stdout.strip().splitlines()[0]
+    except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+        pass
+    for candidate in fallbacks:
+        if candidate.exists() and os.access(candidate, os.X_OK):
+            return str(candidate)
+    return None
+
+
+def _resolve_opencode_exe() -> str | None:
+    """Locate the `opencode` executable, checking PATH then common install spots."""
+    return _resolve_executable(
+        "opencode",
+        (
+            Path.home() / ".opencode" / "bin" / "opencode",
+            Path("/usr/local/bin/opencode"),
+            Path("/opt/homebrew/bin/opencode"),
+        ),
+    )
+
+
+def _resolve_codex_exe() -> str | None:
+    """Locate the `codex` executable, checking PATH then common install spots."""
+    return _resolve_executable(
+        "codex",
+        (
+            Path.home() / ".local" / "bin" / "codex",
+            Path("/opt/homebrew/bin/codex"),
+            Path("/usr/local/bin/codex"),
+        ),
+    )
+
+
+def _load_opencode_models():
+    """Free OpenCode models from `opencode models`: [{id, label, efforts}], available, reason."""
+    exe = _resolve_opencode_exe()
+    if exe is None:
+        return [], False, "opencode executable not on PATH"
+    try:
+        # --standalone runs a private server per call instead of depending on the
+        # shared background service, whose stale registration can make this hang.
+        proc = subprocess.run(
+            [exe, "models", "--standalone"], capture_output=True, text=True, timeout=15
+        )
+    except subprocess.TimeoutExpired:
+        return [], False, "opencode models timed out"
+    except OSError as exc:
+        return [], False, f"opencode models failed to start: {exc}"
+    if proc.returncode != 0:
+        return [], False, f"opencode models exited {proc.returncode}: {proc.stderr.strip()[:200]}"
+    ids = [line.strip() for line in proc.stdout.splitlines() if "/" in line.strip() and _is_free_model_id(line.strip())]
+    seen = set()
+    models = []
+    for mid in ids:
+        if mid in seen:
+            continue
+        seen.add(mid)
+        models.append({"id": mid, "label": mid, "efforts": ["default"]})
+    models.sort(key=lambda x: x["id"])
+    return (models, True, None) if models else ([], False, "opencode catalogue has no free entries")
+
+
+def _load_openrouter_models():
+    """Free OpenRouter models from the curated catalogue: [{id, label, efforts}], available, reason."""
+    try:
+        raw = json.loads(OPENROUTER_CATALOG.read_text())
+    except (FileNotFoundError, json.JSONDecodeError, OSError) as exc:
+        return [], False, f"OpenRouter catalogue unreadable: {exc}"
+    curated = raw.get("curated") if isinstance(raw, dict) else None
+    if not isinstance(curated, list):
+        return [], False, "OpenRouter catalogue has no curated list"
+    metadata = {}
+    try:
+        metadata = json.loads(OPENROUTER_METADATA.read_text())
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        metadata = {}
+    seen = set()
+    models = []
+    for entry in curated:
+        if not isinstance(entry, (list, tuple)) or len(entry) < 1:
+            continue
+        mid = entry[0]
+        label = entry[1] if len(entry) > 1 and entry[1] else ""
+        is_free = label == "free" or _is_free_model_id(mid)
+        # zero-price confirmation from metadata (listing is not entitlement).
+        # Missing pricing is NOT treated as free: only explicitly zero-priced
+        # models qualify.
+        info = metadata.get(mid) or metadata.get(mid.split(":")[0]) or {}
+        if not isinstance(info, dict):
+            info = {}
+        pricing = info.get("pricing") if isinstance(info.get("pricing"), dict) else None
+        if pricing is not None:
+            try:
+                prompt_price = float(pricing.get("prompt", 0) or 0)
+                comp_price = float(pricing.get("completion", 0) or 0)
+            except (TypeError, ValueError):
+                prompt_price = comp_price = 0
+            if prompt_price == 0 and comp_price == 0:
+                is_free = True
+        if not is_free:
+            continue
+        if mid in seen:
+            continue
+        seen.add(mid)
+        models.append({"id": mid, "label": mid, "efforts": ["default"]})
+    models.sort(key=lambda x: x["id"])
+    return (models, True, None) if models else ([], False, "OpenRouter catalogue has no free entries")
+
+
+def _fetch_skill_catalog():
+    """Assemble the full provider-labelled catalogue (fresh on each call)."""
+    claude_models = [
+        {"id": m, "label": m.capitalize(), "efforts": list(ALLOWED_EFFORT)} for m in ALLOWED_MODELS
+    ]
+    codex_models, codex_ok, codex_reason = _load_codex_models()
+    opencode_models, opencode_ok, opencode_reason = _load_opencode_models()
+    openrouter_models, openrouter_ok, openrouter_reason = _load_openrouter_models()
+    return {
+        "models": list(ALLOWED_MODELS),
+        "effort": list(ALLOWED_EFFORT),
+        "provider_models": {
+            "claude": claude_models,
+            "codex": codex_models,
+            "opencode": opencode_models,
+            "openrouter": openrouter_models,
+        },
+        "provider_available": {
+            "claude": True,
+            "codex": codex_ok,
+            "opencode": opencode_ok,
+            "openrouter": openrouter_ok,
+        },
+        "provider_unavailable_reason": {
+            "codex": codex_reason,
+            "opencode": opencode_reason,
+            "openrouter": openrouter_reason,
+        },
+    }
+
+SKILL_RUNNERS = {
+    "impeccable-audit": {
+        "label": "Audit dashboard",
+        "blurb": "Five-dimension technical scan with a scored report. Read-only.",
+        "icon": "🔍",
+        "kind": "claude",
+        "prompt": "/impeccable audit dashboard-app. Report findings only; do not edit files.",
+        "model": "opus",
+        "options": False,
+        "read_only": True,
+    },
+    "impeccable-polish": {
+        "label": "Polish dashboard",
+        "blurb": "Final quality pass over the Orizuru surface. Edits files.",
+        "icon": "✦",
+        "kind": "claude",
+        "prompt": (
+            "/impeccable polish dashboard-app. Keep changes scoped to the dashboard UI: "
+            "edit only dashboard-app/templates/ and dashboard-app/static/, never app.py. "
+            "Read .html files with the Read tool. The always-on server at "
+            "http://127.0.0.1:8000 hot-reloads templates and static files; do not start "
+            "another. See each tab with `sh dashboard-app/screenshot.sh <tab> <width>` "
+            "(tabs are the nav ids, e.g. today, run, tasks; widths 390 and 1280), then "
+            "Read the PNG path it prints; the script fails if the page does not return "
+            "200. Before finishing, run "
+            "`dashboard-app/venv/bin/python -m pytest dashboard-app/tests -q` and report "
+            "its result."
+        ),
+        "model": "opus",
+        "options": True,
+        # dontAsk + this allowlist: everything else is denied, not prompted.
+        "permissions": {
+            "tools": ["Read", "Glob", "Grep", "Skill", "Edit", "Write", "Bash"],
+            "allow": [
+                "Read",
+                "Glob",
+                "Grep",
+                "Skill",
+                # Edit(path) rules cover Write too; Write(path) rules are ignored.
+                "Edit(dashboard-app/templates/**)",
+                "Edit(dashboard-app/static/**)",
+                "Bash(sh dashboard-app/screenshot.sh:*)",
+                "Bash(dashboard-app/venv/bin/python -m pytest:*)",
+            ],
+            # The impeccable skill's reference files live outside the workspace.
+            "add_dirs": [str(Path.home() / ".agents" / "skills" / "impeccable")],
+        },
+    },
+    "ui-ux-review": {
+        "label": "UI/UX review",
+        "blurb": "ui-ux-pro-max pass over the templates and stylesheet. Read-only.",
+        "icon": "◐",
+        "kind": "claude",
+        "prompt": (
+            "/ui-ux-pro-max Review the dashboard-app Run tab "
+            "(templates/pages/run.html, static/app.js and static/style.css). "
+            "Read the skill's applicable reference files. Report at most five "
+            "concrete findings with file:line citations; do not edit any file."
+        ),
+        "model": "sonnet",
+        "options": True,
+        "read_only": True,
+    },
+    "update-sheet": {
+        "label": "Update sheet",
+        "blurb": "Bring every dated workspace file current. Writes to TASKS.md, DASHBOARD.md, routine.md.",
+        "icon": "📎",
+        "kind": "claude",
+        "prompt": None,  # rendered from the index.html template at run time
+        "model": "opus",
+    },
+    "youtube-summary": {
+        "label": "Summarize video",
+        "blurb": "youtube-summarizer skill. Needs a video URL.",
+        "icon": "▶",
+        "kind": "claude",
+        "prompt": "/youtube-summarizer {input}",
+        "model": "sonnet",
+        "options": True,
+        "input_label": "YouTube URL",
+        "input_pattern": r"^https?://(www\.)?(youtube\.com|youtu\.be)/\S+$",
+    },
+    "graft-build": {
+        "label": "Rebuild graph",
+        "blurb": "Refresh the repo context graph. Deterministic, no model, $0.",
+        "icon": "⬢",
+        "kind": "shell",
+        "argv": ["graft", "build"],
+    },
+    "resume-build": {
+        "label": "Build résumés",
+        "blurb": "Export the four variants and tailored copies to .docx and .pdf. Deterministic, no model, $0.",
+        "icon": "▤",
+        "kind": "shell",
+        "argv": ["sh", "resume/build.sh"],
+        # Optional month, passed as its own argv element; blank = build.sh's current month.
+        "input_label": "Month (YYYY-MM, blank = this month)",
+        "input_type": "text",
+        "input_pattern": r"^\d{4}-(0[1-9]|1[0-2])$",
+        "input_optional": True,
+        "input_argv": True,
+    },
+    # ── Organizer tools: also shown as one-tap buttons on the Today page ──
+    "plan-today": {
+        "label": "Plan today",
+        "blurb": "Top three moves for today from TASKS.md, routine.md and DASHBOARD.md, with file:line cites. Read-only.",
+        "icon": "☀",
+        "kind": "claude",
+        "prompt": (
+            "Today is {today} (ISO week {week}). Read TASKS.md, routine.md and "
+            "DASHBOARD.md in this workspace. Output, short enough to read on a "
+            "phone: 1) today's routine block per routine.md (odd ISO week = Week A, "
+            "even = Week B); 2) the three highest-leverage open TASKS.md items "
+            "doable today, each with one concrete first step; 3) anything overdue "
+            "or stale. Cite file:line for every item. Never invent a task, date or "
+            "status. Do not edit any file."
+        ),
+        "model": "sonnet",
+    },
+    "triage-inbox": {
+        "label": "Triage inbox",
+        "blurb": "Files each '## Inbox' item in TASKS.md under its best existing heading, wording unchanged. Edits TASKS.md.",
+        "icon": "⇲",
+        "kind": "claude",
+        "prompt": (
+            "Today is {today}. Triage the '## Inbox' section of TASKS.md. Move each "
+            "unchecked item, with its exact wording, to the end of the best-fitting "
+            "existing '###' section of TASKS.md. If nothing fits, leave it in Inbox. "
+            "Do not create sections, reword, reorder other items, mark anything "
+            "done, or touch any other file. Keep the '## Inbox' heading even when "
+            "empty. End with one bullet per item: item -> destination heading."
+        ),
+        "model": "sonnet",
+    },
+    "brain-index": {
+        "label": "Reindex brain",
+        "blurb": "Rebuild the second-brain catalogue from sources and memories. Deterministic, no model, $0.",
+        "icon": "◎",
+        "kind": "shell",
+        "argv": [sys.executable, "second-brain/brain.py", "index"],
+    },
+    "arms-report": {
+        "label": "Routine report",
+        "blurb": "Regenerate the ARMS passive routine findings (tools/arms/data/routines.json). No model, $0.",
+        "icon": "☰",
+        "kind": "shell",
+        "argv": [sys.executable, "tools/arms/routines.py", "run"],
+    },
+    "artifact-catalog": {
+        "label": "Artifact catalog",
+        "blurb": "Rebuild the searchable artifacts/ index. No model, $0.",
+        "icon": "▦",
+        "kind": "shell",
+        "argv": [sys.executable, "artifacts/catalog.py"],
+    },
+}
+
+_RUNS: dict[str, dict] = {}
+_RUNS_LOCK = threading.Lock()
+
+
+class RunRequest(BaseModel):
+    skill: str
+    model: str | None = None
+    effort: str | None = None
+    input: str | None = None
+
+
+def _log_run(entry: dict) -> None:
+    """Append one JSON event per state change; preserve command and output path."""
+    with RUNS_LOG.open("a") as fh:
+        fh.write(
+            json.dumps(
+                {
+                    "timestamp": datetime.now().astimezone().isoformat(),
+                    **entry,
+                },
+                ensure_ascii=False,
+            )
+            + "\n"
+        )
+
+
+def _build_update_sheet_prompt() -> str:
+    """Reuse the prompt already embedded in index.html so there is one copy."""
+    today = date.today()
+    src = (Path(__file__).parent / "templates" / "index.html").read_text()
+    m = re.search(r'<template id="update-sheet-prompt">(.*?)</template>', src, re.S)
+    if not m:
+        return (
+            "Update the CloudTransition workspace so every dated file reflects today."
+        )
+    return (
+        m.group(1)
+        .replace("{{ today }}", today.isoformat())
+        .replace("{{ current_week }}", str(current_week_of_year(today)))
+    )
+
+
+def _parse_model(value: str | None) -> tuple[str, str] | None:
+    """Parse a model selection into (provider, model_id).
+
+    Accepts "provider:model_id" for any provider, or a bare Claude alias
+    (sonnet/opus/fable) treated as "claude:<alias>" for backward compatibility.
+    Returns None when the value cannot be parsed.
+    """
+    if value is None:
+        return None
+    if value in ALLOWED_MODELS:
+        return "claude", value
+    if ":" in value:
+        provider, _, model_id = value.partition(":")
+        if provider in PROVIDERS and model_id:
+            return provider, model_id
+    return None
+
+
+def _card_allows_provider(cfg: dict, provider: str) -> tuple[bool, str | None]:
+    """Whether a provider may run this card, respecting read/write boundaries.
+
+    Claude is always allowed (its existing per-card tool restrictions apply).
+    Every other provider is allowed on every card: the user accepts that the
+    provider cannot machine-enforce the card's read-only or file/command
+    allowlist. No refusals are made here; boundary enforcement is the user's
+    responsibility when choosing a provider.
+    """
+    return True, None
+
+
+def _run_openrouter(model_id: str, prompt: str) -> dict:
+    """Call the OpenRouter chat API. Returns {status, exit_code, body}.
+
+    Never logs the API key. Returns a failed result when
+    OPENROUTER_API_KEY is unset, so no model call is made.
+    """
+    api_key = os.environ.get(OPENROUTER_API_KEY_ENV)
+    if not api_key:
+        return {
+            "status": "failed",
+            "exit_code": -1,
+            "body": (
+                "OpenRouter is not configured: set OPENROUTER_API_KEY. "
+                "No model call was made."
+            ),
+        }
+    payload = json.dumps(
+        {"model": model_id, "messages": [{"role": "user", "content": prompt}]}
+    ).encode()
+    request = urllib.request.Request(
+        OPENROUTER_API_URL,
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=RUN_TIMEOUT) as resp:
+            body = resp.read().decode("utf-8", "replace")
+            return {"status": "done", "exit_code": 0, "body": body}
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", "replace")[:2000]
+        return {"status": "failed", "exit_code": -1, "body": body}
+    except urllib.error.URLError as exc:
+        return {
+            "status": "failed",
+            "exit_code": -1,
+            "body": f"OpenRouter request failed: {exc}",
+        }
+    except OSError as exc:
+        return {"status": "failed", "exit_code": -1, "body": f"OpenRouter error: {exc}"}
+
+
+def _resolve_run(cfg: dict, req: RunRequest) -> tuple[dict, str]:
+    """Build a run specification. Returns (run_spec, human-readable command).
+
+    run_spec has a "kind" key: "shell", "claude", "codex", "opencode", or
+    "openrouter". Subprocess kinds carry an "argv" list; OpenRouter carries
+    "model" and "prompt" and is dispatched over HTTP in _execute_run.
+    """
+    if cfg["kind"] == "shell":
+        argv = list(cfg["argv"])
+        if cfg.get("input_argv") and req.input:
+            argv.append(req.input)
+        return {"kind": "shell", "argv": argv}, shlex.join(argv)
+
+    today = date.today()
+    if cfg.get("prompt") is None:
+        prompt = _build_update_sheet_prompt()
+    else:
+        # Placeholders: {input} (validated form value), {today}, {week}.
+        prompt = cfg["prompt"].format(
+            input=req.input or "",
+            today=today.isoformat(),
+            week=current_week_of_year(today),
+        )
+
+    options = cfg.get("options", True)
+    if options and req.model is not None:
+        parsed = _parse_model(req.model)
+        if parsed is None:
+            provider, model_id = "claude", cfg.get("model", "sonnet")
+        else:
+            provider, model_id = parsed
+    else:
+        provider, model_id = "claude", cfg.get("model", "sonnet")
+
+    effort = req.effort if req.effort and req.effort != "default" else None
+
+    if provider == "claude":
+        argv = [
+            "claude",
+            "-p",
+            prompt,
+            "--model",
+            model_id,
+            "--permission-mode",
+            "dontAsk" if cfg.get("read_only") or cfg.get("permissions") else "acceptEdits",
+            "--permission-prompts",
+            "none",
+        ]
+        if cfg.get("read_only"):
+            argv += [
+                "--tools",
+                "Read,Glob,Grep,Skill",
+                "--allowedTools",
+                "Read,Glob,Grep,Skill",
+            ]
+        if perms := cfg.get("permissions"):
+            argv += ["--tools", ",".join(perms["tools"]), "--allowedTools", *perms["allow"]]
+            for d in perms.get("add_dirs", []):
+                argv += ["--add-dir", d]
+        if effort:
+            argv += ["--effort", effort]
+        return {"kind": "claude", "argv": argv}, shlex.join(argv)
+
+    if provider == "codex":
+        exe = _resolve_codex_exe()
+        if exe is None:
+            return (
+                {"kind": "error", "error": "codex executable not on PATH"},
+                "codex exec -m <model> <prompt>",
+            )
+        sandbox = "read-only" if cfg.get("read_only") else "workspace-write"
+        argv = [
+            exe,
+            "exec",
+            "-m",
+            model_id,
+            "-s",
+            sandbox,
+            "-C",
+            str(WORKSPACE),
+            "--color",
+            "never",
+            prompt,
+        ]
+        if effort:
+            argv += ["-c", f"model_reasoning_effort={effort}"]
+        return {"kind": "codex", "argv": argv}, shlex.join(argv)
+
+    if provider == "opencode":
+        exe = _resolve_opencode_exe()
+        if exe is None:
+            return (
+                {"kind": "error", "error": "opencode executable not on PATH"},
+                "opencode run --standalone -m <model> <prompt>",
+            )
+        # --standalone avoids the shared background service so a stale service
+        # registration cannot make the run hang.
+        argv = [exe, "run", "--standalone", "-m", model_id, prompt]
+        return {"kind": "opencode", "argv": argv}, shlex.join(argv)
+
+    # openrouter — dispatched over HTTP in _execute_run
+    return (
+        {"kind": "openrouter", "model": model_id, "prompt": prompt},
+        f"openrouter {model_id} <prompt>",
+    )
+
+
+def _execute_run(run_id: str, run_spec: dict) -> None:
+    """Run the command to completion in a worker thread; record the result.
+
+    run_spec["kind"] is "shell"/"claude"/"codex"/"opencode" (subprocess via
+    run_spec["argv"]) or "openrouter" (HTTP via run_spec["model"]/prompt).
+    """
+    RUNS_DIR.mkdir(exist_ok=True)
+    out_path = RUNS_DIR / f"{run_id}.txt"
+    started = time.time()
+    try:
+        if run_spec["kind"] == "error":
+            result = {
+                "status": "failed",
+                "exit_code": -1,
+                "body": run_spec.get("error", "run spec error"),
+            }
+        elif run_spec["kind"] == "openrouter":
+            result = _run_openrouter(run_spec["model"], run_spec["prompt"])
+        else:
+            argv = run_spec["argv"]
+            proc = subprocess.run(
+                argv,
+                cwd=WORKSPACE,
+                capture_output=True,
+                text=True,
+                timeout=RUN_TIMEOUT,
+                check=False,
+            )
+            body = proc.stdout + (
+                f"\n\n--- stderr ---\n{proc.stderr}" if proc.stderr.strip() else ""
+            )
+            result = {
+                "status": "done" if proc.returncode == 0 else "failed",
+                "exit_code": proc.returncode,
+                "body": body,
+            }
+    except subprocess.TimeoutExpired:
+        result = {
+            "status": "failed",
+            "exit_code": -1,
+            "body": f"Timed out after {RUN_TIMEOUT}s.",
+        }
+    except FileNotFoundError:
+        result = {
+            "status": "failed",
+            "exit_code": -1,
+            "body": f"Command not found: {run_spec['argv'][0]}. Is it on PATH?",
+        }
+    except OSError as exc:
+        result = {"status": "failed", "exit_code": -1, "body": f"Failed to start: {exc}"}
+
+    out_path.write_text(result["body"])
+    duration = f"{time.time() - started:.1f}s"
+
+    with _RUNS_LOCK:
+        entry = _RUNS.get(run_id)
+        if entry is not None:
+            entry.update(
+                status=result["status"],
+                exit_code=result["exit_code"],
+                duration=duration,
+                output=str(out_path.relative_to(WORKSPACE)),
+                preview=result["body"].strip()[-400:],
+            )
+            _log_run(entry)
+
+
+@app.get("/api/skills/catalog")
+def api_skill_catalog():
+    """The buttons the UI should render, with provider-labelled model catalogues."""
+    return JSONResponse(
+        {
+            **_fetch_skill_catalog(),
+            "skills": [
+                {
+                    "id": sid,
+                    "label": cfg["label"],
+                    "blurb": cfg["blurb"],
+                    "icon": cfg["icon"],
+                    "kind": cfg["kind"],
+                    "model": cfg.get("model"),
+                    "options": cfg.get("options", cfg["kind"] == "claude"),
+                    "input_label": cfg.get("input_label"),
+                    "input_type": cfg.get("input_type", "url"),
+                }
+                for sid, cfg in SKILL_RUNNERS.items()
+            ],
+        }
+    )
+
+
+@app.post("/api/skills/catalog/refresh")
+def api_skill_catalog_refresh():
+    """Force a fresh read of the provider catalogues (Update models button)."""
+    return api_skill_catalog()
+
+
+@app.post("/api/skills/run")
+def api_skill_run(req: RunRequest, x_requested_with: str = Header(default="")):
+    """Start one skill run in the background; return its id immediately."""
+    if x_requested_with != "XMLHttpRequest":
+        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
+
+    cfg = SKILL_RUNNERS.get(req.skill)
+    if cfg is None:
+        return JSONResponse({"error": "Unknown skill"}, status_code=400)
+
+    # Resolve provider/model, validating against the provider catalogues.
+    options = cfg.get("options", True)
+    if options and req.model is not None:
+        parsed = _parse_model(req.model)
+        if parsed is None:
+            return JSONResponse({"error": "Unknown model"}, status_code=400)
+        provider, model_id = parsed
+    else:
+        provider, model_id = "claude", cfg.get("model", "sonnet")
+
+    # Effort validation is provider-specific.
+    effort = req.effort if req.effort is not None else "default"
+    if provider == "claude":
+        valid_efforts = list(ALLOWED_EFFORT)
+    elif provider == "codex":
+        # Only the Codex cache is needed here; loading every provider catalogue
+        # would shell out to `opencode models` on each launch and delay the run.
+        codex_models, codex_ok, codex_reason = _load_codex_models()
+        if not codex_ok:
+            # Missing cache or missing executable: report it instead of
+            # launching (or rejecting it as an "unsupported effort").
+            return JSONResponse({"error": codex_reason}, status_code=400)
+        valid_efforts = [
+            e for m in codex_models if m["id"] == model_id for e in m.get("efforts", [])
+        ]
+    else:  # opencode / openrouter — effort stays Default
+        valid_efforts = ["default"]
+    if effort not in valid_efforts:
+        return JSONResponse({"error": "Unsupported effort for this model"}, status_code=400)
+
+    # Permission parity: refuse provider/card pairings that cannot enforce the
+    # card's read-only or command/template boundary.
+    allowed, reason = _card_allows_provider(cfg, provider)
+    if not allowed:
+        return JSONResponse({"error": reason}, status_code=400)
+
+    # OpenRouter requires a configured API key before anything launches.
+    if provider == "openrouter" and not os.environ.get(OPENROUTER_API_KEY_ENV):
+        return JSONResponse(
+            {
+                "error": "OpenRouter is not configured: set OPENROUTER_API_KEY. No model call was made."
+            },
+            status_code=400,
+        )
+
+    if cfg.get("input_label"):
+        value = (req.input or "").strip()
+        if not value and cfg.get("input_optional"):
+            req.input = None
+        elif not value:
+            return JSONResponse(
+                {"error": f"{cfg['input_label']} is required"}, status_code=400
+            )
+        elif not re.match(cfg["input_pattern"], value):
+            return JSONResponse(
+                {"error": f"Not a valid {cfg['input_label']}"}, status_code=400
+            )
+        else:
+            req.input = value
+
+    run_spec, shown = _resolve_run(cfg, req)
+
+    run_id = uuid4().hex
+    entry = {
+        "id": run_id,
+        "skill": req.skill,
+        "label": cfg["label"],
+        "provider": provider,
+        "model": model_id,
+        "effort": effort,
+        "status": "running",
+        "started": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "command": shown,
+        "output": None,
+        "duration": None,
+        "preview": None,
+    }
+    with _RUNS_LOCK:
+        # Check and reserve together: double-clicks must not start two processes.
+        if any(
+            r["status"] == "running" and r["skill"] == req.skill for r in _RUNS.values()
+        ):
+            return JSONResponse({"error": "Already running"}, status_code=409)
+        try:
+            _log_run(entry)
+        except OSError:
+            return JSONResponse(
+                {"error": "Cannot write runs.log; run not started"}, status_code=503
+            )
+        _RUNS[run_id] = entry
+        completed = sorted(
+            (key for key, run in _RUNS.items() if run["status"] != "running"),
+            key=lambda key: _RUNS[key]["started"],
+        )
+        for stale in completed[:-MAX_RUNS_KEPT]:
+            _RUNS.pop(stale, None)
+
+    threading.Thread(target=_execute_run, args=(run_id, run_spec), daemon=True).start()
+    return JSONResponse({"ok": True, "run": entry})
+
+
+@app.get("/api/skills/runs")
+def api_skill_runs():
+    """Current status of every tracked run, newest first."""
+    with _RUNS_LOCK:
+        runs = sorted(_RUNS.values(), key=lambda r: r["started"], reverse=True)
+    return JSONResponse({"runs": runs})
+
+
+@app.get("/api/metrics")
+def api_metrics():
+    """Collect observed tailnet telemetry and local project health."""
+    try:
+        from metrics import collect_all_metrics
+
+        return JSONResponse(collect_all_metrics())
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@app.get("/api/metrics/history")
+def api_metrics_history(window: str = "1h"):
+    """Read bounded, allowlisted performance history from Prometheus."""
+    if window not in ("1h", "6h", "24h"):
+        return JSONResponse({"error": "Choose 1h, 6h, or 24h."}, status_code=422)
+    try:
+        from metrics import collect_metric_history
+
+        return JSONResponse(collect_metric_history(window))
+    except Exception:
+        return JSONResponse(
+            {"error": "Performance history is unavailable."}, status_code=503
+        )
+
+
+@app.get("/api/metrics/rates")
+def api_metrics_rates(window: str = "1h"):
+    """Network/disk rates, probe timeline and log volume for the Metrics charts."""
+    if window not in ("1h", "6h", "24h"):
+        return JSONResponse({"error": "Choose 1h, 6h, or 24h."}, status_code=400)
+    try:
+        from metric_charts import collect_chart_history
+
+        return JSONResponse(collect_chart_history(window))
+    except Exception:
+        return JSONResponse({"error": "Chart history is unavailable."}, status_code=503)

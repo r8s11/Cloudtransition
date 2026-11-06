@@ -1,0 +1,55 @@
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- MONEY PAGE                                                  -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-money" role="tabpanel" aria-labelledby="tab-money">
+  <div class="page-header">
+    <h2>Money</h2>
+    <p>The weekend fold &mdash; debt, savings, and the plan behind the paycheck</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Debt tracker</div>
+    {% if money_available %}
+    <div class="empty-state">
+      <div class="empty-icon">&#x1F4B0;</div>
+      <p>Money data found. This fold is ready to be drawn &mdash; extend this page to render it.</p>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">&#x1F9FE;</div>
+      <p>No money tracker yet. Every fold is recoverable &mdash; start the sheet.</p>
+      <p style="margin-top: 8px; opacity: 0.8;">Create <strong>finance/tracker.yml</strong> (or <strong>goals/money-goals.yml</strong>) with debts, payments, and savings to enable this fold. It appears on the dashboard automatically &mdash; the files are the database.</p>
+    </div>
+    {% endif %}
+
+    <div class="card-actions">
+      <button type="button" class="action-btn" data-copy-prompt data-prompt-id="actualize-money-prompt" data-label="&#x1F4E4; Actualize &mdash; prompt for opencode" title="Copy an opencode prompt that scans this workspace for real money facts and updates finance/tracker.yml">
+        &#x1F4E4; Actualize &mdash; prompt for opencode
+      </button>
+      <span class="action-status" data-copy-status role="status" aria-live="polite"></span>
+    </div>
+  </div>
+
+  <template id="actualize-money-prompt">Scan the Cloudtransition workspace for real, current money facts and update finance/tracker.yml so the Money page reflects reality.
+
+Read, relative to /Users/roosevelt/work/Cloudtransition:
+- TASKS.md - the debt plan section: each debt's balance, APR, minimum payment, and the method choice (avalanche or snowball)
+- DASHBOARD.md - job/pay status, the $3,000 net income sprint, and the debt paydown section
+- routine.md - the weekend "Money + review" cadence
+- freelance/profiles-2026-08.md - sprint running total, hourly lanes, TargetTask/flat rates
+- freelance/lane-a-services.md - Lane A package pricing (P1/P2/P3)
+- docs/plans/2026-03-19-consulting-capex-opex.md - the 30% consulting tax set-aside rule
+- finance/tracker.yml - the current file; preserve its schema and inline comments
+
+Rules:
+1. Only write figures that actually appear in those sources. Never invent a balance, APR, minimum payment, income, or savings amount.
+2. If the "List all debts: balance, APR, minimum payment" step in TASKS.md is still unchecked, leave the debts list empty and say so - do not fabricate entries.
+3. Update income.notes and any sprint/lane totals only with amounts you can cite from the files.
+4. Keep every existing key and comment; fill fields you can source, leave the rest unchanged.
+5. No code blocks, no YAML dump back - just a short bullet summary: what you filled in, and which fields you deliberately left empty and why.</template>
+
+  <div class="card card-dark">
+    <div class="card-title">&#x1F4B8; Weekly check</div>
+    <p>The routine holds one money fold a week: debt payments on track, TASKS.md tidy, note the next A/B project week. Automated payments are part of the routine, not a someday project.</p>
+  </div>
+</div>

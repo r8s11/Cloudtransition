@@ -1,0 +1,19 @@
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- WORKSPACE MAP — visual-second-brain viewer, served by app.py  -->
+<!-- at /workspace-map/. Links with data-map-query (app.js) set    -->
+<!-- the iframe's ?q=&topic=&folder= before switching here.        -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-workspace-map" role="tabpanel" aria-labelledby="tab-workspace-map">
+  <div class="page-header">
+    <h2>Workspace map</h2>
+    <p>
+      Find any workspace file by topic, folder or name.
+      {% if map_index.ok %}Snapshot from {{ map_index.generated }}, {{ map_index.files }} files.{% else %}{{ map_index.reason }}.{% endif %}
+      Refresh from Today &rarr; Daily.
+    </p>
+  </div>
+
+  <div class="card embed-card">
+    <iframe class="embed-frame" id="workspaceMapFrame" src="/workspace-map/" title="Workspace map" loading="lazy"></iframe>
+  </div>
+</div>

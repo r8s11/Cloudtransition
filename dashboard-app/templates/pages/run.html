@@ -1,0 +1,49 @@
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- RUN PAGE — headless skill runners                           -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-run" role="tabpanel" aria-labelledby="tab-run">
+  <div class="page-header">
+    <h2>Run</h2>
+    <p>
+      Fire a skill headlessly. Each button shells out to
+      <code>claude -p</code> and writes its output to
+      <code>dashboard-app/runs/</code>. Every run is appended to
+      <code>runs.log</code>.
+    </p>
+  </div>
+
+  <p class="run-empty">
+    Audit and UI/UX review cannot edit files. Audit runs with defaults;
+    UI/UX review, polish, and video summaries offer model and effort pickers.
+    Runs stop after 30 minutes; permission requests that need a person are denied.
+  </p>
+
+  <button id="refreshModels" type="button" class="action-btn action-btn-ghost">
+    Update models
+  </button>
+
+  <div class="card">
+    <div class="card-title">Your skill buttons</div>
+    <div class="run-grid" id="runGrid" data-run-grid data-skills="impeccable-audit,impeccable-polish,ui-ux-review,youtube-summary">
+      <p class="run-empty">Loading skills&hellip;</p>
+    </div>
+  </div>
+
+  <details class="card">
+    <summary class="card-title">Other workspace tools</summary>
+    <div class="run-grid" data-run-grid data-skills="update-sheet,graft-build,resume-build,plan-today,triage-inbox,brain-index,arms-report,artifact-catalog">
+      <p class="run-empty">Loading tools&hellip;</p>
+    </div>
+  </details>
+
+  <!-- Run history -->
+  <div class="card">
+    <div class="card-title">Recent runs</div>
+    <div id="runHistory">
+      <div class="empty-state empty-state-pad">
+        <div class="empty-icon">&#x25CB;</div>
+        <p>No runs yet this session. Press a button above.</p>
+      </div>
+    </div>
+  </div>
+</div>

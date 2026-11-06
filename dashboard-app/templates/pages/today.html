@@ -1,0 +1,181 @@
+{% from "_macros.html" import task_check %}
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- TODAY PAGE — capture, inbox, next up, quick tools, brain     -->
+<!-- Phone-first: the home-screen shortcut opens /#today.         -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-today" role="tabpanel" aria-labelledby="tab-today">
+  <div class="page-header">
+    <h2>Today</h2>
+    <p>
+      {{ today_weekday }} {{ today }} &middot; Week {{ current_week }}
+      {% for block in today_blocks %}<br />{{ block }}{% endfor %}
+    </p>
+  </div>
+
+  <!-- Daily destinations ← command_centre() in app.py. Numbers come from the
+       same parsers as their tabs; rows that cannot read a number say so.
+       Add a destination: append a row to `daily` in command_centre(). -->
+  <section class="card" aria-labelledby="dailyTitle">
+    <h3 class="card-title" id="dailyTitle">Daily</h3>
+    <ul class="daily-list">
+      {% for d in daily %}
+      <li>
+        <a
+          class="daily-row{% if d.warn %} is-warn{% endif %}{% if d.placeholder %} is-placeholder{% endif %}"
+          href="{{ d.href }}"
+          {% if d.new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
+          {% if d.map_query %}data-map-query="{{ d.map_query }}"{% endif %}
+        >
+          <span class="daily-label">{{ d.label }}{% if d.note %} <span class="daily-note">{{ d.note }}</span>{% endif %}</span>
+          <span class="daily-value">{{ d.value }}</span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    <details class="daily-refresh">
+      <summary>
+        {% if map_index.ok %}Workspace map is a snapshot from {{ map_index.generated }}{% if map_index.stale %}, older than a week{% endif %}.{% else %}{{ map_index.reason }}.{% endif %}
+        Refresh it
+      </summary>
+      <p>Run after files move or new work lands, then reload this page:</p>
+      <pre class="daily-cmd">{{ map_refresh }}</pre>
+    </details>
+  </section>
+
+  <!-- Capture → TASKS.md ## Inbox -->
+  <div class="card">
+    <div class="card-title">Capture</div>
+    <form class="today-form" id="captureForm">
+      <label class="run-field today-field-grow">
+        <span class="run-field-label">New task &rarr; TASKS.md Inbox</span>
+        <input
+          class="run-input today-input"
+          id="captureText"
+          name="text"
+          type="text"
+          maxlength="300"
+          autocomplete="off"
+          enterkeyhint="done"
+          required
+        />
+      </label>
+      <button class="action-btn" type="submit">Add</button>
+    </form>
+    <p class="run-status" id="captureStatus" role="status" aria-live="polite"></p>
+  </div>
+
+  <!-- Inbox -->
+  <div class="card">
+    <div class="card-title">
+      Inbox <span class="badge badge-count" id="inboxCount">{{ inbox_items|length }}</span>
+    </div>
+    <div id="inboxList">
+      {% for t in inbox_items %}
+      <div class="task-item">
+        {{ task_check(t) }}
+        <span class="task-text">{{ t.text }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="run-empty" id="inboxEmpty" {% if inbox_items %}hidden{% endif %}>
+      Inbox zero. Capture above; run <em>Triage inbox</em> to file items.
+    </p>
+  </div>
+
+  <!-- Next up: top of TASKS.md, which is kept in priority order -->
+  <div class="card">
+    <div class="card-title">Next up</div>
+    {% set ns = namespace(cat="") %}
+    {% for t in next_up %}
+      {% if t.cat != ns.cat %}
+        {% set ns.cat = t.cat %}
+        <div class="task-category-header">{{ t.cat }}</div>
+      {% endif %}
+      <div class="task-item">
+        {{ task_check(t) }}
+        <span class="task-text">{{ t.text }}</span>
+      </div>
+    {% else %}
+      <p class="run-empty">No open items in TASKS.md.</p>
+    {% endfor %}
+  </div>
+
+  <!-- Recent artifacts ← workspace_content.artifact_entries() (artifacts/catalog.py
+       rules), read live on each load: newest by modification time, not authorship. -->
+  <section class="card" aria-labelledby="artifactsTitle">
+    <h3 class="card-title" id="artifactsTitle">
+      Recent artifacts {% if artifacts.ok %}<span class="badge">{{ artifacts.count }}</span>{% endif %}
+    </h3>
+    {% if not artifacts.ok %}
+    <p class="run-empty">The artifacts folder could not be read. Check that the drive is mounted.</p>
+    {% elif not artifacts.rows %}
+    <p class="run-empty">No artifacts yet. HTML, PDF and image files saved in artifacts/ appear here.</p>
+    {% else %}
+    <ul class="artifact-list">
+      {% for a in artifacts.rows %}
+      <li>
+        <a class="artifact-row" href="{{ a.href }}" target="_blank" rel="noopener noreferrer">
+          <span class="artifact-title">{{ a.title }}</span>
+          <span class="artifact-meta"><span class="artifact-kind">{{ a.kind }}</span> {{ a.relativePath }}</span>
+          <time class="artifact-when" datetime="{{ a.modified }}">{{ a.when }}</time>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    <p class="artifact-more">
+      <a href="#workspace-map" data-map-query="folder=artifacts">All artifacts in the Workspace map</a>
+    </p>
+    {% endif %}
+  </section>
+
+  <!-- One-tap tools: same runners and history as the Run tab -->
+  <div class="card">
+    <div class="card-title">Quick tools</div>
+    <div class="run-grid" data-run-grid data-skills="{{ quick_tools|join(',') }}">
+      <p class="run-empty">Loading tools&hellip;</p>
+    </div>
+  </div>
+
+  <!-- Second brain: deterministic lookup + save -->
+  <div class="card">
+    <div class="card-title">Second brain</div>
+    <form class="today-form" id="brainAskForm">
+      <label class="run-field today-field-grow">
+        <span class="run-field-label">Ask the workspace</span>
+        <input
+          class="run-input today-input"
+          name="q"
+          type="search"
+          minlength="2"
+          maxlength="200"
+          enterkeyhint="search"
+          required
+        />
+      </label>
+      <button class="action-btn" type="submit">Ask</button>
+    </form>
+    <div class="brain-answer" id="brainAnswer" role="status" aria-live="polite"></div>
+
+    <details class="brain-save">
+      <summary>Save a memory</summary>
+      <form class="brain-save-form" id="brainSaveForm">
+        <label class="run-field">
+          <span class="run-field-label">Title</span>
+          <input class="run-input today-input" name="title" maxlength="120" required />
+        </label>
+        <label class="run-field">
+          <span class="run-field-label">One-line summary</span>
+          <input class="run-input today-input" name="summary" maxlength="500" required />
+        </label>
+        <label class="run-field">
+          <span class="run-field-label">Body (cite the source file)</span>
+          <textarea class="run-input today-input" name="body" rows="4" maxlength="8000" required></textarea>
+        </label>
+        <div class="run-item-foot">
+          <button class="action-btn" type="submit">Save</button>
+          <span class="run-status" id="brainSaveStatus" role="status" aria-live="polite"></span>
+        </div>
+      </form>
+    </details>
+  </div>
+</div>

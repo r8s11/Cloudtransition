@@ -1,71 +1,209 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Career Dashboard &mdash; 2026</title>
-  <link rel="stylesheet" href="/static/style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400;1,14..32,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CloudTransition &mdash; Career Dashboard 2026</title>
+    <!-- Home-screen install: opens straight to the Today page -->
+    <link rel="manifest" href="/static/manifest.webmanifest" />
+    <meta name="theme-color" content="#b3212e" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Sheet" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="apple-touch-icon" href="/static/icon-180.png" />
+    <link rel="icon" type="image/png" href="/static/icon-180.png" />
+    <link rel="stylesheet" href="/static/style.css?v=metric-color-20261106" />
+  </head>
+  <body>
+    <!-- Skip Navigation -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
 
+    <!-- ── NAV ──────────────────────────────────────────────────── -->
+    <nav class="masthead" aria-label="Dashboard sections">
+      <div class="masthead-bar">
+        <div class="masthead-brand">
+          <span class="brand-name">CloudTransition</span>
+          <span class="brand-issue">Issue No. {{ current_week }}</span>
+        </div>
+        <time class="masthead-date" datetime="{{ today }}">{{ today }}</time>
+        <div class="masthead-actions">
+          <button
+            type="button"
+            class="action-btn"
+            data-copy-prompt
+            data-prompt-id="update-sheet-prompt"
+            data-label="Update sheet"
+            title="Copy an opencode prompt that scans the workspace and brings every dated file current"
+          >
+            Update sheet
+          </button>
+          <span
+            class="action-status"
+            data-copy-status
+            role="status"
+            aria-live="polite"
+          ></span>
+        </div>
+      </div>
+      <div class="section-nav" role="tablist" aria-label="Dashboard pages">
+        {% set pages = [
+            ("overview", "Overview"),
+            ("today", "Today"),
+            ("workspace-map", "Workspace map"),
+            ("education", "Education"),
+            ("metrics", "Metrics"),
+            ("books", "Books"),
+            ("tasks", "Tasks"),
+            ("projects", "Projects"),
+            ("skills", "Skills"),
+            ("career", "Career"),
+            ("money", "Money"),
+            ("mission-control", "Mission Control"),
+            ("second-brain", "Second Brain"),
+            ("run", "Run"),
+        ] %}
+        {% for pid, plabel in pages %}
+        <button
+          class="nav-tab {% if loop.first %}active{% endif %}"
+          role="tab"
+          id="tab-{{ pid }}"
+          aria-selected="{{ 'true' if loop.first else 'false' }}"
+          aria-controls="page-{{ pid }}"
+          data-page="{{ pid }}"
+          tabindex="{{ '0' if loop.first else '-1' }}"
+        >
+          {{ plabel }}
+        </button>
+        {% endfor %}
+        <a class="nav-tab nav-tab-reader" href="/reader">Reader</a>
+      </div>
+    </nav>
 
-<!-- Skip Navigation -->
-<a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="sheet-layout">
+      <!-- ── Fold column — the week as a numbered margin ────────── -->
+      <nav class="fold-column" aria-label="This week's folds">
+        <div class="fold-column-header">
+          <div class="fold-column-kicker">The Week</div>
+          <div class="fold-column-title">
+            Week {{ current_week }}
+            <span class="fold-dot" aria-hidden="true"></span>
+          </div>
+          <span class="fold-column-note"
+            >Every fold is recoverable &mdash; every task can be unmade.</span
+          >
+        </div>
+        <ol class="fold-steps">
+          {% for step in fold_steps %}
+          <li
+            class="fold-step {% if step.is_today %}active{% endif %}"
+            tabindex="0"
+            role="button"
+            aria-pressed="{{ 'true' if step.is_today else 'false' }}"
+            aria-label="{{ step.day }}: {{ step.label }}"
+            data-fold-index="{{ loop.index0 }}"
+            data-fold-day="{{ step.day }}"
+            data-fold-label="{{ step.label }}"
+          >
+            <span class="fold-number">{{ step.step_num }}</span>
+            <div class="fold-body">
+              <span class="fold-day">{{ step.day }}</span>
+              <span class="fold-label">{{ step.label }}</span>
+            </div>
+            <span class="fold-dot" aria-hidden="true"></span>
+          </li>
+          {% endfor %}
+        </ol>
+        <div
+          class="fold-focus-card"
+          id="fold-focus-card"
+          hidden
+          aria-live="polite"
+        >
+          <div class="fold-focus-kicker">Fold focus</div>
+          <strong class="fold-focus-title" data-fold-focus-title></strong>
+          <p class="fold-focus-detail" data-fold-focus-detail></p>
+          <div class="fold-focus-progress" aria-hidden="true">
+            <span data-fold-focus-progress></span>
+          </div>
+          <span class="fold-focus-meta" data-fold-focus-meta></span>
+          <svg
+            class="fold-neural-graph"
+            data-fold-neural
+            viewBox="0 0 216 120"
+            aria-hidden="true"
+          ></svg>
+        </div>
+      </nav>
 
-<!-- ── NAV ──────────────────────────────────────────────────── -->
-<nav class="masthead" aria-label="Dashboard sections">
-  <div class="masthead-bar">
-    <div class="masthead-brand">
-      <span class="brand-name">CloudTransition</span>
-      <span class="brand-issue">Issue No. {{ current_week }}</span>
+      <main class="sheet-faces" id="main-content">
+        {% include "pages/overview.html" %} {% include "pages/today.html" %}
+        {% include "pages/workspace-map.html" %}
+        {% include "pages/education.html" %}
+        {% include "pages/books.html" %} {% include "pages/tasks.html" %} {%
+        include "pages/projects.html" %} {% include "pages/skills.html" %} {%
+        include "pages/career.html" %} {% include "pages/money.html" %} {%
+        include "pages/mission-control.html" %} {% include "pages/second-brain.html" %}
+        {% include "pages/metrics.html" %}
+        {% include "pages/run.html" %}
+
+        <!-- ── Footer ──────────────────────────────────────────── -->
+        <footer class="footer">
+          <p>
+            CloudTransition Career Dashboard &middot; The Orizuru &mdash; one
+            uncut sheet
+          </p>
+          <p>
+            Data reads from workspace YAML/MD files on each page load &middot;
+            <time datetime="{{ today }}">{{ today }}</time>
+          </p>
+        </footer>
+      </main>
     </div>
-    <time class="masthead-date" datetime="{{ today }}">{{ today }}</time>
-  </div>
-  <div class="section-nav" role="tablist" aria-label="Dashboard pages">
-    {% set pages = [
-      ("overview", "Overview"),
-      ("education", "Education"),
-      ("books", "Books"),
-      ("tasks", "Tasks"),
-      ("projects", "Projects"),
-      ("skills", "Skills"),
-      ("career", "Career"),
-    ] %}
-    {% for pid, plabel in pages %}
-    <button class="nav-tab {% if loop.first %}active{% endif %}"
-      role="tab"
-      id="tab-{{ pid }}"
-      aria-selected="{{ 'true' if loop.first else 'false' }}"
-      aria-controls="page-{{ pid }}"
-      data-page="{{ pid }}"
-      tabindex="{{ '0' if loop.first else '-1' }}">{{ plabel }}</button>
-    {% endfor %}
-    <a class="nav-tab nav-tab-reader" href="/reader">Reader</a>
-  </div>
-</nav>
+    <!-- .sheet-layout -->
 
-<main class="main" id="main-content">
+    <!-- Full output of one run; opened from the Run tab or Today quick tools.
+         Lives outside the tab panels: a dialog inside a hidden panel renders
+         at zero size. -->
+    <dialog class="run-output-dialog" id="runOutputDialog" aria-labelledby="runOutputTitle">
+      <div class="run-output-head">
+        <h3 id="runOutputTitle">Run output</h3>
+        <button type="button" class="action-btn action-btn-ghost" data-close-output>Close</button>
+      </div>
+      <pre class="run-output" id="runOutputBody"></pre>
+    </dialog>
 
-{% include "pages/overview.html" %}
-{% include "pages/education.html" %}
-{% include "pages/books.html" %}
-{% include "pages/tasks.html" %}
-{% include "pages/projects.html" %}
-{% include "pages/skills.html" %}
-{% include "pages/career.html" %}
+    <script src="/static/app.js?v=polish-20261104"></script>
+    <script src="/static/metrics.js?v=metric-typeset-20261106"></script>
 
-<!-- ── Footer ──────────────────────────────────────────────── -->
-<footer class="footer">
-  <p>CloudTransition Career Dashboard &middot; Powered by FastAPI + Jinja2</p>
-  <p>Data reads from workspace YAML files on each page load &middot; <time datetime="{{ today }}">{{ today }}</time></p>
-</footer>
-
-</main><!-- .main -->
-
-
-<script src="/static/app.js"></script>
-</body>
+    <template id="update-sheet-prompt"
+      >Update the CloudTransition workspace so every dated file reflects today:
+      {{ today }} (Week {{ current_week }}). Bring these files current, in this
+      order: 1. routine.md - refresh the _Last updated_ stamp (it reads
+      2026-07-15) and run the weekly review against the actual calendar: confirm
+      which alternating project week is live this week (Week A = IT Mgmt
+      Playbook, Week B = Bogatyr). Check off the weekly-review checklist only
+      where files show real completion evidence. 2. DASHBOARD.md - refresh
+      Current Context, the active workstreams, and the Targets table for the
+      current horizon. Note the week's A/B status. Do not fabricate progress on
+      workstreams. 3. Work log - the routine mandates 3 work-log bullets per
+      day. If today's/week's bullets are missing in the work log, note that as a
+      gap; only write bullets that are evident from TASKS.md, DASHBOARD.md, or
+      the IT Mgmt Playbook commit history. 4. TASKS.md - check off only items
+      whose completion is shown in the files themselves (work log, playbook
+      commits, DASHBOARD.md). Refresh the open items and the debt plan section
+      per current reality. 5. finance/tracker.yml - actualize it (same rules as
+      the money prompt: only figures citable from the files, never invented;
+      empty debt list until the TASKS.md debt inventory is done). 6. plans/,
+      goals/, skills/, interviews/ - only update date stamps if a file has a
+      stale _Last updated_; do not re-plan anything. Rules: 1. Today is {{ today
+      }}, and the current ISO week is {{ current_week }}. Use these as the truth
+      for dates and parity; note the A/B week from the fold column or the parity
+      rule (odd = A, even = B). 2. Never invent a date, fact, achievement,
+      balance, or completion state. Marking something done requires evidence in
+      the files. 3. Never rewrite structure or renumber folders - date stamps,
+      checkboxes, and cadence fields only. 4. End with a short bullet summary:
+      what you updated, what you deliberately left alone, and why.</template
+    >
+  </body>
 </html>
