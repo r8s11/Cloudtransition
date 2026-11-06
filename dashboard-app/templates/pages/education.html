@@ -110,7 +110,7 @@
     <div class="grid-3 gap-12">
       {% set phase_colors = ["#c9a227", "#7c5cbf", "#D97757", "#4a7fb5", "#4a9e6e"] %}
       {% for ph in edu_phases %}
-      <div class="phase-card" style="border-top: 3px solid {{ phase_colors[loop.index0 % 5] }};">
+      <div class="phase-card" style="border-top: 3px solid {{ phase_colors[loop.index0 % 5] }}; padding-top: 20px;">
         <div class="phase-header">
           <span class="phase-number">Phase {{ ph.phase }}</span>
           {% if ph.status == "completed" %}

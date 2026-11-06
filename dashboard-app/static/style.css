@@ -105,6 +105,11 @@
 		);
 }
 
+/* Spacing scale — 4px base: 8 / 12 / 16 / 20 / 24px.
+   Every bordered container keeps at least 16px of inset on all sides so
+   ink never reads flush against an edge. Fold-accented sides (border-left /
+   border-top fold lines) keep at least 20px so content clears the fold. */
+
 /* ── Reset ─────────────────────────────────────────────────── */
 *,
 *::before,
@@ -360,8 +365,8 @@ body > * {
 .fold-focus-kicker,
 .fold-focus-meta {
 	font-family: var(--mono);
-	font-size: 10px;
-	letter-spacing: 1.2px;
+	font-size: 11px;
+	letter-spacing: 1.1px;
 	text-transform: uppercase;
 }
 
@@ -716,7 +721,7 @@ body > * {
 	color: var(--text);
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
-	padding: 18px 20px;
+	padding: 20px 22px;
 	margin-bottom: 16px;
 	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
 	/* a faint diagonal crease catching light on the upper-left fold */
@@ -1005,7 +1010,7 @@ body > * {
 
 /* ── Hero (overview first viewport) ────────────────────────── */
 .hero {
-	padding: 22px 8px 10px;
+	padding: 22px 16px 10px;
 	margin-bottom: 18px;
 }
 
@@ -1062,7 +1067,7 @@ body > * {
 	background: var(--paper-hi);
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
-	padding: 14px 16px;
+	padding: 16px 20px;
 	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
 }
 
@@ -1340,8 +1345,8 @@ body > * {
 	color: var(--text);
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
-	/* extra left inset clears the 4px fold accent set on the element */
-	padding: 14px 16px 14px 20px;
+	/* symmetric inset clears the 4px fold accent set on the element */
+	padding: 16px 20px;
 	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
 }
 
@@ -1658,7 +1663,7 @@ body > * {
 	align-items: center;
 	justify-content: space-between;
 	gap: 14px;
-	padding: 10px 6px;
+	padding: 12px 16px 12px 20px;
 	border-bottom: 1px solid var(--border-light);
 }
 
@@ -1777,7 +1782,7 @@ body > * {
 	background: var(--paper-hi);
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
-	padding: 14px 16px;
+	padding: 16px 20px;
 	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
 }
 

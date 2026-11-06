@@ -134,7 +134,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.15s;
+        transition: background 0.15s, border-color 0.15s, color 0.15s;
       }
       .header-btn:hover {
         background: var(--accent-bg);
@@ -273,7 +273,7 @@
         cursor: pointer;
         font-size: 13px;
         color: var(--text-mid);
-        transition: all 0.15s;
+        transition: background 0.15s, color 0.15s, border-color 0.15s;
         border: 1px solid transparent;
       }
       .file-item:hover {
@@ -368,6 +368,20 @@
         font-family: var(--mono);
         font-size: 11px;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      }
+
+      .welcome-intro {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        text-align: left;
+      }
+      .welcome-mark {
+        margin-bottom: 0;
+        flex-shrink: 0;
+      }
+      .welcome-text h2 {
+        margin-bottom: 4px;
       }
 
       /* ── Loading ──────────────────────────────────────────────── */
@@ -683,6 +697,14 @@
         .welcome-keys {
           display: none;
         }
+        .welcome-intro {
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+        .welcome-text p {
+          margin: 0 auto;
+        }
       }
 
       /* ── Mobile overlay ───────────────────────────────────────── */
@@ -696,6 +718,19 @@
       }
       .sidebar-overlay.visible {
         display: block;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+        }
+        .prose {
+          opacity: 1;
+          transform: none;
+        }
       }
     </style>
   </head>
@@ -776,29 +811,33 @@
       <main class="content-area" id="contentArea">
         <div class="content-inner" id="contentInner">
           <div class="welcome" id="welcomeState">
-            <div class="welcome-mark">
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#fff"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"
-                />
-                <path d="M8 7h6" />
-                <path d="M8 11h8" />
-              </svg>
+            <div class="welcome-intro">
+              <div class="welcome-mark">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#fff"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"
+                  />
+                  <path d="M8 7h6" />
+                  <path d="M8 11h8" />
+                </svg>
+              </div>
+              <div class="welcome-text">
+                <h2>Your Knowledge Library</h2>
+                <p>
+                  Select a file from the sidebar to start reading. Plans,
+                  guides, and notes &mdash; all rendered beautifully.
+                </p>
+              </div>
             </div>
-            <h2>Your Knowledge Library</h2>
-            <p>
-              Select a file from the sidebar to start reading. Plans, guides,
-              and notes &mdash; all rendered beautifully.
-            </p>
             <div class="welcome-keys">
               <span><kbd>Ctrl</kbd> + <kbd>K</kbd> Search</span>
               <span><kbd>Ctrl</kbd> + <kbd>B</kbd> Sidebar</span>
