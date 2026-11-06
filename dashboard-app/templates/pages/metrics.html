@@ -1,0 +1,93 @@
+<!-- METRICS — compact, read-only operations console -->
+<div class="page" id="page-metrics" role="tabpanel" aria-labelledby="tab-metrics">
+  <header class="page-header metrics-header">
+    <div><h2>Server operations</h2><p>Parrot and Flatbush · performance, workloads, and observed activity.</p></div>
+    <div class="metrics-controls"><button type="button" class="metrics-refresh" id="metrics-refresh">Refresh now</button><span class="metrics-auto" id="metrics-auto">Auto-refresh · 15 s</span></div>
+  </header>
+  <div class="metrics-freshness"><p id="metrics-feedback" role="status">Connecting to monitoring sources…</p><p>Last collection <time id="metrics-collected">—</time></p></div>
+
+  <section class="metrics-section" aria-label="Server overview">
+    <div class="host-grid">
+      {% for name, address in [("parrot", "100.105.235.49"), ("flatbush", "100.67.14.72")] %}
+      <article class="host-panel" data-host="{{ name }}" aria-labelledby="host-{{ name }}">
+        <div class="host-heading"><h3 id="host-{{ name }}"><button type="button" class="ops-host-button" data-select-host="{{ name }}" aria-pressed="{{ 'true' if name == 'parrot' else 'false' }}" aria-label="Inspect {{ name }} server">{{ name }}</button></h3><span class="metrics-state" data-host-field="status" data-state="unknown">Checking</span></div>
+        <p class="host-address"><code>{{ address }}</code> · <span data-host-field="os_name">OS not exported</span></p>
+        <dl class="host-stats">
+          <div class="host-stat-primary"><dt>CPU <span>5 min average</span></dt><dd><span data-host-field="cpu_percent">—</span><small class="host-capacity" data-host-field="cpu_threads">—</small><span class="ops-cbar" data-host-bar="cpu_percent" aria-hidden="true"><i class="ops-fill-cpu"></i><b></b><b></b></span><span class="ops-spark" data-host-spark="cpu_percent"></span></dd></div>
+          <div><dt>Memory <span>used / total</span></dt><dd><span data-host-field="memory_percent">—</span><small class="host-capacity" data-host-field="memory_capacity">—</small><span class="ops-cbar" data-host-bar="memory_percent" aria-hidden="true"><i class="ops-fill-memory"></i><b></b><b></b></span><span class="ops-spark" data-host-spark="memory_percent"></span></dd></div>
+          <div><dt><span class="ops-volume-label" data-host-field="volume_label">System volume</span><span>used / total</span></dt><dd><span data-host-field="disk_percent">—</span><small class="host-capacity" data-host-field="disk_capacity">—</small><span class="ops-cbar" data-host-bar="disk_percent" aria-hidden="true"><i class="ops-fill-disk"></i><b></b><b></b></span><span class="ops-spark" data-host-spark="disk_percent"></span></dd></div>
+        </dl>
+        <p class="ops-host-footer">Uptime <strong data-host-field="uptime">—</strong><span data-host-field="detail">Waiting for telemetry.</span></p>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="ops-inspector" aria-labelledby="ops-inspector-heading">
+    <div class="ops-toolbar">
+      <h3 id="ops-inspector-heading">Inspect server</h3>
+      <label>Server <select id="metrics-host"><option value="parrot">Parrot</option><option value="flatbush">Flatbush</option></select></label>
+      <label>History <select id="metrics-window"><option value="1h">Last hour</option><option value="6h">Last 6 hours</option><option value="24h">Last 24 hours</option></select></label>
+      <label class="ops-live-toggle"><input type="checkbox" id="metrics-live" checked /> Live</label>
+    </div>
+    <p class="ops-context" id="ops-server-context">Choose a host to inspect its exported telemetry.</p>
+
+    <section class="metrics-section ops-history" aria-labelledby="ops-history-heading">
+      <div class="ops-section-heading"><h4 id="ops-history-heading">Performance history</h4><span id="metrics-history-feedback" role="status">Loading retained samples…</span></div>
+      <div class="ops-chart-legend"><span class="ops-series-cpu">CPU busy</span><span class="ops-series-memory">Memory used</span><span class="ops-series-disk">System volume used</span><span>Percent · real Prometheus samples</span></div>
+      <figure class="ops-chart" id="metrics-history-chart" aria-label="Host performance history"><p>Waiting for historical samples.</p></figure>
+      <p class="metrics-footnote">Gaps mean no retained samples. History refreshes every minute and remains separate from current exporter health.</p>
+    </section>
+
+    <section class="metrics-section ops-separated" aria-labelledby="ops-net-heading">
+      <div class="ops-section-heading"><h4 id="ops-net-heading">Network throughput</h4><span id="ops-charts-feedback" role="status">Loading retained samples…</span></div>
+      <div class="ops-chart-legend"><span class="ops-series-rx">Receive (above line)</span><span class="ops-series-tx">Send (below line, dashed)</span><span>5-min rates · interface groups have separate scales and are not added together</span></div>
+      <div class="ops-chart-pair" id="ops-net-charts"></div>
+    </section>
+
+    <section class="metrics-section ops-separated" aria-labelledby="ops-diskio-heading">
+      <div class="ops-section-heading"><h4 id="ops-diskio-heading">Disk I/O</h4><span>Per physical device · bytes per second</span></div>
+      <div class="ops-chart-legend"><span class="ops-series-read">Read (above line)</span><span class="ops-series-write">Write (below line, dashed)</span></div>
+      <div class="ops-chart-pair" id="ops-disk-charts"></div>
+    </section>
+
+    <div class="ops-grid">
+      <section class="metrics-section" aria-labelledby="ops-resources-heading"><div class="metrics-section-heading"><h4 id="ops-resources-heading">Resource pressure</h4><p>Platform-specific readings; missing is not zero.</p></div><table class="ops-table ops-key-values"><caption class="metrics-visually-hidden">Selected server resource readings</caption><tbody id="ops-resources-body"></tbody></table></section>
+      <section class="metrics-section" aria-labelledby="ops-network-heading"><div class="metrics-section-heading"><h4 id="ops-network-heading">Network throughput</h4><p>Five-minute rates; interface groups are not additive.</p></div><table class="ops-table"><caption class="metrics-visually-hidden">Selected server network byte rates</caption><thead><tr><th scope="col">Interface group</th><th scope="col">Receive</th><th scope="col">Send</th></tr></thead><tbody id="ops-network-body"></tbody></table><details class="host-diagnostics"><summary>System &amp; collection details</summary><dl class="host-facts" id="ops-host-facts"></dl></details></section>
+    </div>
+
+    <section class="metrics-section ops-separated" aria-labelledby="ops-storage-heading">
+      <div class="metrics-section-heading"><h4 id="ops-storage-heading">Storage &amp; disk I/O</h4><p>Real mounted volumes and physical devices; no inferred free space.</p></div>
+      <p class="ops-empty" id="ops-volumes-status">Waiting for volume metrics.</p>
+      <div class="ops-volume-bars" id="ops-volumes-chart"></div>
+      <div class="ops-table-scroll" tabindex="0" role="region" aria-label="Volume capacity table"><table class="ops-table" id="ops-volumes-table" hidden><thead><tr><th scope="col">Volume</th><th scope="col">Used</th><th scope="col">Available / total</th><th scope="col">Inodes used</th><th scope="col">Mode</th></tr></thead><tbody id="ops-volumes-body"></tbody></table></div>
+      <p class="ops-empty" id="ops-disks-status">Waiting for disk I/O metrics.</p>
+      <div class="ops-table-scroll" tabindex="0" role="region" aria-label="Disk activity table"><table class="ops-table" id="ops-disks-table" hidden><thead><tr><th scope="col">Device</th><th scope="col">Read</th><th scope="col">Write</th><th scope="col">Busy</th><th scope="col">In flight</th></tr></thead><tbody id="ops-disks-body"></tbody></table></div>
+    </section>
+
+    <section class="metrics-section ops-separated" aria-labelledby="ops-workloads-heading">
+      <div class="ops-section-heading"><h4 id="ops-workloads-heading">Workloads</h4><div class="ops-workload-filters"><label>Filter <input id="ops-workload-search" type="search" placeholder="Process, container, or service" autocomplete="off" /></label><label>Service state <select id="ops-service-filter"><option value="all">All states</option><option value="running">Running</option><option value="stopped">Stopped</option><option value="other">Other states</option></select></label><div class="ops-seg" role="group" aria-label="Rank workloads by"><button type="button" data-rank="cpu" aria-pressed="true">CPU cores</button><button type="button" data-rank="memory" aria-pressed="false">Memory</button></div></div></div>
+      <div id="ops-workload-chart"></div>
+      <h5 class="ops-subheading">Processes <span id="ops-processes-count"></span></h5><p class="ops-empty" id="ops-processes-status">Waiting for process metrics.</p>
+      <div class="ops-table-scroll" tabindex="0" role="region" aria-label="Process performance table"><table class="ops-table ops-workload-table" id="ops-processes-table" hidden><thead><tr><th scope="col">Process</th><th scope="col">PID</th><th scope="col">CPU cores</th><th scope="col">Private working set</th><th scope="col">Threads</th><th scope="col">Uptime</th></tr></thead><tbody id="ops-processes-body"></tbody></table></div>
+      <button type="button" class="metrics-inline-action" id="ops-processes-more" hidden>Show more processes</button>
+      <p class="metrics-footnote">Ranked by CPU cores, then private working set. Idle pseudo-processes are excluded. Command lines, executable paths, and environment values are not fetched.</p>
+      <h5 class="ops-subheading">Containers <span id="ops-containers-count"></span></h5><p class="ops-empty" id="ops-containers-status">Waiting for container metrics.</p>
+      <div class="ops-table-scroll" tabindex="0" role="region" aria-label="Container performance table"><table class="ops-table ops-workload-table" id="ops-containers-table" hidden><thead><tr><th scope="col">Container / image</th><th scope="col">CPU cores</th><th scope="col">Working set</th><th scope="col">Receive / send</th><th scope="col">Uptime</th><th scope="col">Health</th></tr></thead><tbody id="ops-containers-body"></tbody></table></div>
+      <button type="button" class="metrics-inline-action" id="ops-containers-more" hidden>Show more containers</button>
+      <h5 class="ops-subheading">System services <span id="ops-services-count"></span></h5><p class="ops-empty" id="ops-services-status">Waiting for service-state metrics.</p>
+      <div class="ops-table-scroll" tabindex="0" role="region" aria-label="System service states table"><table class="ops-table ops-workload-table" id="ops-services-table" hidden><thead><tr><th scope="col">Service</th><th scope="col">State</th><th scope="col">Start mode</th><th scope="col">PID</th></tr></thead><tbody id="ops-services-body"></tbody></table></div>
+      <button type="button" class="metrics-inline-action" id="ops-services-more" hidden>Show more services</button>
+      <p class="metrics-footnote">Container CPU is measured in cores, not host percent. Fresh observation is not a health check. Windows/Linux service states depend on exported collectors.</p>
+    </section>
+
+    <section class="metrics-section ops-separated" aria-labelledby="ops-probes-heading"><div class="metrics-section-heading"><h4 id="ops-probes-heading">Service reachability</h4><p>Actual HTTP/TCP probe results, not exporter scrape success.</p></div><div class="ops-chart-legend"><span class="ops-sw ops-sw-up">Up</span><span class="ops-sw ops-sw-down">Down</span><span class="ops-sw ops-sw-gap">No sample</span><span>One cell per history step · right: current probe duration</span></div><div id="ops-probes-chart"></div><p class="ops-empty" id="ops-probes-status">Waiting for probes.</p><div class="ops-table-scroll" tabindex="0" role="region" aria-label="Service reachability checks"><table class="ops-table" id="ops-probes-table" hidden><thead><tr><th scope="col">Service</th><th scope="col">Check</th><th scope="col">Target</th><th scope="col">Result</th><th scope="col">Duration</th></tr></thead><tbody id="ops-probes-body"></tbody></table></div></section>
+
+    <section class="metrics-section ops-separated" aria-labelledby="ops-activity-heading"><div class="ops-section-heading"><h4 id="ops-activity-heading">Recent activity</h4><span id="ops-log-summary">Waiting for Loki.</span></div><div class="ops-chart-legend"><span class="ops-sw ops-sw-error">Error</span><span class="ops-sw ops-sw-warning">Warning</span><span class="ops-sw ops-sw-info">Information</span><span class="ops-sw ops-sw-unknown">Severity not exported</span><span>Loki line counts per history step · severity as reported, never inferred</span></div><figure class="ops-chart ops-log-chart" id="ops-logs-chart" aria-label="Log volume by severity"><p>Waiting for log history.</p></figure><p class="metrics-footnote">Last 15 minutes · latest 8 entries per server · source severity only. Expand an entry to read its bounded message.</p><p class="ops-empty" id="ops-logs-status"></p><div class="ops-source-list" id="ops-log-sources"></div><ol class="ops-log-list" id="ops-log-entries"></ol></section>
+
+    <section class="metrics-section ops-separated" aria-labelledby="ops-coverage-heading"><div class="metrics-section-heading"><h4 id="ops-coverage-heading">Monitoring coverage</h4><p>What this view can—and cannot—establish from current sources.</p></div><ul class="ops-coverage" id="ops-coverage-list"></ul><p class="metrics-footnote">This console is read-only. It does not restart services, run commands, or collect credentials.</p></section>
+  </section>
+
+  <details class="metrics-methods"><summary>Connections, definitions &amp; local dashboard context</summary><div class="ops-connections"><a href="http://parrot.tail9aa23.ts.net:9091/" target="_blank" rel="noopener noreferrer">Prometheus</a><a href="http://parrot.tail9aa23.ts.net:3100/ready" target="_blank" rel="noopener noreferrer">Loki readiness</a><a href="http://parrot.tail9aa23.ts.net:8090/" target="_blank" rel="noopener noreferrer">Beszel</a></div><dl class="metrics-definitions"><div><dt>Usage</dt><dd>Memory used = total − available. Volume used = size − space available to non-root users (Linux) or free space (Windows). Capacities use binary units. Windows system volume and Linux root filesystem are labelled separately.</dd></div><div><dt>Sampling and clocks</dt><dd>Current usage and network/IO rates use exported samples and five-minute rate windows. History is queried from Prometheus for the selected period. Source sample timestamps use Prometheus’s clock; collection time uses the dashboard clock. They may differ.</dd></div><div><dt>Missing coverage</dt><dd>No metric means unknown, not healthy or idle. A successful scrape is not a successful target probe. Docker log activity alone does not provide container CPU or memory. Host CPU/process counts cannot identify AI tasks, model-token usage, or costs.</dd></div><div><dt>Log handling</dt><dd>Messages are bounded and common credential patterns are redacted server-side. Avoid sending secrets to logs. Existing tailnet dashboard access also permits reading the monitoring data shown here.</dd></div></dl><h4 class="ops-subheading">Local dashboard context—not server workload health</h4><ul class="metrics-project-list">{% for name, label in [("dashboard-app", "Dashboard API"), ("salsatd", "Local salsatd probe"), ("Salsa", "Salsa · no health probe"), ("salsasegura-mobile", "Mobile project · no health probe")] %}<li data-project="{{ name }}"><strong>{{ label }}</strong><span class="metrics-state" data-project-status data-state="unknown">Checking</span></li>{% endfor %}</ul><p class="metrics-footnote">Security posture is not assessed by this page. Beszel registration and credentials remain manual.</p></details>
+  <noscript><p>Live monitoring requires JavaScript. Static monitoring links remain available.</p></noscript>
+</div>

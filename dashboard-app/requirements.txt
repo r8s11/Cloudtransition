@@ -2,3 +2,7 @@ fastapi>=0.115.0
 uvicorn>=0.34.0
 jinja2>=3.1.0
 pyyaml>=6.0
+
+# Design-contract regression tests (tests/test_design_contracts.py)
+pytest>=8.0
+httpx2
