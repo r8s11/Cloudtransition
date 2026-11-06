@@ -37,6 +37,37 @@ from pydantic import BaseModel
 
 import workspace_content as wc
 
+
+def _load_env_file(path: Path, environ: dict[str, str] | None = None) -> None:
+    """Load KEY=VALUE lines from a local .env without overriding real env vars.
+
+    The dashboard runs under launchd with its own environment, so a
+    gitignored dashboard-app/.env is where local keys such as
+    OPENROUTER_API_KEY belong.
+    """
+    target = os.environ if environ is None else environ
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeDecodeError):
+        return
+    for raw in lines:
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[7:].lstrip()
+        key, sep, value = line.partition("=")
+        key = key.strip()
+        if not sep or not key:
+            continue
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+            value = value[1:-1]
+        target.setdefault(key, value)
+
+
+_load_env_file(Path(__file__).resolve().parent / ".env")
+
 # ── Paths ──────────────────────────────────────────────────────
 WORKSPACE = Path(__file__).resolve().parent.parent  # Cloudtransition/
 SKILLS_FILE = WORKSPACE / "skills" / "skills-inventory.yml"
@@ -1199,6 +1230,10 @@ OPENROUTER_METADATA = Path.home() / ".hermes.bak" / "cache" / "openrouter_model_
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_API_KEY_ENV = "OPENROUTER_API_KEY"
 
+# Bounds for workspace text inlined into OpenRouter prompts (no file tools).
+CONTEXT_MAX_FILE_CHARS = 80_000
+CONTEXT_MAX_CHARS = 160_000
+
 
 def _is_free_model_id(model_id: str) -> bool:
     """OpenCode/OpenRouter free models are marked with -free or :free."""
@@ -1447,6 +1482,11 @@ SKILL_RUNNERS = {
         "model": "sonnet",
         "options": True,
         "read_only": True,
+        "context_files": [
+            "dashboard-app/templates/pages/run.html",
+            "dashboard-app/static/app.js",
+            "dashboard-app/static/style.css",
+        ],
     },
     "update-sheet": {
         "label": "Update sheet",
@@ -1503,6 +1543,7 @@ SKILL_RUNNERS = {
             "status. Do not edit any file."
         ),
         "model": "sonnet",
+        "context_files": ["TASKS.md", "routine.md", "DASHBOARD.md"],
     },
     "triage-inbox": {
         "label": "Triage inbox",
@@ -1659,6 +1700,48 @@ def _run_openrouter(model_id: str, prompt: str) -> dict:
         return {"status": "failed", "exit_code": -1, "body": f"OpenRouter error: {exc}"}
 
 
+def _workspace_context(files: list[str]) -> str:
+    """Inline a card's declared files for providers that cannot read them.
+
+    Paths outside the workspace and privacy-flagged paths are skipped, and the
+    rendered text is bounded so a request cannot balloon.
+    """
+    base = WORKSPACE.resolve()
+    remaining = CONTEXT_MAX_CHARS
+    parts: list[str] = []
+    for rel in files:
+        rel_path = Path(rel)
+        target = (WORKSPACE / rel_path).resolve()
+        try:
+            target.relative_to(base)
+        except ValueError:
+            continue
+        if wc.privacy_violation(rel_path.as_posix()) or not target.is_file():
+            continue
+        try:
+            text = target.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        limited = text[: min(CONTEXT_MAX_FILE_CHARS, max(remaining, 0))]
+        if not limited:
+            break
+        numbered = "\n".join(
+            f"{number:>5}| {line}"
+            for number, line in enumerate(limited.splitlines(), start=1)
+        )
+        suffix = "\n… truncated" if len(limited) < len(text) else ""
+        parts.append(f"### {rel_path.as_posix()}\n{numbered}{suffix}")
+        remaining -= len(numbered)
+        if remaining <= 0:
+            break
+    if not parts:
+        return ""
+    return (
+        "Workspace context follows because this provider cannot read files. "
+        "Use it and cite line numbers as path:line.\n\n" + "\n\n".join(parts)
+    )
+
+
 def _resolve_run(cfg: dict, req: RunRequest) -> tuple[dict, str]:
     """Build a run specification. Returns (run_spec, human-readable command).
 
@@ -1694,6 +1777,13 @@ def _resolve_run(cfg: dict, req: RunRequest) -> tuple[dict, str]:
         provider, model_id = "claude", cfg.get("model", "sonnet")
 
     effort = req.effort if req.effort and req.effort != "default" else None
+
+    # OpenRouter chats cannot read files, so inline the card's declared
+    # workspace context for it. Local CLIs (claude/codex/opencode) read the
+    # files themselves and must not get a copy in the prompt.
+    if provider == "openrouter" and cfg.get("context_files"):
+        if context := _workspace_context(cfg["context_files"]):
+            prompt = f"{prompt}\n\n{context}"
 
     if provider == "claude":
         argv = [
