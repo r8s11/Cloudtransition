@@ -2275,6 +2275,7 @@ def _skill_catalog_payload() -> dict:
                 "options": cfg.get("options", cfg["kind"] == "claude"),
                 "input_label": cfg.get("input_label"),
                 "input_type": cfg.get("input_type", "url"),
+                "providers": cfg.get("providers"),
             }
             for sid, cfg in SKILL_RUNNERS.items()
         ],
@@ -2450,6 +2451,30 @@ SKILL_RUNNERS = {
         "model": "sonnet",
         "context_files": ["TASKS.md", "routine.md", "DASHBOARD.md"],
     },
+    "scout-scan": {
+        "label": "Run Scout scan",
+        "blurb": "Free search-and-rank pass over the configured job sources. Writes a scan to workspace/agents/scout/outputs/.",
+        "icon": "◎",
+        "kind": "opencode-agent",
+        "agent": "scout",
+        "prompt": (
+            "Today is {today}. You are Scout. Read workspace/agents/scout/memory/index.md "
+            "and the search history in workspace/agents/scout/memory/log.jsonl first. "
+            "Run a free search-and-rank pass using the job sources configured for the "
+            "system; if none are configured, use the sources recorded in your memory. "
+            "Merge and de-duplicate listings, score every listing 0-100 against "
+            "Roosevelt's profile, and read no full job descriptions. Write the complete "
+            "result to workspace/agents/scout/outputs/scan-{today}.json and a readable "
+            "summary to workspace/agents/scout/outputs/scan-{today}.md. Update "
+            "workspace/agents/scout/memory/index.md and append your events to "
+            "workspace/agents/scout/memory/log.jsonl. Do not run Job Reader, do not "
+            "tailor a CV, and do not use any paid step. Finish by reporting source "
+            "failures, the number of listings found and scored, and the top matches."
+        ),
+        "options": True,
+        "providers": ["opencode"],
+        "read_only": False,
+    },
     "triage-inbox": {
         "label": "Triage inbox",
         "blurb": "Jev judges which existing section each unchecked Inbox item belongs to in TASKS.md; code does the filing, wording unchanged. Edits TASKS.md.",
@@ -2546,12 +2571,17 @@ def _parse_model(value: str | None) -> tuple[str, str] | None:
 def _card_allows_provider(cfg: dict, provider: str) -> tuple[bool, str | None]:
     """Whether a provider may run this card, respecting read/write boundaries.
 
-    Claude is always allowed (its existing per-card tool restrictions apply).
-    Every other provider is allowed on every card: the user accepts that the
-    provider cannot machine-enforce the card's read-only or file/command
-    allowlist. No refusals are made here; boundary enforcement is the user's
+    A card that declares ``providers`` is restricted to exactly those
+    providers; every other card keeps the permissive behavior. For those
+    unrestricted cards, Claude is always allowed (its existing per-card tool
+    restrictions apply) and every other provider is allowed too: the user
+    accepts that the provider cannot machine-enforce the card's read-only or
+    file/command allowlist. Boundary enforcement is then the user's
     responsibility when choosing a provider.
     """
+    allowed = cfg.get("providers")
+    if allowed and provider not in allowed:
+        return False, f"{cfg['label']} only supports {', '.join(allowed)} models."
     return True, None
 
 
@@ -2746,7 +2776,10 @@ def _resolve_run(cfg: dict, req: RunRequest) -> tuple[dict, str]:
             )
         # --standalone avoids the shared background service so a stale service
         # registration cannot make the run hang.
-        argv = [exe, "run", "--standalone", "-m", model_id, prompt]
+        argv = [exe, "run", "--standalone"]
+        if cfg.get("kind") == "opencode-agent":
+            argv += ["--agent", cfg["agent"]]
+        argv += ["-m", model_id, prompt]
         return {"kind": "opencode", "argv": argv}, shlex.join(argv)
 
     # openrouter — dispatched over HTTP in _execute_run

@@ -390,16 +390,38 @@ function sameTaskChecks(box) {
 	);
 }
 
+function updateRoutineReviewProgress() {
+	var list = document.getElementById("routineReviewList");
+	var status = document.getElementById("routineReviewProgress");
+	if (!list || !status) return;
+	var checks = list.querySelectorAll('.task-check[data-realm="routine"]');
+	var done = Array.from(checks).filter((check) => check.dataset.done === "true").length;
+	status.textContent = `${done} of ${checks.length} checked`;
+}
+
+function setRoutineSaveStatus(message, isError = false) {
+	var status = document.getElementById("routineSaveStatus");
+	if (!status) return;
+	status.textContent = message;
+	status.classList.toggle("is-error", isError);
+}
+
 /** Persist a checkbox via /api/tasks/toggle. Global so the Today page can
  *  bind rows it adds after a capture. */
 function bindTaskCheck(box) {
 	function handleToggle() {
+		if (box.getAttribute("aria-disabled") === "true") return;
 		var isDone = box.dataset.done === "true";
 		var newDone = !isDone;
 		var twins = sameTaskChecks(box);
+		var isRoutine = box.dataset.realm === "routine";
 
-		// Optimistic UI update
 		twins.forEach((b) => paintTaskCheck(b, newDone));
+		updateRoutineReviewProgress();
+		if (isRoutine) {
+			twins.forEach((b) => b.setAttribute("aria-disabled", "true"));
+			setRoutineSaveStatus("Saving to routine.md\u2026");
+		}
 
 		fetch("/api/tasks/toggle", {
 			method: "POST",
@@ -415,18 +437,34 @@ function bindTaskCheck(box) {
 			}),
 		})
 			.then((res) => {
-				if (!res.ok) return revert();
-				// The server may have followed the task to a new line.
-				return res.json().then((j) => {
-					twins.forEach((b) => {
-						b.dataset.line = String(j.line);
+				if (!res.ok) {
+					return res.json().catch(() => ({})).then((result) => {
+						throw new Error(result.error || `HTTP ${res.status}`);
 					});
-				});
+				}
+				return res.json();
 			})
-			.catch(revert);
+			.then((result) => {
+				twins.forEach((b) => {
+					b.dataset.line = String(result.line);
+				});
+				if (isRoutine) setRoutineSaveStatus("Saved to routine.md.");
+			})
+			.catch((error) => {
+				revert();
+				if (isRoutine) {
+					setRoutineSaveStatus(`Not saved: ${error.message}`, true);
+				}
+			})
+			.finally(() => {
+				if (isRoutine) {
+					twins.forEach((b) => b.removeAttribute("aria-disabled"));
+				}
+			});
 
 		function revert() {
 			twins.forEach((b) => paintTaskCheck(b, isDone));
+			updateRoutineReviewProgress();
 		}
 	}
 
@@ -440,6 +478,7 @@ function bindTaskCheck(box) {
 }
 
 document.querySelectorAll(".task-check[data-realm]").forEach(bindTaskCheck);
+updateRoutineReviewProgress();
 
 // ── Copy-prompt buttons (Update sheet, Actualize money) ──────
 document.addEventListener("click", (e) => {
@@ -582,6 +621,32 @@ Context:
 	const history = document.getElementById("runHistory");
 	const dialog = document.getElementById("runOutputDialog");
 	let pollTimer = null;
+	let pollFailCount = 0;
+	let prevStatus = {}; // skill -> last announced status, for start/finish announcements
+	let historyRows = new Map(); // run id -> history row element, for in-place diff updates
+
+	// Page-level live region that announces only run start/finish transitions,
+	// so screen readers hear one message at a time instead of every poll tick.
+	const announcer = document.createElement("div");
+	announcer.setAttribute("aria-live", "polite");
+	announcer.className = "sr-only";
+	Object.assign(announcer.style, {
+		position: "absolute",
+		width: "1px",
+		height: "1px",
+		padding: 0,
+		margin: "-1px",
+		overflow: "hidden",
+		clip: "rect(0, 0, 0, 0)",
+		whiteSpace: "nowrap",
+		border: 0,
+	});
+	document.body.appendChild(announcer);
+
+	function announce(text) {
+		announcer.textContent = "";
+		announcer.textContent = text;
+	}
 	let providerModels = {};   // {claude: [...], codex: [...], opencode: [...], openrouter: [...]}
 	let providerAvailable = {}; // {claude: true, codex: true, ...}
 	let runnerEfforts = [];     // effort options for the currently selected model
@@ -615,8 +680,15 @@ Context:
 		btn.type = "button";
 		btn.dataset.output = path || "";
 		btn.dataset.outputLabel = label;
+		if (label) btn.setAttribute("aria-label", `View output: ${label}`);
 		btn.hidden = !path;
 		return btn;
+	}
+
+	function inputPlaceholder(label, type) {
+		if (/youtube/i.test(label)) return "https://www.youtube.com/watch?v=\u2026";
+		if (/month/i.test(label)) return "2026-11";
+		return type === "url" ? "https://" : "";
 	}
 
 	function renderItem(s) {
@@ -637,25 +709,33 @@ Context:
 			field.appendChild(el("span", "run-field-label", s.input_label));
 			const input = el("input", "run-input");
 			input.type = s.input_type || "url";
-			input.placeholder = s.input_label;
+			// An example value, never a copy of the visible label.
+			input.placeholder = inputPlaceholder(s.input_label, input.type);
 			input.dataset.runInput = "";
 			field.appendChild(input);
 			item.appendChild(field);
 		}
 		if (s.options) {
 			const options = el("div", "run-settings-row");
-
 			// ── Model picker (provider-labelled, grouped by provider) ──
 			const modelField = el("label", "run-field");
 			modelField.appendChild(el("span", "run-field-label", "Model"));
 			const modelPicker = el("select", "run-select");
 			modelPicker.dataset.runModel = "";
+			const allowedProviders = Array.isArray(s.providers) && s.providers.length ? s.providers : null;
+			const providerName = (p) =>
+				p === "claude" ? "Claude" : p === "opencode" ? "OpenCode" : p.charAt(0).toUpperCase() + p.slice(1);
 			const providerLabel = (p) =>
-				p === "claude"
-					? "Claude"
-					: p.charAt(0).toUpperCase() + p.slice(1) + " \u2014 local catalogue";
+				p === "opencode" ? "OpenCode \u2014 free models" : `${providerName(p)} \u2014 local catalogue`;
 			let defaultValue = `claude:${s.model || "sonnet"}`;
+			if (allowedProviders) {
+				const provider = allowedProviders.find((p) => providerModels[p]?.length);
+				defaultValue = provider
+					? `${provider}:${providerModels[provider][0].id}`
+					: `${allowedProviders[0]}:`;
+			}
 			for (const [provider, models] of Object.entries(providerModels)) {
+				if (allowedProviders && !allowedProviders.includes(provider)) continue;
 				if (!models || !models.length) continue;
 				const optgroup = document.createElement("optgroup");
 				optgroup.label = providerLabel(provider);
@@ -665,11 +745,19 @@ Context:
 						null,
 						provider === "claude" ? m.label : `${provider} \u00b7 ${m.label}`
 					);
-					option.value = provider === "claude" ? m.id : `${provider}:${m.id}`;
+					// Always provider-prefixed so the card's configured model matches.
+					option.value = `${provider}:${m.id}`;
 					option.selected = option.value === defaultValue;
 					optgroup.appendChild(option);
 				}
 				modelPicker.appendChild(optgroup);
+			}
+			if (allowedProviders && !allowedProviders.some((p) => providerModels[p]?.length)) {
+				const option = el("option", null, `No free ${providerName(allowedProviders[0])} models`);
+				option.value = "";
+				option.disabled = true;
+				option.selected = true;
+				modelPicker.appendChild(option);
 			}
 			modelField.appendChild(modelPicker);
 			options.appendChild(modelField);
@@ -713,10 +801,11 @@ Context:
 		btn.dataset.run = s.id;
 		const status = el(
 			"span",
-			"run-status",
-			s.kind === "shell"
-				? "no model \u00b7 $0"
-				: `default: ${modelLabel(s.model || "sonnet")}`,
+			"run-status",				s.kind === "shell"
+					? "Local tool \u00b7 $0"
+					: s.options
+						? "Ready"
+						: `Ready \u00b7 ${modelLabel(`claude:${s.model || "sonnet"}`)}`,
 		);
 		status.dataset.statusFor = s.id;
 		status.setAttribute("role", "status");
@@ -725,18 +814,31 @@ Context:
 		view.dataset.viewFor = s.id;
 		foot.append(btn, view, status);
 		item.appendChild(foot);
-		const path = el("code", "run-output-path");
-		path.dataset.pathFor = s.id;
-		path.hidden = true;
-		item.appendChild(path);
 		return item;
 	}
 
+	const RUN_STATUS_LABELS = {
+		running: "Running",
+		done: "Completed",
+		failed: "Failed",
+		cancelled: "Cancelled",
+	};
+
 	// ── Render the buttons from the server catalog ──────────────
 	// A grid with data-skills="a,b" shows only those runners, in that order.
-	function loadCatalog() {
-		return fetch("/api/skills/catalog")
-			.then((r) => r.json())
+	function loadCatalog(force = false) {
+		for (const grid of grids) grid.setAttribute("aria-busy", "true");
+		// Snapshot any values the user typed or selected before the grids are
+		// rebuilt, so a refresh never discards half-filled input or picks.
+		const prior = capturedRunnerState();
+		const url = force
+			? "/api/skills/catalog/refresh"
+			: "/api/skills/catalog";
+		return fetch(url, force ? { method: "POST" } : {})
+			.then((r) => {
+				if (!r.ok) throw new Error(`catalog HTTP ${r.status}`);
+				return r.json();
+			})
 			.then((data) => {
 				providerModels = data.provider_models || {};
 				providerAvailable = data.provider_available || {};
@@ -748,30 +850,94 @@ Context:
 					const list = only
 						? only.split(",").map((id) => byId.get(id)).filter(Boolean)
 						: data.skills;
-					for (const s of list) grid.appendChild(renderItem(s));
+					for (const s of list) {
+						const item = renderItem(s);
+						grid.appendChild(item);
+						restoreRunnerState(item, s.id, prior);
+					}
+					grid.removeAttribute("aria-busy");
 				}
 				poll(); // paint status of runs already in flight
+				return true;
 			})
 			.catch(() => {
+				// Keep any rendered cards; only an empty grid needs the notice.
 				for (const grid of grids) {
+					grid.removeAttribute("aria-busy");
+					if (grid.querySelector(".run-item")) continue;
 					clear(grid);
-					grid.appendChild(el("p", "run-empty", "Could not load skill catalog."));
+					grid.appendChild(
+						el("p", "run-empty", "Could not load the skill catalogue."),
+					);
 				}
+				return false;
 			});
 	}
 
-	loadCatalog();
+	// Snapshot per-skill input text and model/effort selections from the
+	// currently rendered cards, keyed by runner id.
+	function capturedRunnerState() {
+		const state = new Map();
+		for (const grid of grids) {
+			for (const item of grid.querySelectorAll(".run-item")) {
+				const btn = item.querySelector("[data-run]");
+				if (!btn) continue;
+				const inputEl = item.querySelector("input[data-run-input]");
+				const modelEl = item.querySelector("select[data-run-model]");
+				const effortEl = item.querySelector("select[data-run-effort]");
+				state.set(btn.dataset.run, {
+					input: inputEl ? inputEl.value : "",
+					model: modelEl ? modelEl.value : null,
+					effort: effortEl ? effortEl.value : null,
+				});
+			}
+		}
+		return state;
+	}
 
-	// ── Refresh model catalogues (Update models button) ───────────
+	// Restore a previously captured input value and model/effort picks onto a
+	// freshly rendered card. Changing the model regenerates its effort options
+	// via the change listener, so effort is reapplied last.
+	function restoreRunnerState(item, id, prior) {
+		const p = prior.get(id);
+		if (!p) return;
+		const input = item.querySelector("input[data-run-input]");
+		if (input) input.value = p.input;
+		const model = item.querySelector("select[data-run-model]");
+		if (model && p.model !== null) {
+			model.value = p.model;
+			model.dispatchEvent(new Event("change"));
+		}
+		const effort = item.querySelector("select[data-run-effort]");
+		if (effort && p.effort !== null) effort.value = p.effort;
+	}
+
+	loadCatalog();
+	poll(); // history should not wait for the slower model catalogues
+
+	// ── Refresh model catalogues (Refresh models button) ──────────
 	const refreshBtn = document.getElementById("refreshModels");
+	const refreshStatus = document.getElementById("refreshModelsStatus");
+	const refreshNote = (text) => {
+		if (refreshStatus) refreshStatus.textContent = text;
+	};
 	if (refreshBtn) {
 		refreshBtn.addEventListener("click", () => {
 			refreshBtn.disabled = true;
 			refreshBtn.textContent = "Updating\u2026";
-			loadCatalog().finally(() => {
-				refreshBtn.disabled = false;
-				refreshBtn.textContent = "Update models";
-			});
+			refreshNote("Refreshing model catalogue\u2026");
+			loadCatalog(true)
+				.then((ok) => {
+					refreshNote(
+						ok
+							? "Models refreshed."
+							: "Model refresh failed; showing the last known list.",
+					);
+				})
+				.finally(() => {
+					refreshBtn.disabled = false;
+					refreshBtn.textContent = "Refresh models";
+				});
 		});
 	}
 
@@ -787,14 +953,19 @@ Context:
 		const item = btn.closest(".run-item");
 		const inputEl = item.querySelector("[data-run-input]");
 		const skill = btn.dataset.run;
+		// role/aria-live are attributes; changing className never clears them.
 		const setAll = (text, cls) =>
 			statusEls(skill).forEach((s) => {
 				s.textContent = text;
 				s.className = `run-status ${cls}`;
 			});
 
-		btn.disabled = true;
-		setAll("starting\u2026", "is-running");
+		// A disabled button loses keyboard focus; stay focusable instead and
+		// guard the click so a second tap cannot re-fire while a run is going.
+		if (btn.getAttribute("aria-disabled") === "true") return;
+		btn.setAttribute("aria-disabled", "true");
+		btn.classList.add("is-disabled");
+		setAll("Starting\u2026", "is-running");
 
 		fetch("/api/skills/run", {
 			method: "POST",
@@ -813,15 +984,17 @@ Context:
 			.then(({ ok, body }) => {
 				if (!ok) {
 					setAll(body.error || "failed to start", "is-failed");
-					btn.disabled = false;
+					btn.removeAttribute("aria-disabled");
+					btn.classList.remove("is-disabled");
 					return;
 				}
-				setAll("running\u2026", "is-running");
+				setAll("Running\u2026", "is-running");
 				poll();
 			})
 			.catch(() => {
 				setAll("network error", "is-failed");
-				btn.disabled = false;
+				btn.removeAttribute("aria-disabled");
+				btn.classList.remove("is-disabled");
 			});
 	});
 
@@ -831,6 +1004,9 @@ Context:
 			.then((r) => r.json())
 			.then((data) => {
 				renderHistory(data.runs);
+
+				// Poll succeeded: reset the failure counter.
+				pollFailCount = 0;
 
 				// Newest run wins per skill.
 				const latest = {};
@@ -845,22 +1021,40 @@ Context:
 					const running = run.status === "running";
 					anyRunning ||= running;
 					statusEls(skill).forEach((s) => {
-						s.textContent = running
-							? "running\u2026"
-							: `${run.status} \u00b7 ${run.duration}`;
-						s.className = `run-status is-${run.status}`;
+						// Only touch the live region when the text actually changes,
+						// so screen readers are not re-announced on every 2s tick.
+						const nextText = running
+							? "Running\u2026"
+							: `${RUN_STATUS_LABELS[run.status] || run.status} \u00b7 ${run.duration}`;
+						const nextCls = `run-status is-${run.status}`;
+						if (s.textContent !== nextText || s.className !== nextCls) {
+							s.textContent = nextText;
+							s.className = nextCls;
+						}
 					});
 					document.querySelectorAll(`[data-run="${sel}"]`).forEach((b) => {
-						b.disabled = running;
+						// Keep the button focusable; use aria-disabled instead of disabled.
+						b.setAttribute("aria-disabled", running ? "true" : "false");
+						b.classList.toggle("is-disabled", running);
 					});
 					document.querySelectorAll(`[data-view-for="${sel}"]`).forEach((v) => {
 						v.dataset.output = run.output || "";
 						v.hidden = !run.output;
 					});
-					document.querySelectorAll(`[data-path-for="${sel}"]`).forEach((p) => {
-						p.textContent = run.output || "";
-						p.hidden = !run.output;
-					});
+
+					// Announce start/finish transitions once from the page-level region.
+					const before = prevStatus[skill];
+					if (before !== run.status) {
+						prevStatus[skill] = run.status;
+						const label = document.querySelector(`[data-run="${sel}"]`)?.closest(".run-item")?.querySelector("h4")?.textContent || skill;
+						if (running) {
+							announce(`Starting ${label}`);
+						} else if (run.status === "done") {
+							announce(`${label} completed`);
+						} else if (run.status === "failed") {
+							announce(`${label} failed`);
+						}
+					}
 				}
 
 				if (anyRunning && !pollTimer) {
@@ -870,47 +1064,249 @@ Context:
 					pollTimer = null;
 				}
 			})
-			.catch(() => {});
+			.catch(() => {
+				// A failed poll must not leave the UI stuck on "Running…".
+				pollFailCount += 1;
+				if (pollFailCount >= 3) {
+					announce("Lost contact with the server, retrying…");
+					// Re-enable every Run button so the user can try again.
+					document.querySelectorAll("[data-run]").forEach((b) => {
+						b.setAttribute("aria-disabled", "false");
+						b.classList.remove("is-disabled");
+					});
+				}
+				// Keep polling so recovery happens automatically when the server returns.
+			});
 	}
 
 	function renderHistory(runs) {
-		if (!history || !runs.length) return;
-		clear(history);
+		if (!history) return;
+
+		const incoming = new Map();
+		for (const r of runs) incoming.set(r.id, r);
+
+		// Remove rows whose run is no longer reported.
+		for (const [id, row] of historyRows) {
+			if (!incoming.has(id)) {
+				history.removeChild(row);
+				historyRows.delete(id);
+			}
+		}
+
+		// Update existing rows in place (preserving any focus/selection inside
+		// them) and append only genuinely new rows.
 		for (const r of runs) {
-			const row = el("div", "run-log-row");
-			const dot = el("span", `run-log-dot is-${r.status}`);
-			dot.setAttribute("aria-hidden", "true");
-			const out = el("span", "run-log-out");
-			if (r.output) out.appendChild(outputButton(r.output, `${r.label} \u00b7 ${r.started}`));
-			else out.textContent = "\u2014";
-			row.append(
-				dot,
-				el("span", "run-log-label", r.label),
-				el("span", "run-log-time", r.started),
-				el("span", "run-log-dur", r.duration || (r.status === "running" ? "running\u2026" : "\u2014")),
-				out,
-			);
-			history.appendChild(row);
+			const existing = historyRows.get(r.id);
+			if (existing) {
+				updateHistoryRow(existing, r);
+			} else {
+				const row = buildHistoryRow(r);
+				history.appendChild(row);
+				historyRows.set(r.id, row);
+			}
+		}
+
+		// Keep the empty state in sync: show it when there are no runs, hide it
+		// once there is at least one run row.
+		const empty = history.querySelector(".empty-state");
+		if (runs.length && empty) {
+			history.removeChild(empty);
+		} else if (!runs.length && historyRows.size === 0 && !empty) {
+			const empty = el("div", "empty-state empty-state-pad");
+			empty.appendChild(el("div", "empty-icon", "\u25CB"));
+			empty.appendChild(el("p", null, "No runs yet. Start one above."));
+			history.appendChild(empty);
+		}
+	}
+
+	function buildHistoryRow(r) {
+		const row = el("div", "run-log-row");
+		row.dataset.runId = r.id;
+		const dot = el("span", `run-log-dot is-${r.status}`);
+		dot.setAttribute("aria-hidden", "true");
+		// Status is text, not colour alone; the dot is reinforcement only.
+		const status = el("span", `run-log-status is-${r.status}`);
+		status.append(
+			dot,
+			el("span", null, RUN_STATUS_LABELS[r.status] || r.status),
+		);
+		const label = el("span", "run-log-label", r.label);
+		const out = el("span", "run-log-out");
+		if (r.output) out.appendChild(outputButton(r.output, `${r.label} \u00b7 ${r.started}`));
+		else out.textContent = "\u2014";
+		row.append(
+			status,
+			label,
+			el("span", "run-log-time", r.started),
+			el("span", "run-log-dur", r.duration || (r.status === "running" ? "running\u2026" : "\u2014")),
+			out,
+		);
+		return row;
+	}
+
+	function updateHistoryRow(row, r) {
+		const status = row.querySelector(".run-log-status");
+		const dot = row.querySelector(".run-log-dot");
+		const time = row.querySelector(".run-log-time");
+		const dur = row.querySelector(".run-log-dur");
+		const out = row.querySelector(".run-log-out");
+		if (status) {
+			const textSpan = status.children[1];
+			if (textSpan) textSpan.textContent = RUN_STATUS_LABELS[r.status] || r.status;
+			status.className = `run-log-status is-${r.status}`;
+		}
+		if (dot) dot.className = `run-log-dot is-${r.status}`;
+		if (time) time.textContent = r.started;
+		if (dur) dur.textContent = r.duration || (r.status === "running" ? "running\u2026" : "\u2014");
+		if (out) {
+			if (r.output) {
+				if (!out.querySelector("button")) {
+					out.textContent = "";
+					out.appendChild(outputButton(r.output, `${r.label} \u00b7 ${r.started}`));
+				}
+			} else {
+				out.textContent = "\u2014";
+			}
 		}
 	}
 
 	// ── Output viewer ───────────────────────────────────────────
 	if (dialog) {
 		const body = document.getElementById("runOutputBody");
+		const note = document.getElementById("runOutputNote");
+		const originalDetails = document.getElementById("runOutputOriginalDetails");
+		const originalBody = document.getElementById("runOutputOriginal");
+		const stderrDetails = document.getElementById("runOutputStderrDetails");
+		const stderrBody = document.getElementById("runOutputStderr");
 		const title = document.getElementById("runOutputTitle");
+		let outputRequest = 0;
+
+		function textContent(value) {
+			if (typeof value === "string") return value;
+			if (!Array.isArray(value)) return "";
+			return value
+				.filter((part) => part && typeof part.text === "string")
+				.map((part) => part.text)
+				.join("\n");
+		}
+
+		function parseRunOutput(raw) {
+			const cleaned = raw
+				.replace(/\u001b(?:\[[0-?]*[ -/]*[@-~]|\][^\u0007]*(?:\u0007|\u001b\\))/g, "")
+				.replace(/\r\n?/g, "\n")
+				.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, "");
+			const stderrMarker = "\n\n--- stderr ---\n";
+			const stderrAt = cleaned.indexOf(stderrMarker);
+			const stdout =
+				stderrAt < 0 ? cleaned : cleaned.slice(0, stderrAt);
+			const stderr =
+				stderrAt < 0 ? "" : cleaned.slice(stderrAt + stderrMarker.length).trim();
+			const candidate = stdout.trim().replace(/^\uFEFF/, "");
+
+			if (!candidate) {
+				return {
+					text: stderr || "No output was produced.",
+					note: stderr ? "Standard error · no standard output" : "",
+					stderr: "",
+					transformed: Boolean(stderr) || cleaned !== raw,
+				};
+			}
+
+			try {
+				const value = JSON.parse(candidate);
+				const metadata = [];
+				if (typeof value?.model === "string") metadata.push(value.model);
+				if (Number.isFinite(value?.usage?.total_tokens)) {
+					metadata.push(`${value.usage.total_tokens.toLocaleString()} tokens`);
+				}
+
+				if (value && typeof value === "object" && value.error) {
+					const message =
+						typeof value.error === "string"
+							? value.error
+							: value.error.message || value.error.description;
+					if (typeof message === "string") {
+						return {
+							text: message,
+							note: ["Provider error", ...metadata].join(" · "),
+							stderr,
+							transformed: true,
+						};
+					}
+				}
+
+				if (Array.isArray(value?.choices)) {
+					const answers = value.choices
+						.map((choice) => {
+							const message = choice?.message || choice?.delta;
+							return textContent(message?.content) || message?.refusal || "";
+						})
+						.filter(Boolean);
+					if (answers.length) {
+						return {
+							text: answers.join("\n\n"),
+							note: metadata.length
+								? `Response · ${metadata.join(" · ")}`
+								: "Response extracted from provider JSON",
+							stderr,
+							transformed: true,
+						};
+					}
+				}
+
+				return {
+					text:
+						typeof value === "string"
+							? value
+							: JSON.stringify(value, null, 2),
+					note: "JSON output formatted",
+					stderr,
+					transformed: true,
+				};
+			} catch {
+				return {
+					text: stdout,
+					note: "",
+					stderr,
+					transformed: cleaned !== raw || stderrAt >= 0,
+				};
+			}
+		}
+
+		function renderRunOutput(raw) {
+			const parsed = parseRunOutput(raw);
+			body.textContent = parsed.text;
+			note.textContent = parsed.note;
+			note.hidden = !parsed.note;
+			originalBody.textContent = raw;
+			originalDetails.hidden = !parsed.transformed;
+			stderrBody.textContent = parsed.stderr;
+			stderrDetails.hidden = !parsed.stderr;
+		}
+
 		document.addEventListener("click", (e) => {
 			const btn = e.target.closest("[data-output]");
 			if (!btn || !btn.dataset.output) return;
+			const request = ++outputRequest;
 			title.textContent = `${btn.dataset.outputLabel || "Run output"} — ${btn.dataset.output}`;
-			body.textContent = "Loading\u2026";
+			renderRunOutput("Loading\u2026");
 			dialog.showModal();
 			fetch(`/api/file?path=${encodeURIComponent(btn.dataset.output)}`)
-				.then((r) => r.json())
-				.then((j) => {
-					body.textContent = j.content ?? j.error ?? "No output.";
+				.then((r) => {
+					if (!r.ok) throw new Error(`Output request failed (${r.status}).`);
+					return r.json();
 				})
-				.catch(() => {
-					body.textContent = "Could not load output.";
+				.then((j) => {
+					if (request !== outputRequest) return;
+					if (typeof j.content !== "string") {
+						throw new Error(j.error || "Output file has no readable content.");
+					}
+					renderRunOutput(j.content);
+					announce("Output loaded");
+				})
+				.catch((error) => {
+					if (request !== outputRequest) return;
+					renderRunOutput(error.message || "Could not load output.");
 				});
 		});
 		dialog
@@ -1064,3 +1460,474 @@ document.addEventListener("click", (e) => {
 	const frame = document.getElementById("workspaceMapFrame");
 	if (link && frame) frame.src = "/workspace-map/?" + link.dataset.mapQuery;
 });
+
+// ── Interviews tab: inline tracker edits ────────────────────
+// Every control writes through a small JSON endpoint and updates the row in
+// place; status changes also move the row between the two cards. Notes and
+// signals are saved without a reload, so the tab stays usable during a call.
+(() => {
+	const page = document.getElementById("page-interviews");
+	if (!page) return;
+
+	const activeStatuses = new Set(
+		(page.dataset.interviewActive || "").split(",").filter(Boolean),
+	);
+	const closedStatuses = new Set(
+		(page.dataset.interviewClosed || "").split(",").filter(Boolean),
+	);
+
+	function post(url, payload) {
+		return fetch(url, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"X-Requested-With": "XMLHttpRequest",
+			},
+			body: JSON.stringify(payload),
+		}).then((r) => r.json().then((j) => ({ ok: r.ok, body: j })));
+	}
+
+	function errorText(body) {
+		if (Array.isArray(body.detail)) return body.detail.map((d) => d.msg).join("; ");
+		return body.error || body.message || "failed";
+	}
+
+	const keyOf = (row) => ({
+		company: row.dataset.company,
+		role: row.dataset.role,
+	});
+
+	function feedback(form, text, kind) {
+		const el = form.querySelector("[data-interview-feedback]");
+		if (!el) return;
+		el.textContent = text;
+		el.className = `run-status ${kind}`;
+	}
+
+	function setCounts(counts) {
+		if (!counts) return;
+		for (const el of page.querySelectorAll("[data-interview-count]")) {
+			const key = el.dataset.interviewCount;
+			if (key in counts) el.textContent = String(counts[key]);
+		}
+	}
+
+	function paintStatus(row, data) {
+		const status = row.querySelector("[data-interview-status]");
+		if (status) {
+			status.textContent = data.status_label;
+			status.className = `badge ${data.status_badge}`;
+		}
+		const priority = row.querySelector("[data-interview-priority]");
+		if (priority) {
+			priority.textContent = `${data.priority_label} priority`;
+			priority.className = `badge ${data.priority_badge}`;
+		}
+	}
+
+	function paintNext(row, data) {
+		const line = row.querySelector("[data-interview-next]");
+		if (!line) return;
+		line.hidden = !data.next_step;
+		row.querySelector("[data-interview-next-task]").textContent = data.next_step
+			? data.next_step.task
+			: "";
+		row.querySelector("[data-interview-next-date]").textContent = data.next_step
+			? data.next_step.date
+			: "";
+		row.querySelector("[data-interview-overdue]").hidden = !data.overdue;
+	}
+
+	function paintSignal(row, data) {
+		const line = row.querySelector("[data-interview-last]");
+		if (!line || !data.last_event) return;
+		line.hidden = false;
+		row.querySelector("[data-interview-last-date]").textContent = data.last_event.date;
+		row.querySelector("[data-interview-last-stage]").textContent = data.last_event.stage
+			? ` \u2014 ${data.last_event.stage}`
+			: "";
+	}
+
+	// Status/priority selects save immediately; a status change can move the row.
+	for (const select of page.querySelectorAll("[data-interview-select]")) {
+		select.dataset.initial = select.value;
+	}
+
+	page.addEventListener("change", (e) => {
+		const select = e.target.closest("[data-interview-select]");
+		if (!select) return;
+		const row = select.closest("[data-interview]");
+		const status = row.querySelector("[data-interview-field-status]");
+		select.disabled = true;
+		post("/api/interviews/field", {
+			...keyOf(row),
+			field: select.dataset.interviewSelect,
+			value: select.value,
+		})
+			.then(({ ok, body }) => {
+				if (!ok) {
+					select.value = select.dataset.initial;
+					select.disabled = false;
+					if (status) {
+						status.textContent = errorText(body);
+						status.className = "run-status is-failed";
+					}
+					return;
+				}
+				select.dataset.initial = select.value;
+				select.disabled = false;
+				paintStatus(row, body.row);
+				setCounts(body.counts);
+				// Closed threads leave the live cards for the collapsed Closed list;
+				// reopening a row sends it back to the card its new status belongs to.
+				let target
+				if (closedStatuses.has(body.row.status)) {
+					target = page.querySelector("[data-interview-list-closed]");
+				} else {
+					const sectionKey = activeStatuses.has(body.row.status) ? "active" : "leads";
+					target = page.querySelector(
+						`[data-interview-section="${sectionKey}"] [data-interview-list]`,
+					);
+				}
+				if (target) {
+					if (row.parentElement !== target) target.appendChild(row);
+				} else if (closedStatuses.has(body.row.status)) {
+					// No Closed list on the page yet; the next load will show it.
+					row.remove();
+				}
+				if (status) {
+					status.textContent = "Saved.";
+					status.className = "run-status is-done";
+				}
+			})
+			.catch(() => {
+				select.value = select.dataset.initial;
+				select.disabled = false;
+				if (status) {
+					status.textContent = "network error";
+					status.className = "run-status is-failed";
+				}
+			});
+	});
+
+	page.addEventListener("submit", (e) => {
+		const form = e.target;
+		const row = form.closest("[data-interview]");
+		if (!row) return;
+
+		if (form.matches("[data-interview-next-form]")) {
+			e.preventDefault();
+			const fields = form.elements;
+			feedback(form, "Saving\u2026", "is-running");
+			post("/api/interviews/next-step", {
+				...keyOf(row),
+				task: fields.task.value,
+				date: fields.date.value,
+			})
+				.then(({ ok, body }) => {
+					if (!ok) {
+						feedback(form, errorText(body), "is-failed");
+						return;
+					}
+					paintNext(row, body.row);
+					feedback(form, "Next action saved.", "is-done");
+				})
+				.catch(() => feedback(form, "network error", "is-failed"));
+			return;
+		}
+
+		if (form.matches("[data-interview-signal-form]")) {
+			e.preventDefault();
+			const fields = form.elements;
+			feedback(form, "Logging\u2026", "is-running");
+			post("/api/interviews/timeline", {
+				...keyOf(row),
+				date: fields.date.value,
+				stage: fields.stage.value,
+				notes: fields.notes.value,
+			})
+				.then(({ ok, body }) => {
+					if (!ok) {
+						feedback(form, errorText(body), "is-failed");
+						return;
+					}
+					paintSignal(row, body.row);
+					fields.stage.value = "";
+					fields.notes.value = "";
+					feedback(form, "Signal logged.", "is-done");
+				})
+				.catch(() => feedback(form, "network error", "is-failed"));
+			return;
+		}
+
+		if (form.matches("[data-interview-notes-form]")) {
+			e.preventDefault();
+			feedback(form, "Saving\u2026", "is-running");
+			post("/api/interviews/text", {
+				...keyOf(row),
+				field: "interview_notes",
+				text: form.elements.notes.value,
+			})
+				.then(({ ok, body }) => {
+					feedback(
+						form,
+						ok ? "Notes saved." : errorText(body),
+						ok ? "is-done" : "is-failed",
+					);
+				})
+				.catch(() => feedback(form, "network error", "is-failed"));
+		}
+	});
+
+	// New application: appended to the tracker, then reloaded so the server's
+	// ordering and counts are the ones on screen.
+	const addForm = document.getElementById("interviewAddForm");
+	const addStatus = document.getElementById("interviewAddStatus");
+	if (addForm) {
+		addForm.addEventListener("submit", (e) => {
+			e.preventDefault();
+			const f = addForm.elements;
+			addStatus.textContent = "Adding\u2026";
+			addStatus.className = "run-status is-running";
+			const button = addForm.querySelector("button[type=submit]");
+			button.disabled = true;
+			post("/api/interviews/create", {
+				company: f.company.value,
+				role: f.role.value,
+				status: f.status.value,
+				priority: f.priority.value,
+				location: f.location.value,
+				salary_range: f.salary_range.value,
+				job_url: f.job_url.value,
+				next_step: f.next_step.value,
+				date: f.date.value,
+			})
+				.then(({ ok, body }) => {
+					if (!ok) {
+						addStatus.textContent = errorText(body);
+						addStatus.className = "run-status is-failed";
+						button.disabled = false;
+						return;
+					}
+					window.location.reload();
+				})
+				.catch(() => {
+					addStatus.textContent = "network error";
+					addStatus.className = "run-status is-failed";
+					button.disabled = false;
+				});
+		});
+	}
+
+	// ── Interview mode dialog ─────────────────────────────────
+	// One application, everything needed while the call is live: who you are
+	// talking to, resume/posting/prep links, the tracker's job-fit notes, the
+	// history, and three editable blocks (questions, preparation, notes).
+	const dialog = document.getElementById("interviewMode");
+	if (dialog) {
+		const $ = (id) => document.getElementById(id);
+		const fields = {
+			interview_questions: $("interviewModeQuestions"),
+			interview_preparation: $("interviewModePreparation"),
+			interview_notes: $("interviewModeNotes"),
+		};
+		const el = (tag, className, text) => {
+			const node = document.createElement(tag);
+			if (className) node.className = className;
+			if (text) node.textContent = text;
+			return node;
+		};
+
+		function fileLink(label, href, note) {
+			const row = el("div", "interview-dialog-file");
+			if (href) {
+				const a = el("a", "interview-dialog-file-link", label);
+				a.href = href;
+				a.target = "_blank";
+				a.rel = "noopener noreferrer";
+				row.appendChild(a);
+			} else {
+				row.appendChild(el("span", "interview-dialog-file-link is-missing", label));
+			}
+			if (note) row.appendChild(el("span", "interview-dialog-file-note", note));
+			return row;
+		}
+
+		function paint(row) {
+			$("interviewModeTitle").textContent = row.company;
+			$("interviewModeRole").textContent = row.role;
+			const meta = [row.status_label, row.location, row.salary]
+				.filter(Boolean)
+				.join(" \u00b7 ");
+			$("interviewModeMeta").textContent = meta;
+
+			const resume = $("interviewModeResume");
+			resume.hidden = !row.resume_href;
+			if (row.resume_href) resume.href = row.resume_href;
+			const posting = $("interviewModePosting");
+			posting.hidden = !row.url;
+			if (row.url) posting.href = row.url;
+			if (row.sheet_href) $("interviewModeSheet").href = row.sheet_href;
+
+			const contacts = $("interviewModeContacts");
+			contacts.textContent = "";
+			for (const c of row.contacts || []) {
+				const line = el("div", "interview-dialog-contact");
+				line.appendChild(el("strong", "", c.name || "Contact"));
+				if (c.role) line.appendChild(el("span", "interview-dialog-contact-role", c.role));
+				if (c.email) {
+					const mail = el("a", "interview-dialog-contact-email", c.email);
+					mail.href = `mailto:${c.email}`;
+					line.appendChild(mail);
+				}
+				contacts.appendChild(line);
+			}
+			$("interviewModeNoContacts").hidden = (row.contacts || []).length > 0;
+
+			const files = $("interviewModeFiles");
+			files.textContent = "";
+			if (row.resume) {
+				files.appendChild(
+					fileLink(row.resume.split("/").pop(), row.resume_href, row.resume_href ? "resume/" + row.resume : "missing under resume/"),
+				);
+			}
+			for (const f of row.prep_files || []) {
+				files.appendChild(fileLink(f.label, f.href, f.href ? "" : "recorded, file missing"));
+			}
+			if (!files.children.length) {
+				files.appendChild(el("p", "interview-dialog-hint", "No resume or prep files recorded for this application."));
+			}
+
+			const fit = $("interviewModeFitSection");
+			fit.hidden = !row.fit_notes;
+			$("interviewModeFit").textContent = row.fit_notes || "";
+
+			const history = $("interviewModeHistory");
+			history.textContent = "";
+			for (const h of row.history || []) {
+				const item = el("li", "interview-dialog-event");
+				item.appendChild(el("span", "interview-dialog-event-date", h.date));
+				item.appendChild(el("span", "interview-dialog-event-stage", h.stage));
+				if (h.notes) item.appendChild(el("span", "interview-dialog-event-notes", h.notes));
+				history.appendChild(item);
+			}
+			$("interviewModeHistorySection").hidden = !(row.history || []).length;
+
+			for (const [field, input] of Object.entries(fields)) {
+				input.value = row[
+					field === "interview_questions"
+						? "questions"
+						: field === "interview_preparation"
+							? "preparation"
+							: "notes"
+				] || "";
+				input.dataset.initial = input.value;
+			}
+		}
+
+		function open(row) {
+			dialog.dataset.company = row.company;
+			dialog.dataset.role = row.role;
+			paint(row);
+			for (const status of dialog.querySelectorAll("[data-interview-dialog-status]")) {
+				status.textContent = "";
+				status.className = "run-status";
+			}
+			if (typeof dialog.showModal === "function") dialog.showModal();
+			else dialog.setAttribute("open", "");
+		}
+
+		// Never leave the previous application's text on screen: during a call,
+		// stale notes would read as if they belonged to this one.
+		function fail(reason) {
+			dialog.dataset.company = "";
+			$("interviewModeTitle").textContent = "Could not load this application";
+			$("interviewModeRole").textContent = reason;
+			$("interviewModeMeta").textContent = "";
+			$("interviewModeContacts").textContent = "";
+			$("interviewModeNoContacts").hidden = true;
+			$("interviewModeFiles").textContent = "";
+			$("interviewModeFitSection").hidden = true;
+			$("interviewModeHistorySection").hidden = true;
+			$("interviewModeResume").hidden = true;
+			$("interviewModePosting").hidden = true;
+			for (const input of Object.values(fields)) input.value = "";
+			if (typeof dialog.showModal === "function") dialog.showModal();
+		}
+
+		// One fetch path for both entry points: a pipeline row's button and
+		// Today's “Interview mode” quick action.
+		function openFor(company, role) {
+			const query = new URLSearchParams({ company, role }).toString();
+			fetch(`/api/interviews/detail?${query}`)
+				.then((r) => r.json().then((j) => ({ ok: r.ok, body: j })))
+				.then(({ ok, body }) => (ok ? open(body.row) : fail(errorText(body))))
+				.catch(() => fail("network error"));
+		}
+
+		page.addEventListener("click", (e) => {
+			const trigger = e.target.closest("[data-interview-mode]");
+			if (!trigger) return;
+			const row = trigger.closest("[data-interview]");
+			if (!row) return;
+			openFor(row.dataset.company, row.dataset.role);
+		});
+
+		// Today's quick action: the href switches to the Interviews tab, and the
+		// dialog opens on top of it without a reload.
+		document.addEventListener("click", (e) => {
+			const trigger = e.target.closest("[data-interview-open]");
+			if (!trigger) return;
+			const [company, role] = (trigger.dataset.interviewOpen || "").split("|");
+			if (company && role) openFor(company, role);
+		});
+
+		dialog.addEventListener("click", (e) => {
+			if (e.target.closest("[data-close-interview]")) {
+				dialog.close();
+				return;
+			}
+			const save = e.target.closest("[data-interview-save]");
+			if (!save) return;
+			const field = save.dataset.interviewSave;
+			const input = fields[field];
+			const status = save.parentElement.querySelector("[data-interview-dialog-status]");
+			if (!input || !dialog.dataset.company) return;
+			save.disabled = true;
+			status.textContent = "Saving\u2026";
+			status.className = "run-status is-running";
+			post("/api/interviews/text", {
+				company: dialog.dataset.company,
+				role: dialog.dataset.role,
+				field,
+				text: input.value,
+			})
+				.then(({ ok, body }) => {
+					save.disabled = false;
+					if (!ok) {
+						status.textContent = errorText(body);
+						status.className = "run-status is-failed";
+						return;
+					}
+					input.dataset.initial = input.value;
+					status.textContent = "Saved.";
+					status.className = "run-status is-done";
+					// The page's own notes box shows the same field.
+					if (field === "interview_notes") {
+						const row = [...page.querySelectorAll("[data-interview]")].find(
+							(r) =>
+								r.dataset.company === dialog.dataset.company &&
+								r.dataset.role === dialog.dataset.role,
+						);
+						const pageNotes = row && row.querySelector("textarea[name=notes]");
+						if (pageNotes) pageNotes.value = input.value;
+					}
+				})
+				.catch(() => {
+					save.disabled = false;
+					status.textContent = "network error";
+					status.className = "run-status is-failed";
+				});
+		});
+	}
+})();

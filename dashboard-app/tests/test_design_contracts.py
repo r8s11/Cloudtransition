@@ -279,3 +279,18 @@ def test_every_data_supplied_color_is_covered_by_the_safe_map():
     for path in yaml_files:
         for raw in re.findall(r'color:\s*"(#[0-9a-fA-F]{3,6})"', path.read_text()):
             assert raw.lower() in known, f"{path.name} color {raw} bypasses SAFE_HUE_MAP"
+
+
+def test_run_picker_can_be_limited_to_allowed_providers():
+    js = (ROOT / "static" / "app.js").read_text()
+    assert "const allowedProviders = Array.isArray(s.providers)" in js
+    assert "if (allowedProviders && !allowedProviders.includes(provider)) continue;" in js
+    assert "allowedProviders.find((p) => providerModels[p]?.length)" in js
+    assert "No free ${providerName(allowedProviders[0])} models" in js
+
+
+def test_scout_scan_is_available_on_the_agents_and_run_tabs():
+    agents_page = (ROOT / "templates" / "pages" / "agents.html").read_text()
+    run_page = (ROOT / "templates" / "pages" / "run.html").read_text()
+    assert 'data-skills="scout-scan"' in agents_page
+    assert "scout-scan" in run_page

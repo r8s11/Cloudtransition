@@ -5,45 +5,69 @@
   <div class="page-header">
     <h2>Run</h2>
     <p>
-      Fire a skill headlessly. Each button shells out to
-      <code>claude -p</code> and writes its output to
-      <code>dashboard-app/runs/</code>. Every run is appended to
+      Start a skill or workspace tool without leaving the dashboard. Output is
+      written to <code>dashboard-app/runs/</code>, and every run is appended to
       <code>runs.log</code>.
     </p>
   </div>
 
-  <p class="run-empty">
-    Audit and UI/UX review cannot edit files. Audit runs with defaults;
-    UI/UX review, polish, and video summaries offer model and effort pickers.
-    Runs stop after 30 minutes; permission requests that need a person are denied.
-  </p>
-
-  <button id="refreshModels" type="button" class="action-btn action-btn-ghost">
-    Update models
-  </button>
+  <ul class="run-rules">
+    <li>Audit and UI/UX review are read-only.</li>
+    <li>Audit runs with defaults; review, polish and video summaries take model and effort pickers.</li>
+    <li>Runs stop after 30 minutes; permission requests that need a person are denied.</li>
+  </ul>
 
   <div class="card">
-    <div class="card-title">Your skill buttons</div>
-    <div class="run-grid" id="runGrid" data-run-grid data-skills="impeccable-audit,impeccable-polish,ui-ux-review,youtube-summary">
-      <p class="run-empty">Loading skills&hellip;</p>
+    <div class="card-title run-card-title">
+      <h3 class="run-card-heading">Your skill buttons</h3>
+      <span class="run-actions">
+        <button
+          id="refreshModels"
+          type="button"
+          class="action-btn action-btn-ghost"
+          title="Re-read the local model catalogues"
+        >
+          Refresh models
+        </button>
+        <span
+          id="refreshModelsStatus"
+          class="refresh-status"
+          role="status"
+          aria-live="polite"
+        ></span>
+      </span>
+    </div>
+    <div
+      class="run-grid"
+      id="runGrid"
+      data-run-grid
+      data-skills="impeccable-audit,impeccable-polish,ui-ux-review,youtube-summary"
+      aria-busy="true"
+    >
+      <p class="run-empty">Reading local model catalogues&hellip;</p>
     </div>
   </div>
 
   <details class="card">
     <summary class="card-title">Other workspace tools</summary>
-    <div class="run-grid" data-run-grid data-skills="update-sheet,graft-build,resume-build,plan-today,triage-inbox,brain-index,arms-report,artifact-catalog">
+    <div
+      class="run-grid"
+      data-run-grid
+      data-skills="update-sheet,trail-build,resume-build,plan-today,scout-scan,triage-inbox,brain-index,arms-report,artifact-catalog"
+      aria-busy="true"
+    >
       <p class="run-empty">Loading tools&hellip;</p>
     </div>
   </details>
 
   <!-- Run history -->
-  <div class="card">
-    <div class="card-title">Recent runs</div>
+  <section class="card" aria-labelledby="recent-runs-title">
+    <h3 class="card-title" id="recent-runs-title">Recent runs</h3>
     <div id="runHistory">
       <div class="empty-state empty-state-pad">
-        <div class="empty-icon">&#x25CB;</div>
-        <p>No runs yet this session. Press a button above.</p>
+        <div class="empty-icon" aria-hidden="true">&#x25CB;</div>
+        <p>No runs yet. Start one above.</p>
       </div>
     </div>
-  </div>
+  </section>
 </div>
