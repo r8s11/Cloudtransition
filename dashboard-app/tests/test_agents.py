@@ -228,3 +228,47 @@ def test_build_context_includes_agents_view(monkeypatch):
 
     for key, value in marker.items():
         assert ctx[key] == value
+
+def test_load_memory_derives_detail_from_a_score_outcome_event(workspace):
+    """Real Scout logs record title/company/score, not detail/summary/notes/result."""
+    memory = workspace / "workspace" / "agents" / "scout" / "memory"
+    memory.mkdir(parents=True)
+    event = {
+        "ts": "2026-11-09T18:00:00Z",
+        "type": "score_outcome",
+        "agent": "scout",
+        "job_id": "desktop-support-technician-lincolnit",
+        "title": "Desktop Support Technician",
+        "company": "LincolnIT",
+        "score": 85,
+        "surfaced": True,
+    }
+    (memory / "log.jsonl").write_text(json.dumps(event) + "\n")
+
+    view = agents.load_memory("scout")
+
+    detail = view["events"][0]["detail"]
+    assert detail is not None
+    assert "Desktop Support Technician" in detail
+    assert "LincolnIT" in detail
+    assert "85" in detail
+
+
+def test_load_latest_scan_survives_a_stat_error(workspace, monkeypatch):
+    """A dangling symlink or vanished file must not 500 every dashboard tab."""
+    outputs = workspace / "workspace" / "agents" / "scout" / "outputs"
+    _scan(outputs / "scan-2026-11-09.json", [{"job_id": "kept", "score": 5}])
+
+    real_stat = Path.stat
+
+    def flaky_stat(self, *args, **kwargs):
+        if self.name.startswith("scan-") and self.suffix == ".json":
+            raise OSError("stat failed")
+        return real_stat(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "stat", flaky_stat)
+
+    view = agents.load_latest_scan()
+
+    assert view["error"] is None
+    assert view["scan"]["jobs"][0]["job_id"] == "kept"

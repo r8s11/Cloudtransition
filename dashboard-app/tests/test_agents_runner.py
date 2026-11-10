@@ -128,3 +128,20 @@ def test_scout_scan_catalog_payload_carries_provider_limit(monkeypatch):
     payload = module._skill_catalog_payload()
     skill = next(s for s in payload["skills"] if s["id"] == "scout-scan")
     assert skill["providers"] == ["opencode"]
+
+
+def test_opencode_agent_card_without_agent_is_an_error_spec(monkeypatch):
+    monkeypatch.setattr(module, "_resolve_opencode_exe", lambda: "/fake/opencode")
+    cfg = {
+        "kind": "opencode-agent",
+        "prompt": "scan",
+        "providers": ["opencode"],
+    }
+    req = module.RunRequest(
+        skill="malformed", model="opencode:opencode/beam-free", effort="default"
+    )
+
+    spec, _ = module._resolve_run(cfg, req)
+
+    assert spec["kind"] == "error"
+    assert "agent" in spec["error"].lower()

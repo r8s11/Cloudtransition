@@ -4270,3 +4270,7 @@ details.card:not([open]) > summary.card-title {
 .agents-scan-table td:first-child {
 	min-width: 220px;
 }
+.agents-scan-table thead th {
+	white-space: nowrap;
+	overflow-wrap: normal;
+}

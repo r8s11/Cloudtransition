@@ -294,3 +294,9 @@ def test_scout_scan_is_available_on_the_agents_and_run_tabs():
     run_page = (ROOT / "templates" / "pages" / "run.html").read_text()
     assert 'data-skills="scout-scan"' in agents_page
     assert "scout-scan" in run_page
+
+
+def test_agents_job_links_only_render_for_safe_schemes():
+    page = (ROOT / "templates" / "pages" / "agents.html").read_text()
+    assert 'job.url.startswith(("http://", "https://", "mailto:"))' in page
+    assert 'target="_blank" rel="noopener noreferrer"' in page

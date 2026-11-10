@@ -2778,7 +2778,16 @@ def _resolve_run(cfg: dict, req: RunRequest) -> tuple[dict, str]:
         # registration cannot make the run hang.
         argv = [exe, "run", "--standalone"]
         if cfg.get("kind") == "opencode-agent":
-            argv += ["--agent", cfg["agent"]]
+            agent = cfg.get("agent")
+            if not agent:
+                return (
+                    {
+                        "kind": "error",
+                        "error": "opencode-agent card has no agent configured",
+                    },
+                    "opencode run --standalone --agent <agent> -m <model> <prompt>",
+                )
+            argv += ["--agent", agent]
         argv += ["-m", model_id, prompt]
         return {"kind": "opencode", "argv": argv}, shlex.join(argv)
 

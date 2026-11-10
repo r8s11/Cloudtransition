@@ -121,6 +121,20 @@ def _event_view(event: dict) -> dict:
         if key in event:
             detail = _detail_value(event.get(key))
             break
+    if detail is None:
+        parts = []
+        title = event.get("title")
+        company = event.get("company")
+        score = event.get("score")
+        if isinstance(title, str) and title:
+            parts.append(title)
+        if isinstance(company, str) and company:
+            parts.append(company)
+        if parts:
+            detail = " — ".join(parts)
+        if score is not None and not isinstance(score, bool):
+            suffix = f"score {score}"
+            detail = f"{detail} · {suffix}" if detail else suffix
     return {"when": when, "event": ev, "detail": detail}
 
 
@@ -171,6 +185,15 @@ def load_memory(slug: str) -> dict:
     }
 
 
+def _scan_sort_key(path: Path) -> tuple:
+    """Newest-first key that survives a vanished or dangling scan file."""
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        mtime = -1.0
+    return (mtime, path.name)
+
+
 def load_latest_scan() -> dict:
     """Newest scan-*.json with a jobs list; sort jobs by score, missing last."""
     outputs = SCOUT_OUTPUTS
@@ -178,9 +201,9 @@ def load_latest_scan() -> dict:
     if outputs is None or not outputs.exists() or not outputs.is_dir():
         return {"scan": None, "files": {}, "error": "No Scout scan yet."}
 
-    candidates = sorted(outputs.glob("scan-*.json"), key=lambda p: (p.stat().st_mtime, p.name), reverse=True)
+    candidates = sorted(outputs.glob("scan-*.json"), key=_scan_sort_key, reverse=True)
 
-    had_files = bool(list(outputs.glob("scan-*.json")))
+    had_files = bool(candidates)
     for path in candidates:
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
