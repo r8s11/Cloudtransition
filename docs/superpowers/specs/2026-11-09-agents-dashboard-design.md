@@ -122,8 +122,10 @@ Add `("agents", "Agents")` to the nav after Interviews, and the include in
   existing `_load_opencode_models()` list plus a new `providers: ["opencode"]`
   field; `app.js` hides the Claude/Codex/OpenRouter choices for a card with
   `providers` and selects the first allowed model by default. “Free” therefore
-  means a free OpenCode model and no paid promotion step. A model outside the
-  catalogue is still rejected by the existing allowlist.
+  means a free OpenCode model and no paid promotion step. The picker offers only
+  free OpenCode models, and `/api/skills/run` rejects a non-OpenCode provider;
+  it does not independently re-validate that a hand-crafted `opencode:<id>` is
+  free.
 - Add `scout-scan` to the Run tab's “Other workspace tools” grid as well.
 
 ### Verification
