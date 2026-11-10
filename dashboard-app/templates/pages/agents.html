@@ -116,7 +116,7 @@
           {% for job in agent_scan.jobs %}
           <tr>
             <th scope="row">
-              {% if job.title and job.url and job.url.startswith(("http://", "https://", "mailto:")) %}
+              {% if job.title and job.url is string and job.url.startswith(("http://", "https://", "mailto:")) %}
               <a href="{{ job.url }}" target="_blank" rel="noopener noreferrer">{{ job.title }}</a>
               {% else %}
               {{ job.title or "" }}

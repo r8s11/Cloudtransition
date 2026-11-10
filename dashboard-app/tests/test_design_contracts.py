@@ -300,3 +300,34 @@ def test_agents_job_links_only_render_for_safe_schemes():
     page = (ROOT / "templates" / "pages" / "agents.html").read_text()
     assert 'job.url.startswith(("http://", "https://", "mailto:"))' in page
     assert 'target="_blank" rel="noopener noreferrer"' in page
+
+
+def _render_agents_scan(job):
+    """Render the real agents page with one scan job through the app's Jinja setup."""
+    import jinja2
+
+    env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(ROOT / "templates"), autoescape=True
+    )
+    template = env.get_template("pages/agents.html")
+    return template.render(
+        agents=[],
+        agent_events={},
+        agent_scan_error=None,
+        agent_scan_files={"json": "scan.json"},
+        agent_scan={"jobs": [job]},
+    )
+
+
+def test_agents_scan_job_with_a_non_string_url_renders_plainly():
+    html = _render_agents_scan({"title": "T", "url": 123})
+
+    assert "T" in html
+    assert 'href="123"' not in html
+
+
+def test_agents_scan_job_with_an_https_url_renders_a_link():
+    html = _render_agents_scan({"title": "T", "url": "https://example.com/job"})
+
+    assert 'href="https://example.com/job"' in html
+    assert 'rel="noopener noreferrer"' in html
