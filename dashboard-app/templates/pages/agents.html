@@ -1,0 +1,155 @@
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- AGENTS PAGE — Forge job-hunting roster + latest Scout scan   -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-agents" role="tabpanel" aria-labelledby="tab-agents">
+  <div class="page-header">
+    <h2>Agents</h2>
+    <p>
+      The Forge job-hunting team &mdash; Forge routes work to Scout, Job Reader
+      and CV Adapter. Definitions come from <code>.opencode/agents/</code>;
+      memory and the latest Scout scan come from <code>workspace/agents/</code>.
+    </p>
+  </div>
+
+  <section aria-labelledby="agents-roster-title">
+    <h3 class="ops-subheading" id="agents-roster-title">Roster</h3>
+
+    {% if not agents %}
+    <div class="empty-state empty-state-pad">
+      <div class="empty-icon" aria-hidden="true">&#x25CB;</div>
+      <p>No agent definitions were found in <code>.opencode/agents/</code>.</p>
+    </div>
+    {% else %}
+    {% for agent in agents %}
+    <article class="card agent-card">
+      <div class="card-title">
+        <h4 class="run-card-heading">{{ agent.name }}</h4>
+        {% if agent.mode %}<span class="badge">{{ agent.mode }}</span>{% endif %}
+      </div>
+
+      {% if agent.description %}
+      <p>{{ agent.description }}</p>
+      {% endif %}
+
+      {% if agent.summary %}
+      <pre class="agent-memory">{{ agent.summary }}</pre>
+      {% else %}
+      <p class="muted">No memory recorded.</p>
+      {% endif %}
+
+      {% if agent.events_error %}
+      <p class="run-status is-failed">{{ agent.events_error }}</p>
+      {% elif agent_events[agent.slug] %}
+      <ul class="agent-events">
+        {% for event in agent_events[agent.slug] %}
+        <li>
+          {% if event.when %}<span class="agent-event-when">{{ event.when }}</span>{% endif %}
+          <strong>{{ event.event }}</strong>
+          {% if event.detail %}<span>{{ event.detail }}</span>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </article>
+    {% endfor %}
+    {% endif %}
+  </section>
+
+  <section class="card" aria-labelledby="agents-scan-title">
+    <div class="card-title">
+      <h3 class="run-card-heading" id="agents-scan-title">Latest Scout scan</h3>
+      {% if agent_scan and agent_scan_files.json %}
+      <span class="run-actions">
+        <button
+          type="button"
+          class="action-btn action-btn-ghost"
+          data-output="{{ agent_scan_files.json }}"
+          data-output-label="Scout scan JSON"
+        >
+          JSON
+        </button>
+        {% if agent_scan_files.markdown %}
+        <button
+          type="button"
+          class="action-btn action-btn-ghost"
+          data-output="{{ agent_scan_files.markdown }}"
+          data-output-label="Scout scan Markdown"
+        >
+          Markdown
+        </button>
+        {% endif %}
+      </span>
+      {% endif %}
+    </div>
+
+    {% if agent_scan %}
+    <p class="interview-meta">
+      Generated
+      {% if agent_scan.generated_at %}<time datetime="{{ agent_scan.generated_at }}">{{ agent_scan.generated_at }}</time>{% else %}timestamp not recorded{% endif %}
+      &middot; {{ agent_scan.job_count }} jobs
+      &middot; {{ agent_scan.primary_count }} primary
+      &middot; {{ agent_scan.secondary_count }} secondary
+      {% if agent_scan.scan_id %}&middot; <code>{{ agent_scan.scan_id }}</code>{% endif %}
+    </p>
+
+    {% if agent_scan.notes %}
+    <p class="interview-note">{{ agent_scan.notes }}</p>
+    {% endif %}
+
+    {% if agent_scan.jobs %}
+    <div class="ops-table-scroll" tabindex="0" role="region" aria-label="Scout scan results">
+      <table class="ops-table agents-scan-table">
+        <caption class="metrics-visually-hidden">Jobs from the latest Scout scan, sorted by score</caption>
+        <thead>
+          <tr>
+            <th scope="col">Job</th>
+            <th scope="col">Score</th>
+            <th scope="col">Company</th>
+            <th scope="col">Location</th>
+            <th scope="col">Salary</th>
+            <th scope="col">Source</th>
+            <th scope="col">Posted</th>
+            <th scope="col">Track</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for job in agent_scan.jobs %}
+          <tr>
+            <th scope="row">
+              {% if job.url and job.title %}
+              <a href="{{ job.url }}" target="_blank" rel="noopener noreferrer">{{ job.title }}</a>
+              {% else %}
+              {{ job.title }}
+              {% endif %}
+            </th>
+            <td>{% if job.score is defined and job.score is not none %}{{ job.score }}{% endif %}</td>
+            <td>{{ job.company }}</td>
+            <td>
+              {{ job.location }}
+              {% if job.work_model %}<small>{{ job.work_model }}</small>{% endif %}
+            </td>
+            <td>{{ job.salary }}</td>
+            <td>{{ job.source }}</td>
+            <td>{{ job.posted }}</td>
+            <td>{{ job.track }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="ops-empty">This scan recorded no jobs.</p>
+    {% endif %}
+    {% elif agent_scan_error %}
+    <div class="empty-state empty-state-pad">
+      <div class="empty-icon" aria-hidden="true">&#x25CB;</div>
+      <p>{{ agent_scan_error }}</p>
+    </div>
+    {% else %}
+    <div class="empty-state empty-state-pad">
+      <div class="empty-icon" aria-hidden="true">&#x25CB;</div>
+      <p>No Scout scan yet. Run one below.</p>
+    </div>
+    {% endif %}
+  </section>
+</div>

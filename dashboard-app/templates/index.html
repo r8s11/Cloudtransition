@@ -13,7 +13,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="apple-touch-icon" href="/static/icon-180.png" />
     <link rel="icon" type="image/png" href="/static/icon-180.png" />
-    <link rel="stylesheet" href="/static/style.css?v=polish-20261106" />
+    <link rel="stylesheet" href="/static/tokens.css?v=polish-20261109b" />
+    <link rel="stylesheet" href="/static/style.css?v=polish-20261109b" />
   </head>
   <body>
     <!-- Skip Navigation -->
@@ -58,6 +59,8 @@
             ("projects", "Projects"),
             ("skills", "Skills"),
             ("career", "Career"),
+            ("interviews", "Interviews"),
+            ("agents", "Agents"),
             ("money", "Money"),
             ("mission-control", "Mission Control"),
             ("second-brain", "Second Brain"),
@@ -142,7 +145,8 @@
         {% include "pages/education.html" %}
         {% include "pages/books.html" %} {% include "pages/tasks.html" %} {%
         include "pages/projects.html" %} {% include "pages/skills.html" %} {%
-        include "pages/career.html" %} {% include "pages/money.html" %} {%
+        include "pages/career.html" %} {% include "pages/interviews.html" %} {%
+        include "pages/agents.html" %} {% include "pages/money.html" %} {%
         include "pages/mission-control.html" %} {% include "pages/second-brain.html" %}
         {% include "pages/metrics.html" %}
         {% include "pages/run.html" %}
@@ -168,13 +172,100 @@
     <dialog class="run-output-dialog" id="runOutputDialog" aria-labelledby="runOutputTitle">
       <div class="run-output-head">
         <h3 id="runOutputTitle">Run output</h3>
-        <button type="button" class="action-btn action-btn-ghost" data-close-output>Close</button>
+        <button type="button" class="action-btn action-btn-ghost run-output-close" data-close-output>Close</button>
       </div>
+      <p class="run-output-note" id="runOutputNote" hidden></p>
       <pre class="run-output" id="runOutputBody"></pre>
+      <details class="run-output-details" id="runOutputOriginalDetails" hidden>
+        <summary>Show original output</summary>
+        <pre class="run-output run-output-secondary" id="runOutputOriginal"></pre>
+      </details>
+      <details class="run-output-details" id="runOutputStderrDetails" hidden>
+        <summary>Show standard error</summary>
+        <pre class="run-output run-output-secondary" id="runOutputStderr"></pre>
+      </details>
     </dialog>
 
-    <script src="/static/app.js?v=polish-20261104"></script>
-    <script src="/static/metrics.js?v=metric-typeset-20261106"></script>
+    <!-- Interview mode: one application, open while the call is happening.
+         Read-only context comes from the tracker and workspace files; the three
+         textareas write back to job-applications.yml without a reload. -->
+    <dialog class="interview-dialog" id="interviewMode" aria-labelledby="interviewModeTitle">
+      <div class="interview-dialog-head">
+        <div class="interview-dialog-id">
+          <p class="interview-dialog-kicker">Interview mode</p>
+          <h3 id="interviewModeTitle"></h3>
+          <p class="interview-dialog-role" id="interviewModeRole"></p>
+          <p class="interview-dialog-meta" id="interviewModeMeta"></p>
+        </div>
+        <div class="interview-dialog-actions">
+          <a class="action-btn action-btn-ghost" id="interviewModeResume" target="_blank" rel="noopener noreferrer" hidden>Resume</a>
+          <a class="action-btn action-btn-ghost" id="interviewModePosting" target="_blank" rel="noopener noreferrer" hidden>Posting</a>
+          <a class="action-btn action-btn-ghost" id="interviewModeSheet" target="_blank" rel="noopener noreferrer">Print sheet</a>
+          <button type="button" class="action-btn" data-close-interview>Close</button>
+        </div>
+      </div>
+
+      <div class="interview-dialog-body">
+        <div class="interview-dialog-col">
+          <section class="interview-dialog-section">
+            <h4>Who you're talking to</h4>
+            <div class="interview-dialog-contacts" id="interviewModeContacts"></div>
+            <p class="interview-dialog-hint" id="interviewModeNoContacts" hidden>No contacts recorded for this application.</p>
+          </section>
+
+          <section class="interview-dialog-section">
+            <h4>Files</h4>
+            <div class="interview-dialog-files" id="interviewModeFiles"></div>
+            <p class="interview-dialog-hint">Resume and posting links come from the tracker; prep files from its <code>interview_prep</code> list.</p>
+          </section>
+
+          <section class="interview-dialog-section" id="interviewModeFitSection" hidden>
+            <h4>Job fit</h4>
+            <p class="interview-dialog-fit" id="interviewModeFit"></p>
+          </section>
+
+          <section class="interview-dialog-section" id="interviewModeHistorySection" hidden>
+            <h4>What happened so far</h4>
+            <ul class="interview-dialog-history" id="interviewModeHistory"></ul>
+          </section>
+        </div>
+
+        <div class="interview-dialog-col">
+          <section class="interview-dialog-section">
+            <h4>Questions to ask</h4>
+            <p class="interview-dialog-hint">One per line. Written to the tracker's <code>interview_questions</code>.</p>
+            <textarea class="run-input interview-dialog-text" id="interviewModeQuestions" rows="6" maxlength="4000" placeholder="What does success look like in the first 90 days?"></textarea>
+            <div class="interview-dialog-save">
+              <button class="action-btn action-btn-ghost" type="button" data-interview-save="interview_questions">Save questions</button>
+              <span class="run-status" data-interview-dialog-status role="status" aria-live="polite"></span>
+            </div>
+          </section>
+
+          <section class="interview-dialog-section">
+            <h4>Preparation</h4>
+            <p class="interview-dialog-hint">Stories to have ready, likely questions, what to look forward to. One per line.</p>
+            <textarea class="run-input interview-dialog-text" id="interviewModePreparation" rows="6" maxlength="4000" placeholder="Outage story: triage, comms, postmortem"></textarea>
+            <div class="interview-dialog-save">
+              <button class="action-btn action-btn-ghost" type="button" data-interview-save="interview_preparation">Save preparation</button>
+              <span class="run-status" data-interview-dialog-status role="status" aria-live="polite"></span>
+            </div>
+          </section>
+
+          <section class="interview-dialog-section">
+            <h4>Notes</h4>
+            <p class="interview-dialog-hint">What was asked, what to sharpen, follow-ups. Saved when you press the button.</p>
+            <textarea class="run-input interview-dialog-text" id="interviewModeNotes" rows="6" maxlength="4000" placeholder="Interviewer, questions, next round"></textarea>
+            <div class="interview-dialog-save">
+              <button class="action-btn action-btn-ghost" type="button" data-interview-save="interview_notes">Save notes</button>
+              <span class="run-status" data-interview-dialog-status role="status" aria-live="polite"></span>
+            </div>
+          </section>
+        </div>
+      </div>
+    </dialog>
+
+    <script src="/static/metrics.js?v=polish-20261109b"></script>
+    <script src="/static/app.js?v=polish-20261109b"></script>
 
     <template id="update-sheet-prompt"
       >Update the CloudTransition workspace so every dated file reflects today:
