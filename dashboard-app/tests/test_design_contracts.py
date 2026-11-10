@@ -252,6 +252,23 @@ def test_agents_tab_renders_roster_and_a_contained_scan_table():
     assert block and "min-width" in block.group(0)
 
 
+def test_agents_scan_table_renders_explicit_nulls_blank():
+    """Jinja renders a JSON null as "None"; every optional job cell needs a guard."""
+    page = (ROOT / "templates" / "pages" / "agents.html").read_text()
+    for field in (
+        "title",
+        "company",
+        "location",
+        "work_model",
+        "salary",
+        "source",
+        "posted",
+        "track",
+    ):
+        assert f'job.{field} or ""' in page, f"job.{field} has no null guard"
+    assert "job.score is defined and job.score is not none" in page
+
+
 def test_every_data_supplied_color_is_covered_by_the_safe_map():
     """Books and education YAML colors must all resolve to a verified hue."""
     yaml_files = [

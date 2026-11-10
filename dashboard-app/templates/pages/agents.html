@@ -119,19 +119,19 @@
               {% if job.url and job.title %}
               <a href="{{ job.url }}" target="_blank" rel="noopener noreferrer">{{ job.title }}</a>
               {% else %}
-              {{ job.title }}
+              {{ job.title or "" }}
               {% endif %}
             </th>
             <td>{% if job.score is defined and job.score is not none %}{{ job.score }}{% endif %}</td>
-            <td>{{ job.company }}</td>
+            <td>{{ job.company or "" }}</td>
             <td>
-              {{ job.location }}
-              {% if job.work_model %}<small>{{ job.work_model }}</small>{% endif %}
+              {{ job.location or "" }}
+              {% if job.work_model %}<small>{{ job.work_model or "" }}</small>{% endif %}
             </td>
-            <td>{{ job.salary }}</td>
-            <td>{{ job.source }}</td>
-            <td>{{ job.posted }}</td>
-            <td>{{ job.track }}</td>
+            <td>{{ job.salary or "" }}</td>
+            <td>{{ job.source or "" }}</td>
+            <td>{{ job.posted or "" }}</td>
+            <td>{{ job.track or "" }}</td>
           </tr>
           {% endfor %}
         </tbody>
