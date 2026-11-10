@@ -35,7 +35,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
+import interview_editor as ie
 import workspace_content as wc
+from agents import build_agents_view
 
 
 def _load_env_file(path: Path, environ: dict[str, str] | None = None) -> None:
@@ -83,97 +85,139 @@ SECOND_BRAIN_FILE = WORKSPACE / "robonugget-second-brain-app" / "index.html"
 MISSION_CONTROL_UPSTREAM = "http://127.0.0.1:8787"
 MISSION_CONTROL_TIMEOUT = 3  # seconds
 
+# ── Verified washi palette ────────────────────────────────────
+# Hues that hold WCAG AA text contrast on the paper surfaces. Data-supplied
+# colors (books YAML, project metadata) are mapped onto these so tinted
+# backgrounds, fills, and accents never fall back to an unchecked hex.
+SAFE_HUES = {
+    "vermilion": "#b3212e",
+    "green": "#356844",
+    "blue": "#38618c",
+    "purple": "#6f58a8",
+    "red": "#a8322c",
+    "yellow": "#7b580e",
+    "teal": "#27686a",
+    "sage": "#3f7d54",
+    "ink-muted": "#554d41",
+}
+
+SAFE_HUE_MAP = {
+    "#d97757": SAFE_HUES["vermilion"],
+    "#c87dff": SAFE_HUES["purple"],
+    "#e05555": SAFE_HUES["red"],
+    "#5cc98a": SAFE_HUES["green"],
+    "#0078d4": SAFE_HUES["blue"],
+    "#61dafb": SAFE_HUES["blue"],
+    "#e0b840": SAFE_HUES["yellow"],
+    "#9478d4": SAFE_HUES["purple"],
+    "#7c5cbf": SAFE_HUES["purple"],
+    "#3aa8c1": SAFE_HUES["teal"],
+    "#4a7fb5": SAFE_HUES["blue"],
+    "#5a9fd4": SAFE_HUES["blue"],
+    "#4a9e6e": SAFE_HUES["green"],
+    "#c9a227": SAFE_HUES["yellow"],
+    "#c44d4d": SAFE_HUES["red"],
+    "#888": SAFE_HUES["ink-muted"],
+    "#888888": SAFE_HUES["ink-muted"],
+}
+
+
+def safe_hue(value: str | None) -> str:
+    """Map a data-supplied color onto the verified washi palette."""
+    return SAFE_HUE_MAP.get((value or "").strip().lower(), SAFE_HUES["ink-muted"])
+
+
 # ── Realm Configuration ───────────────────────────────────────
 REALMS = [
     {
         "id": "tasks",
         "name": "Tasks",
         "file": "TASKS.md",
-        "color": "#D97757",
+        "color": SAFE_HUES["vermilion"],
         "icon": "📋",
     },
     {
         "id": "year-plan",
         "name": "Year Plan",
         "file": "plans/year-plan-2026-2027.md",
-        "color": "#c87dff",
+        "color": SAFE_HUES["purple"],
         "icon": "🗓️",
     },
     {
         "id": "eng190",
         "name": "ENG-190",
         "file": "College Planning/eng190-tracker.md",
-        "color": "#e05555",
+        "color": SAFE_HUES["red"],
         "icon": "📝",
     },
     {
         "id": "regeneron",
         "name": "Regeneron",
         "file": "plans/regeneron-cloud-devops-roadmap_2.md",
-        "color": "#5cc98a",
+        "color": SAFE_HUES["green"],
         "icon": "🔧",
     },
     {
         "id": "sc900",
         "name": "SC-900",
         "file": "plans/sc900-study-plan.md",
-        "color": "#0078d4",
+        "color": SAFE_HUES["blue"],
         "icon": "🛡️",
     },
     {
         "id": "azure",
         "name": "Azure AZ-204",
         "file": "plans/azure-az204-plan.md",
-        "color": "#0078d4",
+        "color": SAFE_HUES["blue"],
         "icon": "☁️",
     },
     {
         "id": "devops",
         "name": "DevOps Plan",
         "file": "plans/devops-learning-plan.md",
-        "color": "#5cc98a",
+        "color": SAFE_HUES["green"],
         "icon": "⚙️",
     },
     {
         "id": "books",
         "name": "Books",
         "file": "plans/books-reading-plan.md",
-        "color": "#9478d4",
+        "color": SAFE_HUES["purple"],
         "icon": "📚",
     },
     {
         "id": "react",
         "name": "React",
         "file": "plans/react_plan.md",
-        "color": "#61dafb",
+        "color": SAFE_HUES["blue"],
         "icon": "⚛️",
     },
     {
         "id": "sql",
         "name": "SQL",
         "file": "plans/sql_plan.md",
-        "color": "#e0b840",
+        "color": SAFE_HUES["yellow"],
         "icon": "🗄️",
     },
     {
         "id": "prompts",
         "name": "Future Prompts",
         "file": "prompts/todo-prompts.md",
-        "color": "#7c5cbf",
+        "color": SAFE_HUES["purple"],
         "icon": "💡",
     },
     {
         "id": "az104",
         "name": "AZ-104",
         "file": "plans/az104-study-plan.md",
-        "color": "#e05555",
+        "color": SAFE_HUES["red"],
         "icon": "🎓",
     },
     {
         "id": "college",
         "name": "College",
         "file": "College Planning/education-plan.md",
-        "color": "#3aa8c1",
+        "color": SAFE_HUES["teal"],
         "icon": "🏫",
     },
 ]
@@ -399,6 +443,139 @@ def parse_routine_slots() -> dict:
     return slots
 
 
+def _routine_sections(lines: list[str]) -> dict[str, list[tuple[int, str]]]:
+    sections: dict[str, list[tuple[int, str]]] = {}
+    current: str | None = None
+    for line_number, line in enumerate(lines, start=1):
+        heading = re.match(r"^##\s+(.+?)\s*$", line.strip())
+        if heading:
+            title = heading.group(1).strip()
+            current = (
+                "weekly review"
+                if re.match(r"^Weekly Review(?:\s|\()", title, re.IGNORECASE)
+                else title.casefold()
+            )
+            sections.setdefault(current, [])
+        elif current is not None:
+            sections[current].append((line_number, line))
+    return sections
+
+
+def _routine_plain_text(value: str) -> str:
+    value = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", value)
+    return re.sub(r"\*\*|__|~~|`", "", value).strip()
+
+
+def _routine_table(
+    rows: list[tuple[int, str]], min_cells: int
+) -> list[list[str]]:
+    result = []
+    for _, line in rows:
+        stripped = line.strip()
+        if not stripped.startswith("|"):
+            continue
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        if len(cells) < min_cells or cells[0].casefold() in {"slot", "date"}:
+            continue
+        if all(re.fullmatch(r":?-{3,}:?", cell.replace(" ", "")) for cell in cells):
+            continue
+        result.append([_routine_plain_text(cell) for cell in cells])
+    return result
+
+
+def _routine_review_items(lines: list[str]) -> list[dict]:
+    items = []
+    for line_number, line in _routine_sections(lines).get("weekly review", []):
+        match = CHECKBOX_RE.match(line.rstrip("\r\n"))
+        if not match:
+            continue
+        text = match.group(3)[2:]
+        items.append(
+            {
+                "text": text,
+                "display_text": _routine_plain_text(text),
+                "cat": "Weekly Review",
+                "done": match.group(2) in ("x", "X"),
+                "realm": "routine",
+                "line": line_number,
+            }
+        )
+    return items
+
+
+def parse_routine_view(today: date, path: Path | None = None) -> dict:
+    """Parse the Today routine panel from the live routine.md source."""
+    path = path or WORKSPACE / "routine.md"
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError:
+        return {"available": False, "message": "routine.md was not found."}
+    except (OSError, UnicodeDecodeError):
+        return {"available": False, "message": "routine.md could not be read."}
+
+    sections = _routine_sections(lines)
+    rhythm_section = next(
+        (
+            rows
+            for name, rows in sections.items()
+            if name.endswith("working rhythm")
+        ),
+        [],
+    )
+    rhythm_rows = _routine_table(rhythm_section, 3)
+    rhythm_summary = [
+        _routine_plain_text(line.strip())
+        for _, line in rhythm_section
+        if line.strip()
+        and not line.strip().startswith("|")
+        and not re.match(r"^#{1,6}\s+", line.strip())
+        and not re.fullmatch(r"(?:-{3,}|_{3,}|\*{3,})", line.strip())
+    ]
+    if today.weekday() < 5:
+        today_slots = ("workday",)
+    elif today.weekday() == 5:
+        today_slots = ("project", "devops")
+    else:
+        today_slots = ("weekend",)
+    rhythm = [
+        {
+            "slot": row[0],
+            "what": row[1],
+            "notes": row[2],
+            "is_today": any(token in row[0].casefold() for token in today_slots),
+        }
+        for row in rhythm_rows
+    ]
+
+    updated = None
+    context = ""
+    for line in lines:
+        if updated is None:
+            match = re.match(r"^\s*_Last updated:\s*(.+?)_\s*$", line)
+            if match:
+                updated = match.group(1)
+        match = re.match(r"^\s*\*\*Current context:\*\*\s*(.+)$", line)
+        if match:
+            context = _routine_plain_text(match.group(1))
+
+    rules = []
+    for _, line in sections.get("rules", []):
+        match = re.match(r"^\s*\d+\.\s+(.+)$", line)
+        if match:
+            rules.append(_routine_plain_text(match.group(1)))
+
+    return {
+        "available": True,
+        "updated": updated,
+        "context": context,
+        "rhythm": rhythm,
+        "rhythm_summary": rhythm_summary,
+        "review": _routine_review_items(lines),
+        "rules": rules,
+        "dates": _routine_table(sections.get("key dates ahead", []), 3),
+    }
+
+
 def parse_routine_folds(today: date | None = None) -> list[dict]:
     """Map this week's routine to numbered fold steps.
 
@@ -442,7 +619,70 @@ def parse_routine_folds(today: date | None = None) -> list[dict]:
 
 
 # ── Today view ────────────────────────────────────────────────
-TODAY_NEXT_UP = 8
+NEXT_UP_COUNT = 3
+
+# routine.md orders the work: income and the job search first (rule 1), debt is
+# part of the routine (rule 6), and the bills lane — playbook/MD-102 — outranks
+# DevOps extras (rule 3). TASKS.md's own security heading outranks all of it.
+NEXT_UP_LANES = (
+    ("security", 0),
+    ("income", 1),
+    ("monetization", 1),
+    ("job search", 1),
+    ("debt", 2),
+    ("playbook", 3),
+    ("md-102", 3),
+    ("devops", 4),
+    ("bogatyr", 5),
+)
+# Sections that are reference, not work: TASKS.md keeps the elapsed $3,000
+# sprint as historical context, and routine.md already renders the weekly
+# rhythm on this page.
+NEXT_UP_REFERENCE = ("$3,000 income sprint",)
+NEXT_UP_NON_WORK = ("inbox", "recurring", "someday", "waiting on")
+_OTHER_LANE = 6
+
+
+def _next_up_lane(category: str) -> int:
+    folded = category.casefold()
+    for keyword, lane in NEXT_UP_LANES:
+        if keyword in folded:
+            return lane
+    return _OTHER_LANE
+
+
+def _next_up_candidate(category: str) -> bool:
+    folded = category.casefold()
+    if any(folded.startswith(prefix) for prefix in NEXT_UP_NON_WORK):
+        return False
+    return not any(term in folded for term in NEXT_UP_REFERENCE)
+
+
+def select_next_up(
+    open_tasks: list[dict], today: date | None = None, count: int = NEXT_UP_COUNT
+) -> list[dict]:
+    """The highest-priority open TASKS.md items, ranked by routine.md's lanes.
+
+    TASKS.md file order breaks ties. The live alternating week (routine.md:
+    odd = Playbook, even = Bogatyr) decides which project leads; the other
+    project waits behind DevOps.
+    """
+    today = today or date.today()
+    week_a = today.isocalendar().week % 2 == 1
+    live_project, waiting_project = ("playbook", "bogatyr") if week_a else ("bogatyr", "playbook")
+
+    def rank(task: dict) -> int:
+        folded = task["cat"].casefold()
+        lane = _next_up_lane(task["cat"])
+        if lane >= 3:
+            if live_project in folded:
+                lane = 3
+            elif waiting_project in folded:
+                lane = 5
+        return lane
+
+    candidates = [t for t in open_tasks if _next_up_candidate(t["cat"])]
+    return sorted(candidates, key=rank)[:count]
 # Run-tab tools surfaced as one-tap buttons on the Today page.
 QUICK_TOOLS = ("plan-today", "triage-inbox", "brain-index")
 
@@ -457,8 +697,9 @@ def build_today_view(realm_tasks: dict, fold_steps: list[dict], today: date) -> 
     return {
         "today_weekday": weekday,
         "today_blocks": [s["label"] for s in fold_steps if s["day"] == weekday],
+        "routine": parse_routine_view(today),
         "inbox_items": [t for t in open_tasks if t["cat"] == "Inbox"],
-        "next_up": [t for t in open_tasks if t["cat"] != "Inbox"][:TODAY_NEXT_UP],
+        "next_up": select_next_up(open_tasks, today),
         "quick_tools": QUICK_TOOLS,
     }
 
@@ -526,13 +767,32 @@ def recent_artifacts() -> dict:
     return {"ok": True, "rows": items, "count": len(rows)}
 
 
-def command_centre(realm_tasks: dict, today_view: dict, project_count: int) -> dict:
+def command_centre(
+    realm_tasks: dict,
+    today_view: dict,
+    project_count: int,
+    interview_action: dict | None = None,
+) -> dict:
     now = datetime.now(timezone.utc).astimezone()
     index = map_index_summary(now)
     artifacts = recent_artifacts()
     open_count = realm_tasks["total_active"]
     blocks = today_view["today_blocks"]
-    daily = [
+    daily = []
+    if interview_action:
+        # Opens Interview mode for that application; the row itself carries the
+        # key, so Today never has to re-read the tracker in the browser.
+        daily.append(
+            {
+                "label": "Interview mode",
+                "href": "#interviews",
+                "interview_key": interview_action["key"],
+                "note": interview_action["company"],
+                "value": f"{interview_action['when']} \u00b7 {interview_action['date']}",
+                "warn": interview_action["overdue"],
+            }
+        )
+    daily += [
         {
             "label": "Tasks",
             "href": "#tasks",
@@ -595,6 +855,311 @@ def money_available() -> bool:
 
 
 # ── Build Context ─────────────────────────────────────────────
+# ── Interview dashboard ───────────────────────────────────────
+# interviews/job-applications.yml is the source of truth. Statuses the file
+# uses today: interviewing | assessment | screening | applied | new_lead
+# (rejected/withdrawn entries are closed and not shown as live work).
+INTERVIEW_STATUS_ORDER = {
+    "offer": 0,
+    "onsite": 1,
+    "interviewing": 2,
+    "assessment": 3,
+    "screening": 4,
+    "applied": 5,
+    "new_lead": 6,
+}
+INTERVIEW_STATUS_LABELS = {
+    "offer": "Offer",
+    "onsite": "Onsite",
+    "interviewing": "Interviewing",
+    "assessment": "Assessment",
+    "screening": "Screening",
+    "applied": "Applied",
+    "new_lead": "New lead",
+}
+INTERVIEW_STATUS_BADGES = {
+    "offer": "badge-done",
+    "onsite": "badge-p2",
+    "interviewing": "badge-status-active",
+    "assessment": "badge-status-pending",
+    "screening": "badge-status-planned",
+    "applied": "badge-status-upcoming",
+    "new_lead": "badge",
+}
+INTERVIEW_PRIORITY_ORDER = {"high": 0, "medium": 1, "low": 2}
+INTERVIEW_PRIORITY_BADGES = {
+    "high": "badge-p1",
+    "medium": "badge-p2",
+    "low": "badge-p3",
+}
+# Everything except a bare lead has a live conversation to show first.
+INTERVIEW_ACTIVE_STATUSES = ("offer", "onsite", "interviewing", "assessment", "screening", "applied")
+# Closed threads stay in the file for history; Today must never point at one.
+INTERVIEW_CLOSED_STATUSES = ("rejected", "withdrawn")
+
+
+def _iso_text(value) -> str:
+    """YAML unquoted dates parse as date objects; JSON and the template want text."""
+    if not value:
+        return ""
+    return value.isoformat() if isinstance(value, date) else str(value)
+
+
+def _inter_date(value) -> date | None:
+    """An ISO date from YAML, or None — never guess from a human sentence."""
+    if not value:
+        return None
+    try:
+        return date.fromisoformat(str(value)[:10])
+    except ValueError:
+        return None
+
+
+def _workspace_href(recorded: str) -> str:
+    """A servable link for a workspace-relative file, or "" if it is missing.
+
+    Absolute paths and `..` are refused: the tracker stores workspace paths, and
+    a link should never reach outside it.
+    """
+    if not recorded:
+        return ""
+    rel = Path(str(recorded))
+    if rel.is_absolute() or ".." in rel.parts:
+        return ""
+    if not (WORKSPACE / rel).is_file():
+        return ""
+    return workspace_file_href(rel.as_posix())
+
+
+def _resume_href(recorded: str) -> str:
+    """A servable link for a resume recorded as a path under resume/."""
+    if not recorded:
+        return ""
+    rel = Path(str(recorded))
+    if rel.is_absolute() or ".." in rel.parts:
+        return ""
+    if not (WORKSPACE / "resume" / rel).is_file():
+        return ""
+    return workspace_file_href(f"resume/{rel.as_posix()}")
+
+
+def _prep_files(recorded) -> list[dict]:
+    """Prep/JD files the tracker lists under `interview_prep:`.
+
+    The tracker stores paths (interviews/Ground Up/prep.md). Only files that
+    exist are linked; a recorded-but-missing path is reported, not invented.
+    """
+    if isinstance(recorded, str):
+        recorded = [recorded]
+    files = []
+    for item in recorded or []:
+        if not isinstance(item, str) or not item.strip():
+            continue
+        path = item.strip()
+        files.append(
+            {
+                "path": path,
+                "label": Path(path).name,
+                "href": _workspace_href(path),
+            }
+        )
+    return files
+
+
+def _relative_day(when: date, today: date) -> str:
+    """"today" / "tomorrow" / "in N days" / "overdue N days" for a date."""
+    delta = (when - today).days
+    if delta == 0:
+        return "today"
+    if delta == 1:
+        return "tomorrow"
+    if delta > 1:
+        return f"in {delta} days"
+    if delta == -1:
+        return "overdue 1 day"
+    return f"overdue {-delta} days"
+
+
+def next_interview_action(rows: list[dict], today: date) -> dict | None:
+    """The application whose next action is nearest — Today's one-tap entry.
+
+    Soonest upcoming date wins; when every recorded date has passed, the most
+    recent one is offered and flagged overdue. Nothing is invented: a row with
+    no next-step date is simply not a candidate.
+    """
+    dated = [
+        r
+        for r in rows
+        if r.get("next_step")
+        and _inter_date(r["next_step"].get("date"))
+        and r.get("status") not in INTERVIEW_CLOSED_STATUSES
+    ]
+    if not dated:
+        return None
+
+    def sort_key(row: dict):
+        when = _inter_date(row["next_step"].get("date"))
+        return (
+            when,
+            INTERVIEW_STATUS_ORDER.get(row["status"], 9),
+            INTERVIEW_PRIORITY_ORDER.get(row["priority"], 9),
+        )
+
+    upcoming = [r for r in dated if sort_key(r)[0] >= today]
+    pick = min(upcoming, key=sort_key) if upcoming else max(dated, key=sort_key)
+    when = _inter_date(pick["next_step"].get("date"))
+    return {
+        "company": pick["company"],
+        "role": pick["role"],
+        # company|role is the tracker's key and survives the pipe-free data here.
+        "key": f"{pick['company']}|{pick['role']}",
+        "date": when.isoformat(),
+        "when": _relative_day(when, today),
+        "overdue": when < today,
+        "status_label": pick["status_label"],
+        "task": pick["next_step"]["task"],
+    }
+
+
+def _interview_sheet_href(company: str, role: str) -> str:
+    """A printable one-page sheet for one application."""
+    query = urllib.parse.urlencode({"company": company, "role": role})
+    return f"/interviews/sheet?{query}"
+
+
+def build_interview_view(jobs_data: dict, today: date | None = None) -> dict:
+    """Rows for the Interviews tab, read live from job-applications.yml.
+
+    A row carries what the file actually records: status, priority, contacts,
+    the latest timeline entry and the first next step. Missing fields stay
+    blank rather than being filled in.
+    """
+    today = today or date.today()
+    rows = []
+    for entry in jobs_data.get("active_applications") or []:
+        if not isinstance(entry, dict):
+            continue
+        status = str(entry.get("status") or "new_lead")
+        priority = str(entry.get("priority") or "").casefold()
+        timeline = entry.get("timeline") or []
+        last = timeline[-1] if timeline else {}
+        step = (entry.get("next_steps") or [{}])[0]
+        step_date = _inter_date(step.get("date"))
+        rows.append(
+            {
+                "company": entry.get("company") or "Company not recorded",
+                "role": entry.get("role") or "Role not recorded",
+                "status": status,
+                "status_label": INTERVIEW_STATUS_LABELS.get(
+                    status, status.replace("_", " ").capitalize()
+                ),
+                "status_badge": INTERVIEW_STATUS_BADGES.get(status, "badge"),
+                "priority": priority,
+                "priority_label": priority.capitalize() if priority else "",
+                "priority_badge": INTERVIEW_PRIORITY_BADGES.get(priority, "badge"),
+                "location": entry.get("location") or "",
+                "salary": entry.get("salary_range") or "",
+                "url": entry.get("job_url") or "",
+                "resume": entry.get("resume") or "",
+                "resume_href": _resume_href(entry.get("resume") or ""),
+                "application_date": _iso_text(entry.get("application_date")),
+                # Dashboard-owned blocks, each separate from the hand-written
+                # job-fit `notes:` so the tracker's own prose survives edits.
+                "notes": entry.get("interview_notes") or "",
+                "questions": entry.get("interview_questions") or "",
+                "preparation": entry.get("interview_preparation") or "",
+                "fit_notes": str(entry.get("notes") or "").strip(),
+                "prep_files": _prep_files(entry.get("interview_prep")),
+                "contacts": [
+                    {
+                        "name": c.get("name") or "",
+                        "role": c.get("role") or "",
+                        "email": c.get("email") or "",
+                    }
+                    for c in (entry.get("contacts") or [])
+                    if isinstance(c, dict)
+                ],
+                "history": [
+                    {
+                        "date": _iso_text(t.get("date")),
+                        "stage": str(t.get("stage") or "").replace("_", " "),
+                        "notes": t.get("notes") or "",
+                    }
+                    for t in timeline
+                    if isinstance(t, dict)
+                ][-4:][::-1],
+                "last_event": (
+                    {
+                        "date": _iso_text(last.get("date")),
+                        "stage": str(last.get("stage") or "").replace("_", " "),
+                        "notes": last.get("notes") or "",
+                    }
+                    if last
+                    else None
+                ),
+                "next_step": {
+                    "task": step.get("task") or "",
+                    "date": step_date.isoformat() if step_date else "",
+                }
+                if step.get("task")
+                else None,
+                "overdue": bool(step_date and step_date < today),
+                "sheet_href": _interview_sheet_href(
+                    entry.get("company") or "Company not recorded",
+                    entry.get("role") or "Role not recorded",
+                ),
+            }
+        )
+
+    rows.sort(
+        key=lambda r: (
+            INTERVIEW_STATUS_ORDER.get(r["status"], 9),
+            INTERVIEW_PRIORITY_ORDER.get(r["priority"], 9),
+        )
+    )
+    # Closed threads (rejected/withdrawn) are kept for history but never shown
+    # as live work: they get their own collapsed card and stay out of the counts.
+    live = [r for r in rows if r["status"] not in INTERVIEW_CLOSED_STATUSES]
+    closed = [r for r in rows if r["status"] in INTERVIEW_CLOSED_STATUSES]
+    active = [r for r in live if r["status"] in INTERVIEW_ACTIVE_STATUSES]
+    leads = [r for r in live if r["status"] not in INTERVIEW_ACTIVE_STATUSES]
+    # Newest signal first, so the most recent rejection reads at the top.
+    closed.sort(
+        key=lambda r: (
+            r["last_event"]["date"] if r["last_event"] else "",
+            r["company"],
+        ),
+        reverse=True,
+    )
+    return {
+        "interview_rows": rows,
+        "interview_active": active,
+        "interview_leads": leads,
+        "interview_closed": closed,
+        "interview_counts": {
+            "tracked": len(live),
+            "active": len(active),
+            "leads": len(leads),
+            "high": sum(1 for r in live if r["priority"] == "high"),
+            "closed": len(closed),
+        },
+        "interview_active_statuses": list(INTERVIEW_ACTIVE_STATUSES),
+        "interview_statuses": [
+            {
+                "value": status,
+                "label": INTERVIEW_STATUS_LABELS.get(
+                    status, status.replace("_", " ").capitalize()
+                ),
+            }
+            for status in ie.STATUSES
+        ],
+        "interview_priorities": [
+            {"value": priority, "label": priority.capitalize()}
+            for priority in ie.PRIORITIES
+        ],
+    }
+
+
 def build_context() -> dict:
     """Read all workspace files and return template context."""
 
@@ -654,6 +1219,8 @@ def build_context() -> dict:
         "pending": stats.get("pending", 0),
     }
 
+    interview_view = build_interview_view(jobs_data, today)
+
     # Networking goals
     net_goals = []
     for g in network_data.get("networking_goals", []):
@@ -693,7 +1260,7 @@ def build_context() -> dict:
             "name": "WODCard",
             "status": "Deprioritized — maintenance only",
             "q1_goal": "Resume after school stabilizes",
-            "color": "#D97757",
+            "color": SAFE_HUES["vermilion"],
             "features": [
                 "React + Vite + TypeScript frontend",
                 "FastAPI backend structure",
@@ -705,7 +1272,7 @@ def build_context() -> dict:
             "name": "SalsaSegura",
             "status": "Deprioritized — maintenance only",
             "q1_goal": "Resume after school stabilizes",
-            "color": "#4a7fb5",
+            "color": SAFE_HUES["blue"],
             "features": [
                 "React TypeScript app deployed to Azure",
                 "Events display, header, footer, hero section",
@@ -716,7 +1283,7 @@ def build_context() -> dict:
             "name": "SalsaTD",
             "status": "Deprioritized — maintenance only",
             "q1_goal": "Resume after school stabilizes",
-            "color": "#7c5cbf",
+            "color": SAFE_HUES["purple"],
             "features": [
                 "Game board with turn-based play (2-30 players)",
                 "Truth & Dare decks with spiciness levels",
@@ -729,7 +1296,7 @@ def build_context() -> dict:
             "name": "Capstone (genomics-style batch pipeline)",
             "status": "Planned — Phase 7 of roadmap, builds in 2027",
             "q1_goal": "Public GitHub repo by end of 2027",
-            "color": "#5cc98a",
+            "color": SAFE_HUES["green"],
             "features": [
                 "Terraform-managed VPC + EKS cluster",
                 "Fan-out workflow: S3 → SQS → Karpenter worker pods",
@@ -795,7 +1362,10 @@ def build_context() -> dict:
     edu_data = load_yaml(EDU_FILE)
     edu_program = edu_data.get("program", {})
     edu_stats = edu_data.get("degree_stats", {})
-    edu_sources = edu_data.get("credit_sources", [])
+    edu_sources = [
+        {**s, "color": safe_hue(s.get("color"))}
+        for s in edu_data.get("credit_sources", [])
+    ]
     edu_phases = edu_data.get("transfer_phases", [])
     edu_timeline = edu_data.get("timeline", [])
     edu_cost = edu_data.get("cost", {})
@@ -831,7 +1401,7 @@ def build_context() -> dict:
             cat_groups[cat] = {
                 "name": cat,
                 "icon": meta.get("icon", "📖"),
-                "color": meta.get("color", "#888"),
+                "color": safe_hue(meta.get("color")),
                 "books": [],
             }
         cat_groups[cat]["books"].append(b)
@@ -852,7 +1422,12 @@ def build_context() -> dict:
         "today": today.isoformat(),
         "fold_steps": fold_steps,
         **today_view,
-        **command_centre(realm_tasks, today_view, len(projects)),
+        **command_centre(
+            realm_tasks,
+            today_view,
+            len(projects),
+            next_interview_action(interview_view["interview_rows"], today),
+        ),
         "money_available": money_available(),
         "edu_program": edu_program,
         "edu_stats": edu_stats,
@@ -877,6 +1452,7 @@ def build_context() -> dict:
         "has_goals": has_goals,
         "vision": vision,
         "job_stats": job_stats,
+        **interview_view,
         "net_goals": net_goals,
         "projects": projects,
         "learning_matrix": learning_matrix,
@@ -887,6 +1463,7 @@ def build_context() -> dict:
         "in_plan_count": in_plan_count,
         "new_picks": new_picks,
         "q_counts": q_counts,
+        **build_agents_view(),
     }
 
 
@@ -918,6 +1495,8 @@ def discover_md_files() -> list[dict]:
 # ── Routes ────────────────────────────────────────────────────
 @app.get("/", response_class=HTMLResponse)
 def dashboard(request: Request):
+    # The Run tab reads this catalogue; build it while the page renders.
+    _warm_skill_catalog()
     ctx = build_context()
     return templates.TemplateResponse(request, "index.html", ctx)
 
@@ -1029,24 +1608,43 @@ def api_file(path: str = Query(...)):
 
 
 @app.post("/api/tasks/toggle")
-def toggle_task(req: ToggleRequest, x_requested_with: str = Header()):
+def toggle_task(req: ToggleRequest, x_requested_with: str = Header(default="")):
     """Toggle a checkbox in the source markdown file."""
     if x_requested_with != "XMLHttpRequest":
         return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
-    # Find realm config
-    realm_cfg = next((r for r in REALMS if r["id"] == req.realm), None)
-    if not realm_cfg:
-        return JSONResponse({"error": "Unknown realm"}, status_code=400)
-
-    target = WORKSPACE / realm_cfg["file"]
+    if req.realm == "routine":
+        target = WORKSPACE / "routine.md"
+    else:
+        realm_cfg = next((r for r in REALMS if r["id"] == req.realm), None)
+        if not realm_cfg:
+            return JSONResponse({"error": "Unknown realm"}, status_code=400)
+        target = WORKSPACE / realm_cfg["file"]
     if not target.exists():
         return JSONResponse({"error": "File not found"}, status_code=404)
 
     with _FILE_WRITE_LOCK:
         lines = target.read_text().splitlines(keepends=True)
         idx = req.line - 1  # convert to 0-based
+        allowed_routine_lines = (
+            {item["line"]: item["text"] for item in _routine_review_items(lines)}
+            if req.realm == "routine"
+            else None
+        )
+        if (
+            allowed_routine_lines is not None
+            and idx + 1 not in allowed_routine_lines
+            and req.text not in allowed_routine_lines.values()
+        ):
+            return JSONResponse(
+                {"error": "Only Weekly Review items can be changed here"},
+                status_code=400,
+            )
 
         def text_at(i: int) -> str | None:
+            if not 0 <= i < len(lines):
+                return None
+            if allowed_routine_lines is not None:
+                return allowed_routine_lines.get(i + 1)
             m = CHECKBOX_RE.match(lines[i].rstrip("\r\n"))
             return m.group(3)[2:] if m else None
 
@@ -1068,6 +1666,11 @@ def toggle_task(req: ToggleRequest, x_requested_with: str = Header()):
         m = CHECKBOX_RE.match(lines[idx].rstrip("\n").rstrip("\r"))
         if not m:
             return JSONResponse({"error": "No checkbox on that line"}, status_code=400)
+        if allowed_routine_lines is not None and idx + 1 not in allowed_routine_lines:
+            return JSONResponse(
+                {"error": "Only Weekly Review items can be changed here"},
+                status_code=400,
+            )
 
         new_mark = "x" if req.done else " "
         lines[idx] = m.group(1) + new_mark + m.group(3) + "\n"
@@ -1145,6 +1748,231 @@ def brain_remember(req: RememberRequest, x_requested_with: str = Header(default=
     return _brain(
         "remember", "--title", req.title, "--summary", req.summary, "--body", req.body
     )
+
+
+# ── Interview dashboard writes ─────────────────────────────────────────────
+# Each endpoint edits only the lines it owns in interviews/job-applications.yml
+# (see interview_editor.py), then answers with the rebuilt row so the page can
+# update without a reload.
+class InterviewFieldRequest(BaseModel):
+    company: str
+    role: str
+    field: str
+    value: str
+
+
+class InterviewNextStepRequest(BaseModel):
+    company: str
+    role: str
+    task: str
+    date: str | None = None
+
+
+class InterviewSignalRequest(BaseModel):
+    company: str
+    role: str
+    date: str
+    stage: str
+    notes: str | None = None
+
+
+class InterviewTextRequest(BaseModel):
+    company: str
+    role: str
+    field: str
+    text: str
+
+
+class InterviewCreateRequest(BaseModel):
+    company: str
+    role: str
+    status: str = "new_lead"
+    priority: str = "medium"
+    location: str | None = None
+    salary_range: str | None = None
+    job_url: str | None = None
+    next_step: str | None = None
+    date: str | None = None
+
+
+def _interview_target(company: str, role: str) -> tuple[str, str] | None:
+    company, role = company.strip(), role.strip()
+    if not company or not role or len(company) > 200 or len(role) > 200:
+        return None
+    return company, role
+
+
+def _interview_write(edit, company: str, role: str):
+    """Apply one editor function under the file lock, then return the new row."""
+    if not JOBS_FILE.exists():
+        return JSONResponse({"error": "Application tracker not found"}, status_code=404)
+    with _FILE_WRITE_LOCK:
+        text = JOBS_FILE.read_text(encoding="utf-8")
+        try:
+            updated = edit(text)
+        except ie.InterviewEditError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=400)
+        _atomic_write(JOBS_FILE, updated)
+
+    view = build_interview_view(load_yaml(JOBS_FILE), date.today())
+    row = next(
+        (
+            r
+            for r in view["interview_rows"]
+            if r["company"] == company and r["role"] == role
+        ),
+        None,
+    )
+    return JSONResponse({"ok": True, "row": row, "counts": view["interview_counts"]})
+
+
+def _csrf_ok(x_requested_with: str) -> bool:
+    return x_requested_with == "XMLHttpRequest"
+
+
+@app.post("/api/interviews/field")
+def interview_field(
+    req: InterviewFieldRequest, x_requested_with: str = Header(default="")
+):
+    if not _csrf_ok(x_requested_with):
+        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
+    target = _interview_target(req.company, req.role)
+    if not target:
+        return JSONResponse({"error": "Company and role are required"}, status_code=400)
+    company, role = target
+    return _interview_write(
+        lambda text: ie.set_field(text, company, role, req.field, req.value),
+        company,
+        role,
+    )
+
+
+@app.post("/api/interviews/next-step")
+def interview_next_step(
+    req: InterviewNextStepRequest, x_requested_with: str = Header(default="")
+):
+    if not _csrf_ok(x_requested_with):
+        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
+    target = _interview_target(req.company, req.role)
+    if not target:
+        return JSONResponse({"error": "Company and role are required"}, status_code=400)
+    company, role = target
+    return _interview_write(
+        lambda text: ie.set_next_step(text, company, role, req.task, req.date or ""),
+        company,
+        role,
+    )
+
+
+@app.post("/api/interviews/timeline")
+def interview_timeline(
+    req: InterviewSignalRequest, x_requested_with: str = Header(default="")
+):
+    if not _csrf_ok(x_requested_with):
+        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
+    target = _interview_target(req.company, req.role)
+    if not target:
+        return JSONResponse({"error": "Company and role are required"}, status_code=400)
+    company, role = target
+    return _interview_write(
+        lambda text: ie.append_timeline(
+            text, company, role, req.date, req.stage, req.notes or ""
+        ),
+        company,
+        role,
+    )
+
+
+@app.get("/api/interviews/detail")
+def interview_detail(
+    company: str = Query(..., min_length=1, max_length=200),
+    role: str = Query(..., min_length=1, max_length=200),
+):
+    """One application as the Interview mode dialog needs it."""
+    view = build_interview_view(load_yaml(JOBS_FILE), date.today())
+    row = next(
+        (
+            r
+            for r in view["interview_rows"]
+            if r["company"] == company.strip() and r["role"] == role.strip()
+        ),
+        None,
+    )
+    if row is None:
+        return JSONResponse({"error": "Application not found"}, status_code=404)
+    return JSONResponse({"ok": True, "row": row})
+
+
+@app.get("/interviews/sheet", response_class=HTMLResponse)
+def interview_sheet(
+    request: Request,
+    company: str = Query(..., min_length=1, max_length=200),
+    role: str = Query(..., min_length=1, max_length=200),
+):
+    """Standalone printable prep sheet: browser Print → PDF for offline use."""
+    view = build_interview_view(load_yaml(JOBS_FILE), date.today())
+    row = next(
+        (
+            r
+            for r in view["interview_rows"]
+            if r["company"] == company.strip() and r["role"] == role.strip()
+        ),
+        None,
+    )
+    if row is None:
+        return HTMLResponse("Application not found", status_code=404)
+    return templates.TemplateResponse(
+        request,
+        "interview_sheet.html",
+        {"row": row, "printed": date.today().isoformat(), "workspace": str(WORKSPACE)},
+    )
+
+
+@app.post("/api/interviews/text")
+def interview_text(
+    req: InterviewTextRequest, x_requested_with: str = Header(default="")
+):
+    if not _csrf_ok(x_requested_with):
+        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
+    target = _interview_target(req.company, req.role)
+    if not target:
+        return JSONResponse({"error": "Company and role are required"}, status_code=400)
+    if req.field not in ie.TEXT_BLOCKS:
+        return JSONResponse({"error": "Unknown field"}, status_code=400)
+    company, role = target
+    return _interview_write(
+        lambda text: ie.set_text_block(text, company, role, req.field, req.text),
+        company,
+        role,
+    )
+
+
+@app.post("/api/interviews/create")
+def interview_create(
+    req: InterviewCreateRequest, x_requested_with: str = Header(default="")
+):
+    if not _csrf_ok(x_requested_with):
+        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
+    target = _interview_target(req.company, req.role)
+    if not target:
+        return JSONResponse({"error": "Company and role are required"}, status_code=400)
+    company, role = target
+
+    def edit(text: str) -> str:
+        return ie.add_application(
+            text,
+            company=company,
+            role=role,
+            status=req.status,
+            priority=req.priority,
+            location=req.location or "",
+            salary_range=req.salary_range or "",
+            job_url=req.job_url or "",
+            next_step=req.next_step or "",
+            due=req.date or "",
+        )
+
+    return _interview_write(edit, company, role)
 
 
 # ── Connected systems: Second Brain + Mission Control ──────────
@@ -1331,7 +2159,7 @@ def _load_opencode_models():
         return [], False, f"opencode models failed to start: {exc}"
     if proc.returncode != 0:
         return [], False, f"opencode models exited {proc.returncode}: {proc.stderr.strip()[:200]}"
-    ids = [line.strip() for line in proc.stdout.splitlines() if "/" in line.strip() and _is_free_model_id(line.strip())]
+    ids = [line.strip() for line in proc.stdout.splitlines() if "/" in line.strip() and _is_free_model_id(line.strip()) and "opus" not in line.strip().lower()]
     seen = set()
     models = []
     for mid in ids:
@@ -1420,15 +2248,92 @@ def _fetch_skill_catalog():
         },
     }
 
+# The catalogue is read by the Run tab on open. OpenCode listing spawns a
+# private server (~4 s), so cache the assembled payload and warm it from any
+# dashboard visit; "Refresh models" still forces a rebuild.
+_SKILL_CATALOG_TTL = 300.0
+_SKILL_CATALOG: dict[str, object] = {
+    "payload": None,
+    "built_at": 0.0,
+    "building": False,
+}
+_SKILL_CATALOG_LOCK = threading.Lock()
+
+
+def _skill_catalog_payload() -> dict:
+    """The full catalogue response (provider models plus renderable skills)."""
+    return {
+        **_fetch_skill_catalog(),
+        "skills": [
+            {
+                "id": sid,
+                "label": cfg["label"],
+                "blurb": cfg["blurb"],
+                "icon": cfg["icon"],
+                "kind": cfg["kind"],
+                "model": cfg.get("model"),
+                "options": cfg.get("options", cfg["kind"] == "claude"),
+                "input_label": cfg.get("input_label"),
+                "input_type": cfg.get("input_type", "url"),
+            }
+            for sid, cfg in SKILL_RUNNERS.items()
+        ],
+    }
+
+
+def _cached_skill_catalog(force: bool = False) -> dict:
+    """Return a cached catalogue, rebuilding it when stale or forced."""
+    now = time.monotonic()
+    with _SKILL_CATALOG_LOCK:
+        cached = _SKILL_CATALOG["payload"]
+        if (
+            not force
+            and cached is not None
+            and now - float(_SKILL_CATALOG["built_at"]) < _SKILL_CATALOG_TTL
+        ):
+            return cached  # type: ignore[return-value]
+        payload = _skill_catalog_payload()
+        _SKILL_CATALOG["payload"] = payload
+        _SKILL_CATALOG["built_at"] = time.monotonic()
+        return payload
+
+
+def _warm_skill_catalog() -> None:
+    """Build the catalogue off the request path so the next Run visit is fast."""
+    now = time.monotonic()
+    with _SKILL_CATALOG_LOCK:
+        cached = _SKILL_CATALOG["payload"]
+        if (
+            cached is not None
+            and now - float(_SKILL_CATALOG["built_at"]) < _SKILL_CATALOG_TTL
+        ):
+            return
+        if _SKILL_CATALOG["building"]:
+            return
+        _SKILL_CATALOG["building"] = True
+
+    def build() -> None:
+        try:
+            # Not forced: if a page request filled the cache first, reuse it.
+            _cached_skill_catalog()
+        except Exception:  # noqa: BLE001 — a failed warm must not break the page
+            pass
+        finally:
+            with _SKILL_CATALOG_LOCK:
+                _SKILL_CATALOG["building"] = False
+
+    threading.Thread(target=build, name="skill-catalog-warm", daemon=True).start()
+
+
 SKILL_RUNNERS = {
     "impeccable-audit": {
         "label": "Audit dashboard",
         "blurb": "Five-dimension technical scan with a scored report. Read-only.",
-        "icon": "🔍",
+        "icon": "◇",
         "kind": "claude",
         "prompt": "/impeccable audit dashboard-app. Report findings only; do not edit files.",
-        "model": "opus",
-        "options": False,
+        "model": "sonnet",
+        "options": True,
         "read_only": True,
     },
     "impeccable-polish": {
@@ -1448,7 +2353,7 @@ SKILL_RUNNERS = {
             "`dashboard-app/venv/bin/python -m pytest dashboard-app/tests -q` and report "
             "its result."
         ),
-        "model": "opus",
+        "model": "sonnet",
         "options": True,
         # dontAsk + this allowlist: everything else is denied, not prompted.
         "permissions": {
@@ -1491,10 +2396,10 @@ SKILL_RUNNERS = {
     "update-sheet": {
         "label": "Update sheet",
         "blurb": "Bring every dated workspace file current. Writes to TASKS.md, DASHBOARD.md, routine.md.",
-        "icon": "📎",
+        "icon": "▭",
         "kind": "claude",
         "prompt": None,  # rendered from the index.html template at run time
-        "model": "opus",
+        "model": "sonnet",
     },
     "youtube-summary": {
         "label": "Summarize video",
@@ -1507,12 +2412,12 @@ SKILL_RUNNERS = {
         "input_label": "YouTube URL",
         "input_pattern": r"^https?://(www\.)?(youtube\.com|youtu\.be)/\S+$",
     },
-    "graft-build": {
+    "trail-build": {
         "label": "Rebuild graph",
-        "blurb": "Refresh the repo context graph. Deterministic, no model, $0.",
+        "blurb": "Refresh the trail repo context graph. Deterministic, no model, $0.",
         "icon": "⬢",
         "kind": "shell",
-        "argv": ["graft", "build"],
+        "argv": ["trail", "build"],
     },
     "resume-build": {
         "label": "Build résumés",
@@ -1547,18 +2452,13 @@ SKILL_RUNNERS = {
     },
     "triage-inbox": {
         "label": "Triage inbox",
-        "blurb": "Files each '## Inbox' item in TASKS.md under its best existing heading, wording unchanged. Edits TASKS.md.",
+        "blurb": "Jev judges which existing section each unchecked Inbox item belongs to in TASKS.md; code does the filing, wording unchanged. Edits TASKS.md.",
         "icon": "⇲",
-        "kind": "claude",
-        "prompt": (
-            "Today is {today}. Triage the '## Inbox' section of TASKS.md. Move each "
-            "unchecked item, with its exact wording, to the end of the best-fitting "
-            "existing '###' section of TASKS.md. If nothing fits, leave it in Inbox. "
-            "Do not create sections, reword, reorder other items, mark anything "
-            "done, or touch any other file. Keep the '## Inbox' heading even when "
-            "empty. End with one bullet per item: item -> destination heading."
-        ),
-        "model": "sonnet",
+        # Jev answers two questions per item (does a section fit, which one) and
+        # triage_jev.py holds the thresholds and the edit. No model selector:
+        # the decision, not a prompt, is what this card runs.
+        "kind": "shell",
+        "argv": [sys.executable, "dashboard-app/triage_jev.py"],
     },
     "brain-index": {
         "label": "Reindex brain",
@@ -1926,31 +2826,13 @@ def _execute_run(run_id: str, run_spec: dict) -> None:
 @app.get("/api/skills/catalog")
 def api_skill_catalog():
     """The buttons the UI should render, with provider-labelled model catalogues."""
-    return JSONResponse(
-        {
-            **_fetch_skill_catalog(),
-            "skills": [
-                {
-                    "id": sid,
-                    "label": cfg["label"],
-                    "blurb": cfg["blurb"],
-                    "icon": cfg["icon"],
-                    "kind": cfg["kind"],
-                    "model": cfg.get("model"),
-                    "options": cfg.get("options", cfg["kind"] == "claude"),
-                    "input_label": cfg.get("input_label"),
-                    "input_type": cfg.get("input_type", "url"),
-                }
-                for sid, cfg in SKILL_RUNNERS.items()
-            ],
-        }
-    )
+    return JSONResponse(_cached_skill_catalog())
 
 
 @app.post("/api/skills/catalog/refresh")
 def api_skill_catalog_refresh():
-    """Force a fresh read of the provider catalogues (Update models button)."""
-    return api_skill_catalog()
+    """Force a fresh read of the provider catalogues (Refresh models button)."""
+    return JSONResponse(_cached_skill_catalog(force=True))
 
 
 @app.post("/api/skills/run")
