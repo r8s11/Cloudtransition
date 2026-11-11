@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Systems Analyst - Northwind</title>
+  <!-- Test-only: honored by the extension only on 127.0.0.1 / localhost. -->
+  <meta name="autofill-test-ats" content="lever">
+  <style>
+    body { font: 14px Arial, sans-serif; margin: 24px; max-width: 700px; }
+    .application-question { margin-bottom: 12px; }
+    .application-label { display: block; font-weight: 700; margin-bottom: 4px; }
+    input[type=text], input[type=email], input[type=tel], textarea { width: 100%; padding: 8px; border: 1px solid #bbb; border-radius: 4px; font: inherit; }
+  </style>
+</head>
+<body>
+  <h1>Systems Analyst</h1>
+  <form class="application-form" action="thanks.html" method="get">
+    <div class="application-question"><label><span class="application-label">Resume/CV <span>*</span></span><input type="file" name="resume" required></label></div>
+    <div class="application-question"><label><span class="application-label">Full name <span>*</span></span><input type="text" name="name" required></label></div>
+    <div class="application-question"><label><span class="application-label">Email <span>*</span></span><input type="email" name="email" required></label></div>
+    <div class="application-question"><label><span class="application-label">Phone</span><input type="tel" name="phone"></label></div>
+    <div class="application-question"><label><span class="application-label">Current company</span><input type="text" name="org"></label></div>
+    <div class="application-question"><label><span class="application-label">LinkedIn URL</span><input type="text" name="urls[LinkedIn]"></label></div>
+    <div class="application-question"><label><span class="application-label">GitHub URL</span><input type="text" name="urls[GitHub]"></label></div>
+    <div class="application-question"><label><span class="application-label">Portfolio URL</span><input type="text" name="urls[Portfolio]"></label></div>
+    <div class="application-question"><label><span class="application-label">Additional information</span><textarea name="comments" rows="4"></textarea></label></div>
+    <button id="submit_app" type="submit">Submit application</button>
+  </form>
+  <script>
+    document.body.dataset.submitClicks = '0';
+    document.getElementById('submit_app').addEventListener('click', function (e) {
+      document.body.dataset.submitClicks = String(Number(document.body.dataset.submitClicks) + 1);
+      e.preventDefault();
+    });
+  </script>
+</body>
+</html>

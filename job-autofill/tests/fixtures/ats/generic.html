@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Contact the team</title>
+  <style>
+    body { font: 14px Arial, sans-serif; margin: 24px; max-width: 600px; }
+    .field { margin-bottom: 12px; }
+    label { display: block; font-weight: 700; margin-bottom: 4px; }
+    input[type=text], input[type=email], input[type=tel] { width: 100%; padding: 8px; border: 1px solid #bbb; border-radius: 4px; font: inherit; }
+  </style>
+</head>
+<body>
+  <h1>Join our team</h1>
+  <form id="generic_form" action="generic.html" method="get">
+    <div class="field"><label for="f1">First name</label><input id="f1" type="text"></div>
+    <div class="field"><label for="f2">Email</label><input id="f2" type="email"></div>
+    <div class="field"><label for="f3">Phone</label><input id="f3" type="tel"></div>
+    <div class="field"><label for="f4">Are you willing to relocate to this city?</label><input id="f4" type="text"></div>
+    <button id="submit_app" type="submit">Submit</button>
+  </form>
+  <script>
+    document.body.dataset.submitClicks = '0';
+    document.getElementById('submit_app').addEventListener('click', function (e) {
+      document.body.dataset.submitClicks = String(Number(document.body.dataset.submitClicks) + 1);
+      e.preventDefault();
+    });
+  </script>
+</body>
+</html>
