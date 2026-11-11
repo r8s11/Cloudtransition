@@ -22,20 +22,34 @@
     'tel': 'phone',
     'tel-national': 'phone',
     'postal-code': 'zip',
-    'street-address': 'address',
-    'address-line1': 'address',
+    'street-address': 'street',
+    'address-line1': 'street',
     'address-level2': 'city',
     'address-level1': 'state',
     'country': 'country',
     'country-name': 'country',
   };
 
+  // Text that names a different field than the keyword it contains ("Referral email", "Phone
+  // type", "State your reason"). A vetoed text yields no key at all; it never falls through to a
+  // looser rule or to another attribute.
+  const NOT_THIS_FIELD = new RegExp([
+    '\\b(referr\\w*|emergency|reference|references|recommender|contact (person|name))\\b',
+    '\\bphone (type|country|code|extension|ext)\\b',
+    '\\b(country|area|dial|calling) code\\b',
+    '\\b(state|describe|explain|tell us|share) (your|why|how|about)\\b',
+    '\\b(your|the) (reason|answer|story|response)\\b',
+    '\\bhear(d)? (about|of)\\b|\\bhow did you (find|hear|learn)\\b',
+    '\\bvisa (status|type|category|number)\\b',
+  ].join('|'));
+
   // Order matters: specific keys before generic ones. `test` runs on text from words(); `not`
-  // vetoes the key for that text.
+  // vetoes the key for that text. Keys are the profile keys (helper/store.py MANUAL_KEYS plus the
+  // imported fields).
   const FIELD_MATCHERS = [
-    { key: 'sponsorship', test: /\bsponsor(ship)?\b|\bvisa\b/ },
+    { key: 'needsSponsorship', test: /\bsponsor(ship)?\b|\b(require|requires|need|needs) (a |an )?(work )?visa\b/ },
     {
-      key: 'workAuth',
+      key: 'workAuthorization',
       test: /\b(authori[sz]ed|eligible|legally entitled|legal right|right) to work\b|\bwork (authori[sz]ation|permit|eligibility|status)\b/,
     },
     { key: 'email', test: /\be ?mail\b/ },
@@ -51,7 +65,7 @@
     { key: 'country', test: /\bcountry\b|\bnation\b/ },
     { key: 'state', test: /\b(state|province|region)\b/ },
     {
-      key: 'address',
+      key: 'street',
       test: /\b(street|address|address line|addr)\b/,
       not: /\b(line|address) ?(2|two)\b|\b(apt|apartment|suite|unit)\b/,
     },
@@ -63,11 +77,12 @@
 
   function matchText(text) {
     const w = words(text);
-    if (!w) return null;
+    if (!w) return undefined;
+    if (NOT_THIS_FIELD.test(w)) return null;
     for (const m of FIELD_MATCHERS) {
       if (m.test.test(w) && !(m.not && m.not.test(w))) return m.key;
     }
-    return null;
+    return undefined;
   }
 
   function isQuestionStyle(label) {
@@ -88,12 +103,13 @@
     // The visible label is authoritative; attributes are only consulted when it says nothing.
     for (const src of [ctx.label, ctx.placeholder, ctx.name, ctx.id, ctx.automationId]) {
       const key = matchText(src);
+      if (key === null) return { key: null, questionStyle };
       if (key) return { key, questionStyle };
     }
     return { key: null, questionStyle };
   }
 
-  const api = { matchField, isQuestionStyle, FIELD_MATCHERS };
+  const api = { matchField, isQuestionStyle, FIELD_MATCHERS, AUTOCOMPLETE };
   root.AF = root.AF || {};
   Object.assign(root.AF, api);
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

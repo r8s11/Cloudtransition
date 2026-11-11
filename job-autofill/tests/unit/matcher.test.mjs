@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { matchField } = require('../../extension/content/matcher.js');
+const { matchField, FIELD_MATCHERS, AUTOCOMPLETE } = require('../../extension/content/matcher.js');
 
 test('F14: label "Country (United States only)" does not match state', () => {
   const r = matchField({ label: 'Country (United States only)' });
@@ -14,12 +14,12 @@ test('F14: label "Country (United States only)" does not match state', () => {
 test('F14: label "Email address" matches email, not address', () => {
   const r = matchField({ label: 'Email address' });
   assert.equal(r.key, 'email');
-  assert.notEqual(r.key, 'address');
+  assert.notEqual(r.key, 'street');
 });
 
 test('F14: a real street-address label still matches address; line 2 does not', () => {
-  assert.equal(matchField({ label: 'Street address' }).key, 'address');
-  assert.equal(matchField({ label: 'Address' }).key, 'address');
+  assert.equal(matchField({ label: 'Street address' }).key, 'street');
+  assert.equal(matchField({ label: 'Address' }).key, 'street');
   assert.equal(matchField({ label: 'Address line 2' }).key, null);
 });
 
@@ -32,8 +32,8 @@ test('F14: specific keys win over generic ones', () => {
   assert.equal(matchField({ label: 'Website address' }).key, 'website');
   assert.equal(matchField({ label: 'LinkedIn profile URL' }).key, 'linkedin');
   assert.equal(matchField({ label: 'GitHub URL' }).key, 'github');
-  assert.equal(matchField({ label: 'Will you now or in the future require visa sponsorship?' }).key, 'sponsorship');
-  assert.equal(matchField({ label: 'Are you legally authorized to work in the United States?' }).key, 'workAuth');
+  assert.equal(matchField({ label: 'Will you now or in the future require visa sponsorship?' }).key, 'needsSponsorship');
+  assert.equal(matchField({ label: 'Are you legally authorized to work in the United States?' }).key, 'workAuthorization');
   assert.equal(matchField({ label: 'Zip / Postal code' }).key, 'zip');
 });
 
@@ -73,4 +73,43 @@ test('U10: question style is "?" or more than six words', () => {
   assert.equal(matchField({ label: 'One two three four five six' }).questionStyle, false);
   assert.equal(matchField({ label: 'One two three four five six seven' }).questionStyle, true);
   assert.equal(matchField({ name: 'email' }).questionStyle, false);
+});
+
+test('matcher: every returned key is a profile key', () => {
+  const profileKeys = new Set([
+    'fullName', 'firstName', 'lastName', 'city', 'state', 'phone', 'email', 'website', 'github', 'linkedin',
+    'street', 'zip', 'country', 'workAuthorization', 'needsSponsorship', 'gender', 'race', 'veteran', 'disability',
+  ]);
+  const returnable = new Set(FIELD_MATCHERS.map((m) => m.key));
+  for (const k of returnable) assert.ok(profileKeys.has(k), `matcher key ${k} is not a profile key`);
+  for (const k of profileKeys) assert.ok(returnable.has(k), `profile key ${k} has no matcher`);
+  for (const k of Object.values(AUTOCOMPLETE)) assert.ok(profileKeys.has(k), `autocomplete key ${k} is not a profile key`);
+  assert.equal(matchField({ autocomplete: 'street-address' }).key, 'street');
+});
+
+const FALSE_POSITIVES = [
+  'State your reason',
+  'Referral email',
+  'Emergency contact phone',
+  'Phone type',
+  'Phone country code',
+  'Visa status',
+  'How did you hear about us (website, friend)',
+];
+for (const label of FALSE_POSITIVES) {
+  test(`matcher: false positive "${label}" is not matched`, () => {
+    assert.equal(matchField({ label }).key, null);
+    // A vetoed label must not be rescued by a looser attribute.
+    assert.equal(matchField({ label, name: 'email' }).key, null);
+  });
+}
+
+test('matcher: "Confirm email" and "Re-enter email" stay email', () => {
+  assert.equal(matchField({ label: 'Confirm email' }).key, 'email');
+  assert.equal(matchField({ label: 'Re-enter email' }).key, 'email');
+});
+
+test('U10: false-positive labels that are also question-style stay flagged', () => {
+  assert.equal(matchField({ label: 'How did you hear about us (website, friend)' }).questionStyle, true);
+  assert.equal(matchField({ label: 'State your reason' }).questionStyle, false);
 });
