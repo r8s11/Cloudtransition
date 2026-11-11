@@ -5,7 +5,7 @@
   "description": "Local job-application autofill extension and helper",
   "scripts": {
     "test:unit": "node --test tests/unit/",
-    "test:helper": "python3 -m unittest discover -s tests/helper",
+    "test:helper": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/helper",
     "test:e2e": "playwright test",
     "test": "npm run test:unit && npm run test:helper && npm run test:e2e",
     "check": "node scripts/check.mjs"
