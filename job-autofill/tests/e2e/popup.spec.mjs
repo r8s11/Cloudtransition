@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { spawn } from 'node:child_process';
 import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { createServer } from 'node:http';
 import { HELPER, freePort, launch, openPopup, runAutofill, stubContent } from './harness.mjs';
 
 const mode = (p) => statSync(p).mode & 0o777;
@@ -209,6 +210,72 @@ test('U13: pick provider and model from the provider\'s list', async () => {
     await popup.getByLabel('Claude').check();
     await expect(popup.locator('#ai-error')).toContainText('No Anthropic key — run: python3 job-autofill/helper/server.py set-key anthropic');
     await popup.close();
+  });
+});
+
+test('U13: provider switch cannot save previous provider\'s model', async () => {
+  await withHelper(async h => {
+    h.helper.setKey('anthropic', 'test-key-a');
+    h.helper.setKey('openai', 'test-key-o');
+    await h.pair();
+    await h.page.goto(h.fixtureUrl('index.html'));
+    const { popup } = await openPopup(h.page);
+    await popup.getByRole('tab', { name: 'AI' }).click();
+    await expect(popup.locator('#model option').nth(1)).toHaveText('fake-anthropic-a');
+    await popup.locator('#model').selectOption('fake-anthropic-a');
+    await popup.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(popup.locator('#ai-msg')).toHaveText('Saved');
+
+    let release, reached;
+    const gate = new Promise(resolve => { release = resolve; });
+    const started = new Promise(resolve => { reached = resolve; });
+    let delayed = false;
+    // Delay only the provider-change PUT, forwarding all other traffic to the real fixture helper.
+    const proxy = createServer(async (req, res) => {
+      try {
+        const chunks = [];
+        for await (const chunk of req) chunks.push(chunk);
+        const body = Buffer.concat(chunks);
+        const patch = req.method === 'PUT' && req.url === '/config' ? JSON.parse(body.toString()) : null;
+        if (!delayed && patch?.provider === 'openai' && !patch.models) {
+          delayed = true;
+          reached();
+          await gate;
+        }
+        const headers = Object.fromEntries(Object.entries(req.headers).filter(([key]) => !['host', 'connection', 'content-length'].includes(key)));
+        const response = await fetch(`http://127.0.0.1:${h.helper.port}${req.url}`, {
+          method: req.method, headers, body: body.length ? body : undefined,
+        });
+        res.writeHead(response.status, { 'content-type': response.headers.get('content-type') || 'application/json' });
+        res.end(Buffer.from(await response.arrayBuffer()));
+      } catch (error) {
+        res.writeHead(503);
+        res.end(JSON.stringify({ error: String(error) }));
+      }
+    });
+    await new Promise(resolve => proxy.listen(0, '127.0.0.1', resolve));
+    try {
+      await h.worker.evaluate(port => chrome.storage.local.set({ port }), proxy.address().port);
+      await popup.getByLabel('OpenAI').check();
+      await started;
+      await popup.getByRole('button', { name: 'Save', exact: true }).click();
+      await expect(popup.locator('#ai-msg')).toHaveText('Saved');
+      expect(readJson(h, 'config.json').provider).toBe('openai');
+      expect(readJson(h, 'config.json').models.openai).toBeUndefined();
+      await expect(popup.locator('#model')).toBeDisabled();
+      release();
+      await expect(popup.locator('#model option')).toHaveText(['— pick a model —', 'fake-openai-a', 'fake-openai-b']);
+      await expect(popup.locator('#model')).toBeEnabled();
+      await popup.locator('#model').selectOption('fake-openai-b');
+      await popup.getByRole('button', { name: 'Save', exact: true }).click();
+      await expect(popup.locator('#ai-msg')).toHaveText('Saved');
+      await expect.poll(() => readJson(h, 'config.json').models).toEqual({ anthropic: 'fake-anthropic-a', openai: 'fake-openai-b' });
+    } finally {
+      release();
+      await popup.close();
+      proxy.closeAllConnections();
+      await new Promise(resolve => proxy.close(resolve));
+    }
   });
 });
 

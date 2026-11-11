@@ -340,6 +340,7 @@ async function loadModels() {
 }
 
 async function onProviderChange() {
+  $('model').disabled = true;
   const msg = $('ai-msg');
   msg.className = 'msg';
   setText(msg, '');
