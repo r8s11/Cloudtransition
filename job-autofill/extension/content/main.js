@@ -18,6 +18,7 @@
   const stepCounts = new Map();
   let cancellation = null;
   let signIn = false;
+  let partial = null; // the fill in progress: {runId, step, items}
   AF.pageSafety = () => ({
     captcha: AF.captcha(),
     yellow: lastItems.filter(i => i.level === 'yellow' && !['Required field still needs input', "Couldn't set this field"].includes(i.reason)).length,
@@ -31,6 +32,9 @@
     if (currentRun !== msg.runId) return;
     AF.wizard.stop();
     cancellation?.abort();
+    // shortcut: partial fills report 0 fields and 0 AI counts, upgrade if the log needs them.
+    if (partial?.runId === msg.runId) await report(msg, partial.step, { items: partial.items, fields: 0 });
+    partial = null;
     await chrome.runtime.sendMessage({ type: 'LOG_RUN', runId: msg.runId, status, reason, code });
   }
 
@@ -45,6 +49,7 @@
     if (signIn) return finish(msg, 'stopped', "Sign in first — AutoFill doesn't sign in or create accounts", 'signin');
     if (!msg.submit) {
       if (state.action?.kind !== 'next') return finish(msg, 'filled');
+      if (lastStep >= 10) return finish(msg, 'stopped', '10-step limit', 'limit');
       return;
     }
     const check = AF.safetyCheck(state.safety);
@@ -107,15 +112,21 @@
     const { config } = await chrome.storage.local.get('config');
     if (cancellation?.signal.aborted || currentRun !== msg.runId) return;
     const adapter = AF.adapterFor(root.location.hostname);
+    partial = { runId: msg.runId, step, items: [] };
     const result = await AF.fillPage(root.document, msg.profile || {}, resume, {
       adapter, resumeError, fallback: msg.fallback, signal: cancellation.signal,
-      aiEnabled: !!config?.models?.[config.provider],
+      aiEnabled: !!config?.models?.[config.provider], items: partial.items, runId: msg.runId,
     });
     if (currentRun !== msg.runId || cancellation.signal.aborted) return;
+    partial = null;
     signIn = !!result.signIn;
     for (const it of result.items) AF.highlight(it.el, it.level, it.reason);
     lastItems = result.items;
     lastStep = step;
+    await report(msg, step, result);
+  }
+
+  async function report(msg, step, result) {
     stepCounts.set(step, { ...summarize(result.items, result.fields), ai_drafts: result.aiDrafts || 0, ai_calls: result.aiCalls || 0 });
     const counts = { green: 0, yellow: 0, filled: 0, fields: 0, ai_drafts: 0, ai_calls: 0 };
     for (const snapshot of stepCounts.values()) {
@@ -123,7 +134,7 @@
     }
     await chrome.runtime.sendMessage({
       type: 'REPORT',
-      summary: { runId: msg.runId, status: msg.submit ? 'running' : 'filled', step, counts, ats: adapter.name, fingerprint: AF.wizard.fingerprint() },
+      summary: { runId: msg.runId, status: msg.submit ? 'running' : 'filled', step, counts, ats: AF.adapterFor(root.location.hostname).name, fingerprint: AF.wizard.fingerprint() },
     }).catch(() => {});
   }
 
@@ -182,9 +193,12 @@
       return false;
     }
     if (msg?.type === 'SAFE_CLICK' && sender.id === chrome.runtime.id && msg.runId === currentRun) {
+      // Live recheck at click time: the page may have changed since the background's snapshot.
       const button = AF.safeButton(AF.adapterFor(location.hostname));
-      if (button && !cancellation?.signal.aborted) AF.util.click(button.el);
-      sendResponse({ ok: !!button && !cancellation?.signal.aborted });
+      const check = AF.safetyCheck({ ...AF.pageSafety(), button: !!button });
+      const ok = check.ok && button.kind === msg.kind && !cancellation?.signal.aborted;
+      if (ok) AF.util.click(button.el);
+      sendResponse(ok ? { ok } : check.ok ? { error: 'No safe Next or Submit button found', code: 'button' } : { error: check.reason, code: check.code });
       return false;
     }
     if (!msg || msg.type !== 'START' || sender.id !== chrome.runtime.id) return false;

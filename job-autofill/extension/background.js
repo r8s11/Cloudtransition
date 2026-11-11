@@ -5,7 +5,7 @@
 // Messages (all handlers are registered synchronously, as MV3 requires):
 //   popup -> bg   RUN {tabId, submit} | SYNC | PAIR {token} | SAVE_PROFILE {manual}
 //                 SAVE_CONFIG {patch, fallback?} | MODELS {provider}
-//   content -> bg DRAFT {req} | REPORT {tabId?, summary} | DEBUGGER_FILL {frameId, selector, kind, value}
+//   content -> bg DRAFT {req} | REPORT {tabId?, summary} | DEBUGGER_FILL {runId, frameId, selector, kind, value}
 //                 LOG_RUN {runId, status, reason?, code?}
 //   bg -> content START {runId, profile, resumeRef, submit, fallback}
 //
@@ -207,6 +207,8 @@ async function startRun({ tabId, submit }) {
   const st = await chrome.storage.local.get(['profile', 'resume', 'prefs', 'syncedAt']);
   if (!st.profile || !st.syncedAt) return { error: NEEDS_SYNC };
 
+  const prev = await runState(tabId);
+  if (prev && !prev.logged) await finishRun(tabId, { runId: prev.runId, status: 'stopped', reason: 'New run started', code: 'replaced' });
   const runId = crypto.randomUUID();
   const frames = await chrome.scripting.executeScript({ target: { tabId, allFrames: true }, func: () => true });
   const frameIds = frames.map(r => r.frameId);
@@ -320,7 +322,8 @@ function focusInFrame(selector, selectText) {
 
 // kind 'text': focus, select the old value, insert `value` as real input.
 // kind 'click': real mouse click at the element's centre (top frame only).
-async function debuggerFill(tabId, { frameId = 0, selector, kind, value }) {
+// Content senders pass their runId; queued input is dropped once that run has ended.
+async function debuggerFill(tabId, { frameId = 0, selector, kind, value, runId }) {
   if (typeof selector !== 'string' || !selector) return { error: 'selector required' };
   if (kind !== 'text' && kind !== 'click') return { error: `unknown kind ${kind}` };
   if (kind === 'click' && frameId !== 0) return { error: 'Real clicks inside frames are not supported' };
@@ -333,6 +336,10 @@ async function debuggerFill(tabId, { frameId = 0, selector, kind, value }) {
   if (!at) return { error: 'element not found' };
   try {
     await withDebugger(tabId, async (send) => {
+      if (runId !== undefined) {
+        const run = await runState(tabId, runId);
+        if (!run || run.logged) throw new Error('run ended');
+      }
       if (kind === 'text') {
         await send('Input.insertText', { text: String(value == null ? '' : value) });
       } else {
@@ -423,10 +430,19 @@ async function safeAction(tabId, runId) {
     return { deadline: run.submitDeadline };
   });
   if (!claimed) return { error: 'Already submitted from this tab', code: 'duplicate' };
+  const click = await chrome.tabs.sendMessage(tabId, { type: 'SAFE_CLICK', runId, kind: state.action.kind }, { frameId: state.action.frameId }).catch(() => null);
+  if (!click?.ok) {
+    if (state.action.kind === 'submit') await mutateRuns(all => {
+      const run = all[tabId];
+      if (run?.runId !== runId) return;
+      run.submittedUrls = run.submittedUrls.filter(u => u !== run.url);
+      run.pendingSubmit = false;
+    });
+    return { error: click?.error || 'No safe Next or Submit button found', code: click?.code || 'button' };
+  }
   if (state.action.kind === 'submit') setTimeout(() => {
     finishRun(tabId, { runId, status: 'submitted_unconfirmed' }).catch(() => {});
   }, Math.max(0, claimed.deadline - Date.now()));
-  await chrome.tabs.sendMessage(tabId, { type: 'SAFE_CLICK', runId }, { frameId: state.action.frameId });
   return { kind: state.action.kind, deadline: claimed.deadline };
 }
 
@@ -463,7 +479,7 @@ async function handle(msg, sender) {
         await finishRun(tabId, { runId: state.runId, status: 'stopped', reason: 'Page reloaded', code: 'navigation' });
       return runState(tabId);
     }
-    case 'DEBUGGER_FILL': return debuggerFill(tabId, { ...msg, frameId: trusted ? msg.frameId || 0 : sender.frameId || 0 });
+    case 'DEBUGGER_FILL': return debuggerFill(tabId, { ...msg, frameId: trusted ? msg.frameId || 0 : sender.frameId || 0, runId: trusted ? undefined : String(msg.runId) });
     default: return { error: `unknown message ${msg.type}` };
   }
 }

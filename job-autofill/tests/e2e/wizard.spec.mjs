@@ -94,3 +94,56 @@ test('7b: queued old-document REPORT and LOG_RUN cannot revive reloaded run', as
   expect(state.status).toBe('stopped'); expect(state.step).not.toBe(99);
   await expect.poll(()=>logs(h).length).toBe(1); await popup.close();
 }));
+test('7b: SAFE_CLICK rechecks live page safety before clicking', async () => scenario(async (h, p) => {
+  await h.worker.evaluate(() => {
+    const send = chrome.tabs.sendMessage.bind(chrome.tabs);
+    chrome.tabs.sendMessage = async (tabId, msg, opts) => {
+      if (msg?.type === 'SAFE_CLICK') await chrome.scripting.executeScript({ target: { tabId }, func: () => document.querySelector('main').insertAdjacentHTML('afterbegin', '<div class="g-recaptcha"></div><label>Extra<input required></label>') });
+      return send(tabId, msg, opts);
+    };
+  });
+  const r = await runAutofill(p, { submit: true });
+  expect(r.status).toBe('stopped');
+  expect(await p.locator('body').getAttribute('data-next-clicks')).toBe('0');
+}));
+test('7b: Stop cancels queued real-input fill', async () => scenario(async (h, p) => {
+  const { popup, tabId } = await openPopup(p);
+  await p.locator('main').evaluate(e => { e.innerHTML = '<form aria-label="Application"><label>Email<input id="em" type="email"></label></form>'; e.querySelector('#em').addEventListener('input', ev => { if (!ev.isTrusted) ev.target.value = ''; }); });
+  await h.worker.evaluate(tabId => debuggerQueues.set(tabId, new Promise(r => { globalThis.releaseDebugger = r; })), tabId);
+  await popup.getByRole('button', { name: 'Autofill page', exact: true }).click();
+  await p.waitForTimeout(800);
+  await p.getByRole('button', { name: 'Stop', exact: true }).click();
+  await expect(p.locator('#autofill-hud')).toContainText('Stopped');
+  await h.worker.evaluate(() => globalThis.releaseDebugger());
+  await p.waitForTimeout(1500); await expect(p.locator('#em')).toHaveValue(''); await popup.close();
+}));
+test('7b: passive run ends and logs at step 10', async () => scenario(async (h, p) => {
+  await runAutofill(p);
+  for (let i = 0; i < 9; i++) {
+    await p.getByRole('button', { name: 'Next', exact: true }).click();
+    await expect(p.locator('main input')).not.toHaveValue('');
+  }
+  await expect.poll(() => logs(h).length).toBe(1);
+  expect(logs(h)[0]).toMatchObject({ steps: 10, outcome: 'stopped:limit' });
+}, 'workday-twelve.html'));
+test('7b: new run logs the active previous run', async () => scenario(async (h, p) => {
+  await runAutofill(p);
+  await runAutofill(p);
+  await expect.poll(() => logs(h).length).toBe(1);
+  expect(logs(h)[0].steps).toBe(1);
+}));
+test('7b: Stop during filling logs fields already filled', async () => scenario(async (h, p) => {
+  h.helper.setKey('anthropic', 'fixture-key');
+  const { popup, tabId } = await openPopup(p);
+  await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'SAVE_CONFIG', patch: { provider: 'anthropic', models: { anthropic: 'fake-anthropic-a' } } }));
+  await h.worker.evaluate(async tabId => chrome.scripting.executeScript({ target: { tabId }, func: () => {
+    const send = chrome.runtime.sendMessage.bind(chrome.runtime);
+    chrome.runtime.sendMessage = async msg => msg.type === 'DRAFT' ? (await AF.util.sleep(1500), { text: 'Delayed draft', cached: false }) : send(msg);
+  } }), tabId);
+  await p.locator('main').evaluate(e => e.innerHTML = '<form aria-label="Application"><label>First name<input></label><label>Why this role?<textarea></textarea></label></form>');
+  await popup.getByRole('button', { name: 'Autofill page', exact: true }).click();
+  await expect(p.locator('main input')).toHaveValue('Jordan');
+  await p.getByRole('button', { name: 'Stop', exact: true }).click();
+  await expect.poll(() => logs(h).length).toBe(1);
+  expect(logs(h)[0]).toMatchObject({ steps: 1, green: 1 }); await popup.close();
+}));

@@ -88,7 +88,7 @@
     const dropSlots = widgets.filter(({ kind }) => kind === 'drop');
 
     const all = U.deepQueryAll(scope, U.CONTROLS).filter((el) => !inSignInForm(el));
-    const items = [];
+    const items = opts.items || [];
     const pending = []; // entries that need a read-back
     const seenGroups = new Set();
     const handled = new Set(); // controls that already have an item or were left alone
@@ -395,7 +395,7 @@
       const marker = crypto.randomUUID();
       entry.el.setAttribute(attribute, marker);
       try {
-        await chrome.runtime.sendMessage({ type: 'DEBUGGER_FILL', selector: `[${attribute}="${marker}"]`, kind: 'text', value: entry.value });
+        await chrome.runtime.sendMessage({ type: 'DEBUGGER_FILL', runId: opts.runId, selector: `[${attribute}="${marker}"]`, kind: 'text', value: entry.value });
         entry.el.blur();
         await U.sleep(SETTLE_MS);
       } catch (_) { /* Read-back below remains authoritative when real input fails. */ }
