@@ -435,4 +435,13 @@
   }
 
   AF.fillPage = fillPage;
+  AF.requiredEmptyCount = function (scope) {
+    const adapter = AF.adapterFor(root.location.hostname);
+    const signInForms = new Set(U.deepQueryAll(scope, 'form').filter(form => adapter.isSignIn(form)));
+    const all = U.deepQueryAll(scope, U.CONTROLS)
+      .filter(el => !signInForms.has(el.form || el.closest('form')));
+    const missing = [];
+    requiredPass(all, missing, entry => missing.push(entry));
+    return missing.length;
+  };
 })(globalThis);

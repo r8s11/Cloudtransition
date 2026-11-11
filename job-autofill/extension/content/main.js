@@ -21,7 +21,7 @@
     captcha: AF.captcha(),
     yellow: lastItems.filter(i => i.level === 'yellow' && !['Required field still needs input', "Couldn't set this field"].includes(i.reason)).length,
     aiDrafts: lastItems.filter(i => i.ai).length,
-    required: lastItems.filter(i => i.reason === 'Required field still needs input').length,
+    required: AF.requiredEmptyCount(root.document),
     readback: lastItems.filter(i => i.reason === "Couldn't set this field" || (i.filled !== false && i.read && !i.read(i.el))).length,
     button: AF.safeButton(AF.adapterFor(location.hostname))?.kind || '',
   });
@@ -45,15 +45,16 @@
     if (!check.ok) return finish(msg, 'stopped', check.reason, check.code);
     const action = await chrome.runtime.sendMessage({ type: 'SAFE_ACTION', runId: msg.runId });
     if (action?.error) return finish(msg, 'stopped', action.error, action.code || 'button');
-    if (action.kind === 'submit') {
-      AF.wizard.stop();
-      const end = Date.now() + 15000;
-      while (currentRun === msg.runId && Date.now() < end) {
-        if (AF.confirmed(AF.adapterFor(location.hostname))) return finish(msg, 'submitted_confirmed');
-        await AF.util.sleep(100);
-      }
-      if (currentRun === msg.runId) return finish(msg, 'submitted_unconfirmed');
+    if (action.kind === 'submit') return waitForConfirmation(msg, AF.adapterFor(location.hostname), action.deadline);
+  }
+
+  async function waitForConfirmation(msg, adapter, deadline) {
+    AF.wizard.stop();
+    while (currentRun === msg.runId && Date.now() < deadline) {
+      if (AF.confirmed(adapter)) return finish(msg, 'submitted_confirmed');
+      await AF.util.sleep(100);
     }
+    if (currentRun === msg.runId) return finish(msg, 'submitted_unconfirmed');
   }
 
   async function loadResume() {
@@ -176,6 +177,6 @@
     currentRun = state.runId;
     lastStep = state.step || 1;
     const sourceAdapter = AF.adapterFor(state.sourceHostname);
-    if (AF.confirmed(sourceAdapter)) await finish(state, 'submitted_confirmed');
+    await waitForConfirmation(state, sourceAdapter, state.submitDeadline);
   }).catch(() => {});
 })(globalThis);

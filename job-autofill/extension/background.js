@@ -405,15 +405,16 @@ async function safeAction(tabId, runId) {
       if (run.submittedUrls.includes(run.url)) return false;
       run.submittedUrls.push(run.url);
       run.pendingSubmit = true;
+      run.submitDeadline = Date.now() + 15000;
     }
-    return true;
+    return { deadline: run.submitDeadline };
   });
   if (!claimed) return { error: 'Already submitted from this tab', code: 'duplicate' };
   if (state.action.kind === 'submit') setTimeout(() => {
     finishRun(tabId, { runId, status: 'submitted_unconfirmed' }).catch(() => {});
-  }, 15000);
+  }, Math.max(0, claimed.deadline - Date.now()));
   await chrome.tabs.sendMessage(tabId, { type: 'SAFE_CLICK', runId }, { frameId: state.action.frameId });
-  return { kind: state.action.kind };
+  return { kind: state.action.kind, deadline: claimed.deadline };
 }
 
 // ---- message routing --------------------------------------------------------------------

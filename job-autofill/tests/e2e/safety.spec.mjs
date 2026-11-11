@@ -96,3 +96,47 @@ test('U21: exactly one value-free record per filled and submitted run', async ()
     for (const value of ['Jordan', 'Avery', 'jordan.avery@example.test', '555-010-0199']) expect(JSON.stringify(rec)).not.toContain(value);
   }
 }); });
+
+for (const mutation of ['inserted', 'cleared']) {
+  test(`F4: ${mutation === 'inserted' ? 'required field inserted' : 'prefilled required field cleared'} after fill blocks submit`, async () => { await setup(async h => {
+    const { popup, tabId } = await openPopup(h.page);
+    await popup.close();
+    await h.worker.evaluate(async ({ tabId, mutation }) => {
+      await chrome.scripting.executeScript({
+        target: { tabId }, args: [mutation],
+        func: mutation => {
+          if (mutation === 'cleared') document.querySelector('#first_name').value = 'Jordan';
+          const fill = AF.fillPage;
+          AF.fillPage = async (...args) => {
+            const result = await fill(...args);
+            if (mutation === 'inserted') {
+              const input = document.createElement('input');
+              input.required = true;
+              input.id = 'late-required';
+              document.querySelector('form').append(input);
+            } else document.querySelector('#first_name').value = '';
+            return result;
+          };
+        },
+      });
+    }, { tabId, mutation });
+    await stopped(h, '1 required field empty', 'required');
+    await expect(h.page.locator(mutation === 'inserted' ? '#late-required' : '#first_name')).toHaveValue('');
+  }); });
+}
+
+test('U15: confirmation rendered after navigation is detected', async () => { await setup(async h => {
+  await h.context.route('**/receipt.html*', route => route.fulfill({
+    contentType: 'text/html',
+    body: '<!doctype html><html lang="en"><body><h1>Processing application</h1><script>setTimeout(() => document.querySelector("h1").textContent = "Thank you for applying", 700)</script></body></html>',
+  }));
+  await h.page.goto(h.fixtureUrl('greenhouse-submit.html'));
+  await h.page.locator('form').evaluate(form => { form.action = 'receipt.html'; });
+  const result = await runAutofill(h.page, { submit: true });
+  expect(result.status).toBe('submitted_confirmed');
+  await expect(h.page).toHaveURL(/receipt.html/);
+  await expect(h.page.locator('#autofill-hud')).toContainText('Submitted · confirmed');
+  await expect.poll(() => logs(h).length).toBe(1);
+  expect(logs(h)[0].outcome).toBe('submitted_confirmed');
+  expect(await h.page.evaluate(() => sessionStorage.getItem('submitClicks'))).toBe('1');
+}); });
