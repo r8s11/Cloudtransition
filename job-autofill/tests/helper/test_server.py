@@ -118,6 +118,23 @@ class F7RefusalTest(ServerCase):
         self.assertEqual(payload['imported']['fullName'], 'Jordan Avery')
         self.assertIn('profile.json', self.store.reads)
 
+    def test_F7_get_through_post_override_needs_the_same_credentials(self):
+        # Chrome omits Origin on extension GETs, so reads go as POST + X-HTTP-Method-Override.
+        override = {'X-HTTP-Method-Override': 'GET'}
+        status, payload = self.json('POST', '/profile', headers=override)
+        self.assertEqual(status, 200)
+        self.assertEqual(payload['imported']['fullName'], 'Jordan Avery')
+        self.assertEqual(self.json('POST', '/health', headers=override)[1]['ok'], True)
+        self.store.reads.clear()
+        for label, kw in {'no token': dict(token=None), 'wrong token': dict(token='nope'),
+                          'evil origin': dict(origin='https://evil.example'),
+                          'no origin': dict(origin=None)}.items():
+            status, _, body = self.request('POST', '/profile', headers=override, **kw)
+            self.assertEqual((status, body), (403, b''), label)
+        self.assertEqual(self.store.reads, [])
+        # The override only turns POST into GET: it does not unlock write routes.
+        self.assertEqual(self.request('POST', '/draft', body={}, headers=override)[0], 404)
+
     def test_F7_every_route_and_method_refuses_without_credentials(self):
         self.store.reads.clear()
         for method, path in (('GET', '/health'), ('PUT', '/profile'), ('GET', '/resume.pdf'),

@@ -3,8 +3,122 @@
 <head>
   <meta charset="utf-8">
   <title>AutoFill</title>
+  <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <main id="app"></main>
+<div class="popup" role="dialog" aria-label="AutoFill">
+  <header>
+    <h1>AutoFill <span class="status" id="status"><span class="dot" id="dot"></span><span id="status-text">Checking helper…</span></span></h1>
+  </header>
+
+  <!-- Not paired -->
+  <main id="view-pair" hidden>
+    <div class="hint" id="pair-hint">Not paired with the helper. Start it, then paste the token it printed:</div>
+    <div class="card mono">python3 job-autofill/helper/server.py</div>
+    <div class="field"><label for="token">Pairing token</label><input type="password" id="token" placeholder="Paste token" autocomplete="off" spellcheck="false"></div>
+    <button id="pair" type="button">Pair</button>
+    <div class="msg err" id="pair-msg" role="alert"></div>
+    <button class="primary" type="button" disabled id="pair-run">Autofill page</button>
+    <div class="hint">Autofill needs one sync with the helper first.</div>
+  </main>
+
+  <!-- Paired -->
+  <div id="view-main" hidden>
+    <div class="tabs" role="tablist" aria-label="AutoFill sections">
+      <button type="button" role="tab" id="tab-run" aria-controls="panel-run" aria-selected="true" data-panel="run">Run</button>
+      <button type="button" role="tab" id="tab-profile" aria-controls="panel-profile" aria-selected="false" tabindex="-1" data-panel="profile">Profile</button>
+      <button type="button" role="tab" id="tab-ai" aria-controls="panel-ai" aria-selected="false" tabindex="-1" data-panel="ai">AI</button>
+    </div>
+
+    <!-- Run -->
+    <main id="panel-run" role="tabpanel" aria-labelledby="tab-run">
+      <div class="warnline" id="offline-line" hidden></div>
+      <button class="primary" type="button" id="run">Autofill page</button>
+      <button class="switch" type="button" role="switch" id="submit" aria-checked="false" aria-labelledby="submit-label" aria-describedby="submit-hint">
+        <span class="track"></span>
+        <span><b id="submit-label">Continue and submit when safe</b><span class="hint" id="submit-hint"></span></span>
+      </button>
+      <div class="card" id="run-card" hidden>
+        <h2 id="run-card-title"></h2>
+        <div id="run-card-line"></div>
+        <div class="counts" id="run-card-counts"></div>
+        <div class="hint mt" id="run-card-hint" hidden></div>
+      </div>
+      <div class="msg" id="run-msg" aria-live="polite"></div>
+    </main>
+
+    <!-- Profile -->
+    <main id="panel-profile" role="tabpanel" aria-labelledby="tab-profile" hidden>
+      <div class="errline" id="profile-error" hidden></div>
+      <div class="warnline" id="profile-missing" hidden></div>
+      <div class="src" id="profile-src"></div>
+      <div class="grid2">
+        <div class="field"><label for="p-first">First name</label><input type="text" id="p-first" readonly></div>
+        <div class="field"><label for="p-last">Last name</label><input type="text" id="p-last" readonly></div>
+      </div>
+      <div class="field"><label for="p-email">Email</label><input type="text" id="p-email" readonly></div>
+      <div class="grid2">
+        <div class="field"><label for="p-phone">Phone</label><input type="text" id="p-phone" readonly></div>
+        <div class="field"><label for="p-city">City, State</label><input type="text" id="p-city" readonly></div>
+      </div>
+      <div class="field"><label for="p-links">LinkedIn · GitHub · Website</label><input type="text" id="p-links" readonly></div>
+
+      <div class="src mt">Yours to set · never guessed · stored on this Mac only</div>
+      <div class="grid2">
+        <div class="field"><label for="m-street">Street address</label><input type="text" id="m-street" placeholder="Leave blank" autocomplete="off"></div>
+        <div class="field"><label for="m-zip">ZIP</label><input type="text" id="m-zip" placeholder="Leave blank" autocomplete="off"></div>
+      </div>
+      <div class="field"><label for="m-country">Country</label><input type="text" id="m-country" placeholder="Leave blank" autocomplete="off"></div>
+      <div class="grid2">
+        <div class="field"><label for="m-workAuthorization">Authorized to work in the US</label><select id="m-workAuthorization"></select></div>
+        <div class="field"><label for="m-needsSponsorship">Needs sponsorship</label><select id="m-needsSponsorship"></select></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="m-gender">Gender</label><select id="m-gender"></select></div>
+        <div class="field"><label for="m-race">Race / ethnicity</label><select id="m-race"></select></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="m-veteran">Veteran status</label><select id="m-veteran"></select></div>
+        <div class="field"><label for="m-disability">Disability status</label><select id="m-disability"></select></div>
+      </div>
+
+      <div class="field" role="group" aria-labelledby="resume-label">
+        <label id="resume-label">Resume file</label>
+        <div class="card mono resume-row" id="resume-row"><span id="resume-text">No file chosen</span><button type="button" id="resume-change" aria-expanded="false">Change</button></div>
+      </div>
+      <div class="change-row" id="resume-edit" hidden>
+        <div class="field"><label for="resume-path">Path to your resume PDF</label><input type="text" id="resume-path" placeholder="~/Documents/resume.pdf" autocomplete="off" spellcheck="false"></div>
+        <button type="button" id="resume-set">Use this file</button>
+      </div>
+      <div class="errline" id="resume-error" hidden></div>
+      <div class="hint" id="profile-hint" hidden>Fields that are missing stay empty on forms. Required ones turn yellow so you can fill them.</div>
+      <button type="button" id="profile-save">Save profile</button>
+      <div class="msg" id="profile-msg" aria-live="polite"></div>
+    </main>
+
+    <!-- AI -->
+    <main id="panel-ai" role="tabpanel" aria-labelledby="tab-ai" hidden>
+      <div class="hint">Drafts answers to open questions from your resume text only. Every draft is yellow until you review it, so a page with a draft is never auto-submitted.</div>
+      <fieldset class="field">
+        <legend>Provider</legend>
+        <div class="radios">
+          <label><input type="radio" name="provider" value="anthropic" id="prov-anthropic"> Claude</label>
+          <label><input type="radio" name="provider" value="openai" id="prov-openai"> OpenAI</label>
+        </div>
+      </fieldset>
+      <div class="errline" id="ai-error" hidden></div>
+      <div class="field"><label for="model" id="model-label">Model</label><select id="model" disabled></select></div>
+      <div class="src" id="key-line" hidden></div>
+      <div class="field"><label for="cap">AI calls per day</label><input type="text" id="cap" inputmode="numeric" autocomplete="off"></div>
+      <button class="switch" type="button" role="switch" id="fallback" aria-checked="true" aria-labelledby="fallback-label" aria-describedby="fallback-hint">
+        <span class="track"></span>
+        <span><b id="fallback-label">Real input for stubborn fields</b><span class="hint" id="fallback-hint">Uses Chrome's debugger only when a field rejects simulated typing. Chrome shows "started debugging this browser" while it runs.</span></span>
+      </button>
+      <button type="button" id="ai-save">Save</button>
+      <div class="msg" id="ai-msg" aria-live="polite"></div>
+    </main>
+  </div>
+</div>
+<script src="popup.js"></script>
 </body>
 </html>

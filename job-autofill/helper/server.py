@@ -133,6 +133,13 @@ class Handler(BaseHTTPRequestHandler):
         self._dispatch('PUT')
 
     def do_POST(self):
+        # Chrome sends no Origin header on GETs an extension makes to a host it has permission
+        # for (PUT/POST carry it), so the extension reads through POST + this header. A plain
+        # GET without an extension Origin is still refused.
+        if self.headers.get('X-HTTP-Method-Override') == 'GET':
+            if self.headers.get('Content-Length', '0').strip() not in ('', '0'):
+                self.close_connection = True  # a GET's body is never read
+            return self._dispatch('GET')
         self._dispatch('POST')
 
     def do_OPTIONS(self):
@@ -142,7 +149,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(204)
         self.send_header('Access-Control-Allow-Origin', origin)
         self.send_header('Access-Control-Allow-Methods', 'GET, PUT, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'X-Job-Autofill-Token, Content-Type')
+        self.send_header('Access-Control-Allow-Headers', 'X-Job-Autofill-Token, X-HTTP-Method-Override, Content-Type')
         self.send_header('Access-Control-Max-Age', '600')
         self.send_header('Vary', 'Origin')
         self.send_header('Content-Length', '0')

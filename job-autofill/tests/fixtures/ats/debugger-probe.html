@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Debugger probe</title></head>
+<body>
+  <!-- Accepts a value only from trusted (real) input events; simulated ones are wiped. -->
+  <label for="probe">Probe</label>
+  <input id="probe" type="text">
+  <script>
+    const probe = document.getElementById('probe');
+    probe.addEventListener('input', (e) => {
+      if (!e.isTrusted) probe.value = '';
+    });
+  </script>
+</body>
+</html>
