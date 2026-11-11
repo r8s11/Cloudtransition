@@ -390,6 +390,7 @@
       entry.el.setAttribute(attribute, marker);
       try {
         await chrome.runtime.sendMessage({ type: 'DEBUGGER_FILL', selector: `[${attribute}="${marker}"]`, kind: 'text', value: entry.value });
+        entry.el.blur();
         await U.sleep(SETTLE_MS);
       } catch (_) { /* Read-back below remains authoritative when real input fails. */ }
       finally {

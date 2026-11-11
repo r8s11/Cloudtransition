@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>IT Support Specialist at Northwind</title>
+  <!-- Test-only: honored by the extension only on 127.0.0.1 / localhost. -->
+  <meta name="autofill-test-ats" content="greenhouse">
+  <style>
+    body { font: 14px Arial, sans-serif; margin: 24px; max-width: 700px; }
+    .field { margin-bottom: 12px; }
+    label { display: block; font-weight: 700; margin-bottom: 4px; }
+    input[type=text], input[type=email], input[type=tel], select { width: 100%; padding: 8px; border: 1px solid #bbb; border-radius: 4px; font: inherit; }
+    input[type=file] { border: 1px solid #bbb; padding: 6px; width: 100%; }
+  </style>
+</head>
+<body>
+  <h1 class="app-title">IT Support Specialist</h1>
+  <div class="company-name">Northwind</div>
+  <form id="application_form" action="confirmation.html" method="get">
+    <div class="field"><label for="first_name">First Name <span aria-hidden="true">*</span></label><input id="first_name" name="first_name" type="text" required></div>
+    <div class="field"><label for="last_name">Last Name <span aria-hidden="true">*</span></label><input id="last_name" name="last_name" type="text" required></div>
+    <div class="field"><label for="email">Email <span aria-hidden="true">*</span></label><input id="email" name="email" type="email" required></div>
+    <div class="field"><label for="phone">Phone</label><input id="phone" name="phone" type="tel"></div>
+    <div class="field"><label for="candidate-location">Location (City) <span aria-hidden="true">*</span></label><input id="candidate-location" name="candidate_location" type="text" required></div>
+    <div class="field"><label for="resume">Resume/CV <span aria-hidden="true">*</span></label><input id="resume" name="resume" type="file" required></div>
+    <div class="field"><label for="cover_letter">Cover Letter</label><input id="cover_letter" name="cover_letter" type="file"></div>
+    <div class="field"><label for="question_1">LinkedIn Profile</label><input id="question_1" name="question_1" type="text"></div>
+    <div class="field"><label for="question_2">Website</label><input id="question_2" name="question_2" type="text"></div>
+    <div class="field"><label for="question_3">Are you legally authorized to work in the US? <span aria-hidden="true">*</span></label>
+      <select id="question_3" name="question_3" required><option value="">Please select</option><option value="1">Yes</option><option value="0">No</option></select></div>
+    <div class="field"><label for="question_4">Will you now or in the future require sponsorship? <span aria-hidden="true">*</span></label>
+      <select id="question_4" name="question_4" required><option value="">Please select</option><option value="1">Yes</option><option value="0">No</option></select></div>
+    <div class="field"><label for="gender">Gender</label>
+      <select id="gender" name="gender"><option value="">Please select</option><option value="1">Male</option><option value="2">Female</option><option value="3">Decline To Self Identify</option></select></div>
+    <div class="field"><label for="race">Race</label>
+      <select id="race" name="race"><option value="">Please select</option><option value="1">Hispanic or Latino</option><option value="2">White</option><option value="3">Black or African American</option><option value="4">Asian</option><option value="5">Two or More Races</option><option value="6">Decline To Self Identify</option></select></div>
+    <div class="field"><label for="veteran_status">Veteran Status</label>
+      <select id="veteran_status" name="veteran_status"><option value="">Please select</option><option value="1">I am not a protected veteran</option><option value="2">I identify as one or more of the classifications of protected veteran</option><option value="3">I don't wish to answer</option></select></div>
+    <div class="field"><label for="disability_status">Disability Status</label>
+      <select id="disability_status" name="disability_status"><option value="">Please select</option><option value="1">Yes, I have a disability, or have had one in the past</option><option value="2">No, I do not have a disability and have not had one in the past</option><option value="3">I do not want to answer</option></select></div>
+    <button id="submit_app" type="submit">Submit application</button>
+  </form>
+  <script>
+    // The fixture counts Submit clicks so tests can assert that nothing was clicked.
+    document.body.dataset.submitClicks = '0';
+    document.getElementById('submit_app').addEventListener('click', function (e) {
+      document.body.dataset.submitClicks = String(Number(document.body.dataset.submitClicks) + 1);
+      e.preventDefault();
+    });
+  </script>
+<iframe src="captcha-frame.html?hcaptcha" title="Embedded form"></iframe></body>
+</html>

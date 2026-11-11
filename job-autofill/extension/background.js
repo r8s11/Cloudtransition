@@ -208,6 +208,7 @@ async function startRun({ tabId, submit }) {
   if (!st.profile || !st.syncedAt) return { error: NEEDS_SYNC };
 
   const runId = crypto.randomUUID();
+  const frameIds = (await chrome.scripting.executeScript({ target: { tabId, allFrames: true }, func: () => true })).map(r => r.frameId);
   const now = Date.now();
   await mutateRuns((all) => {
     const prev = all[tabId];
@@ -217,6 +218,10 @@ async function startRun({ tabId, submit }) {
       step: 0,
       fingerprints: [],
       frames: {},
+      frameIds,
+      path: new URL(tab.url).pathname,
+      sourceHostname: new URL(tab.url).hostname,
+      url: tab.url,
       counts: { green: 0, yellow: 0, filled: 0, ai_drafts: 0, ai_calls: 0, fields: null },
       status: 'running',
       reason: '',
@@ -252,6 +257,7 @@ function applyReport(tabId, summary, frameId = 0) {
     const run = all[tabId];
     if (!run || !summary || (summary.runId && summary.runId !== run.runId)) return false;
     if (RUN_STATUSES.includes(summary.status)) run.status = summary.status;
+    if (typeof summary.ats === 'string') run.ats = summary.ats;
     if (typeof summary.reason === 'string') run.reason = summary.reason;
     if (Number.isInteger(summary.step)) run.step = Math.max(run.step || 0, summary.step);
     if (summary.counts && typeof summary.counts === 'object') {
@@ -344,6 +350,72 @@ async function logRun(rec) {
   return r.status === 200 ? { ok: true } : { error: 'run log not written' };
 }
 
+async function runState(tabId, runId) {
+  await runsQueue;
+  const { runs = {} } = await chrome.storage.session.get('runs');
+  const run = runs[tabId];
+  return run && (!runId || run.runId === runId) ? run : null;
+}
+
+async function pageState(tabId, runId) {
+  const run = await runState(tabId, runId);
+  if (!run || !run.frameIds.every(id => run.frames[id])) return { ready: false };
+  const snapshots = await chrome.scripting.executeScript({
+    target: { tabId, allFrames: true },
+    func: () => globalThis.AF?.pageSafety?.() || { captcha: '', yellow: 0, required: 0, readback: 0, aiDrafts: 0, button: '' },
+  });
+  const safety = { captcha: '', yellow: 0, required: 0, readback: 0, aiDrafts: 0, button: false, submitted: run.submittedUrls.includes(run.url) };
+  let action = null;
+  for (const { frameId, result } of snapshots) {
+    safety.captcha ||= result.captcha;
+    for (const key of ['yellow', 'required', 'readback', 'aiDrafts']) safety[key] += result[key] || 0;
+    if (result.button && !action) action = { frameId, kind: result.button };
+  }
+  safety.button = !!action;
+  return { ready: true, safety, action };
+}
+
+async function finishRun(tabId, msg) {
+  const rec = await mutateRuns(all => {
+    const run = all[tabId];
+    if (!run || run.runId !== msg.runId || run.logged) return null;
+    run.status = msg.status;
+    run.reason = msg.reason || '';
+    run.pendingSubmit = false;
+    run.logged = true;
+    const c = run.counts;
+    return { host: run.host, path: run.path, ats: run.ats || 'generic', green: c.green, yellow: c.yellow,
+      ai_drafts: c.ai_drafts, ai_calls: c.ai_calls, steps: run.step,
+      outcome: msg.status === 'stopped' ? `stopped:${msg.code || 'stopped'}` : msg.status };
+  });
+  return rec ? logRun(rec) : { ok: true };
+}
+
+async function safeAction(tabId, runId) {
+  const state = await pageState(tabId, runId);
+  const check = (await chrome.scripting.executeScript({
+    target: { tabId, frameIds: [0] }, args: [state.safety],
+    func: safety => globalThis.AF.safetyCheck(safety),
+  }))[0].result;
+  if (!check.ok) return { error: check.reason, code: check.code };
+  const claimed = await mutateRuns(all => {
+    const run = all[tabId];
+    if (!run || run.runId !== runId || run.pendingSubmit || run.logged || !run.submit) return false;
+    if (state.action.kind === 'submit') {
+      if (run.submittedUrls.includes(run.url)) return false;
+      run.submittedUrls.push(run.url);
+      run.pendingSubmit = true;
+    }
+    return true;
+  });
+  if (!claimed) return { error: 'Already submitted from this tab', code: 'duplicate' };
+  if (state.action.kind === 'submit') setTimeout(() => {
+    finishRun(tabId, { runId, status: 'submitted_unconfirmed' }).catch(() => {});
+  }, 15000);
+  await chrome.tabs.sendMessage(tabId, { type: 'SAFE_CLICK', runId }, { frameId: state.action.frameId });
+  return { kind: state.action.kind };
+}
+
 // ---- message routing --------------------------------------------------------------------
 const POPUP_ONLY = new Set(['RUN', 'SYNC', 'PAIR', 'SAVE_PROFILE', 'SAVE_CONFIG', 'MODELS']);
 
@@ -366,8 +438,11 @@ async function handle(msg, sender) {
     case 'SAVE_CONFIG': return saveConfig(msg.patch, msg.fallback);
     case 'MODELS': return listModels(msg.provider);
     case 'DRAFT': return draft(msg.req);
+    case 'RUN_STATE': return runState(tabId);
+    case 'PAGE_STATE': return pageState(tabId, msg.runId);
+    case 'SAFE_ACTION': return safeAction(tabId, msg.runId);
     case 'REPORT': return { ok: await applyReport(tabId, msg.summary, trusted ? 0 : sender.frameId || 0) };
-    case 'LOG_RUN': return logRun(msg.rec);
+    case 'LOG_RUN': return finishRun(tabId, msg);
     case 'DEBUGGER_FILL': return debuggerFill(tabId, { ...msg, frameId: trusted ? msg.frameId || 0 : sender.frameId || 0 });
     default: return { error: `unknown message ${msg.type}` };
   }

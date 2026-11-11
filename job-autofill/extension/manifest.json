@@ -12,7 +12,7 @@
       "matches": ["<all_urls>"],
       "all_frames": true,
       "run_at": "document_idle",
-      "js": ["content/util.js", "content/scorer.js", "content/matcher.js", "content/drafts.js", "content/adapters.js", "content/fill.js", "content/hud.js", "content/wizard.js", "content/main.js"]
+      "js": ["content/util.js", "content/scorer.js", "content/matcher.js", "content/drafts.js", "content/adapters.js", "content/fill.js", "content/hud.js", "content/wizard.js", "content/safety.js", "content/main.js"]
     }
   ]
 }
