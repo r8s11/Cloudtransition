@@ -137,6 +137,7 @@ function renderRunCard(run, active, canFill, hasCache) {
   const counts = (run && run.counts) || {};
   const green = counts.green || 0;
   const yellow = counts.yellow || 0;
+  const filled = counts.filled || 0;
   const aiDrafts = counts.ai_drafts || 0;
   const noFields = run && !active && counts.fields === 0 && run.status !== 'error';
 
@@ -144,12 +145,12 @@ function renderRunCard(run, active, canFill, hasCache) {
   if (run && !noFields) {
     setText($('run-card-title'), `${active ? 'Running' : 'Last run'} · ${run.host || ''}`);
     setText($('run-card-line'), active
-      ? `Step ${Math.max(run.step, 1)} of ? · ${green + yellow} filled so far`
-      : `Filled ${green + yellow} · ${yellow} to review`);
+      ? `Step ${Math.max(run.step, 1)} of ? · ${filled} filled so far`
+      : `Filled ${filled} · ${yellow} to review`);
     const pills = $('run-card-counts');
     pills.textContent = '';
     const pill = (cls, text) => { const s = document.createElement('span'); s.className = 'pill ' + cls; s.textContent = text; pills.appendChild(s); };
-    if (active) pill('ok', `✓ ${green + yellow}`);
+    if (active) pill('ok', `✓ ${filled}`);
     else {
       pill('ok', `✓ ${green} from profile`);
       if (yellow) pill('rv', `! ${yellow} to review`);
@@ -173,7 +174,7 @@ function renderRunCard(run, active, canFill, hasCache) {
   else if (!hasCache) { text = 'Autofill needs one sync with the helper first.'; }
   else if (noFields) { text = 'No form fields found on this page'; }
   else if (active) { text = counts.fields == null ? 'Filling this page…' : 'Waiting for the next step…'; }
-  else if (run && run.status === 'filled') { text = `Filled ${green + yellow} · ${yellow} to review`; msg.classList.add('ok'); }
+  else if (run && run.status === 'filled') { text = `Filled ${filled} · ${yellow} to review`; msg.classList.add('ok'); }
   else if (run && run.status === 'stopped') { text = `Stopped: ${run.reason}`; msg.classList.add('err'); }
   else if (run && run.status === 'submitted_confirmed') { text = 'Submitted · confirmed'; msg.classList.add('ok'); }
   else if (run && run.status === 'submitted_unconfirmed') { text = 'Submitted · not confirmed — check the page before trying again'; msg.classList.add('err'); }

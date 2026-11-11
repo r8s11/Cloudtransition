@@ -9,6 +9,7 @@
 (function (root) {
   'use strict';
   const AF = (root.AF = root.AF || {});
+  if (AF.fillPage) return; // Re-injection must preserve read-back history.
   const U = AF.util;
 
   const SETTLE_MS = 150;
@@ -108,6 +109,7 @@
         fillRadioGroup(group, claims, profile, pending, add, handled);
         continue;
       }
+      if (type === 'checkbox') { fields += 1; continue; }
       if (tag === 'INPUT' && !TEXT_TYPES.has(type)) continue;
       fields += 1;
 
@@ -128,7 +130,7 @@
     await U.sleep(SETTLE_MS);
     for (const p of pending) verify(p);
 
-    requiredPass(all, items, handled, add);
+    requiredPass(all, items, add);
     return { items, aiQueue: [], fields };
   }
 
@@ -174,11 +176,20 @@
     const { opt, index } = hit.option;
     U.setNative(el, opt.value);
     if (el.selectedIndex !== index) { el.selectedIndex = index; el.dispatchEvent(new Event('change', { bubbles: true })); }
-    pending.push(add({
+    const entry = {
       el, key, kind: 'select', value, filled: true,
       level: hit.score >= 85 ? 'green' : 'yellow', reason: hit.score >= 85 ? R_PROFILE : R_CLOSE,
-      read: (e) => e.selectedIndex === index && !isPlaceholderOption(e.options[e.selectedIndex]),
-    }));
+      read: (e) => {
+        const selected = e.options[e.selectedIndex];
+        if (isPlaceholderOption(selected)) return false;
+        const score = optionScore(selected.textContent, selected.value, value);
+        if (score < 70) return false;
+        entry.level = score >= 85 ? 'green' : 'yellow';
+        entry.reason = score >= 85 ? R_PROFILE : R_CLOSE;
+        return true;
+      },
+    };
+    pending.push(add(entry));
   }
 
   // True when this run's earlier pass filled the control and its value is still there.
@@ -256,21 +267,28 @@
 
   // A required control still empty at the end is yellow with its reason. Counted for the
   // report here; blocking a submit on it is the safety checks' job.
-  function requiredPass(all, items, handled, add) {
+  function requiredPass(all, items, add) {
     const seen = new Set();
+    const mark = (el, kind, group = [el]) => {
+      const existing = items.find((item) => group.includes(item.el));
+      const entry = { el, key: null, kind, filled: false, level: 'yellow', reason: R_REQUIRED };
+      if (existing) Object.assign(existing, { filled: false, level: 'yellow', reason: R_REQUIRED });
+      else add(entry);
+    };
     for (const el of all) {
-      if (handled.has(el) || el.disabled || el.readOnly || !isRequired(el) || !U.isVisible(el)) continue;
+      if (el.disabled || el.readOnly || !U.isVisible(el)) continue;
       const type = el.tagName === 'INPUT' ? el.type : el.tagName === 'SELECT' ? 'select' : 'textarea';
-      if (type === 'checkbox' || type === 'file') continue;
+      if (type === 'file') continue;
       if (type === 'radio') {
         const group = radiosOf(el);
-        if (seen.has(group[0]) || group.some((r) => r.checked)) continue;
+        if (seen.has(group[0])) continue;
         seen.add(group[0]);
-        add({ el: group[0], key: null, kind: 'radio', filled: false, level: 'yellow', reason: R_REQUIRED });
+        if (group.some(isRequired) && !group.some((r) => r.checked)) mark(group[0], 'radio', group);
         continue;
       }
-      const empty = type === 'select' ? !selectHasValue(el) : el.value.trim() === '';
-      if (empty) add({ el, key: null, kind: type, filled: false, level: 'yellow', reason: R_REQUIRED });
+      if (!isRequired(el)) continue;
+      const empty = type === 'checkbox' ? !el.checked : type === 'select' ? !selectHasValue(el) : el.value.trim() === '';
+      if (empty) mark(el, type);
     }
   }
 

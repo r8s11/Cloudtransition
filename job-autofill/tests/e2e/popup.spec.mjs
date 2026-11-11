@@ -6,7 +6,7 @@ import { HELPER, freePort, launch, openPopup, runAutofill, stubContent } from '.
 
 const mode = (p) => statSync(p).mode & 0o777;
 const readJson = (h, name) => JSON.parse(readFileSync(path.join(h.helper.home, name), 'utf8'));
-const FILLED = { status: 'filled', step: 1, counts: { green: 13, yellow: 1, ai_drafts: 1, ai_calls: 1, fields: 14 } };
+const FILLED = { status: 'filled', step: 1, counts: { green: 13, yellow: 1, filled: 14, ai_drafts: 1, ai_calls: 1, fields: 14 } };
 
 async function withHelper(fn, opts) {
   const h = await launch(opts);
@@ -302,7 +302,7 @@ test('popup: a page with no form fields says so', async () => {
   await withHelper(async (h) => {
     await h.pair();
     await h.page.goto(h.fixtureUrl('index.html'));
-    await stubContent(h.page, { report: { status: 'filled', step: 1, counts: { green: 0, yellow: 0, ai_drafts: 0, ai_calls: 0, fields: 0 } } });
+    await stubContent(h.page, { report: { status: 'filled', step: 1, counts: { green: 0, yellow: 0, filled: 0, ai_drafts: 0, ai_calls: 0, fields: 0 } } });
     const run = await runAutofill(h.page);
     expect(run.text).toContain('No form fields found on this page');
   });

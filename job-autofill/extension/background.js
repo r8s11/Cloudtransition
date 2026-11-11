@@ -215,7 +215,7 @@ async function startRun({ tabId, submit }) {
       submit: !!submit,
       step: 0,
       fingerprints: [],
-      counts: { green: 0, yellow: 0, ai_drafts: 0, ai_calls: 0, fields: null },
+      counts: { green: 0, yellow: 0, filled: 0, ai_drafts: 0, ai_calls: 0, fields: null },
       status: 'running',
       reason: '',
       submittedUrls: prev && Array.isArray(prev.submittedUrls) ? prev.submittedUrls : [],

@@ -72,7 +72,7 @@
           runId: msg.runId,
           status: 'filled',
           step: 1,
-          counts: { green: counts.green, yellow: counts.yellow, ai_drafts: 0, ai_calls: 0, fields: counts.fields },
+          counts: { green: counts.green, yellow: counts.yellow, filled: counts.filled, ai_drafts: 0, ai_calls: 0, fields: counts.fields },
         },
       }).catch(() => {});
     }

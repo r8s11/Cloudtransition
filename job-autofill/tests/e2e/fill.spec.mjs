@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { launch, openPopup, runAutofill } from './harness.mjs';
+import { ROOT, launch, openPopup, runAutofill } from './harness.mjs';
+import path from 'node:path';
 
 const GREEN = 'rgb(22, 163, 74)';
 const MANUAL = {
@@ -146,5 +147,115 @@ test('F22: fields that already have a value are left alone', async () => {
     await expect(p.locator('#last_name')).toHaveValue('Avery');
     expect(await greenCount(p)).toBe(12);
     expect(run.text).toContain('Filled 12 \u00b7 0 to review');
+  });
+});
+
+async function loadCore(page, html) {
+  await page.setContent(html);
+  for (const name of ['util', 'scorer', 'matcher', 'adapters', 'fill', 'hud']) {
+    await page.addScriptTag({ path: path.join(ROOT, 'extension', 'content', `${name}.js`) });
+  }
+}
+
+test('6a: select read-back rejects a different option at the same index', async ({ page }) => {
+  await loadCore(page, '<label>State<select><option value="">Select</option><option value="IL">Illinois</option></select></label>');
+  const result = await page.evaluate(async () => {
+    const select = document.querySelector('select');
+    select.addEventListener('change', () => setTimeout(() => {
+      select.options[1].value = 'NY';
+      select.options[1].textContent = 'New York';
+    }, 30), { once: true });
+    const { items } = await AF.fillPage(document, { state: 'IL' }, null);
+    return { value: select.value, level: items[0].level, filled: items[0].filled, reason: items[0].reason };
+  });
+  expect(result).toEqual({ value: 'NY', level: 'yellow', filled: false, reason: "Couldn't set this field" });
+});
+
+test('6a: clearing highlights restores mixed border longhands and priorities', async ({ page }) => {
+  await loadCore(page, '<input title="Original hint" style="border-top: 3px dashed red !important; border-right-width: 5px; border-bottom-color: blue !important; border-left-style: dotted; box-shadow: 1px 2px 3px black !important">');
+  const result = await page.evaluate(() => {
+    const input = document.querySelector('input');
+    const properties = ['top', 'right', 'bottom', 'left'].flatMap((side) =>
+      ['width', 'style', 'color'].map((part) => `border-${side}-${part}`)).concat('box-shadow');
+    const snapshot = () => ({
+      styles: properties.map((p) => [p, input.style.getPropertyValue(p), input.style.getPropertyPriority(p)]),
+      title: input.getAttribute('title'),
+    });
+    const before = snapshot();
+    AF.highlight(input, 'green', 'From profile');
+    AF.highlight(input, 'yellow', 'Review');
+    AF.clearHighlights();
+    return { before, after: snapshot() };
+  });
+  expect(result.after).toEqual(result.before);
+});
+
+test('6a: unresolved required radio groups and checkboxes need review', async ({ page }) => {
+  await loadCore(page, `<form>
+    <fieldset><legend>Choose a shift</legend><label><input id="day" type="radio" name="shift" value="day">Day</label>
+    <label><input id="night" type="radio" name="shift" value="night" required>Night</label></fieldset>
+    <label><input id="consent" type="checkbox" required>Consent</label>
+    <label><input id="checked" type="checkbox" required checked>Accepted</label>
+    <label><input id="optional" type="checkbox">Optional</label>
+    <label><input id="disabled" type="checkbox" required disabled>Disabled</label>
+    <fieldset><legend>Chosen shift</legend><label><input type="radio" name="chosen" required>Day</label>
+    <label><input type="radio" name="chosen" checked>Night</label></fieldset>
+  </form>`);
+  const items = await page.evaluate(async () => {
+    const { items } = await AF.fillPage(document, {}, null);
+    for (const item of items) AF.highlight(item.el, item.level, item.reason);
+    return items.map(({ el, level, reason, filled }) => ({ id: el.id, level, reason, filled }));
+  });
+  expect(items).toEqual([
+    { id: 'day', level: 'yellow', reason: 'Required field still needs input', filled: false },
+    { id: 'consent', level: 'yellow', reason: 'Required field still needs input', filled: false },
+  ]);
+  await expect(page.locator('#day')).toHaveAttribute('title', 'AutoFill: Required field still needs input');
+  await expect(page.locator('#consent')).toHaveAttribute('title', 'AutoFill: Required field still needs input');
+});
+
+test('6a: whole-list reinjection preserves one HUD and highlight restoration', async () => {
+  await withExtension(async (h) => {
+    await h.page.goto(h.fixtureUrl('greenhouse.html'));
+    await h.page.locator('#first_name').evaluate((e) => {
+      e.style.borderTop = '3px dashed red';
+      e.title = 'Original hint';
+    });
+    await runAutofill(h.page);
+    const { popup, tabId } = await openPopup(h.page);
+    await popup.close();
+    await h.worker.evaluate(async (tabId) => {
+      await chrome.scripting.executeScript({
+        target: { tabId },
+        files: chrome.runtime.getManifest().content_scripts[0].js,
+      });
+    }, tabId);
+    const run = await runAutofill(h.page);
+    expect(run.text).toContain('Filled 14 · 0 to review');
+    await expect(h.page.locator('#autofill-hud')).toHaveCount(1);
+    await panel(h.page).getByRole('button', { name: 'Clear borders' }).click();
+    await expect(h.page.locator('#first_name')).toHaveAttribute('title', 'Original hint');
+    expect(await h.page.locator('#first_name').evaluate((e) => e.style.borderTop)).toBe('3px dashed red');
+  });
+});
+
+test('6a: REPORT and popup count fills separately from empty required reviews', async () => {
+  await withExtension(async (h) => {
+    await h.page.goto(h.fixtureUrl('generic.html'));
+    await h.page.evaluate(() => {
+      document.body.innerHTML = '<label>First name<input id="name"></label><label>Explain your motivation<textarea required></textarea></label>';
+    });
+    const run = await runAutofill(h.page);
+    expect(run.counts.filled).toBe(1);
+    expect(run.counts.yellow).toBe(1);
+    expect(run.text).toContain('Filled 1 · 1 to review');
+    await expect(panel(h.page)).toContainText('1 filled');
+    const { popup } = await openPopup(h.page);
+    try {
+      await expect(popup.locator('#run-card-line')).toHaveText('Filled 1 · 1 to review');
+      await expect(popup.locator('#run-msg')).toHaveText('Filled 1 · 1 to review');
+    } finally {
+      await popup.close();
+    }
   });
 });

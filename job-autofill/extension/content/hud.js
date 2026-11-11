@@ -9,6 +9,7 @@
 (function (root) {
   'use strict';
   const AF = (root.AF = root.AF || {});
+  if (AF.hud) return; // Keep the panel and original styles across whole-list re-injection.
   const U = AF.util;
 
   const COLORS = {
@@ -16,6 +17,8 @@
     yellow: { border: '#ca8a04', ring: 'rgba(202, 138, 4, 0.22)' },
   };
   const PREFIX = 'AutoFill: ';
+  const STYLE_PROPERTIES = ['top', 'right', 'bottom', 'left'].flatMap((side) =>
+    ['width', 'style', 'color'].map((part) => `border-${side}-${part}`)).concat('box-shadow');
 
   // element -> what it had before the first highlight
   const saved = new Map();
@@ -33,22 +36,25 @@
     const t = targetOf(el);
     if (!saved.has(t)) {
       saved.set(t, {
-        border: [t.style.getPropertyValue('border'), t.style.getPropertyPriority('border')],
-        shadow: [t.style.getPropertyValue('box-shadow'), t.style.getPropertyPriority('box-shadow')],
+        styles: STYLE_PROPERTIES.map((property) =>
+          [property, t.style.getPropertyValue(property), t.style.getPropertyPriority(property)]),
         title: t.getAttribute('title'),
       });
     }
-    t.style.setProperty('border', `2px solid ${c.border}`, 'important');
-    t.style.setProperty('box-shadow', `0 0 0 2px ${c.ring}`, 'important');
+    for (const property of STYLE_PROPERTIES) {
+      const value = property === 'box-shadow' ? `0 0 0 2px ${c.ring}`
+        : property.endsWith('-width') ? '2px' : property.endsWith('-style') ? 'solid' : c.border;
+      t.style.setProperty(property, value, 'important');
+    }
     if (reason) t.setAttribute('title', String(reason).startsWith(PREFIX) ? reason : PREFIX + reason);
   }
 
   function clearHighlights() {
     for (const [t, o] of saved) {
-      if (o.border[0]) t.style.setProperty('border', o.border[0], o.border[1]);
-      else t.style.removeProperty('border');
-      if (o.shadow[0]) t.style.setProperty('box-shadow', o.shadow[0], o.shadow[1]);
-      else t.style.removeProperty('box-shadow');
+      for (const [property, value, priority] of o.styles) {
+        if (value) t.style.setProperty(property, value, priority);
+        else t.style.removeProperty(property);
+      }
       if (o.title == null) t.removeAttribute('title');
       else t.setAttribute('title', o.title);
     }
