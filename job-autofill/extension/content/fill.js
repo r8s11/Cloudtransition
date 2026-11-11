@@ -100,6 +100,7 @@
     let n = 0;
     for (const el of all) {
       if ((n += 1) % 25 === 0) await tick();
+      opts.signal?.throwIfAborted();
       // Editable comboboxes must select an option, not merely accept a text value.
       if (widgetElements.has(el)) continue;
       const tag = el.tagName;
@@ -141,12 +142,14 @@
     let widgetCount = 0;
     for (const widget of widgets) {
       if (++widgetCount % 25 === 0) await tick();
+      opts.signal?.throwIfAborted();
       if (!U.isVisible(widget.el) || widget.el.disabled || widget.el.getAttribute('aria-disabled') === 'true') continue;
       fields += 1;
       if (!reuse(widget.el, add)) await fillWidget(widget, profile, resume, opts, pending, add, dropSlots.length);
     }
 
     await U.sleep(SETTLE_MS);
+    opts.signal?.throwIfAborted();
     for (const p of pending) await verify(p, opts);
 
     const aiQueue = all.filter((el) => {
@@ -177,6 +180,7 @@
         let reply;
         try { reply = await chrome.runtime.sendMessage({ type: 'DRAFT', req }); }
         catch (_) { reply = { error: 'Helper offline — AI drafts unavailable' }; }
+        opts.signal?.throwIfAborted();
         let entry = items.find((item) => item.el === el);
         if (!entry) entry = add({ el, key: null, kind: 'text' });
         Object.assign(entry, { filled: false, level: 'yellow', reason: 'AI draft — review before submitting', ai: true });
@@ -239,6 +243,7 @@
         : U.deepQueryAll(el.ownerDocument, '[role=option], [data-automation-id=promptOption]')).filter(U.isVisible);
       if (options.length) break;
       await U.sleep(50);
+      opts.signal?.throwIfAborted();
     }
     const hit = bestOption(options.map((option) => ({ option, label: U.clean(option.textContent), value: option.getAttribute('data-value') || '' })), value);
     if (hit) U.click(hit.option.option);
@@ -383,6 +388,7 @@
   }
 
   async function verify(entry, opts = {}) {
+    opts.signal?.throwIfAborted();
     if (!entry.read(entry.el) && opts.fallback && entry.kind === 'text' && typeof chrome !== 'undefined') {
       const attribute = 'data-autofill-target';
       const previous = entry.el.getAttribute(attribute);

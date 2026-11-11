@@ -6,7 +6,7 @@
 //   popup -> bg   RUN {tabId, submit} | SYNC | PAIR {token} | SAVE_PROFILE {manual}
 //                 SAVE_CONFIG {patch, fallback?} | MODELS {provider}
 //   content -> bg DRAFT {req} | REPORT {tabId?, summary} | DEBUGGER_FILL {frameId, selector, kind, value}
-//                 LOG_RUN {rec}
+//                 LOG_RUN {runId, status, reason?, code?}
 //   bg -> content START {runId, profile, resumeRef, submit, fallback}
 //
 // REPORT summary: {runId?, status, reason?, step?, counts?: {green, yellow, ai_drafts, ai_calls, fields}}
@@ -158,7 +158,7 @@ function mutateRuns(fn) {
   const next = runsQueue.then(async () => {
     const { runs } = await chrome.storage.session.get('runs');
     const all = runs || {};
-    const out = fn(all);
+    const out = await fn(all);
     await chrome.storage.session.set({ runs: all });
     return out;
   });
@@ -208,7 +208,8 @@ async function startRun({ tabId, submit }) {
   if (!st.profile || !st.syncedAt) return { error: NEEDS_SYNC };
 
   const runId = crypto.randomUUID();
-  const frameIds = (await chrome.scripting.executeScript({ target: { tabId, allFrames: true }, func: () => true })).map(r => r.frameId);
+  const frames = await chrome.scripting.executeScript({ target: { tabId, allFrames: true }, func: () => true });
+  const frameIds = frames.map(r => r.frameId);
   const now = Date.now();
   await mutateRuns((all) => {
     const prev = all[tabId];
@@ -219,6 +220,7 @@ async function startRun({ tabId, submit }) {
       fingerprints: [],
       frames: {},
       frameIds,
+      documents: Object.fromEntries(frames.map(r => [r.frameId, r.documentId])),
       path: new URL(tab.url).pathname,
       sourceHostname: new URL(tab.url).hostname,
       url: tab.url,
@@ -252,14 +254,23 @@ async function startRun({ tabId, submit }) {
   return { ok: true, runId };
 }
 
-function applyReport(tabId, summary, frameId = 0) {
-  return mutateRuns((all) => {
+async function currentDocument(tabId, sender) {
+  if (!sender?.documentId) return true; // Extension-page test reports have no document.
+  try {
+    const frames = await chrome.scripting.executeScript({ target: { tabId, frameIds: [sender.frameId || 0] }, func: () => true });
+    return frames[0]?.documentId === sender.documentId;
+  } catch (_) { return false; }
+}
+
+function applyReport(tabId, summary, frameId = 0, sender) {
+  return mutateRuns(async (all) => {
     const run = all[tabId];
-    if (!run || !summary || (summary.runId && summary.runId !== run.runId)) return false;
+    if (!run || !summary || (summary.runId && summary.runId !== run.runId) || run.logged || !await currentDocument(tabId, sender)) return false;
     if (RUN_STATUSES.includes(summary.status)) run.status = summary.status;
     if (typeof summary.ats === 'string') run.ats = summary.ats;
     if (typeof summary.reason === 'string') run.reason = summary.reason;
     if (Number.isInteger(summary.step)) run.step = Math.max(run.step || 0, summary.step);
+    if (typeof summary.fingerprint === 'string' && !run.fingerprints.includes(summary.fingerprint)) run.fingerprints.push(summary.fingerprint);
     if (summary.counts && typeof summary.counts === 'object') {
       run.frames ||= {};
       run.frames[frameId] = Object.assign({}, run.frames[frameId], summary.counts);
@@ -375,19 +386,21 @@ async function pageState(tabId, runId) {
   return { ready: true, safety, action };
 }
 
-async function finishRun(tabId, msg) {
-  const rec = await mutateRuns(all => {
+async function finishRun(tabId, msg, sender) {
+  const rec = await mutateRuns(async all => {
     const run = all[tabId];
-    if (!run || run.runId !== msg.runId || run.logged) return null;
+    if (!run || run.runId !== msg.runId || run.logged || !await currentDocument(tabId, sender)) return null;
     run.status = msg.status;
     run.reason = msg.reason || '';
     run.pendingSubmit = false;
     run.logged = true;
+    run.updatedAt = Date.now();
     const c = run.counts;
     return { host: run.host, path: run.path, ats: run.ats || 'generic', green: c.green, yellow: c.yellow,
       ai_drafts: c.ai_drafts, ai_calls: c.ai_calls, steps: run.step,
       outcome: msg.status === 'stopped' ? `stopped:${msg.code || 'stopped'}` : msg.status };
   });
+  if (rec) await chrome.tabs.sendMessage(tabId, { type: 'STOP_RUN', runId: msg.runId }).catch(() => {});
   return rec ? logRun(rec) : { ok: true };
 }
 
@@ -442,8 +455,14 @@ async function handle(msg, sender) {
     case 'RUN_STATE': return runState(tabId);
     case 'PAGE_STATE': return pageState(tabId, msg.runId);
     case 'SAFE_ACTION': return safeAction(tabId, msg.runId);
-    case 'REPORT': return { ok: await applyReport(tabId, msg.summary, trusted ? 0 : sender.frameId || 0) };
-    case 'LOG_RUN': return finishRun(tabId, msg);
+    case 'REPORT': return { ok: await applyReport(tabId, msg.summary, trusted ? 0 : sender.frameId || 0, trusted ? null : sender) };
+    case 'LOG_RUN': return finishRun(tabId, msg, trusted ? null : sender);
+    case 'DOCUMENT_READY': {
+      const state = await runState(tabId);
+      if (state && !state.logged && !state.pendingSubmit && state.documents?.[0] !== sender.documentId)
+        await finishRun(tabId, { runId: state.runId, status: 'stopped', reason: 'Page reloaded', code: 'navigation' });
+      return runState(tabId);
+    }
     case 'DEBUGGER_FILL': return debuggerFill(tabId, { ...msg, frameId: trusted ? msg.frameId || 0 : sender.frameId || 0 });
     default: return { error: `unknown message ${msg.type}` };
   }

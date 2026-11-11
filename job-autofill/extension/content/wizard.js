@@ -1,6 +1,5 @@
-// Passive step observer. It never clicks navigation or submission controls.
-// start(runCtx), stop(), onStep(cb) -> unsubscribe, fingerprint() -> FNV-1a hex.
-// Callbacks receive {runCtx, step, fingerprint}; start records the already-filled first step.
+// Settled semantic steps, bounded navigation, and idle lifetime.
+// onStep receives {runCtx, step, fingerprint}; onStop receives a reason and code.
 (function (root) {
   'use strict';
   const AF = (root.AF = root.AF || {});
@@ -8,8 +7,11 @@
   const callbacks = new Set();
   let observer = null;
   let timer = null;
+  let idle = null;
+  let advanceTimer = null;
   let context = null;
   let step = 1;
+  let current = '';
   const seen = new Set();
 
   function fingerprint() {
@@ -28,29 +30,55 @@
     observer?.disconnect();
     observer = null;
     clearTimeout(timer);
-    timer = null;
+    clearTimeout(idle);
+    clearTimeout(advanceTimer);
+    timer = idle = advanceTimer = null;
     context = null;
   }
-
+  function end(reason, code) {
+    const ctx = context;
+    stop();
+    ctx?.onStop(reason, code);
+  }
+  function resetIdle() {
+    clearTimeout(idle);
+    idle = setTimeout(() => end('5-minute idle limit', 'idle'), 300000);
+  }
+  function settled() {
+    if (!context) return;
+    const fp = fingerprint();
+    if (fp === current) {
+      if (advanceTimer) end("page didn't advance", 'no_advance');
+      return;
+    }
+    clearTimeout(advanceTimer);
+    advanceTimer = null;
+    if (seen.has(fp)) return end("page didn't advance", 'no_advance');
+    if (step >= 10) return end('10-step limit', 'limit');
+    seen.add(fp);
+    current = fp;
+    step += 1;
+    resetIdle();
+    for (const cb of callbacks) cb({ runCtx: context, step, fingerprint: fp });
+  }
   function start(runCtx) {
     stop();
     context = runCtx;
     step = 1;
+    current = fingerprint();
     seen.clear();
-    seen.add(fingerprint());
-    observer = new MutationObserver(() => {
+    seen.add(current);
+    resetIdle();
+    observer = new MutationObserver(records => {
+      if (records.every(r => r.target.closest?.('#autofill-hud'))) return;
       clearTimeout(timer);
-      timer = setTimeout(() => {
-        if (!context) return;
-        const fp = fingerprint();
-        if (seen.has(fp)) return;
-        seen.add(fp);
-        step += 1;
-        for (const cb of callbacks) cb({ runCtx: context, step, fingerprint: fp });
-      }, 850);
+      timer = setTimeout(settled, 850);
     });
     observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'style', 'class', 'aria-hidden'] });
   }
-
-  AF.wizard = { start, stop, fingerprint, onStep(cb) { callbacks.add(cb); return () => callbacks.delete(cb); } };
+  function advancing() {
+    clearTimeout(advanceTimer);
+    advanceTimer = setTimeout(settled, 850);
+  }
+  AF.wizard = { start, stop, advancing, fingerprint, onStep(cb) { callbacks.add(cb); return () => callbacks.delete(cb); } };
 })(globalThis);

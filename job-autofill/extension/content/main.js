@@ -16,6 +16,7 @@
   let lastItems = [];
   let lastStep = 1;
   const stepCounts = new Map();
+  let cancellation = null;
   let signIn = false;
   AF.pageSafety = () => ({
     captcha: AF.captcha(),
@@ -27,22 +28,29 @@
   });
 
   async function finish(msg, status, reason = '', code = '') {
-    if (status !== 'filled') AF.wizard.stop();
+    if (currentRun !== msg.runId) return;
+    AF.wizard.stop();
+    cancellation?.abort();
     await chrome.runtime.sendMessage({ type: 'LOG_RUN', runId: msg.runId, status, reason, code });
   }
 
   async function settle(msg) {
-    if (!isTop || currentRun !== msg.runId) return;
+    if (!isTop || currentRun !== msg.runId || cancellation?.signal.aborted) return;
     let state;
     do {
       state = await chrome.runtime.sendMessage({ type: 'PAGE_STATE', runId: msg.runId });
       if (!state?.ready) await AF.util.sleep(100);
-    } while (currentRun === msg.runId && !state?.ready);
-    if (currentRun !== msg.runId) return;
+    } while (currentRun === msg.runId && !cancellation?.signal.aborted && !state?.ready);
+    if (currentRun !== msg.runId || cancellation?.signal.aborted) return;
     if (signIn) return finish(msg, 'stopped', "Sign in first — AutoFill doesn't sign in or create accounts", 'signin');
-    if (!msg.submit) return finish(msg, 'filled');
+    if (!msg.submit) {
+      if (state.action?.kind !== 'next') return finish(msg, 'filled');
+      return;
+    }
     const check = AF.safetyCheck(state.safety);
     if (!check.ok) return finish(msg, 'stopped', check.reason, check.code);
+    if (lastStep >= 10 && state.action?.kind === 'next') return finish(msg, 'stopped', '10-step limit', 'limit');
+    if (state.action?.kind === 'next') AF.wizard.advancing();
     const action = await chrome.runtime.sendMessage({ type: 'SAFE_ACTION', runId: msg.runId });
     if (action?.error) return finish(msg, 'stopped', action.error, action.code || 'button');
     if (action.kind === 'submit') return waitForConfirmation(msg, AF.adapterFor(location.hostname), action.deadline);
@@ -97,12 +105,13 @@
   async function fillStep(msg, step = 1) {
     const { resume, resumeError } = await loadResume();
     const { config } = await chrome.storage.local.get('config');
+    if (cancellation?.signal.aborted || currentRun !== msg.runId) return;
     const adapter = AF.adapterFor(root.location.hostname);
     const result = await AF.fillPage(root.document, msg.profile || {}, resume, {
-      adapter, resumeError, fallback: msg.fallback,
+      adapter, resumeError, fallback: msg.fallback, signal: cancellation.signal,
       aiEnabled: !!config?.models?.[config.provider],
     });
-    if (currentRun !== msg.runId) return;
+    if (currentRun !== msg.runId || cancellation.signal.aborted) return;
     signIn = !!result.signIn;
     for (const it of result.items) AF.highlight(it.el, it.level, it.reason);
     lastItems = result.items;
@@ -114,25 +123,31 @@
     }
     await chrome.runtime.sendMessage({
       type: 'REPORT',
-      summary: { runId: msg.runId, status: msg.submit ? 'running' : 'filled', step, counts, ats: adapter.name },
+      summary: { runId: msg.runId, status: msg.submit ? 'running' : 'filled', step, counts, ats: adapter.name, fingerprint: AF.wizard.fingerprint() },
     }).catch(() => {});
   }
 
   async function run(msg) {
     AF.wizard.stop();
+    cancellation?.abort();
+    cancellation = new AbortController();
+    msg.onStop = (reason, code) => finish(msg, 'stopped', reason, code);
     currentRun = msg.runId;
     stepCounts.clear();
     lastItems = [];
     lastStep = 1;
     signIn = false;
     AF.clearHighlights();
-    if (isTop) AF.hud.render({ runId: msg.runId, message: 'Filling\u2026', tone: 'rv' });
+    if (isTop) AF.hud.render({ runId: msg.runId, message: 'Filling\u2026', tone: 'rv', canStop: true }, {
+      onStop: () => finish(msg, 'stopped'),
+    });
     await fillStep(msg);
-    if (currentRun === msg.runId && !signIn) AF.wizard.start(msg);
+    if (currentRun === msg.runId && !signIn && !cancellation.signal.aborted) AF.wizard.start(msg);
     await settle(msg);
   }
 
   AF.wizard.onStep(({ runCtx, step }) => {
+    if (cancellation?.signal.aborted) return;
     fillStep(runCtx, step).then(() => settle(runCtx)).catch(() => {});
   });
 
@@ -142,9 +157,14 @@
     const state = Object.values(changes.runs.newValue || {}).find((r) => r.runId === currentRun);
     if (!state) return;
     const summary = panelFor(currentRun, state.counts, lastItems);
+    summary.canStop = !state.logged;
+    if (state.logged) {
+      AF.wizard.stop();
+      cancellation?.abort();
+    }
     const step = Math.max(lastStep, state.step || 1);
     if (state.status === 'stopped') {
-      summary.message = state.reason === 'Already submitted from this tab' ? state.reason : `Stopped: ${state.reason}`;
+      summary.message = state.reason === 'Already submitted from this tab' ? state.reason : state.reason ? `Stopped: ${state.reason}` : 'Stopped';
       summary.tone = 'stop';
     } else if (state.status === 'submitted_confirmed' || state.status === 'submitted_unconfirmed') {
       summary.message = state.status === 'submitted_confirmed' ? 'Submitted · confirmed' : 'Submitted · not confirmed — check the page before trying again';
@@ -155,6 +175,12 @@
   });
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg?.type === 'STOP_RUN' && sender.id === chrome.runtime.id && msg.runId === currentRun) {
+      cancellation?.abort();
+      AF.wizard.stop();
+      sendResponse({ ok: true });
+      return false;
+    }
     if (msg?.type === 'SAFE_CLICK' && sender.id === chrome.runtime.id && msg.runId === currentRun) {
       const button = AF.safeButton(AF.adapterFor(location.hostname));
       if (button) AF.util.click(button.el);
@@ -163,6 +189,7 @@
     }
     if (!msg || msg.type !== 'START' || sender.id !== chrome.runtime.id) return false;
     run(msg).catch((e) => {
+      if (cancellation?.signal.aborted) return;
       chrome.runtime.sendMessage({
         type: 'REPORT',
         summary: { runId: msg.runId, status: 'error', reason: String((e && e.message) || e) },
@@ -172,7 +199,7 @@
     return false;
   });
 
-  if (isTop) chrome.runtime.sendMessage({ type: 'RUN_STATE' }).then(async state => {
+  if (isTop) chrome.runtime.sendMessage({ type: 'DOCUMENT_READY' }).then(async state => {
     if (!state?.pendingSubmit) return;
     currentRun = state.runId;
     lastStep = state.step || 1;
