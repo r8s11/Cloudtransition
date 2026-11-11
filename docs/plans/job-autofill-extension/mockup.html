@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Job autofill extension — mockup</title>
+<style>
+/* Orizuru tokens (dashboard-app/DESIGN.md, same set as tools/arms/clipper/popup.css). */
+:root { --vermilion: #b3212e; --vermilion-deep: #8e1a24; --paper: #f8f1e3; --paper-deep: #efe3cd; --paper-hi: #fdf9ef; --sumi: #171512; --ink-muted: #554d41; --border: #d8c9ab; --gold: #c9a227; --red: #a8322c; --green: #1d4a2e;
+  /* Field states on third-party pages need high contrast on white. */
+  --ok: #16a34a; --review: #ca8a04; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #e7e3dc; color: var(--sumi); font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Inter", sans-serif; padding: 24px; }
+.sheet-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.sheet-note { color: var(--ink-muted); font-size: 13px; margin-bottom: 24px; max-width: 900px; }
+section.state { margin-bottom: 36px; }
+section.state > h2 { font: 600 12px/1.4 ui-monospace, "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-muted); margin-bottom: 8px; }
+.row { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+
+/* ---------- Popup ---------- */
+.popup { width: 360px; min-height: 420px; background: var(--paper); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(23,21,18,.18); overflow: hidden; }
+.popup header { padding: 12px 16px 0; }
+.popup h1 { font-size: 16px; font-weight: 600; border-bottom: 3px solid var(--vermilion); padding-bottom: 6px; display: flex; justify-content: space-between; align-items: baseline; }
+.status { font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.dot.on { background: var(--ok); } .dot.off { background: var(--red); } .dot.warn { background: var(--review); }
+.tabs { display: grid; grid-template-columns: repeat(3,1fr); margin: 10px 16px 0; background: var(--paper-deep); border-radius: 6px; padding: 3px; }
+.tabs span { text-align: center; font-size: 12.5px; font-weight: 600; padding: 5px 0; border-radius: 4px; color: var(--ink-muted); }
+.tabs span.active { background: var(--paper-hi); color: var(--sumi); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.popup main { padding: 12px 16px 16px; display: grid; gap: 10px; }
+button { font: inherit; font-weight: 600; min-height: 36px; padding: 4px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--paper-deep); color: var(--sumi); cursor: pointer; }
+button.primary { background: var(--vermilion); color: #f4ead8; border-color: var(--vermilion-deep); width: 100%; min-height: 40px; font-size: 15px; }
+button:disabled { opacity: .55; cursor: not-allowed; }
+.hint { color: var(--ink-muted); font-size: 12.5px; }
+.switch { display: grid; grid-template-columns: 36px 1fr; gap: 10px; align-items: start; padding: 10px; background: var(--paper-hi); border: 1px solid var(--border); border-radius: 8px; }
+.track { width: 36px; height: 20px; border-radius: 999px; background: var(--border); position: relative; margin-top: 2px; }
+.track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; }
+.track.on { background: var(--vermilion); } .track.on::after { left: 18px; }
+.switch b { font-size: 13.5px; display: block; }
+.card { background: var(--paper-hi); border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-size: 13px; }
+.card h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-muted); margin-bottom: 4px; }
+.counts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.pill { font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; border: 1px solid; }
+.pill.ok { color: var(--ok); border-color: var(--ok); background: rgba(22,163,74,.08); }
+.pill.rv { color: #8a5d00; border-color: var(--review); background: rgba(202,138,4,.1); }
+.pill.ai { color: var(--vermilion-deep); border-color: var(--vermilion); background: rgba(179,33,46,.06); }
+.mono { font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 11.5px; }
+.msg { font-size: 12.5px; min-height: 1.4em; }
+.msg.err { color: var(--red); } .msg.ok { color: var(--green); }
+.field { display: grid; gap: 2px; }
+.field label { font-size: 11.5px; font-weight: 600; color: var(--ink-muted); }
+.field input, .field select { font: inherit; font-size: 13px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 5px; background: #fff; color: var(--sumi); width: 100%; }
+.field input[readonly] { background: var(--paper-deep); color: var(--ink-muted); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.src { font-size: 11px; color: var(--ink-muted); }
+.warnline { font-size: 12px; color: #8a5d00; background: rgba(202,138,4,.1); border: 1px solid rgba(202,138,4,.4); border-radius: 6px; padding: 6px 8px; }
+.errline { font-size: 12px; color: var(--red); background: rgba(168,50,44,.07); border: 1px solid rgba(168,50,44,.35); border-radius: 6px; padding: 6px 8px; }
+
+/* ---------- Page panel (renders in a Shadow DOM on job sites) ---------- */
+.panel { width: 320px; background: var(--sumi); color: #f4ead8; border-radius: 10px; border: 1px solid #3a352d; box-shadow: 0 10px 25px rgba(0,0,0,.35); padding: 10px 12px; font-size: 12.5px; }
+.panel .top { display: flex; justify-content: space-between; align-items: center; }
+.panel .t { font-weight: 700; display: flex; gap: 6px; align-items: center; }
+.panel .t i { width: 10px; height: 10px; background: var(--vermilion); transform: rotate(45deg); display: inline-block; }
+.panel .x { background: none; border: none; color: #b8ad9a; min-height: 0; padding: 0 4px; font-size: 14px; }
+.panel .reason { margin-top: 8px; padding: 6px 8px; border-radius: 6px; font-size: 12px; }
+.panel .reason.rv { background: rgba(202,138,4,.18); color: #fde68a; }
+.panel .reason.stop { background: rgba(179,33,46,.28); color: #fecaca; }
+.panel .reason.done { background: rgba(22,163,74,.2); color: #bbf7d0; }
+.panel ul { list-style: none; margin-top: 8px; display: grid; gap: 3px; }
+.panel li { display: grid; grid-template-columns: 16px 1fr; gap: 6px; font-size: 12px; color: #e6dccb; }
+.panel li .ic-ok { color: #4ade80; } .panel li .ic-rv { color: #facc15; }
+.panel .btns { display: flex; gap: 6px; margin-top: 10px; }
+.panel .btns button { background: #2a2620; color: #f4ead8; border-color: #4a443a; min-height: 28px; padding: 2px 10px; font-size: 12px; }
+.panel .cpill { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.panel .cpill span { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 999px; border: 1px solid; }
+.panel .g { color: #86efac; border-color: #22c55e; } .panel .y { color: #fde047; border-color: #eab308; } .panel .b { color: #fca5a5; border-color: var(--vermilion); }
+.collapsed { display: inline-flex; gap: 8px; align-items: center; background: var(--sumi); color: #f4ead8; border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600; box-shadow: 0 6px 16px rgba(0,0,0,.3); }
+
+/* ---------- Sample job page with highlights ---------- */
+.page { width: 760px; background: #fff; border: 1px solid #d9d9d9; border-radius: 8px; padding: 24px; position: relative; font-family: Arial, Helvetica, sans-serif; color: #222; }
+.page h4 { font-size: 20px; margin-bottom: 2px; } .page .co { color: #666; font-size: 13px; margin-bottom: 16px; }
+.page .f { margin-bottom: 12px; } .page .f label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.page .f input, .page .f select, .page .f textarea { width: 100%; font: 14px Arial, sans-serif; padding: 8px; border: 1px solid #bbb; border-radius: 4px; }
+.page .hl-ok { border: 2px solid var(--ok) !important; box-shadow: 0 0 0 2px rgba(22,163,74,.16); }
+.page .hl-rv { border: 2px solid var(--review) !important; box-shadow: 0 0 0 2px rgba(202,138,4,.22); }
+.tip { position: absolute; background: #222; color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 4px; white-space: nowrap; }
+.page .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.page .submit { background: #2b6cb0; color: #fff; border: none; padding: 10px 18px; border-radius: 4px; font-weight: 700; }
+.page .panelpos { position: absolute; right: 16px; bottom: 16px; }
+</style>
+</head>
+<body>
+<div class="sheet-title">Job application autofill — mockup</div>
+<p class="sheet-note">Design bar for <code>docs/plans/job-autofill-extension/eval.md</code> cases D1–D6. Popup is 360 px wide (Orizuru washi + vermilion, same tokens as the ARMS clipper). The page panel sits bottom-right on job sites inside a Shadow DOM, on dark sumi so it reads on any site. Field borders use green <code>#16a34a</code> and amber <code>#ca8a04</code>. Data is fictional (Jordan Avery).</p>
+
+<!-- ===================== POPUP · RUN ===================== -->
+<section class="state" id="popup-run">
+<h2>Popup · Run (helper connected, after a run)</h2>
+<div class="row">
+<div class="popup" role="dialog" aria-label="AutoFill">
+  <header><h1>AutoFill <span class="status"><span class="dot on"></span>Helper connected · 127.0.0.1:8766</span></h1></header>
+  <div class="tabs" role="tablist"><span class="active" role="tab" aria-selected="true">Run</span><span role="tab">Profile</span><span role="tab">AI</span></div>
+  <main>
+    <button class="primary">Autofill page</button>
+    <div class="switch" role="switch" aria-checked="false" tabindex="0">
+      <div class="track"></div>
+      <div><b>Continue and submit when safe</b><span class="hint">This run only. Clicks Next or Submit only when there's no CAPTCHA, nothing to review, no empty required field and every value checked on the page.</span></div>
+    </div>
+    <div class="card">
+      <h3>Last run · job-boards.greenhouse.io</h3>
+      <div>Filled 14 · 1 to review</div>
+      <div class="counts"><span class="pill ok">✓ 13 from profile</span><span class="pill rv">! 1 to review</span><span class="pill ai">AI 1 draft</span></div>
+      <div class="hint" style="margin-top:6px">Not submitted — review the yellow field, then submit yourself.</div>
+    </div>
+    <div class="msg ok" aria-live="polite">Filled 14 · 1 to review</div>
+  </main>
+</div>
+
+<div class="popup" role="dialog" aria-label="AutoFill">
+  <header><h1>AutoFill <span class="status"><span class="dot on"></span>Helper connected · 127.0.0.1:8766</span></h1></header>
+  <div class="tabs"><span class="active">Run</span><span>Profile</span><span>AI</span></div>
+  <main>
+    <button class="primary" disabled>Filling… step 2</button>
+    <div class="switch"><div class="track on"></div><div><b>Continue and submit when safe</b><span class="hint">On for this run. Turns off when the run ends.</span></div></div>
+    <div class="card"><h3>Running · acme.wd5.myworkdayjobs.com</h3><div>Step 2 of ? · 9 filled so far</div><div class="counts"><span class="pill ok">✓ 9</span></div></div>
+    <div class="msg" aria-live="polite">Waiting for the next step…</div>
+  </main>
+</div>
+</div>
+</section>
+
+<!-- ===================== POPUP · PROFILE ===================== -->
+<section class="state" id="popup-profile">
+<h2>Popup · Profile</h2>
+<div class="row">
+<div class="popup">
+  <header><h1>AutoFill <span class="status"><span class="dot on"></span>Helper connected</span></h1></header>
+  <div class="tabs"><span>Run</span><span class="active">Profile</span><span>AI</span></div>
+  <main>
+    <div class="src">From resume/master.md · read-only · synced 11 Nov, 09:42</div>
+    <div class="grid2">
+      <div class="field"><label>First name</label><input readonly value="Jordan"></div>
+      <div class="field"><label>Last name</label><input readonly value="Avery"></div>
+    </div>
+    <div class="field"><label>Email</label><input readonly value="jordan.avery@example.test"></div>
+    <div class="grid2">
+      <div class="field"><label>Phone</label><input readonly value="555-010-0199"></div>
+      <div class="field"><label>City, State</label><input readonly value="Brooklyn, NY"></div>
+    </div>
+    <div class="field"><label>LinkedIn · GitHub · Website</label><input readonly value="linkedin.com/in/jordan-avery-example · +2"></div>
+    <div class="src" style="margin-top:4px">Yours to set · never guessed · stored on this Mac only</div>
+    <div class="grid2">
+      <div class="field"><label>Street address</label><input placeholder="Leave blank"></div>
+      <div class="field"><label>ZIP</label><input placeholder="Leave blank"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Authorized to work in the US</label><select><option>Yes</option></select></div>
+      <div class="field"><label>Needs sponsorship</label><select><option>No</option></select></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Gender</label><select><option>Leave blank</option></select></div>
+      <div class="field"><label>Race / ethnicity</label><select><option>Leave blank</option></select></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Veteran status</label><select><option>Leave blank</option></select></div>
+      <div class="field"><label>Disability status</label><select><option>Leave blank</option></select></div>
+    </div>
+    <div class="field"><label>Resume file</label><div class="card mono" style="padding:6px 8px">resume/tailored/2026-11/Resume2611.pdf · 142 KB <button style="min-height:24px;padding:0 8px;font-size:11px;float:right">Change</button></div></div>
+    <button>Save profile</button>
+    <div class="msg ok">Profile saved</div>
+  </main>
+</div>
+
+<div class="popup">
+  <header><h1>AutoFill <span class="status"><span class="dot on"></span>Helper connected</span></h1></header>
+  <div class="tabs"><span>Run</span><span class="active">Profile</span><span>AI</span></div>
+  <main>
+    <div class="warnline">Not found in resume/master.md: phone</div>
+    <div class="errline">AutoFill: Resume file not found — pick it in Profile</div>
+    <div class="hint">Fields that are missing stay empty on forms. Required ones turn yellow so you can fill them.</div>
+  </main>
+</div>
+</div>
+</section>
+
+<!-- ===================== POPUP · AI ===================== -->
+<section class="state" id="popup-ai">
+<h2>Popup · AI</h2>
+<div class="row">
+<div class="popup">
+  <header><h1>AutoFill <span class="status"><span class="dot on"></span>Helper connected</span></h1></header>
+  <div class="tabs"><span>Run</span><span>Profile</span><span class="active">AI</span></div>
+  <main>
+    <div class="hint">Drafts answers to open questions from your resume text only. Every draft is yellow until you review it, so a page with a draft is never auto-submitted.</div>
+    <fieldset class="field" style="border:none"><label>Provider</label>
+      <div style="display:flex;gap:12px;font-size:13px"><label style="display:inline-flex;gap:4px;align-items:center;font-weight:500;color:var(--sumi)"><input type="radio" checked> Claude</label><label style="display:inline-flex;gap:4px;align-items:center;font-weight:500;color:var(--sumi)"><input type="radio"> OpenAI</label></div>
+    </fieldset>
+    <div class="field"><label>Model (from Anthropic's model list)</label><select><option>— pick a model —</option></select></div>
+    <div class="src">Key: saved in Keychain (job-autofill-anthropic)</div>
+    <div class="grid2">
+      <div class="field"><label>AI calls per day</label><input value="30"></div>
+      <div class="field"><label>Used today</label><input readonly value="4 of 30"></div>
+    </div>
+    <div class="switch"><div class="track on"></div><div><b>Real input for stubborn fields</b><span class="hint">Uses Chrome's debugger only when a field rejects simulated typing. Chrome shows "started debugging this browser" while it runs.</span></div></div>
+    <button>Save</button>
+  </main>
+</div>
+
+<div class="popup" id="popup-ai-nokey">
+  <header><h1>AutoFill <span class="status"><span class="dot on"></span>Helper connected</span></h1></header>
+  <div class="tabs"><span>Run</span><span>Profile</span><span class="active">AI</span></div>
+  <main>
+    <div class="field"><label>Provider</label><div style="font-size:13px">○ Claude &nbsp; ● OpenAI</div></div>
+    <div class="errline">No OpenAI key — run:<br><span class="mono">python3 job-autofill/helper/server.py set-key openai</span></div>
+    <div class="field"><label>Model</label><select disabled><option>Add a key to load models</option></select></div>
+    <div class="warnline">AutoFill: Daily AI limit reached (30). Drafts resume tomorrow.</div>
+  </main>
+</div>
+</div>
+</section>
+
+<!-- ===================== POPUP · NOT PAIRED / OFFLINE ===================== -->
+<section class="state" id="popup-offline">
+<h2>Popup · Not paired / Helper offline / Can't fill</h2>
+<div class="row">
+<div class="popup">
+  <header><h1>AutoFill <span class="status"><span class="dot off"></span>Not paired</span></h1></header>
+  <main>
+    <div class="hint">Not paired with the helper. Start it, then paste the token it printed:</div>
+    <div class="card mono">python3 job-autofill/helper/server.py</div>
+    <div class="field"><label>Pairing token</label><input type="password" placeholder="Paste token"></div>
+    <button>Pair</button>
+    <button class="primary" disabled>Autofill page</button>
+    <div class="hint">Autofill needs one sync with the helper first.</div>
+  </main>
+</div>
+
+<div class="popup">
+  <header><h1>AutoFill <span class="status"><span class="dot warn"></span>Helper offline</span></h1></header>
+  <div class="tabs"><span class="active">Run</span><span>Profile</span><span>AI</span></div>
+  <main>
+    <div class="warnline">Helper offline — profile from last sync (11 Nov, 09:42); AI drafts unavailable</div>
+    <button class="primary">Autofill page</button>
+    <div class="switch"><div class="track"></div><div><b>Continue and submit when safe</b><span class="hint">This run only.</span></div></div>
+  </main>
+</div>
+
+<div class="popup" style="min-height:220px">
+  <header><h1>AutoFill <span class="status"><span class="dot on"></span>Helper connected</span></h1></header>
+  <main>
+    <button class="primary" disabled>Autofill page</button>
+    <div class="msg err">Can't fill this page</div>
+    <div class="msg">No form fields found on this page</div>
+  </main>
+</div>
+</div>
+</section>
+
+<!-- ===================== PAGE PANEL ===================== -->
+<section class="state" id="page-panel">
+<h2>Page panel · states</h2>
+<div class="row">
+  <div class="panel" role="status" aria-live="polite">
+    <div class="top"><div class="t"><i></i>AutoFill · 14 filled</div><button class="x" aria-label="Dismiss">✕</button></div>
+    <div class="cpill"><span class="g">✓ 13 from profile</span><span class="y">! 1 to review</span></div>
+    <ul>
+      <li><span class="ic-rv">!</span>Why do you want to work at Northwind? — AI draft, review before submitting</li>
+    </ul>
+    <div class="reason rv">Review the yellow field, then submit yourself.</div>
+    <div class="btns"><button>Clear borders</button><button>Stop</button></div>
+  </div>
+
+  <div class="panel">
+    <div class="top"><div class="t"><i></i>AutoFill · 12 filled</div><button class="x">✕</button></div>
+    <div class="cpill"><span class="g">✓ 12 from profile</span></div>
+    <div class="reason stop">Stopped: reCAPTCHA detected — finish and submit yourself</div>
+    <div class="btns"><button>Clear borders</button></div>
+  </div>
+
+  <div class="panel">
+    <div class="top"><div class="t"><i></i>AutoFill · 9 filled</div><button class="x">✕</button></div>
+    <div class="cpill"><span class="g">✓ 9</span><span class="b">Step 2</span></div>
+    <div class="reason rv">Stopped: 1 required field empty</div>
+    <ul><li><span class="ic-rv">!</span>Will you require sponsorship? — Required field still needs input</li></ul>
+    <div class="btns"><button>Clear borders</button><button>Stop</button></div>
+  </div>
+
+  <div class="panel">
+    <div class="top"><div class="t"><i></i>AutoFill · 22 filled</div><button class="x">✕</button></div>
+    <div class="cpill"><span class="g">✓ 22</span><span class="b">4 steps</span></div>
+    <div class="reason done">Submitted · confirmed</div>
+  </div>
+
+  <div class="panel">
+    <div class="top"><div class="t"><i></i>AutoFill · 14 filled</div><button class="x">✕</button></div>
+    <div class="reason stop">Submitted · not confirmed — check the page before trying again</div>
+  </div>
+
+  <div class="panel">
+    <div class="top"><div class="t"><i></i>AutoFill</div><button class="x">✕</button></div>
+    <div class="reason rv">Sign in first — AutoFill doesn't sign in or create accounts</div>
+  </div>
+
+  <div><div class="collapsed" role="button" tabindex="0">◆ AutoFill · 14 filled · 1 to review</div><div class="hint" style="margin-top:6px">Collapsed pill below 900 px wide, so it never covers Submit.</div></div>
+</div>
+</section>
+
+<!-- ===================== PAGE · FIELD HIGHLIGHTS ===================== -->
+<section class="state" id="page-highlights">
+<h2>Page · field highlights (Greenhouse-style form)</h2>
+<div class="page">
+  <h4>IT Support Specialist</h4>
+  <div class="co">Northwind · New York, NY</div>
+  <div class="two">
+    <div class="f"><label>First Name *</label><input class="hl-ok" value="Jordan" title="AutoFill: From profile"></div>
+    <div class="f"><label>Last Name *</label><input class="hl-ok" value="Avery"></div>
+  </div>
+  <div class="two">
+    <div class="f"><label>Email *</label><input class="hl-ok" value="jordan.avery@example.test"></div>
+    <div class="f"><label>Phone</label><input class="hl-ok" value="555-010-0199"></div>
+  </div>
+  <div class="f"><label>Resume/CV *</label><input class="hl-ok" value="📄 resume.fixture.pdf"></div>
+  <div class="f"><label>Cover Letter</label><input value="Attach"></div>
+  <div class="f" style="position:relative"><label>Are you willing to relocate to this city?</label><input class="hl-rv" value="">
+    <div class="tip" style="right:0;top:-6px">AutoFill: Question-style label — check this answer</div></div>
+  <div class="f" style="position:relative"><label>Why do you want to work at Northwind? *</label><textarea class="hl-rv" rows="3">I've spent eight years keeping IT running for teams that can't afford downtime…</textarea>
+    <div class="tip" style="right:0;top:-6px">AutoFill: AI draft — review before submitting</div></div>
+  <div class="two">
+    <div class="f"><label>Are you legally authorized to work in the US? *</label><select class="hl-ok"><option>Yes</option></select></div>
+    <div class="f"><label>Will you require sponsorship? *</label><select class="hl-ok"><option>No</option></select></div>
+  </div>
+  <button class="submit">Submit application</button>
+  <div class="panelpos"><div class="collapsed">◆ AutoFill · 14 filled · 2 to review</div></div>
+</div>
+</section>
+</body>
+</html>
