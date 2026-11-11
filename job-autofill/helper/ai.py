@@ -13,6 +13,7 @@ import hashlib
 import http.client
 import json
 import os
+import socket
 import threading
 from urllib.parse import urlsplit
 
@@ -99,7 +100,7 @@ def _request(provider, method, endpoint, key, env, payload=None):
         resp = conn.getresponse()
         status = resp.status
         raw = resp.read(MAX_RESPONSE + 1)
-    except TimeoutError:
+    except (socket.timeout, TimeoutError):  # socket.timeout is only an OSError before 3.10
         raise AiError('AI error: timed out')
     except OSError:
         raise AiError('AI error: provider unreachable')
