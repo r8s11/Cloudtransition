@@ -66,7 +66,7 @@
         {% for cert in certifications %}
         <div class="cert-card">
           <div class="cert-icon {{ 'cert-icon-obtained' if cert.obtained else 'cert-icon-pending' }}">
-            {{ '&#x1F3C5;' if cert.obtained else '&#x1F4CB;' }}
+            {{ '🏅' if cert.obtained else '📋' }}
           </div>
           <div class="cert-info">
             <h4>{{ cert.name }}</h4>

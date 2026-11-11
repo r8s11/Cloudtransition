@@ -16,7 +16,7 @@
      role="checkbox"
      tabindex="0"
      aria-checked="{{ 'true' if t.done else 'false' }}"
-     aria-label="{{ t.text }}"
+     aria-label="{{ t.display_text if t.display_text is defined else t.text }}"
      data-realm="{{ t.realm }}"
      data-line="{{ t.line }}"
      data-text="{{ t.text }}"

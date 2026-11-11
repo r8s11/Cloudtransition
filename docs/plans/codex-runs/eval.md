@@ -1,7 +1,7 @@
 ---
 feature: Codex, OpenCode and OpenRouter models for Run executions
 status: passed
-approved: 2026-11-06
+approved: 2026-11-10
 rd: rd.md
 mockup: mockup.html
 ---
@@ -15,7 +15,7 @@ Selectable Codex, OpenCode and OpenRouter execution models in the existing local
 - Build only after user approval and status approved. Case changes require re-review.
 - Run: `node ~/.agents/skills/write-evals/scripts/evals.mjs run docs/plans/codex-runs/eval.md`.
 - Record manual cases with the same runner's record subcommand and evidence under eval-evidence/. Never claim fixtures prove account entitlement.
-- Code changes stale prior results. Done requires every case passing against the current tree.
+- Code changes stale prior results. Done requires every automated case passing against the current tree; manual cases are advisory and only block when recorded as failing.
 - No paid model calls, credentials changes or security-setting changes without separate explicit permission.
 
 ## Traceability
@@ -48,7 +48,7 @@ Selectable Codex, OpenCode and OpenRouter execution models in the existing local
 ### U3 — Provider selection applies to shared configurable cards
 - **Setup:** Run tab and Today organizer controls rendered from the same catalogue.
 - **Steps:** Select Codex, OpenCode and OpenRouter on configurable AI cards in Run, including Other workspace tools; exercise the corresponding shared Today runner.
-- **Expected:** Catalogue capability rules and selected provider are honored consistently; no duplicate independent runner path; fixed Audit and deterministic tools remain unchanged.
+- **Expected:** Catalogue capability rules and selected provider are honored consistently, including configurable Audit; no duplicate independent runner path; deterministic tools remain unchanged.
 - **Verify:** manual — capture Run/Today requests using temporary executor fixtures, including same-skill duplicate handling.
 
 ### U4 — Keyboard and narrow screen
@@ -78,10 +78,10 @@ Selectable Codex, OpenCode and OpenRouter execution models in the existing local
 - **Verify:** `dashboard-app/venv/bin/python -m pytest dashboard-app/tests/test_codex_runs.py -q -k failure_lifecycle_and_duplicate`
 
 ### F4 — Permission parity is enforced or denied
-- **Setup:** Disposable workspace and sentinel files inside/outside each card scope; installed Codex sandbox policy, OpenCode read-only mechanism and OpenRouter (no local sandbox) behavior inspected without model calls.
-- **Steps:** Exercise read-only and polish constraints using an isolated permission probe for Codex, OpenCode and OpenRouter; confirm all providers run on all cards without refusal.
-- **Expected:** All providers allowed on all cards — no permission refusals. Claude enforces read-only sandboxes and file/command allowlists; non-Claude providers (Codex, OpenCode, OpenRouter) run without machine-enforced boundaries (the user accepts this when choosing them). Read-only cards do not prevent non-Claude writes; polish command/template allowlist does not restrict non-Claude providers. No dangerous bypass or trust changes.
-- **Verify:** manual — confirm OpenCode and OpenRouter run on polish and read-only cards without 400 refusal; capture sentinel behavior showing non-Claude writes are not blocked.
+- **Setup:** Disposable workspace and sentinel files inside/outside each card scope; inspect installed Codex sandbox policy and OpenCode/OpenRouter dispatch without model calls.
+- **Steps:** Exercise read-only and polish requests through isolated provider fixtures; inspect the exact sandbox/permission arguments and OpenRouter HTTP request.
+- **Expected:** All providers are allowed on configurable cards. Claude retains its read-only tools and polish allowlist. Codex retains read-only for read-only cards and workspace-write otherwise. OpenCode has no dashboard-enforced file/command allowlist. OpenRouter uses HTTP with no local file or command tools. No dangerous bypass or trust changes.
+- **Verify:** manual — capture accepted requests and exact provider commands; use disposable sentinels for local fixture writes, clearly distinguishing dispatch probes from installed-provider sandbox enforcement.
 
 ## Regression
 
@@ -99,8 +99,8 @@ Selectable Codex, OpenCode and OpenRouter execution models in the existing local
 
 ### R3 — Claude, deterministic tools and shared neighbors
 - **Setup:** Isolated local executor fixtures and dashboard routes.
-- **Steps:** Run existing Claude selection, fixed Audit and a shell tool; inspect Today and Metrics.
-- **Expected:** Claude model/effort semantics preserved; Audit retains fixed defaults; shell runs have no model and no provider selection. Output viewing/polling/CSRF and Today actions remain functional; Metrics still loads.
+- **Steps:** Run existing Claude selection, configurable Audit and a shell tool; inspect Today and Metrics.
+- **Expected:** Claude model/effort semantics preserved; Audit retains Sonnet as its initial selection and honors explicit model/effort choices; shell runs have no model and no provider selection. Output viewing/polling/CSRF and Today actions remain functional; Metrics still loads.
 - **Verify:** manual — capture commands, API results and browser evidence using fixtures; no real paid model calls.
 
 ## Design

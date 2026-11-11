@@ -256,6 +256,103 @@ def load_latest_scan() -> dict:
     return {"scan": None, "files": {}, "error": "Scout scan unreadable."}
 
 
+# ── Interviews tab wiring ─────────────────────────────────────
+# One job id per tracker row, derived by code so Job Reader and CV Adapter
+# write to paths the dashboard can find again without guessing.
+JOB_ID_MAX = 80
+READING_FIELDS = (
+    ("responsibilities", "Responsibilities"),
+    ("required_skills", "Required skills"),
+    ("preferred_skills", "Preferred skills"),
+    ("language_requirements", "Language requirements"),
+)
+MAX_READING_ITEMS = 30
+MAX_LEADS = 8
+
+
+def job_id(company: str, role: str) -> str:
+    """`company-role` as a lowercase slug; empty when nothing usable remains."""
+    slug = re.sub(r"[^a-z0-9]+", "-", f"{company} {role}".lower()).strip("-")
+    return slug[:JOB_ID_MAX].strip("-")
+
+
+def _rel(path: Path) -> str:
+    try:
+        return path.relative_to(Path(WORKSPACE)).as_posix()
+    except ValueError:
+        return str(path)
+
+
+def load_job_reading(jid: str) -> dict | None:
+    """Job Reader's extraction for one job id, or None when absent or unreadable.
+
+    Only lists of plain strings are shown; anything else in the file is ignored.
+    """
+    if not jid:
+        return None
+    path = Path(AGENT_STATE) / "job-reader" / "outputs" / f"{jid}.json"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    sections = []
+    for key, label in READING_FIELDS:
+        value = data.get(key)
+        items = [v.strip() for v in value if isinstance(v, str) and v.strip()] if isinstance(value, list) else []
+        if items:
+            sections.append({"label": label, "items": items[:MAX_READING_ITEMS]})
+    return {"path": _rel(path), "sections": sections}
+
+
+def base_cv_path() -> str | None:
+    path = Path(AGENT_STATE) / "cv-adapter" / "outputs" / "base-cv.json"
+    return _rel(path) if path.is_file() else None
+
+
+def application_agents(company: str, role: str, url: str) -> dict:
+    """What the agents have produced, and can be asked to produce, for one row."""
+    jid = job_id(company, role)
+    reading = load_job_reading(jid)
+    tailored = Path(AGENT_STATE) / "cv-adapter" / "outputs" / f"tailored-{jid}.md"
+    is_web = isinstance(url, str) and url.startswith(("http://", "https://")) and not re.search(r"\s", url)
+    return {
+        "job_id": jid,
+        # Prefill for the Job Reader card: "<job id> <posting URL>".
+        "reader_input": f"{jid} {url}" if jid and is_web else "",
+        "reading": reading,
+        "tailored": _rel(tailored) if jid and tailored.is_file() else "",
+    }
+
+
+def scout_leads(scan: dict | None, tracked: set[tuple[str, str]]) -> list[dict]:
+    """Top-scored jobs of the latest scan that the tracker does not hold yet."""
+    leads = []
+    for job in (scan or {}).get("jobs") or []:
+        title, company = job.get("title"), job.get("company")
+        if not (isinstance(title, str) and title.strip() and isinstance(company, str) and company.strip()):
+            continue
+        if (company.strip().casefold(), title.strip().casefold()) in tracked:
+            continue
+        url = job.get("url")
+        text = lambda key: job[key].strip() if isinstance(job.get(key), str) else ""  # noqa: E731
+        leads.append(
+            {
+                "title": title.strip(),
+                "company": company.strip(),
+                "score": job.get("score") if isinstance(job.get("score"), (int, float)) and not isinstance(job.get("score"), bool) else None,
+                "location": text("location"),
+                "salary": text("salary"),
+                "rationale": text("rationale"),
+                "url": url if isinstance(url, str) and url.startswith(("http://", "https://")) else "",
+            }
+        )
+        if len(leads) >= MAX_LEADS:
+            break
+    return leads
+
+
 def build_agents_view() -> dict:
     """Assemble agents, agent_events, agent_scan, agent_scan_files, agent_scan_error."""
     roster = load_roster()

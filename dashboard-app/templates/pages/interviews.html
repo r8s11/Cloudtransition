@@ -1,0 +1,328 @@
+{# One application row + its inline editor. data-company/data-role are the
+   tracker's key; app.js sends them with each write. #}
+{% macro interview_entry(a) %}
+<div class="interview-entry" data-interview data-company="{{ a.company }}" data-role="{{ a.role }}">
+  <article class="interview-row">
+    <div class="interview-main">
+      <div class="interview-heading">
+        <h3>{{ a.company }}</h3>
+        <span class="badge {{ a.status_badge }}" data-interview-status>{{ a.status_label }}</span>
+        {% if a.priority_label %}
+        <span class="badge {{ a.priority_badge }}" data-interview-priority>{{ a.priority_label }} priority</span>
+        {% endif %}
+      </div>
+      <p class="interview-role">{{ a.role }}</p>
+      {% if a.location or a.salary %}
+      <p class="interview-meta">
+        {% if a.location %}{{ a.location }}{% endif %}
+        {% if a.location and a.salary %} &middot; {% endif %}
+        {% if a.salary %}{{ a.salary }}{% endif %}
+      </p>
+      {% endif %}
+      {% if a.contacts %}
+      <p class="interview-meta">
+        Contact:
+        {% for c in a.contacts %}
+          {{ c.name }}{% if c.role %} ({{ c.role }}){% endif %}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+      </p>
+      {% endif %}
+      <p class="interview-meta" data-interview-last {% if not a.last_event %}hidden{% endif %}>
+        Last signal:
+        <strong data-interview-last-date>{{ a.last_event.date if a.last_event else "" }}</strong>
+        <span data-interview-last-stage>{% if a.last_event and a.last_event.stage %} &mdash; {{ a.last_event.stage }}{% endif %}</span>
+      </p>
+      <p class="interview-next" data-interview-next {% if not a.next_step %}hidden{% endif %}>
+        <strong>Next:</strong>
+        <span data-interview-next-task>{{ a.next_step.task if a.next_step else "" }}</span>
+        <span class="interview-date" data-interview-next-date>{{ a.next_step.date if a.next_step else "" }}</span>
+        <span class="interview-overdue" data-interview-overdue {% if not a.overdue %}hidden{% endif %}>past target date</span>
+      </p>
+    </div>
+    <div class="interview-actions">
+      <button class="action-btn" type="button" data-interview-mode>Interview mode</button>
+      {% if a.url %}
+      <a class="action-btn action-btn-ghost" href="{{ a.url }}" target="_blank" rel="noopener noreferrer" aria-label="Posting for {{ a.company }}">Posting</a>
+      {% endif %}
+      {% if a.agent and a.agent.reader_input and not a.agent.reading %}
+      <button class="action-btn action-btn-ghost" type="button" data-agent-fill="job-reader" data-agent-input="{{ a.agent.reader_input }}" aria-label="Read the posting for {{ a.company }} with Job Reader">Read posting</button>
+      {% endif %}
+      {% if a.agent and a.agent.reading and not a.agent.tailored %}
+      <button class="action-btn action-btn-ghost" type="button" data-agent-fill="cv-tailor" data-agent-input="{{ a.agent.job_id }}" aria-label="Tailor the CV for {{ a.company }} with CV Adapter">Tailor CV</button>
+      {% endif %}
+      {% if a.agent and a.agent.tailored %}
+      <button class="action-btn action-btn-ghost" type="button" data-output="{{ a.agent.tailored }}" data-output-label="Tailored CV · {{ a.company }}">Tailored CV</button>
+      {% endif %}
+    </div>
+  </article>
+
+  <details class="interview-tools">
+    <summary>Update application</summary>
+
+    <div class="interview-grid">
+      <label class="interview-field">
+        <span>Status</span>
+        <select class="run-select" data-interview-select="status">
+          {% for s in interview_statuses %}
+          <option value="{{ s.value }}" {% if s.value == a.status %}selected{% endif %}>{{ s.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="interview-field">
+        <span>Priority</span>
+        <select class="run-select" data-interview-select="priority">
+          {% for p in interview_priorities %}
+          <option value="{{ p.value }}" {% if p.value == a.priority %}selected{% endif %}>{{ p.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <div class="interview-form-actions">
+        <span class="run-status" data-interview-field-status role="status" aria-live="polite"></span>
+      </div>
+    </div>
+
+    <form class="interview-grid" data-interview-next-form>
+      <label class="interview-field interview-field-wide">
+        <span>Next action</span>
+        <input class="run-input" name="task" maxlength="300" placeholder="Follow up, schedule, send thank-you" value="{{ a.next_step.task if a.next_step else '' }}">
+      </label>
+      <label class="interview-field">
+        <span>Date</span>
+        <input class="run-input" type="date" name="date" value="{{ a.next_step.date if a.next_step else '' }}">
+      </label>
+      <div class="interview-form-actions">
+        <button class="action-btn action-btn-ghost" type="submit">Save next action</button>
+        <span class="run-status" data-interview-feedback role="status" aria-live="polite"></span>
+      </div>
+    </form>
+
+    <form class="interview-grid" data-interview-signal-form>
+      <label class="interview-field">
+        <span>Signal date</span>
+        <input class="run-input" type="date" name="date" value="{{ today }}" required>
+      </label>
+      <label class="interview-field">
+        <span>Stage</span>
+        <input class="run-input" name="stage" maxlength="80" placeholder="phone_screen" required>
+      </label>
+      <label class="interview-field interview-field-wide">
+        <span>What happened</span>
+        <input class="run-input" name="notes" maxlength="1000" placeholder="Interviewer, questions to revisit, next round">
+      </label>
+      <div class="interview-form-actions">
+        <button class="action-btn action-btn-ghost" type="submit">Log signal</button>
+        <span class="run-status" data-interview-feedback role="status" aria-live="polite"></span>
+      </div>
+    </form>
+
+    <form class="interview-grid" data-interview-notes-form>
+      <label class="interview-field interview-field-wide">
+        <span>Interview notes</span>
+        <textarea class="run-input interview-notes" name="notes" rows="4" maxlength="4000" placeholder="Questions asked, answers to sharpen, follow-ups">{{ a.notes }}</textarea>
+      </label>
+      <div class="interview-form-actions">
+        <button class="action-btn action-btn-ghost" type="submit">Save notes</button>
+        <span class="run-status" data-interview-feedback role="status" aria-live="polite"></span>
+      </div>
+    </form>
+  </details>
+</div>
+{% endmacro %}
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- INTERVIEWS PAGE                                             -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-interviews" role="tabpanel" aria-labelledby="tab-interviews"
+     data-interview-active="{{ interview_active_statuses|join(',') }}"
+     data-interview-closed="rejected,withdrawn">
+  <div class="page-header">
+    <h2>Interview dashboard</h2>
+    <p>
+      Live applications, their last recorded signal and the next action &mdash;
+      edited in place and written back to interviews/job-applications.yml.
+      <strong>Interview mode</strong> opens one application full-screen: who
+      you're talking to, your resume and prep files, the posting, questions to
+      ask and notes to take during the call.
+    </p>
+  </div>
+
+  <div class="card">
+    <details class="interview-add">
+      <summary class="card-title">Add application</summary>
+      <form class="interview-grid" id="interviewAddForm">
+        <label class="interview-field">
+          <span>Company</span>
+          <input class="run-input" name="company" maxlength="200" required>
+        </label>
+        <label class="interview-field">
+          <span>Role</span>
+          <input class="run-input" name="role" maxlength="200" required>
+        </label>
+        <label class="interview-field">
+          <span>Status</span>
+          <select class="run-select" name="status">
+            {% for s in interview_statuses %}
+            <option value="{{ s.value }}" {% if s.value == "new_lead" %}selected{% endif %}>{{ s.label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="interview-field">
+          <span>Priority</span>
+          <select class="run-select" name="priority">
+            {% for p in interview_priorities %}
+            <option value="{{ p.value }}" {% if p.value == "medium" %}selected{% endif %}>{{ p.label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="interview-field">
+          <span>Location</span>
+          <input class="run-input" name="location" maxlength="200" placeholder="New York, NY (hybrid)">
+        </label>
+        <label class="interview-field">
+          <span>Salary range</span>
+          <input class="run-input" name="salary_range" maxlength="120" placeholder="$90-110K">
+        </label>
+        <label class="interview-field interview-field-wide">
+          <span>Posting URL</span>
+          <input class="run-input" type="url" name="job_url" maxlength="500" placeholder="https://">
+        </label>
+        <label class="interview-field interview-field-wide">
+          <span>Next action</span>
+          <input class="run-input" name="next_step" maxlength="300" placeholder="Apply, tailor resume, follow up">
+        </label>
+        <label class="interview-field">
+          <span>Date</span>
+          <input class="run-input" type="date" name="date">
+        </label>
+        <div class="interview-form-actions">
+          <button class="action-btn" type="submit">Add to tracker</button>
+          <span class="run-status" id="interviewAddStatus" role="status" aria-live="polite"></span>
+        </div>
+      </form>
+    </details>
+  </div>
+
+  {% if not interview_rows %}
+  <div class="card">
+    <div class="card-title">Pipeline</div>
+    <p class="run-empty">No applications in interviews/job-applications.yml yet.</p>
+  </div>
+  {% else %}
+
+  <div class="card">
+    <div class="card-title">Pipeline</div>
+    <div class="grid-3 mb-12 job-stats">
+      {% for label, key, color in [
+        ("Tracked", "tracked", "color-blue"),
+        ("In conversation", "active", "color-purple"),
+        ("New leads", "leads", "color-yellow"),
+        ("High priority", "high", "color-accent"),
+      ] %}
+      <div class="stat-box stat-sm">
+        <div class="stat-value {{ color }}" data-interview-count="{{ key }}">{{ interview_counts[key] }}</div>
+        <div class="stat-label">{{ label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="interview-note">
+      Counts come from the tracker's status field and cover live threads only.
+      A lead counts as &ldquo;new&rdquo; until the file records an application;
+      rejected and withdrawn applications sit under Closed threads and are not
+      counted as work.
+    </p>
+  </div>
+
+  <section class="card" id="interviewAgents" aria-labelledby="interview-agents-title">
+    <div class="card-title"><h3 class="run-card-heading" id="interview-agents-title">Agents</h3></div>
+    <p>Scout finds leads, Job Reader reads one posting, CV Adapter tailors the CV to it. <strong>Read posting</strong> and <strong>Tailor CV</strong> on a row fill the matching card below; nothing runs until you press its run button. All three use free OpenCode models.</p>
+
+    {% if interview_scout_leads %}
+    <h4 class="interview-agents-subhead">Scout leads not in the tracker{% if agent_scan and agent_scan.scan_id %} <small>&middot; <code>{{ agent_scan.scan_id }}</code></small>{% endif %}</h4>
+    <ul class="interview-agents-leads">
+      {% for lead in interview_scout_leads %}
+      <li>
+        <div>
+          <strong>{{ lead.company }}</strong> &middot;
+          {% if lead.url %}<a href="{{ lead.url }}" target="_blank" rel="noopener noreferrer">{{ lead.title }}</a>{% else %}{{ lead.title }}{% endif %}
+          {% if lead.score is not none %}<span class="badge badge-count">{{ lead.score }}</span>{% endif %}
+          <p class="interview-meta">{{ lead.location }}{% if lead.location and lead.salary %} &middot; {% endif %}{{ lead.salary }}</p>
+          {% if lead.rationale %}<p class="interview-meta">{{ lead.rationale }}</p>{% endif %}
+        </div>
+        <button class="action-btn action-btn-ghost" type="button" data-agent-lead
+                data-company="{{ lead.company }}" data-role="{{ lead.title }}" data-location="{{ lead.location }}"
+                data-salary="{{ lead.salary }}" data-url="{{ lead.url }}"
+                aria-label="Add {{ lead.title }} at {{ lead.company }} to the tracker">Add to tracker</button>
+      </li>
+      {% endfor %}
+    </ul>
+    <p class="run-status" id="interviewLeadStatus" role="status" aria-live="polite"></p>
+    {% elif agent_scan %}
+    <p class="ops-empty">Every job in the latest Scout scan is already in the tracker.</p>
+    {% else %}
+    <p class="ops-empty">No Scout scan yet. Run one below.</p>
+    {% endif %}
+
+    <div class="run-grid" data-run-grid data-skills="scout-scan,job-reader,cv-base,cv-tailor" aria-busy="true">
+      <p class="run-empty">Loading the agent runners&hellip;</p>
+    </div>
+  </section>
+
+  <div class="card" data-interview-section="active">
+    <div class="card-title">
+      In conversation
+      <span class="badge badge-count" data-interview-count="active">{{ interview_active|length }}</span>
+    </div>
+
+    {% if not interview_active %}
+    <p class="run-empty">
+      No application past the lead stage. Apply to a lead below, then set its
+      status to <code>applied</code>.
+    </p>
+    {% endif %}
+
+    <div data-interview-list>
+      {% for a in interview_active %}
+        {{ interview_entry(a) }}
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card" data-interview-section="leads">
+    <div class="card-title">
+      New leads
+      <span class="badge badge-count" data-interview-count="leads">{{ interview_leads|length }}</span>
+    </div>
+
+    {% if not interview_leads %}
+    <p class="run-empty">No unapplied leads in the tracker.</p>
+    {% endif %}
+
+    <div data-interview-list>
+      {% for a in interview_leads %}
+        {{ interview_entry(a) }}
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if interview_closed %}
+  <div class="card">
+    <details class="interview-closed">
+      <summary class="card-title">
+        Closed threads
+        <span class="badge badge-count" data-interview-count="closed">{{ interview_closed|length }}</span>
+      </summary>
+      <p class="interview-note">
+        Rejected or withdrawn &mdash; kept for history, never counted as live
+        work. Change a status in the row to reopen it.
+      </p>
+      <div data-interview-list-closed>
+        {% for a in interview_closed %}
+          {{ interview_entry(a) }}
+        {% endfor %}
+      </div>
+    </details>
+  </div>
+  {% endif %}
+
+  {% endif %}
+</div>

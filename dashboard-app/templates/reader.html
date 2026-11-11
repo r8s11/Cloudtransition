@@ -9,30 +9,24 @@
       href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="/static/tokens.css?v=polish-20261109b" />
     <style>
       /* ── Foundation ────────────────────────────────────────────── */
+      /* Shared palette, type, and shape tokens come from /static/tokens.css.
+         Only reader-specific overrides live here. */
       :root {
         --bg: #f3ead8;
-        --surface: #fdf9ef;
-        --surface-alt: #efe3cd;
-        --border: #d8c9ab;
-        --border-light: #e4dac4;
-        --text: #211d18;
-        --text-mid: #4f483c;
-        --text-muted: #554d41;
-        --accent: #b3212e;
-        --accent-warm: #d44551;
-        --accent-bg: #efd9d4;
-        --ink: #171512;
-        --code-bg: #171512;
+        --surface: var(--paper-hi);
+        --surface-alt: var(--paper-deep);
+        --accent-warm: var(--vermilion-light);
+        --accent-bg: var(--accent-soft);
+        --ink: var(--sumi);
+        --code-bg: var(--sumi);
         --code-text: #e8dfd6;
         --sidebar-w: 280px;
         --header-h: 52px;
         --serif: "Newsreader", "Georgia", serif;
         --sans: "DM Sans", -apple-system, sans-serif;
-        --mono: "JetBrains Mono", "Fira Code", monospace;
-        --radius: 10px;
-        --ease: cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       *,
@@ -397,24 +391,14 @@
         border-radius: 50%;
         background: var(--accent);
         margin: 0 4px;
-        animation: loadPulse 1s ease infinite;
+        /* Static marks: a loading state is not live data, so it does not pulse. */
+        opacity: 0.35;
       }
       .loading-dot:nth-child(2) {
-        animation-delay: 0.15s;
+        opacity: 0.65;
       }
       .loading-dot:nth-child(3) {
-        animation-delay: 0.3s;
-      }
-      @keyframes loadPulse {
-        0%,
-        100% {
-          opacity: 0.25;
-          transform: scale(0.8);
-        }
-        50% {
-          opacity: 1;
-          transform: scale(1.1);
-        }
+        opacity: 1;
       }
 
       /* ── Markdown Prose ───────────────────────────────────────── */
@@ -687,6 +671,11 @@
           padding: 28px 20px 60px;
         }
 
+        .header-btn {
+          width: 44px;
+          height: 44px;
+        }
+
         .prose h1 {
           font-size: 26px;
         }
@@ -721,13 +710,13 @@
       }
 
       @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-          animation: none !important;
-          transition: none !important;
+        /* Targeted, like style.css: remove motion, keep the state change. */
+        .sidebar,
+        .folder-toggle svg {
+          transition: none;
         }
         .prose {
+          animation: none;
           opacity: 1;
           transform: none;
         }
@@ -1082,6 +1071,8 @@
           // Loading state
           contentInner.textContent = "";
           var loading = make("div", "loading");
+          loading.setAttribute("role", "status");
+          loading.setAttribute("aria-label", "Loading document");
           for (var i = 0; i < 3; i++) {
             loading.appendChild(make("div", "loading-dot"));
           }

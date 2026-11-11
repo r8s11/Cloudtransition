@@ -1,0 +1,249 @@
+{# Printable one-page interview sheet — opened from Interview mode.
+   Standalone document: no app chrome or scripts beyond the print button, so
+   Print → PDF keeps everything for offline use during a call. #}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interview sheet — {{ row.company }}, {{ row.role }}</title>
+<style>
+  @font-face {
+    font-family: "Inter";
+    src: url("/static/fonts/InterVariable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "JetBrains Mono";
+    src: url("/static/fonts/JetBrainsMono.woff2") format("woff2");
+    font-weight: 400 700;
+    font-display: swap;
+  }
+  :root {
+    --ink: #171512;
+    --ink-mid: #4f483c;
+    --ink-muted: #6b6355;
+    --rule: #c9bda6;
+    --fold: #efe3cd;
+    --paper: #f8f1e3;
+    --vermilion: #b3212e;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); }
+  body {
+    font: 10.5pt/1.45 "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 12mm 13mm;
+    max-width: 190mm;
+    margin: 0 auto;
+  }
+  h1 { font-size: 17pt; margin: 0; letter-spacing: -0.01em; }
+  h2 {
+    font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 0 0 3mm; padding-bottom: 1.2mm; border-bottom: 1px solid var(--rule);
+    color: var(--ink-mid); font-weight: 700;
+  }
+  h3 { font-size: 11pt; margin: 0 0 1.5mm; }
+  p { margin: 0 0 1.5mm; }
+  header {
+    display: flex; justify-content: space-between; gap: 8mm; align-items: flex-start;
+    margin-bottom: 5mm; padding-top: 4mm; border-top: 2px solid var(--vermilion);
+  }
+  .role { font-weight: 600; font-size: 11pt; margin-top: 1mm; }
+  .meta { font-size: 9pt; color: var(--ink-mid); margin-top: 1mm; }
+  .stamp { text-align: right; font-size: 8pt; color: var(--ink-muted); overflow-wrap: anywhere; }
+  .stamp strong { display: block; font-size: 9.5pt; color: var(--ink); font-family: var(--mono); }
+  .cols { display: grid; grid-template-columns: minmax(0, 62mm) minmax(0, 1fr); gap: 8mm; align-items: start; }
+  .cols > div, .section, .check { min-width: 0; }
+  .section { margin-bottom: 4mm; break-inside: avoid; }
+  .contact { padding: 1.6mm 0; border-bottom: 1px dotted var(--rule); }
+  .contact:last-child { border-bottom: 0; }
+  .contact strong { font-size: 10pt; }
+  .contact .sub { display: block; font-size: 8.5pt; color: var(--ink-muted); }
+  .contact a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); }
+  dl { margin: 0; }
+  dl div { display: flex; gap: 2mm; padding: 0.8mm 0; font-size: 9pt; }
+  dt { color: var(--ink-muted); min-width: 17mm; }
+  dd { margin: 0; overflow-wrap: anywhere; }
+  ul { margin: 0; padding: 0; list-style: none; }
+  .check { display: grid; grid-template-columns: 4mm 1fr; gap: 0 2mm; padding: 1.1mm 0; break-inside: avoid; overflow-wrap: break-word; }
+  .check-list.two-up { columns: 1; column-gap: 5mm; }
+  .check-list.two-up .check { break-inside: avoid; }
+  .check::before {
+    content: ""; width: 3.2mm; height: 3.2mm; margin-top: 0.9mm;
+    border: 1px solid var(--ink-mid); border-radius: 0.6mm;
+  }
+  .prose { white-space: pre-wrap; font-size: 9.5pt; line-height: 1.5; }
+  .lines { margin-top: 3mm; }
+  .lines div { border-bottom: 1px solid var(--rule); height: 6mm; }
+  .files { font-size: 8.5pt; }
+  .files li { padding: 0.7mm 0; overflow-wrap: anywhere; }
+  .files .path { display: block; font-family: var(--mono); font-size: 8pt; color: var(--ink-muted); }
+  .history li { display: grid; grid-template-columns: 20mm 1fr; gap: 2mm; padding: 1mm 0; font-size: 8.5pt; border-bottom: 1px dotted var(--rule); }
+  .history .date { font-family: var(--mono); color: var(--ink-muted); }
+  .history .stage { font-weight: 600; }
+  .empty { font-size: 8.5pt; color: var(--ink-muted); font-style: italic; overflow-wrap: anywhere; }
+  footer { margin-top: 4mm; padding-top: 2mm; border-top: 1px solid var(--rule); font-size: 7.5pt; color: var(--ink-muted); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4mm; }
+  footer span { min-width: 0; overflow-wrap: anywhere; }
+  .mono { font-family: var(--mono); }
+  .print-bar {
+    position: sticky; top: 0; display: flex; justify-content: flex-end; gap: 6px;
+    padding: 0 0 5mm;
+  }
+  .print-bar button {
+    font: inherit; font-weight: 600; padding: 6px 14px; border-radius: 6px;
+    border: 1px solid var(--ink-mid); background: var(--fold); color: var(--ink); cursor: pointer;
+  }
+  .print-bar span { align-self: center; font-size: 8pt; color: var(--ink-muted); }
+  @media screen and (max-width: 620px) {
+    body { padding: 16px; }
+    header { flex-direction: column; gap: 2mm; }
+    .stamp { text-align: left; }
+    .cols { grid-template-columns: 1fr; }
+  }
+  @page { size: letter; margin: 10mm; }
+  @media print {
+    html, body { background: #fff; }
+    body { padding: 0; max-width: none; font-size: 9.3pt; line-height: 1.4; }
+    h2 { margin-bottom: 2mm; font-size: 9pt; }
+    .section { margin-bottom: 2.2mm; }
+    .check { padding: 0.75mm 0; }
+    .contact { padding: 1.1mm 0; }
+    dl div { padding: 0.5mm 0; }
+    .files, .history li, .empty { font-size: 9pt; }
+    .files .path, .workspace { display: none; }
+    .print-bar { display: none; }
+    a { border-bottom: 0; }
+    .stamp { max-width: 62mm; }
+    footer { font-size: 8pt; }
+    .check-list.two-up { columns: 2; }
+  }
+</style>
+</head>
+<body>
+<div class="print-bar">
+  <span>Print → “Save as PDF” keeps this sheet offline.</span>
+  <button type="button" onclick="window.print()">Print / save PDF</button>
+</div>
+
+{% set posted_salary = (row.salary or "").split(", floor")[0].split(" — clears")[0].split(" (lowered")[0].strip(" ,;") %}
+<header>
+  <div>
+    <h1>{{ row.company }}</h1>
+    <p class="role">{{ row.role }}</p>
+    <p class="meta">
+      {{ row.status_label }}{% if row.location %} &middot; {{ row.location }}{% endif %}{% if posted_salary %} &middot; {{ posted_salary }}{% endif %}
+    </p>
+  </div>
+  <div class="stamp">
+    {% if row.next_step and row.status not in ("rejected", "withdrawn") %}<strong>{{ row.next_step.date }}</strong>{{ row.next_step.task }}
+    {% elif row.status in ("rejected", "withdrawn") %}<strong>Closed{% if row.last_event %} &middot; {{ row.last_event.date }}{% endif %}</strong>
+    {% else %}<strong>{{ printed }}</strong>printed{% endif %}
+  </div>
+</header>
+
+<div class="cols">
+  <div>
+    <section class="section">
+      <h2>Who you're talking to</h2>
+      {% if row.contacts %}
+        {% for c in row.contacts %}
+        <div class="contact">
+          <strong>{{ c.name }}</strong>
+          <span class="sub">{{ c.role }}{% if c.email %} &middot; <a href="mailto:{{ c.email }}">{{ c.email }}</a>{% endif %}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+      <p class="empty">No contacts recorded for this application.</p>
+      {% endif %}
+    </section>
+
+    <section class="section">
+      <h2>Details</h2>
+      <dl>
+        {% if row.application_date %}<div><dt>Applied</dt><dd class="mono">{{ row.application_date }}</dd></div>{% endif %}
+        {% if row.last_event %}<div><dt>Last signal</dt><dd><span class="mono">{{ row.last_event.date }}</span> · {{ row.last_event.stage }}</dd></div>{% endif %}
+        <div><dt>Priority</dt><dd>{{ row.priority_label or "not recorded" }}</dd></div>
+        {% if row.url %}<div><dt>Posting</dt><dd>{{ row.url }}</dd></div>{% endif %}
+      </dl>
+    </section>
+
+    <section class="section">
+      <h2>Files</h2>
+      {% if row.resume or row.prep_files %}
+      <ul class="files">
+        {% if row.resume %}<li>Resume<span class="path">resume/{{ row.resume }}</span></li>{% endif %}
+        {% for f in row.prep_files %}<li>{{ f.label }}{% if not f.href %} <em>(recorded, file missing)</em>{% endif %}<span class="path">{{ f.path }}</span></li>{% endfor %}
+      </ul>
+      {% else %}
+      <p class="empty">No resume or prep files recorded.</p>
+      {% endif %}
+      <p class="empty workspace" style="margin-top:2mm">Workspace: {{ workspace }}</p>
+    </section>
+
+    {% if row.fit_notes %}
+    <section class="section">
+      <h2>Job fit</h2>
+      <p class="prose">{{ row.fit_notes }}</p>
+    </section>
+    {% endif %}
+  </div>
+
+  <div>
+    <section class="section">
+      <h2>Questions to ask</h2>
+      {% if row.questions %}
+      <ul>
+        {% for line in row.questions.splitlines() if line.strip() %}
+        <li class="check">{{ line.strip() }}</li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="empty">None written yet. Add them in Interview mode.</p>
+      {% endif %}
+    </section>
+
+    <section class="section">
+      <h2>Preparation</h2>
+      {% if row.preparation %}
+      <ul class="check-list two-up">
+        {% for line in row.preparation.splitlines() if line.strip() and not (line.strip()|lower).startswith("salary") %}
+        <li class="check">{{ line.strip() }}</li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="empty">None written yet. Add them in Interview mode.</p>
+      {% endif %}
+    </section>
+
+    {% if row.history %}
+    <section class="section">
+      <h2>What happened so far</h2>
+      <ul class="history">
+        {% for h in row.history %}
+        <li>
+          <span class="date">{{ h.date }}</span>
+          <span><span class="stage">{{ h.stage }}</span>{% if h.notes %}: {{ h.notes }}{% endif %}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    <section class="section">
+      <h2>Notes</h2>
+      {% if row.notes %}<p class="prose">{{ row.notes }}</p>{% endif %}
+      <div class="lines">
+        {% for _ in range(4) %}<div></div>{% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+
+<footer>
+  <span>Printed {{ printed }} from interviews/job-applications.yml</span>
+  <span>CloudTransition · {{ row.company }}</span>
+</footer>
+</body>
+</html>

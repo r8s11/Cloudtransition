@@ -1,5 +1,7 @@
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- RUN PAGE — headless skill runners                           -->
+<!-- Deterministic first: tools that call no model lead; model   -->
+<!-- and paid-API runs follow, each tagged by runner_engine().   -->
 <!-- ════════════════════════════════════════════════════════════ -->
 <div class="page" id="page-run" role="tabpanel" aria-labelledby="tab-run">
   <div class="page-header">
@@ -12,14 +14,27 @@
   </div>
 
   <ul class="run-rules">
-    <li>Audit and UI/UX review are read-only.</li>
-    <li>Audit runs with defaults; review, polish and video summaries take model and effort pickers.</li>
-    <li>Runs stop after 30 minutes; permission requests that need a person are denied.</li>
+    <li>Local tools call no model. Every other card names the API or model it uses.</li>
+    <li>Claude enforces read-only tools and the Polish allowlist. Codex uses read-only or workspace-write sandboxes.</li>
+    <li>OpenCode has no dashboard-enforced file or command allowlist. OpenRouter has no local tools and can only use supplied context.</li>
+    <li>Runs stop after 30 minutes. No permission or sandbox bypass flags are used.</li>
   </ul>
+
+  <section class="card" aria-labelledby="local-tools-title">
+    <h3 class="card-title" id="local-tools-title">Local tools</h3>
+    <div
+      class="run-grid"
+      data-run-grid
+      data-skills="trail-build,resume-build,brain-index,arms-report,artifact-catalog"
+      aria-busy="true"
+    >
+      <p class="run-empty">Loading tools&hellip;</p>
+    </div>
+  </section>
 
   <div class="card">
     <div class="card-title run-card-title">
-      <h3 class="run-card-heading">Your skill buttons</h3>
+      <h3 class="run-card-heading">Model and API runs</h3>
       <span class="run-actions">
         <button
           id="refreshModels"
@@ -41,7 +56,7 @@
       class="run-grid"
       id="runGrid"
       data-run-grid
-      data-skills="impeccable-audit,impeccable-polish,ui-ux-review,youtube-summary"
+      data-skills="triage-inbox,scout-scan,plan-today,update-sheet,youtube-summary"
       aria-busy="true"
     >
       <p class="run-empty">Reading local model catalogues&hellip;</p>
@@ -49,14 +64,14 @@
   </div>
 
   <details class="card">
-    <summary class="card-title">Other workspace tools</summary>
+    <summary class="card-title">Dashboard design runs</summary>
     <div
       class="run-grid"
       data-run-grid
-      data-skills="update-sheet,trail-build,resume-build,plan-today,scout-scan,triage-inbox,brain-index,arms-report,artifact-catalog"
+      data-skills="impeccable-audit,impeccable-polish,ui-ux-review"
       aria-busy="true"
     >
-      <p class="run-empty">Loading tools&hellip;</p>
+      <p class="run-empty">Reading local model catalogues&hellip;</p>
     </div>
   </details>
 

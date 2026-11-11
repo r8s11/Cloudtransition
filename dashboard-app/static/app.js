@@ -649,7 +649,7 @@ Context:
 	}
 	let providerModels = {};   // {claude: [...], codex: [...], opencode: [...], openrouter: [...]}
 	let providerAvailable = {}; // {claude: true, codex: true, ...}
-	let runnerEfforts = [];     // effort options for the currently selected model
+	let providerUnavailableReason = {};
 
 	/** Make an element with optional class and text. Text is always set via
 	 *  textContent, so no value can ever be parsed as markup. */
@@ -660,9 +660,19 @@ Context:
 		return node;
 	}
 
+	/** "provider:id" split at the first colon only. Model ids such as
+	 *  "nvidia/…:free" contain a colon themselves; splitting on every colon
+	 *  cut the id short, so the lookup missed and the card offered efforts
+	 *  the server rejects. */
+	function splitModel(value) {
+		const text = String(value);
+		const at = text.indexOf(":");
+		return at < 0 ? [text] : [text.slice(0, at), text.slice(at + 1)];
+	}
+
 	/** Human-readable label for a model value ("claude:sonnet" or "sonnet"). */
 	function modelLabel(value) {
-		const [p, id] = String(value).split(":");
+		const [p, id] = splitModel(value);
 		const provider = p === "claude" && !id ? "claude" : p;
 		const modelId = p === "claude" && !id ? value : id;
 		const list = providerModels[provider] || [];
@@ -699,7 +709,14 @@ Context:
 		const icon = el("span", "run-item-icon", s.icon);
 		icon.setAttribute("aria-hidden", "true");
 		const text = el("div", "run-item-text");
-		text.appendChild(el("h4", null, s.label));
+		// Title row: name plus what the run spends (engine comes from app.py's
+		// runner_engine; an older server without the field shows no tag).
+		const title = el("div", "run-item-title");
+		title.appendChild(el("h4", null, s.label));
+		if (s.engine) {
+			title.appendChild(el("span", `run-tag run-tag-${s.engine.tier}`, s.engine.label));
+		}
+		text.appendChild(title);
 		text.appendChild(el("p", null, s.blurb));
 		head.append(icon, text);
 		item.appendChild(head);
@@ -752,12 +769,13 @@ Context:
 				}
 				modelPicker.appendChild(optgroup);
 			}
-			if (allowedProviders && !allowedProviders.some((p) => providerModels[p]?.length)) {
-				const option = el("option", null, `No free ${providerName(allowedProviders[0])} models`);
+			if (!modelPicker.options.length) {
+				const option = el("option", null, "No available models");
 				option.value = "";
 				option.disabled = true;
 				option.selected = true;
 				modelPicker.appendChild(option);
+				modelPicker.disabled = true;
 			}
 			modelField.appendChild(modelPicker);
 			options.appendChild(modelField);
@@ -768,9 +786,9 @@ Context:
 			const effortPicker = el("select", "run-select");
 			effortPicker.dataset.runEffort = "";
 			function setEffortOptions(modelValue) {
-				const [p, id] = String(modelValue).split(":");
-				const list =
-					providerModels[p]?.find((m) => m.id === id)?.efforts || runnerEfforts;
+				const [p, id] = splitModel(modelValue);
+				const list = providerModels[p]?.find((m) => m.id === id)?.efforts || ["default"];
+				effortPicker.disabled = !modelPicker.value;
 				clear(effortPicker);
 				let selected = "default";
 				for (const value of list) {
@@ -792,6 +810,10 @@ Context:
 			options.appendChild(effortField);
 
 			item.appendChild(options);
+			const unavailable = (allowedProviders || Object.keys(providerAvailable))
+				.filter((provider) => providerAvailable[provider] === false)
+				.map((provider) => `${providerName(provider)}: ${providerUnavailableReason[provider] || "Catalogue unavailable"}`);
+			if (unavailable.length) item.appendChild(el("p", "run-status", unavailable.join(" · ")));
 		}
 
 		const foot = el("div", "run-item-foot");
@@ -799,13 +821,16 @@ Context:
 		btn.type = "button";
 		btn.setAttribute("aria-label", `Run ${s.label}`);
 		btn.dataset.run = s.id;
+		if (s.options && !item.querySelector("[data-run-model]")?.value) {
+			btn.setAttribute("aria-disabled", "true");
+			btn.classList.add("is-disabled");
+		}
 		const status = el(
 			"span",
-			"run-status",				s.kind === "shell"
-					? "Local tool \u00b7 $0"
-					: s.options
-						? "Ready"
-						: `Ready \u00b7 ${modelLabel(`claude:${s.model || "sonnet"}`)}`,
+			"run-status",
+			s.kind === "shell" || s.options
+				? (s.options && !item.querySelector("[data-run-model]")?.value ? "No model available" : "Ready")
+				: `Ready \u00b7 ${modelLabel(`claude:${s.model || "sonnet"}`)}`,
 		);
 		status.dataset.statusFor = s.id;
 		status.setAttribute("role", "status");
@@ -842,7 +867,7 @@ Context:
 			.then((data) => {
 				providerModels = data.provider_models || {};
 				providerAvailable = data.provider_available || {};
-				runnerEfforts = data.effort || [];
+				providerUnavailableReason = data.provider_unavailable_reason || {};
 				const byId = new Map(data.skills.map((s) => [s.id, s]));
 				for (const grid of grids) {
 					clear(grid);
@@ -904,12 +929,12 @@ Context:
 		const input = item.querySelector("input[data-run-input]");
 		if (input) input.value = p.input;
 		const model = item.querySelector("select[data-run-model]");
-		if (model && p.model !== null) {
+		if (model && p.model !== null && [...model.options].some((option) => option.value === p.model && !option.disabled)) {
 			model.value = p.model;
 			model.dispatchEvent(new Event("change"));
 		}
 		const effort = item.querySelector("select[data-run-effort]");
-		if (effort && p.effort !== null) effort.value = p.effort;
+		if (effort && p.effort !== null && [...effort.options].some((option) => option.value === p.effort)) effort.value = p.effort;
 	}
 
 	loadCatalog();
@@ -1023,9 +1048,10 @@ Context:
 					statusEls(skill).forEach((s) => {
 						// Only touch the live region when the text actually changes,
 						// so screen readers are not re-announced on every 2s tick.
+						const identity = run.model ? ` · ${run.provider} · ${run.model}` : "";
 						const nextText = running
-							? "Running\u2026"
-							: `${RUN_STATUS_LABELS[run.status] || run.status} \u00b7 ${run.duration}`;
+							? `Running…${identity}`
+							: `${RUN_STATUS_LABELS[run.status] || run.status}${identity} · ${run.duration}${run.status === "failed" ? " · Open Output, then retry" : ""}`;
 						const nextCls = `run-status is-${run.status}`;
 						if (s.textContent !== nextText || s.className !== nextCls) {
 							s.textContent = nextText;
@@ -1034,8 +1060,10 @@ Context:
 					});
 					document.querySelectorAll(`[data-run="${sel}"]`).forEach((b) => {
 						// Keep the button focusable; use aria-disabled instead of disabled.
-						b.setAttribute("aria-disabled", running ? "true" : "false");
-						b.classList.toggle("is-disabled", running);
+						const model = b.closest(".run-item").querySelector("[data-run-model]");
+						const blocked = running || (model && !model.value);
+						b.setAttribute("aria-disabled", blocked ? "true" : "false");
+						b.classList.toggle("is-disabled", Boolean(blocked));
 					});
 					document.querySelectorAll(`[data-view-for="${sel}"]`).forEach((v) => {
 						v.dataset.output = run.output || "";
@@ -1130,7 +1158,8 @@ Context:
 			dot,
 			el("span", null, RUN_STATUS_LABELS[r.status] || r.status),
 		);
-		const label = el("span", "run-log-label", r.label);
+		const label = el("span", "run-log-label", `${r.label}${r.model ? ` · ${r.provider} · ${r.model}` : ""}`);
+		label.title = label.textContent;
 		const out = el("span", "run-log-out");
 		if (r.output) out.appendChild(outputButton(r.output, `${r.label} \u00b7 ${r.started}`));
 		else out.textContent = "\u2014";
@@ -1681,6 +1710,54 @@ document.addEventListener("click", (e) => {
 
 	// New application: appended to the tracker, then reloaded so the server's
 	// ordering and counts are the ones on screen.
+	// ── Agents on the Interviews tab ──────────────────────────
+	// A row button only fills the matching runner card; the card's own run
+	// button starts the agent, so no model call happens on a stray tap.
+	page.addEventListener("click", (e) => {
+		const fill = e.target.closest("[data-agent-fill]");
+		if (fill) {
+			const item = page.querySelector(
+				`#interviewAgents .run-item[data-skill="${CSS.escape(fill.dataset.agentFill)}"]`,
+			);
+			const input = item && item.querySelector("[data-run-input]");
+			if (!input) return;
+			input.value = fill.dataset.agentInput;
+			item.scrollIntoView({ block: "center" });
+			(item.querySelector("[data-run]") || input).focus();
+			return;
+		}
+		const lead = e.target.closest("[data-agent-lead]");
+		if (!lead || lead.disabled) return;
+		const status = document.getElementById("interviewLeadStatus");
+		const say = (text, cls) => {
+			status.textContent = text;
+			status.className = `run-status ${cls}`;
+		};
+		lead.disabled = true;
+		say("Adding\u2026", "is-running");
+		post("/api/interviews/create", {
+			company: lead.dataset.company,
+			role: lead.dataset.role,
+			status: "new_lead",
+			priority: "medium",
+			location: lead.dataset.location,
+			salary_range: lead.dataset.salary,
+			job_url: lead.dataset.url,
+		})
+			.then(({ ok, body }) => {
+				if (!ok) {
+					say(errorText(body), "is-failed");
+					lead.disabled = false;
+					return;
+				}
+				window.location.reload();
+			})
+			.catch(() => {
+				say("network error", "is-failed");
+				lead.disabled = false;
+			});
+	});
+
 	const addForm = document.getElementById("interviewAddForm");
 	const addStatus = document.getElementById("interviewAddStatus");
 	if (addForm) {
@@ -1797,6 +1874,18 @@ document.addEventListener("click", (e) => {
 			if (!files.children.length) {
 				files.appendChild(el("p", "interview-dialog-hint", "No resume or prep files recorded for this application."));
 			}
+
+			// Job Reader's extraction, when one exists for this row. Text only.
+			const reading = $("interviewModeReading");
+			reading.textContent = "";
+			const sections = (row.agent && row.agent.reading && row.agent.reading.sections) || [];
+			for (const s of sections) {
+				reading.appendChild(el("p", "interview-dialog-hint", s.label));
+				const list = el("ul", "interview-dialog-history");
+				for (const text of s.items) list.appendChild(el("li", "interview-dialog-event", text));
+				reading.appendChild(list);
+			}
+			$("interviewModeReadingSection").hidden = !sections.length;
 
 			const fit = $("interviewModeFitSection");
 			fit.hidden = !row.fit_notes;

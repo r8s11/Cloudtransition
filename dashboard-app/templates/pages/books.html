@@ -31,7 +31,7 @@
   <div class="card">
     <div class="card-title">Books by Quarter</div>
     <div class="grid-4">
-      {% for q, label, color in [("Q1", "Foundations", "#5cc98a"), ("Q2", "Features", "#5a9fd4"), ("Q3", "Scale & Cert", "#9478d4"), ("Q4", "Job Ready", "#D97757")] %}
+      {% for q, label, color in [("Q1", "Foundations", "var(--green)"), ("Q2", "Features", "var(--blue)"), ("Q3", "Scale & Cert", "var(--purple)"), ("Q4", "Job Ready", "var(--vermilion)")] %}
       <div class="stat-box" style="border-left: 3px solid {{ color }};">
         <div class="stat-value" style="color: {{ color }};">{{ q_counts[q] }}</div>
         <div class="stat-label">{{ q }} &mdash; {{ label }}</div>

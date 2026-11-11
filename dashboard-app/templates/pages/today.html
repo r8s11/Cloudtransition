@@ -3,7 +3,7 @@
 <!-- TODAY PAGE — capture, inbox, next up, quick tools, brain     -->
 <!-- Phone-first: the home-screen shortcut opens /#today.         -->
 <!-- ════════════════════════════════════════════════════════════ -->
-<div class="page" id="page-today" role="tabpanel" aria-labelledby="tab-today">
+<div class="page active" id="page-today" role="tabpanel" aria-labelledby="tab-today">
   <div class="page-header">
     <h2>Today</h2>
     <p>
@@ -25,6 +25,7 @@
           href="{{ d.href }}"
           {% if d.new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
           {% if d.map_query %}data-map-query="{{ d.map_query }}"{% endif %}
+          {% if d.interview_key %}data-interview-open="{{ d.interview_key }}"{% endif %}
         >
           <span class="daily-label">{{ d.label }}{% if d.note %} <span class="daily-note">{{ d.note }}</span>{% endif %}</span>
           <span class="daily-value">{{ d.value }}</span>
@@ -41,6 +42,26 @@
       <pre class="daily-cmd">{{ map_refresh }}</pre>
     </details>
   </section>
+
+  <!-- Next up: the top 3 open TASKS.md items, ranked by routine.md's lanes
+       (security → income/job search → debt → live project week → DevOps →
+       Bogatyr), with TASKS.md file order breaking ties. -->
+  <div class="card">
+    <div class="card-title">Next up</div>
+    {% set ns = namespace(cat="") %}
+    {% for t in next_up %}
+      {% if t.cat != ns.cat %}
+        {% set ns.cat = t.cat %}
+        <div class="task-category-header">{{ t.cat }}</div>
+      {% endif %}
+      <div class="task-item">
+        {{ task_check(t) }}
+        <span class="task-text">{{ t.text }}</span>
+      </div>
+    {% else %}
+      <p class="run-empty">No open items in TASKS.md.</p>
+    {% endfor %}
+  </div>
 
   <!-- Capture → TASKS.md ## Inbox -->
   <div class="card">
@@ -82,23 +103,110 @@
     </p>
   </div>
 
-  <!-- Next up: top of TASKS.md, which is kept in priority order -->
-  <div class="card">
-    <div class="card-title">Next up</div>
-    {% set ns = namespace(cat="") %}
-    {% for t in next_up %}
-      {% if t.cat != ns.cat %}
-        {% set ns.cat = t.cat %}
-        <div class="task-category-header">{{ t.cat }}</div>
+  <!-- Routine content and Weekly Review checks are read from routine.md. -->
+  <section class="card routine-card" aria-labelledby="routineTitle">
+    <h3 class="card-title routine-card-title" id="routineTitle">
+      Routine
+      {% if routine.available and routine.updated %}
+      <span class="routine-source">routine.md &middot; {{ routine.updated }}</span>
       {% endif %}
-      <div class="task-item">
-        {{ task_check(t) }}
-        <span class="task-text">{{ t.text }}</span>
-      </div>
+    </h3>
+    {% if not routine.available %}
+    <p class="run-empty">{{ routine.message }}</p>
     {% else %}
-      <p class="run-empty">No open items in TASKS.md.</p>
-    {% endfor %}
-  </div>
+      {% if routine.context %}
+      <p class="routine-context"><strong>Current context:</strong> {{ routine.context }}</p>
+      {% endif %}
+
+      <section class="routine-section" aria-labelledby="routineRhythmTitle">
+        <div class="routine-section-heading">
+          <h4 id="routineRhythmTitle">Working rhythm</h4>
+        </div>
+        {% if routine.rhythm %}
+        <div class="routine-rhythm-list">
+          {% for item in routine.rhythm %}
+          <article class="routine-rhythm-item{% if item.is_today %} is-today{% endif %}">
+            <div class="routine-slot-heading">
+              <span class="routine-slot-label">{{ item.slot }}</span>
+              {% if item.is_today %}<span class="routine-today-mark">Today</span>{% endif %}
+            </div>
+            <p class="routine-slot-what">{{ item.what }}</p>
+            {% if item.notes %}
+            <details class="routine-slot-notes">
+              <summary>Notes</summary>
+              <p>{{ item.notes }}</p>
+            </details>
+            {% endif %}
+          </article>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="run-empty">No working rhythm entries were found in routine.md.</p>
+        {% endif %}
+        {% if routine.rhythm_summary %}
+        <p class="routine-rhythm-summary">{{ routine.rhythm_summary|join(" ") }}</p>
+        {% endif %}
+      </section>
+
+      <section class="routine-section" aria-labelledby="routineReviewTitle">
+        <div class="routine-section-heading">
+          <h4 id="routineReviewTitle">Weekly Review</h4>
+          <span class="routine-review-progress" id="routineReviewProgress" role="status" aria-live="polite">
+            {{ routine.review|selectattr("done")|list|length }} of {{ routine.review|length }} checked
+          </span>
+        </div>
+        {% if routine.review %}
+        <div class="routine-review-list" id="routineReviewList">
+          {% for item in routine.review %}
+          <div class="task-item routine-review-item">
+            {{ task_check(item) }}
+            <span class="task-text">{{ item.display_text }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        <p class="routine-save-status" id="routineSaveStatus" role="status" aria-live="polite"></p>
+        {% else %}
+        <p class="run-empty">No Weekly Review checkboxes were found in routine.md.</p>
+        {% endif %}
+      </section>
+
+      <details class="routine-disclosure">
+        <summary>
+          <span>Rules</span>
+          <span class="routine-disclosure-meta">{{ routine.rules|length }} items</span>
+        </summary>
+        {% if routine.rules %}
+        <ol class="routine-rule-list">
+          {% for rule in routine.rules %}<li>{{ rule }}</li>{% endfor %}
+        </ol>
+        {% else %}
+        <p class="run-empty">No numbered rules were found in routine.md.</p>
+        {% endif %}
+      </details>
+
+      <details class="routine-disclosure">
+        <summary>
+          <span>Key dates</span>
+          <span class="routine-disclosure-meta">{{ routine.dates|length }} entries</span>
+        </summary>
+        {% if routine.dates %}
+        <ul class="routine-date-list">
+          {% for row in routine.dates %}
+          <li class="routine-date-item">
+            <span class="routine-date">{{ row[0] }}</span>
+            <div>
+              <strong>{{ row[1] }}</strong>
+              {% if row[2] %}<p>{{ row[2] }}</p>{% endif %}
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="run-empty">No key dates were found in routine.md.</p>
+        {% endif %}
+      </details>
+    {% endif %}
+  </section>
 
   <!-- Recent artifacts ← workspace_content.artifact_entries() (artifacts/catalog.py
        rules), read live on each load: newest by modification time, not authorship. -->

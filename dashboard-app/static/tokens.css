@@ -1,0 +1,59 @@
+/* Orizuru shared tokens — one source for the dashboard sheet and the reader.
+   Loaded before style.css (dashboard) and before the reader's inline style, so
+   both documents resolve the same palette, type, and shape values. */
+
+:root {
+	/* Orizuru palette — one uncut sheet */
+	--vermilion: #b3212e; /* vermilion washi ground */
+	--vermilion-deep: #8e1a24; /* folded / shadowed vermilion */
+	--vermilion-light: #d44551; /* lit edge of the sheet */
+	--fold-white: #f4ead8; /* crease lines / unfolded washi */
+	--paper: #f8f1e3; /* unfolded kimono/washi face */
+	--paper-deep: #efe3cd; /* creased / folded-over face */
+	--paper-hi: #fdf9ef; /* face in direct light */
+	--gold: #c9a227; /* the active step dot */
+	--sumi: #171512; /* ink — notes written on the sheet */
+	--ink: #211d18; /* body ink */
+	--ink-mid: #4f483c; /* secondary ink */
+	--ink-muted: #554d41; /* faint ink — 5.47:1 on --paper-deep, 6.68:1 on --paper-hi (WCAG AA) */
+
+	/* Semantic aliases kept for templates */
+	--accent: var(--vermilion);
+	--accent-soft: #efd9d4;
+	--text: var(--ink);
+	--text-mid: var(--ink-mid);
+	--text-muted: var(--ink-muted);
+	--text-dim: var(--ink-muted);
+	--surface: var(--paper);
+	--surface-alt: var(--paper-deep);
+	--border: #d8c9ab;
+	--border-light: #e4dac4;
+
+	/* Domain / realm colors — verified to hold contrast on washi */
+	--green: #356844;
+	--green-light: rgba(63, 125, 84, 0.12);
+	--blue: #38618c;
+	--blue-light: rgba(56, 97, 140, 0.12);
+	--purple: #6f58a8;
+	--purple-light: rgba(111, 88, 168, 0.12);
+	--red: #a8322c;
+	--red-light: rgba(168, 50, 44, 0.12);
+	--yellow: #7b580e;
+	--yellow-light: rgba(123, 88, 14, 0.08);
+	--teal: #27686a;
+	--rose: var(--vermilion);
+	--rose-soft: rgba(179, 33, 46, 0.12);
+	--sage: #3f7d54;
+
+	/* Typography */
+	--sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+	--mono: "JetBrains Mono", "Fira Code", monospace;
+
+	/* Shape — paper, not glass */
+	--radius-sm: 6px;
+	--radius: 10px;
+	--radius-lg: 14px;
+	--radius-xl: 18px;
+
+	--ease: cubic-bezier(0.4, 0, 0.2, 1);
+}

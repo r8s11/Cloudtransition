@@ -108,7 +108,7 @@
   <div class="card">
     <div class="card-title">Credit Strategy &mdash; Cheapest First</div>
     <div class="grid-3 gap-12">
-      {% set phase_colors = ["#c9a227", "#7c5cbf", "#D97757", "#4a7fb5", "#4a9e6e"] %}
+      {% set phase_colors = ["var(--yellow)", "var(--purple)", "var(--vermilion)", "var(--blue)", "var(--green)"] %}
       {% for ph in edu_phases %}
       <div class="phase-card" style="border-top: 3px solid {{ phase_colors[loop.index0 % 5] }}; padding-top: 20px;">
         <div class="phase-header">
@@ -157,16 +157,16 @@
       <div class="card">
         <div class="card-title">Cost Projection</div>
         {% for item in edu_cost.get("breakdown", []) %}
-        <div class="metric-row">
+        <div class="metric-row cost-row">
           <div class="metric-goal">{{ item.item }}</div>
           <div class="metric-measure">${{ "{:,}".format(item.amount) }}</div>
         </div>
         {% endfor %}
-        <div class="metric-row cost-total">
+        <div class="metric-row cost-row cost-total">
           <div class="metric-goal">Total estimated</div>
           <div class="metric-measure">${{ "{:,}".format(edu_cost.get("total_low", 0)) }}&ndash;${{ "{:,}".format(edu_cost.get("total_high", 0)) }}</div>
         </div>
-        <div class="metric-row cost-net">
+        <div class="metric-row cost-row cost-net">
           <div class="metric-goal">After max Pell Grant</div>
           <div class="metric-measure">${{ "{:,}".format(edu_cost.get("net_low", 0)) }}&ndash;${{ "{:,}".format(edu_cost.get("net_high", 0)) }}</div>
         </div>
@@ -197,10 +197,10 @@
     <table class="matrix-table">
       <thead>
         <tr>
-          <th>Priority</th>
-          <th>Course</th>
-          <th>SNHU Equiv</th>
-          <th>Credits</th>
+          <th scope="col">Priority</th>
+          <th scope="col">Course</th>
+          <th scope="col">SNHU Equiv</th>
+          <th scope="col">Credits</th>
         </tr>
       </thead>
       <tbody>

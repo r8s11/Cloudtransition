@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Usage Remaining</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #0b0c10; color: #e8eaed; margin: 0; padding: 24px;
+  }
+  .card {
+    max-width: 700px; margin: 0 auto; background: #12141a;
+    border: 1px solid #23262e; border-radius: 16px; padding: 28px;
+  }
+  h1 { margin: 0 0 6px 0; font-size: 24px; letter-spacing: -0.5px; }
+  .sub { color: #9aa0a6; font-size: 14px; margin-bottom: 26px; }
+  .limit-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #1a1d25; border: 1px solid #2c313a;
+    padding: 4px 12px; border-radius: 999px; font-size: 12px;
+    color: #e8eaed; margin-bottom: 22px; width: fit-content;
+  }
+  .limit-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
+  .gauge-wrap { position: relative; width: 160px; height: 160px; margin: 0 auto 22px auto; }
+  svg.gauge { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .gauge-bg, .gauge-fg {
+    fill: none; stroke-linecap: round; stroke-width: 14;
+  }
+  .gauge-bg { stroke: #23262e; }
+  .gauge-fg {
+    stroke: #22c55e; stroke-dasharray: 471; stroke-dashoffset: 471;
+    transition: stroke-dashoffset 0.6s ease;
+  }
+  .gauge-text { position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
+  .gauge-big { font-size: 40px; font-weight: 700; line-height: 1; }
+  .gauge-small { font-size: 13px; color: #9aa0a6; margin-top: 2px; }
+  h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: #9aa0a6; margin: 26px 0 12px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: #9aa0a6; padding: 8px 6px; font-weight: 600; }
+  td { color: #c9ccd2; padding: 9px 6px; border-top: 1px solid #23262e; font-variant-numeric: tabular-nums; }
+  tr:hover td { background: #171a22; }
+  .model-opus { color: #f59e0b; font-weight: 700; }
+  .model-sonnet { color: #60a5fa; }
+  .status-fail { color: #ef4444; }
+  .status-done { color: #22c55e; }
+  .note { color: #9aa0a6; font-size: 13px; margin-top: 22px; line-height: 1.5; }
+  .note b { color: #e8eaed; }
+  .manual { margin-top: 24px; border-top: 1px solid #23262e; padding-top: 16px; }
+  .manual input {
+    width: 100%; background: #171a22; border: 1px solid #333a45; color: #e8eaed;
+    border-radius: 8px; padding: 10px 12px; font-size: 14px; margin-bottom: 8px;
+  }
+  .manual button {
+    background: #2563eb; color: #fff; border: none; border-radius: 8px;
+    padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .manual button:hover { background: #1d4ed8; }
+  .manual .hint { color: #9aa0a6; font-size: 12px; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Claude Usage Remaining</h1>
+  <p class="sub">Built from your local <code>runs.log</code>. I can't read your live Claude meter — this counts down to the 6&nbsp;pm ET reset and lists the Opus runs I found.</p>
+
+  <div class="limit-chip"><span class="dot"></span>5-hour Opus limit · resets <span id="resetTime">6:00&nbsp;pm ET</span></div>
+
+  <div class="gauge-wrap">
+    <svg class="gauge" viewBox="0 0 120 120">
+      <circle class="gauge-bg" cx="60" cy="60" r="52" />
+      <circle id="gaugeFg" class="gauge-fg" cx="60" cy="60" r="52" />
+    </svg>
+    <div class="gauge-text">
+      <div id="timeLeft" class="gauge-big">--:--:--</div>
+      <div id="timeLeftLabel" class="gauge-small">until reset</div>
+    </div>
+  </div>
+
+  <h2>Today's Opus runs (5-hour window)</h2>
+  <table>
+    <thead><tr><th>Time (ET)</th><th>Skill</th><th>Model</th><th>Duration</th><th>Result</th></tr></thead>
+    <tbody id="runsBody">
+      <tr>
+        <td>1:16 pm</td>
+        <td>Audit dashboard</td>
+        <td class="model-opus">opus</td>
+        <td>4 min 27 s</td>
+        <td class="status-fail">hit 5-hour limit</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="note"><b>Note:</b> Only one Opus run is logged today (Nov&nbsp;9), started at 1:16&nbsp;pm ET and failed after ~4.5&nbsp;min with "You've hit your 5-hour limit · resets 6&nbsp;pm (America/New_York)". Your window refills at 6&nbsp;pm ET today. Sonnet runs (e.g. UI/UX review at 1:10&nbsp;pm) don't count against the Opus 5-hour cap.</p>
+
+  <div class="manual">
+    <h2>Add usage manually</h2>
+    <input type="text" id="manualText" placeholder="e.g. Opus polish — 12 min">
+    <button onclick="addEntry()">Log it</button>
+    <p class="hint">Entries are kept only in this browser session (localStorage). The countdown always reflects real time to 6&nbsp;pm ET.</p>
+  </div>
+</div>
+
+<script>
+(function() {
+  const ET_OFFSET = -5; // America/New_York is EST (UTC-5) in November
+
+  function nextReset() {
+    const now = new Date();
+    const reset = new Date(now);
+    reset.setHours(18, 0, 0, 0); // 6pm local (browser TZ assumed ET-ish)
+    if (reset <= now) reset.setDate(reset.getDate() + 1);
+    return reset;
+  }
+
+  function fmt(sec) {
+    sec = Math.max(0, Math.floor(sec));
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return (h > 0 ? h + ':' : '') + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  }
+
+  function tick() {
+    const now = new Date();
+    const reset = nextReset();
+    const remaining = (reset - now) / 1000;
+    const total = 5 * 3600; // 5 hours
+    const used = Math.max(0, total - remaining);
+
+    document.getElementById('timeLeft').textContent = fmt(remaining);
+    document.getElementById('timeLeftLabel').textContent =
+      remaining <= 0 ? 'Reset — try again' : 'until reset';
+
+    const fg = document.getElementById('gaugeFg');
+    const circumference = 2 * Math.PI * 52;
+    const offset = circumference - (used / total) * circumference;
+    fg.style.strokeDashoffset = offset;
+    fg.style.stroke = remaining <= 0 ? '#22c55e' :
+      used > total * 0.8 ? '#f59e0b' : '#22c55e';
+  }
+
+  setInterval(tick, 1000);
+  tick();
+
+  function addEntry() {
+    const inp = document.getElementById('manualText');
+    const val = inp.value.trim();
+    if (!val) return;
+    const tbody = document.getElementById('runsBody');
+    const row = document.createElement('tr');
+    row.innerHTML = '<td>just now</td><td>Manual entry</td><td class="model-opus">opus</td><td>' + val + '</td><td>logged</td>';
+    tbody.appendChild(row);
+    inp.value = '';
+  }
+})();
+</script>
+</body>
+</html>

@@ -9,7 +9,7 @@ Applications, the monorepo, scripts, and tooling configuration.
 | Dashboard | `dashboard-app/` | FastAPI + Jinja2 + Tailwind. Renders workspace `.md`/`.yml` live. **Read `dashboard-app/CLAUDE.md` first** |
 | Agentic OS | `agentic-os/` | TypeScript/Bun monorepo — API, CLI, runtime, storage, policy, memory. See `agentic-os/README.md` |
 | Button Runner | `button-runner/` | Standalone headless Claude skill buttons |
-| Second Brain | `robonugget-second-brain-app/` | Static reference page, served by the dashboard |
+| Second Brain | `robonugget-second-brain-app/` | Static RoboNuggets reference page. Standalone: open `index.html` directly; the dashboard no longer serves it |
 | Deterministic Second Brain | `second-brain/` | Standard-library Python retrieval, atomic memory storage, catalogue checks and benchmarks |
 | Visual Second Brain | `visual-second-brain/` | Topic-first workspace map (curated, privacy-filtered snapshot index). Served by the dashboard at `/workspace-map/` and the **Workspace map** tab. See `visual-second-brain/README.md` |
 | ARMS Review | `tools/arms/` | Loopback review app, parked feedback, passive routine reports and browser clipper |

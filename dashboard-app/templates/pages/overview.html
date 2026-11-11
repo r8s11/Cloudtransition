@@ -2,32 +2,10 @@
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- OVERVIEW PAGE                                               -->
 <!-- ════════════════════════════════════════════════════════════ -->
-<div
-  class="page active"
-  id="page-overview"
-  role="tabpanel"
-  aria-labelledby="tab-overview"
->
-  <!-- Restart Banner -->
-  <div class="restart-banner">
-    <div class="banner-icon">&#x1F504;</div>
-    <div>
-      <h3>Fresh Start Next Week</h3>
-      <p>
-        Restarting the learning journey from Week 1. All previous progress
-        preserved &mdash; building on what you know.
-      </p>
-    </div>
-  </div>
-
-  <!-- Hero Section -->
-  <div class="hero">
-    <h1 class="hero-title">
-      2026 Learning &amp; <span class="accent">Career</span> Dashboard
-    </h1>
-    <p class="hero-sub">
-      Full-time worker &middot; 10-15 hrs/week &middot; Learn by building
-    </p>
+<div class="page" id="page-overview" role="tabpanel" aria-labelledby="tab-overview">
+  <div class="page-header">
+    <h2>Overview</h2>
+    <p>Progress across every task file, the year, projects and end-of-2026 goals.</p>
   </div>
 
   <!-- Stats -->
@@ -79,10 +57,10 @@
   <div class="card">
     <div class="card-title">Year Progress</div>
     <div class="grid-5 justify-center pad-y-8">
-      {% for ring in [ {"pct": year_pct, "label": "2026", "color": "#D97757"},
-      {"pct": q1_pct, "label": "Q1", "color": "#5cc98a"}, {"pct": q2_pct,
-      "label": "Q2", "color": "#5a9fd4"}, {"pct": q3_pct, "label": "Q3",
-      "color": "#9478d4"}, {"pct": q4_pct, "label": "Q4", "color": "#e0b840"}, ]
+      {% for ring in [ {"pct": year_pct, "label": "2026", "color": "var(--vermilion)"},
+      {"pct": q1_pct, "label": "Q1", "color": "var(--green)"}, {"pct": q2_pct,
+      "label": "Q2", "color": "var(--blue)"}, {"pct": q3_pct, "label": "Q3",
+      "color": "var(--purple)"}, {"pct": q4_pct, "label": "Q4", "color": "var(--yellow)"}, ]
       %}
       <div class="ring-container">
         {% set circ = 99.9 %} {% set offset = circ * (1 - ring.pct / 100) %}

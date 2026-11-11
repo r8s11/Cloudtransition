@@ -1,6 +1,6 @@
 {
-  "name": "CloudTransition Dashboard",
-  "short_name": "Sheet",
+  "name": "Command Center",
+  "short_name": "Command",
   "start_url": "/#today",
   "scope": "/",
   "display": "standalone",

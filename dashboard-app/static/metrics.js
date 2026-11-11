@@ -243,7 +243,13 @@
 		const usable = fields.some((key) => series[key]?.some((point) => Number.isFinite(point[0]) && Number.isFinite(point[1])));
 		if (!usable || !(history.end > history.start)) { chart.append(node("p", "No retained host samples in this window. No values are filled in.")); return; }
 		const width = Math.max(200, Math.round(chart.clientWidth || 800)), right = width - 12;
-		const svg = svgNode("svg", { viewBox: `0 0 ${width} 180`, role: "img", "aria-label": selected + " CPU, memory, and system volume utilization for " + history.window });
+		const valid = (point) => Number.isFinite(point[0]) && Number.isFinite(point[1]) && point[1] >= 0 && point[1] <= 100 && point[0] >= history.start && point[0] <= history.end;
+		const names = ["CPU", "memory", "system volume"];
+		const summary = fields.map((field, index) => {
+			const values = (series[field] || []).filter(valid).map((point) => point[1]);
+			return names[index] + (values.length ? " " + Math.min(...values).toFixed(1) + "–" + Math.max(...values).toFixed(1) + "%" : " no samples");
+		}).join(", ");
+		const svg = svgNode("svg", { viewBox: `0 0 ${width} 180`, role: "img", "aria-label": selected + " utilization over " + history.window + ": " + summary });
 		svg.append(svgNode("title", {}, "Recorded host utilization, 0 to 100 percent"), svgNode("desc", {}, "CPU solid, memory dashed, system volume dotted. Gaps represent missing samples. Time is based on Prometheus."));
 		for (const tick of [0, 50, 100]) {
 			const y = 148 - tick * 1.28;
@@ -264,15 +270,24 @@
 			}
 			if (path) svg.append(svgNode("path", { d: path, class: "ops-history-line ops-history-series-" + index, fill: "none" }));
 		});
-		svg.append(svgNode("text", { x: 36, y: 174, class: "ops-chart-label" }, date(history.start)), svgNode("text", { x: right, y: 174, "text-anchor": "end", class: "ops-chart-label" }, date(history.end)));
+		timeLabels(svg, history.start, history.end, 36, right, 174);
 		chart.append(svg);
+		const byTime = new Map();
+		fields.forEach((field, index) => { for (const point of series[field] || []) if (valid(point)) { if (!byTime.has(point[0])) byTime.set(point[0], ["—", "—", "—"]); byTime.get(point[0])[index] = percent(point[1]); } });
+		chart.append(dataTable("Host utilization", ["Time", "CPU busy", "Memory used", "System volume used"], [...byTime.entries()].sort((a, b) => a[0] - b[0]).map(([t, values]) => [date(t, history.end - history.start > 21600), ...values])));
 	}
 	/* ── Charts: hand-drawn SVG; missing samples stay gaps, never zero ── */
 	const HOST_FIELDS = ["cpu_percent", "memory_percent", "disk_percent"];
 	function widthOf(element) { return Math.max(240, Math.round(element.clientWidth || 520)); }
+	function axisTime(seconds, start, end) {
+		const label = date(seconds).replace(/:\d\d(\s|$)/, "$1");
+		const first = new Date(start * 1000), last = new Date(end * 1000);
+		if (!Number.isFinite(first.getTime()) || !Number.isFinite(last.getTime()) || first.toDateString() === last.toDateString()) return label;
+		return new Date(seconds * 1000).toLocaleDateString(undefined, { weekday: "short" }) + " " + label;
+	}
 	function timeLabels(svg, start, end, x0, x1, y) {
 		for (const [ratio, anchor] of [[0, "start"], [0.5, "middle"], [1, "end"]]) {
-			svg.append(svgNode("text", { x: x0 + ratio * (x1 - x0), y, "text-anchor": anchor, class: "ops-chart-label" }, date(start + ratio * (end - start)).replace(/:\d\d(\s|$)/, "$1")));
+			svg.append(svgNode("text", { x: x0 + ratio * (x1 - x0), y, "text-anchor": anchor, class: "ops-chart-label" }, axisTime(start + ratio * (end - start), start, end)));
 		}
 	}
 	function linePath(points, start, end, step, xOf, yOf) {
@@ -284,8 +299,11 @@
 		}
 		return path;
 	}
+	const openTables = new Set();
 	function dataTable(caption, headers, rowsData) {
 		const details = node("details", undefined, "ops-chart-data"), table = node("table", undefined, "ops-table");
+		details.dataset.table = caption; details.open = openTables.has(caption);
+		details.addEventListener("toggle", () => { if (details.open) openTables.add(caption); else openTables.delete(caption); });
 		details.append(node("summary", "Data table"));
 		table.append(node("caption", caption, "metrics-visually-hidden"));
 		const head = node("tr"); headers.forEach((label) => { const cell = node("th", label); cell.scope = "col"; head.append(cell); });
@@ -338,7 +356,7 @@
 		timeLabels(svg, section.start, section.end, x0, x1, H - 4);
 		figure.append(svg);
 		const byTime = new Map(); upPoints.forEach(([t, v]) => byTime.set(t, [bytes(v, true), "—"])); downPoints.forEach(([t, v]) => byTime.set(t, [byTime.get(t)?.[0] || "—", bytes(v, true)]));
-		figure.append(dataTable(title, ["Time", labels[0], labels[1]], [...byTime.entries()].sort((a, b) => a[0] - b[0]).map(([t, pair]) => [date(t), ...pair])));
+		figure.append(dataTable(title, ["Time", labels[0], labels[1]], [...byTime.entries()].sort((a, b) => a[0] - b[0]).map(([t, pair]) => [date(t, section.end - section.start > 21600), ...pair])));
 		return figure;
 	}
 
@@ -346,7 +364,10 @@
 		const net = $("#ops-net-charts"), disks = $("#ops-disk-charts"), section = charts?.rates;
 		net.replaceChildren(); disks.replaceChildren();
 		const host = hostData();
-		if (chartsLoading && !charts) { net.append(node("p", "Loading retained samples…", "ops-empty")); return; }
+		if (chartsLoading && !charts) {
+			net.append(node("p", "Loading retained samples…", "ops-empty"));
+			disks.append(node("p", "Loading retained samples…", "ops-empty")); return;
+		}
 		const hostRates = section?.status === "ok" ? section.hosts?.[selected] : null;
 		const hasHistory = Boolean(hostRates) && (Object.values(hostRates.network || {}).some((pair) => pair.receive.length || pair.transmit.length) || Object.keys(hostRates.disks || {}).length > 0);
 		if (section?.status !== "ok") {
@@ -418,6 +439,7 @@
 	function renderProbeChart() {
 		const chart = $("#ops-probes-chart"), section = charts?.probes, current = activityData()?.probes?.rows || [];
 		chart.replaceChildren();
+		if (chartsLoading && !charts) { chart.append(node("p", "Loading retained samples…", "ops-empty")); return; }
 		const durations = new Map(current.map((row) => [row.service + "|" + row.target, row.duration_seconds]));
 		const historyRows = section?.status === "ok" ? section.hosts?.[selected] || [] : [];
 		const list = node("div", undefined, "ops-timeline");
@@ -434,12 +456,27 @@
 			for (const row of current) list.append(node("span", row.service + (row.kind ? " · " + row.kind : ""), "ops-timeline-name"), badge(row.status === "up" ? "Up now" : row.status === "down" ? "Down now" : "Unknown", row.status), node("span", Number.isFinite(row.duration_seconds) ? numeric(row.duration_seconds * 1000, 1) + " ms" : "—", "ops-timeline-value"));
 		}
 		if (list.childElementCount) chart.append(list);
+		if (historyRows.length) {
+			const stepTime = (index) => date(section.start + index * section.step_seconds, section.end - section.start > 21600);
+			const runs = (values, wanted) => {
+				const found = [];
+				for (let index = 0, from = null; index <= values.length; index++) {
+					const match = index < values.length && values[index] === wanted;
+					if (match && from === null) from = index;
+					else if (!match && from !== null) { found.push(from === index - 1 ? stepTime(from) : stepTime(from) + " – " + stepTime(index - 1)); from = null; }
+				}
+				return found.join("; ") || "none";
+			};
+			chart.append(dataTable("Probe history", ["Probe", "Up", "Down", "No sample", "Down at", "No sample at"], historyRows.map((row) => [
+				row.service + (row.kind ? " · " + row.kind : ""), row.values.filter((v) => v === 1).length, row.values.filter((v) => v === 0).length, row.values.filter((v) => v === null).length, runs(row.values, 0), runs(row.values, null),
+			])));
+		}
 	}
 
 	function renderLogChart() {
 		const figure = $("#ops-logs-chart"), section = charts?.logs;
 		figure.replaceChildren();
-		if (chartsLoading && !charts) { figure.append(node("p", "Loading log history…")); return; }
+		if (chartsLoading && !charts) { figure.append(node("p", "Loading retained samples…")); return; }
 		if (section?.status !== "ok") { figure.append(node("p", "Log history unavailable (Loki unreachable). Other charts are unaffected.", "ops-error")); return; }
 		const levels = section.hosts?.[selected]?.levels || {};
 		const order = [["Error", "error"], ["Warning", "warning"], ["Information", "info"]];
@@ -466,7 +503,7 @@
 		timeLabels(svg, section.start, section.end, x0, x1, H - 4);
 		figure.append(svg);
 		if (stacks.length === 1 && stacks[0][0] === "unknown") figure.append(node("p", "These log sources omit a severity label, so every line is counted as “severity not exported”.", "metrics-footnote"));
-		figure.append(dataTable("Log lines by severity", ["Time", ...stacks.map(([name]) => name)], Array.from({ length: n }, (_, i) => [date(section.start + i * section.step_seconds), ...stacks.map(([name]) => numeric(levels[name][i] || 0))]).filter((row) => row.slice(1).some((v) => v !== "0"))));
+		figure.append(dataTable("Log lines by severity", ["Time", ...stacks.map(([name]) => name)], Array.from({ length: n }, (_, i) => [date(section.start + i * section.step_seconds, section.end - section.start > 21600), ...stacks.map(([name]) => numeric(levels[name][i] || 0))]).filter((row) => row.slice(1).some((v) => v !== "0"))));
 	}
 	function renderCharts() { renderRates(); renderProbeChart(); renderLogChart(); }
 
@@ -581,5 +618,14 @@
 		const width = Math.round(entries[0].contentRect.width);
 		if (width !== chartWidth) { chartWidth = width; renderHistory(); renderCharts(); }
 	}).observe($("#metrics-history-chart"));
+	// Re-rendering replaces chart nodes; keep a focused Data table summary focused so keyboard users are not dropped to the page top.
+	function keepFocus(render) {
+		return () => {
+			const key = document.activeElement?.matches?.(".ops-chart-data > summary") ? document.activeElement.parentElement.dataset.table : null;
+			render();
+			if (key) page.querySelector(`.ops-chart-data[data-table="${CSS.escape(key)}"] > summary`)?.focus({ preventScroll: true });
+		};
+	}
+	renderHistory = keepFocus(renderHistory); renderRates = keepFocus(renderRates); renderProbeChart = keepFocus(renderProbeChart); renderLogChart = keepFocus(renderLogChart);
 	renderSnapshot(); renderCharts(); syncPolling();
 })();

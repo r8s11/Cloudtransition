@@ -4,7 +4,7 @@
   Keeps the dashboard up on loopback (127.0.0.1:8000) so the phone can reach it
   through `tailscale serve`. Runs only while the USB drive is mounted
   (KeepAlive/PathState); logs and working directory live in $HOME so they never
-  depend on the drive. PATH carries claude, codex, opencode, graft and node
+  depend on the drive. PATH carries claude, codex, opencode, trail and node
   for Run-tab buttons (~/.local/bin has codex, ~/.opencode/bin has opencode).
   Starts through venv/bin/python (a symlink to the framework Python, which
   holds the removable-volume grant): launchd's /bin/sh may not exec the

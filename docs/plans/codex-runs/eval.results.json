@@ -1,104 +1,34 @@
 {
   "feature": "Codex, OpenCode and OpenRouter models for Run executions",
-  "evalHash": "61535cc23adad24b",
+  "evalHash": "c9038db9a1830b23",
   "cases": {
     "F1": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "2aad94ad463b6ceb",
-      "at": "2026-11-06T22:16:23.148Z",
-      "output": ".                                                                        [100%]\n1 passed, 3 deselected in 0.62s\n"
+      "workspace": "9e9d3b2cd93ef5f7",
+      "at": "2026-11-10T18:16:17.364Z",
+      "output": ".                                                                        [100%]\n1 passed, 12 deselected in 0.35s\n"
     },
     "F3": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "2aad94ad463b6ceb",
-      "at": "2026-11-06T22:16:28.332Z",
-      "output": "..                                                                       [100%]\n2 passed, 2 deselected in 4.85s\n"
+      "workspace": "9e9d3b2cd93ef5f7",
+      "at": "2026-11-10T18:16:21.441Z",
+      "output": "......                                                                   [100%]\n6 passed, 7 deselected in 3.88s\n"
     },
     "R1": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "2aad94ad463b6ceb",
-      "at": "2026-11-06T22:16:33.968Z",
-      "output": "........................................................................ [ 53%]\n...............................................................          [100%]\n135 passed in 5.16s\n"
+      "workspace": "9e9d3b2cd93ef5f7",
+      "at": "2026-11-10T18:16:30.042Z",
+      "output": "........................................................................ [ 22%]\n........................................................................ [ 45%]\n........................................................................ [ 68%]\n........................................................................ [ 90%]\n.............................                                            [100%]\n317 passed in 8.40s\n"
     },
     "R2": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "2aad94ad463b6ceb",
-      "at": "2026-11-06T22:16:34.085Z",
+      "workspace": "9e9d3b2cd93ef5f7",
+      "at": "2026-11-10T18:16:30.106Z",
       "output": ""
-    },
-    "U1": {
-      "status": "pass",
-      "kind": "manual",
-      "workspace": "2aad94ad463b6ceb",
-      "at": "2026-11-06T22:16:41.046Z",
-      "evidence": "Live /api/skills/catalog after codex-resolution fix: all four providers available, claude 3 / codex 9 / opencode 12 / openrouter 7, free-only confirmed"
-    },
-    "U2": {
-      "status": "pass",
-      "kind": "manual",
-      "workspace": "2aad94ad463b6ceb",
-      "at": "2026-11-06T22:16:41.564Z",
-      "evidence": "Command construction verified for codex (resolved /Users/roosevelt/.local/bin/codex, exec -m, sandbox, reasoning effort) and opencode (run --standalone); missing codex gives 400 before launch; openrouter-without-key 400"
-    },
-    "U3": {
-      "status": "pass",
-      "kind": "manual",
-      "workspace": "2aad94ad463b6ceb",
-      "at": "2026-11-06T22:16:42.076Z",
-      "evidence": "Run and Today share one /api/skills/catalog; all providers allowed on all cards (programmatic check across SKILL_RUNNERS); fixed Audit options:false retained"
-    },
-    "U4": {
-      "status": "pass",
-      "kind": "manual",
-      "workspace": "2aad94ad463b6ceb",
-      "at": "2026-11-06T22:16:42.747Z",
-      "evidence": "static/app.js builds native selects with run-field-label Model/Effort fields; effort recomputes and resets to Default; grep-verified 2026-11-06 against current tree"
-    },
-    "F2": {
-      "status": "pass",
-      "kind": "manual",
-      "workspace": "2aad94ad463b6ceb",
-      "at": "2026-11-06T22:16:49.066Z",
-      "evidence": "test_missing_codex_executable_is_reported (new, green) + live catalogue: codex unavailable when unresolvable, reason 'codex executable not on PATH', 400 before launch; opencode unavailable likewise"
-    },
-    "F4": {
-      "status": "pass",
-      "kind": "manual",
-      "workspace": "2aad94ad463b6ceb",
-      "at": "2026-11-06T22:16:49.708Z",
-      "evidence": "Programmatic: _card_allows_provider allows codex/opencode/openrouter on every card (all-providers-allowed revision); no bypass flags"
-    },
-    "R3": {
-      "status": "pass",
-      "kind": "manual",
-      "workspace": "2aad94ad463b6ceb",
-      "at": "2026-11-06T22:16:51.518Z",
-      "evidence": "Full suite 135 passed (pytest, 2026-11-06 re-verified); Claude/Audit/shell semantics retained"
-    },
-    "D1": {
-      "status": "pass",
-      "kind": "manual",
-      "workspace": "2aad94ad463b6ceb",
-      "at": "2026-11-06T22:16:52.105Z",
-      "evidence": "Mockup unchanged, no frontend changes in codex-resolution fix; live picker structure still matches grouped/free-only optgroups"
-    },
-    "D2": {
-      "status": "pass",
-      "kind": "manual",
-      "workspace": "2aad94ad463b6ceb",
-      "at": "2026-11-06T22:16:53.010Z",
-      "evidence": "No frontend changes; codex-unavailable path reports reason via provider_unavailable_reason + 400 before launch, same pattern as other providers"
-    },
-    "D3": {
-      "status": "pass",
-      "kind": "manual",
-      "workspace": "2aad94ad463b6ceb",
-      "at": "2026-11-06T22:16:53.640Z",
-      "evidence": "Run lifecycle untouched by codex-resolution fix; suite green 135 passed; completed-run history and runs log verified live earlier"
     }
   }
 }

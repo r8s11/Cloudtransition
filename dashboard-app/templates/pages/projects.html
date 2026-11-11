@@ -8,7 +8,7 @@
   </div>
 
   {% for p in projects %}
-  <div class="card" style="border-left: 4px solid {{ p.color }};">
+  <div class="card" style="border-left: 4px solid var(--accent);">
     <div class="project-header">
       <h3 class="fs-20">{{ p.name }}</h3>
       <span class="project-badge" style="background: {{ p.color }}20; color: {{ p.color }};">{{ p.status }}</span>
@@ -37,10 +37,10 @@
     <table class="matrix-table">
       <thead>
         <tr>
-          <th>Skill</th>
-          <th>WODCard</th>
-          <th>SalsaSegura</th>
-          <th>SalsaTD</th>
+          <th scope="col">Skill</th>
+          <th scope="col">WODCard</th>
+          <th scope="col">SalsaSegura</th>
+          <th scope="col">SalsaTD</th>
         </tr>
       </thead>
       <tbody>

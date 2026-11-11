@@ -3,29 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CloudTransition &mdash; Career Dashboard 2026</title>
+    <title>Command Center &mdash; CloudTransition</title>
     <!-- Home-screen install: opens straight to the Today page -->
     <link rel="manifest" href="/static/manifest.webmanifest" />
     <meta name="theme-color" content="#b3212e" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="Sheet" />
+    <meta name="apple-mobile-web-app-title" content="Command" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="apple-touch-icon" href="/static/icon-180.png" />
     <link rel="icon" type="image/png" href="/static/icon-180.png" />
-    <link rel="stylesheet" href="/static/tokens.css?v=polish-20261109b" />
-    <link rel="stylesheet" href="/static/style.css?v=polish-20261109b" />
+    <link rel="stylesheet" href="/static/tokens.css?v=command-20261110" />
+    <link rel="stylesheet" href="/static/style.css?v=command-20261110" />
   </head>
   <body>
     <!-- Skip Navigation -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
-    <!-- ── NAV ──────────────────────────────────────────────────── -->
-    <nav class="masthead" aria-label="Dashboard sections">
+    <!-- ── MASTHEAD ─────────────────────────────────────────────── -->
+    <header class="masthead">
       <div class="masthead-bar">
         <div class="masthead-brand">
-          <span class="brand-name">CloudTransition</span>
-          <span class="brand-issue">Issue No. {{ current_week }}</span>
+          <h1 class="brand-name">Command Center</h1>
+          <span class="brand-issue">CloudTransition &middot; Week {{ current_week }}</span>
         </div>
         <time class="masthead-date" datetime="{{ today }}">{{ today }}</time>
         <div class="masthead-actions">
@@ -48,40 +48,60 @@
         </div>
       </div>
       <div class="section-nav" role="tablist" aria-label="Dashboard pages">
-        {% set pages = [
-            ("overview", "Overview"),
-            ("today", "Today"),
-            ("workspace-map", "Workspace map"),
-            ("education", "Education"),
-            ("metrics", "Metrics"),
-            ("books", "Books"),
-            ("tasks", "Tasks"),
-            ("projects", "Projects"),
-            ("skills", "Skills"),
-            ("career", "Career"),
-            ("interviews", "Interviews"),
-            ("agents", "Agents"),
-            ("money", "Money"),
-            ("mission-control", "Mission Control"),
-            ("second-brain", "Second Brain"),
-            ("run", "Run"),
+        {# Add a tab: put (id, label) in its group. The landing page is Today.
+           Group wrappers are presentational, so the tab list stays flat for
+           assistive technology and for the arrow keys in app.js. #}
+        {% set landing = "today" %}
+        {% set nav_groups = [
+            ("Operate", [
+                ("today", "Today"),
+                ("overview", "Overview"),
+                ("tasks", "Tasks"),
+                ("projects", "Projects"),
+            ]),
+            ("Career", [
+                ("interviews", "Interviews"),
+                ("career", "Career"),
+                ("money", "Money"),
+            ]),
+            ("Learning", [
+                ("skills", "Skills"),
+                ("education", "Education"),
+                ("books", "Books"),
+            ]),
+            ("System", [
+                ("run", "Run"),
+                ("agents", "Agents"),
+                ("metrics", "Metrics"),
+                ("workspace-map", "Workspace map"),
+                ("mission-control", "Mission Control"),
+            ]),
         ] %}
-        {% for pid, plabel in pages %}
-        <button
-          class="nav-tab {% if loop.first %}active{% endif %}"
-          role="tab"
-          id="tab-{{ pid }}"
-          aria-selected="{{ 'true' if loop.first else 'false' }}"
-          aria-controls="page-{{ pid }}"
-          data-page="{{ pid }}"
-          tabindex="{{ '0' if loop.first else '-1' }}"
-        >
-          {{ plabel }}
-        </button>
+        {% for group, pages in nav_groups %}
+        <div class="nav-group" role="presentation">
+          <span class="nav-group-label" aria-hidden="true">{{ group }}</span>
+          <div class="nav-group-tabs" role="presentation">
+            {% for pid, plabel in pages %}
+            <button
+              class="nav-tab{% if pid == landing %} active{% endif %}"
+              role="tab"
+              id="tab-{{ pid }}"
+              aria-selected="{{ 'true' if pid == landing else 'false' }}"
+              aria-controls="page-{{ pid }}"
+              data-page="{{ pid }}"
+              tabindex="{{ '0' if pid == landing else '-1' }}"
+            >
+              {{ plabel }}
+            </button>
+            {% endfor %}
+            {% if loop.last %}
+            <a class="nav-tab nav-tab-reader" href="/reader">Reader</a>
+            {% endif %}
+          </div>
+        </div>
         {% endfor %}
-        <a class="nav-tab nav-tab-reader" href="/reader">Reader</a>
       </div>
-    </nav>
+    </header>
 
     <div class="sheet-layout">
       <!-- ── Fold column — the week as a numbered margin ────────── -->
@@ -140,22 +160,27 @@
       </nav>
 
       <main class="sheet-faces" id="main-content">
-        {% include "pages/overview.html" %} {% include "pages/today.html" %}
-        {% include "pages/workspace-map.html" %}
+        {% include "pages/today.html" %}
+        {% include "pages/overview.html" %}
+        {% include "pages/tasks.html" %}
+        {% include "pages/projects.html" %}
+        {% include "pages/interviews.html" %}
+        {% include "pages/career.html" %}
+        {% include "pages/money.html" %}
+        {% include "pages/skills.html" %}
         {% include "pages/education.html" %}
-        {% include "pages/books.html" %} {% include "pages/tasks.html" %} {%
-        include "pages/projects.html" %} {% include "pages/skills.html" %} {%
-        include "pages/career.html" %} {% include "pages/interviews.html" %} {%
-        include "pages/agents.html" %} {% include "pages/money.html" %} {%
-        include "pages/mission-control.html" %} {% include "pages/second-brain.html" %}
-        {% include "pages/metrics.html" %}
+        {% include "pages/books.html" %}
         {% include "pages/run.html" %}
+        {% include "pages/agents.html" %}
+        {% include "pages/metrics.html" %}
+        {% include "pages/workspace-map.html" %}
+        {% include "pages/mission-control.html" %}
 
         <!-- ── Footer ──────────────────────────────────────────── -->
         <footer class="footer">
           <p>
-            CloudTransition Career Dashboard &middot; The Orizuru &mdash; one
-            uncut sheet
+            Command Center &middot; CloudTransition &middot; The Orizuru
+            &mdash; one uncut sheet
           </p>
           <p>
             Data reads from workspace YAML/MD files on each page load &middot;
@@ -219,6 +244,11 @@
             <p class="interview-dialog-hint">Resume and posting links come from the tracker; prep files from its <code>interview_prep</code> list.</p>
           </section>
 
+          <section class="interview-dialog-section" id="interviewModeReadingSection" hidden>
+            <h4>From the posting <small>&middot; Job Reader</small></h4>
+            <div id="interviewModeReading"></div>
+          </section>
+
           <section class="interview-dialog-section" id="interviewModeFitSection" hidden>
             <h4>Job fit</h4>
             <p class="interview-dialog-fit" id="interviewModeFit"></p>
@@ -264,8 +294,8 @@
       </div>
     </dialog>
 
-    <script src="/static/metrics.js?v=polish-20261109b"></script>
-    <script src="/static/app.js?v=polish-20261109b"></script>
+    <script src="/static/metrics.js?v=command-20261110d"></script>
+    <script src="/static/app.js?v=command-20261110c"></script>
 
     <template id="update-sheet-prompt"
       >Update the CloudTransition workspace so every dated file reflects today:

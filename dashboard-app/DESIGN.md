@@ -53,6 +53,24 @@ Arrow keys traverse the map; Enter, Space, and click hold the selected
 context. Without JavaScript, the numbered weekly list remains the complete
 fallback.
 
+## Navigation and run provenance
+
+The product is named **Command Center**; CloudTransition is the secondary line
+beside it. It opens on Today.
+
+The fifteen faces sit in four groups — Operate, Career, Learning, System —
+separated by a single crease line. Inactive tabs carry no outline; the active
+tab is the one fold-white pill, at the same weight as its neighbours so the row
+never shifts. Reader keeps a dashed outline because it leaves the sheet. All
+four groups hold one row at 1280px; under 640px they scroll sideways as one
+strip with 44px targets.
+
+Deterministic first: every run card states what it spends in a small mono tag
+beside its title. `No model · $0` is the quiet, uncoloured default. A paid API
+takes the ochre ink and a model call the vermilion ink, so cost is the marked
+state; the words carry the meaning without the colour. Local tools are listed
+before anything that calls a model.
+
 ## Motion grammar
 
 Fold/unfold is a **discrete snap** — no continuous spatial animation. Progress

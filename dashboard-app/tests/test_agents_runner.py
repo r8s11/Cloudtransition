@@ -98,6 +98,7 @@ def test_scout_scan_rejects_a_non_opencode_model_and_missing_csrf():
 
 def test_scout_scan_is_single_flight(monkeypatch):
     monkeypatch.setattr(module, "_resolve_opencode_exe", lambda: "/fake/opencode")
+    monkeypatch.setattr(module, "_load_opencode_models", lambda: ([{"id": "opencode/beam-free", "efforts": ["default"]}], True, None))
     monkeypatch.setattr(module, "_execute_run", lambda *args: None)
     monkeypatch.setattr(module, "_log_run", lambda entry: None)
     with TestClient(module.app) as client:
