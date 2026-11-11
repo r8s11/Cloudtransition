@@ -27,7 +27,7 @@
   });
 
   async function finish(msg, status, reason = '', code = '') {
-    AF.wizard.stop();
+    if (status !== 'filled') AF.wizard.stop();
     await chrome.runtime.sendMessage({ type: 'LOG_RUN', runId: msg.runId, status, reason, code });
   }
 
