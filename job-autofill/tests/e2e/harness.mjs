@@ -277,6 +277,8 @@ export async function stubContent(page, { report = null } = {}) {
       func: (report) => {
         if (globalThis.__afStub) return;
         globalThis.__afStub = { starts: [] };
+        // This stand-in owns REPORTs; keep the real START listener from racing it.
+        if (globalThis.AF) globalThis.AF.fillPage = () => new Promise(() => {});
         chrome.runtime.onMessage.addListener((m) => {
           if (!m || m.type !== 'START') return;
           globalThis.__afStub.starts.push(m);
