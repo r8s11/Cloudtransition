@@ -1,0 +1,16 @@
+{
+  "name": "job-autofill",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Local job-application autofill extension and helper",
+  "scripts": {
+    "test:unit": "node --test tests/unit/",
+    "test:helper": "python3 -m unittest discover -s tests/helper",
+    "test:e2e": "playwright test",
+    "test": "npm run test:unit && npm run test:helper && npm run test:e2e",
+    "check": "node scripts/check.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0"
+  }
+}
