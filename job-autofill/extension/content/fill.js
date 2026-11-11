@@ -442,6 +442,7 @@
       .filter(el => !signInForms.has(el.form || el.closest('form')));
     const missing = [];
     requiredPass(all, missing, entry => missing.push(entry));
-    return missing.length;
+    const emptyFiles = all.filter(el => el.type === 'file' && !el.disabled && isRequired(el) && !el.files.length).length;
+    return missing.length + emptyFiles;
   };
 })(globalThis);

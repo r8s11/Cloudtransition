@@ -97,8 +97,8 @@ test('U21: exactly one value-free record per filled and submitted run', async ()
   }
 }); });
 
-for (const mutation of ['inserted', 'cleared']) {
-  test(`F4: ${mutation === 'inserted' ? 'required field inserted' : 'prefilled required field cleared'} after fill blocks submit`, async () => { await setup(async h => {
+for (const [mutation, label] of [['inserted', 'required field inserted'], ['cleared', 'prefilled required field cleared'], ['file', 'required file input inserted']]) {
+  test(`F4: ${label} after fill blocks submit`, async () => { await setup(async h => {
     const { popup, tabId } = await openPopup(h.page);
     await popup.close();
     await h.worker.evaluate(async ({ tabId, mutation }) => {
@@ -109,8 +109,9 @@ for (const mutation of ['inserted', 'cleared']) {
           const fill = AF.fillPage;
           AF.fillPage = async (...args) => {
             const result = await fill(...args);
-            if (mutation === 'inserted') {
+            if (mutation !== 'cleared') {
               const input = document.createElement('input');
+              if (mutation === 'file') input.type = 'file';
               input.required = true;
               input.id = 'late-required';
               document.querySelector('form').append(input);
@@ -121,7 +122,7 @@ for (const mutation of ['inserted', 'cleared']) {
       });
     }, { tabId, mutation });
     await stopped(h, '1 required field empty', 'required');
-    await expect(h.page.locator(mutation === 'inserted' ? '#late-required' : '#first_name')).toHaveValue('');
+    await expect(h.page.locator(mutation === 'cleared' ? '#first_name' : '#late-required')).toHaveValue('');
   }); });
 }
 
