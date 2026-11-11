@@ -140,7 +140,7 @@ function renderRunCard(run, active, canFill, hasCache) {
   const yellow = counts.yellow || 0;
   const filled = counts.filled || 0;
   const aiDrafts = counts.ai_drafts || 0;
-  const noFields = run && !active && counts.fields === 0 && run.status !== 'error';
+  const noFields = run && !active && counts.fields === 0 && run.status === 'filled';
 
   show(card, !!run && !noFields);
   if (run && !noFields) {

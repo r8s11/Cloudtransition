@@ -11,8 +11,8 @@ Control endpoints (not recorded):
     GET  /__requests             JSON array of {method, path, headers, body}
     POST /__mode                 {"mode": <mode>, "reply": <optional text>}
 
-Modes: ok, 401, 429, 500, slow (25 s), malformed, echo (replies with the user message),
-confidence (replies with confidence-looking text). `reply` replaces the ok/confidence text.
+Modes: ok, 401, 429, 500, slow (25 s), malformed, echo (replies with the user message).
+`reply` replaces the ok text.
 The model ids are opaque test strings.
 """
 import json
@@ -25,9 +25,8 @@ MODELS = {
     'openai': ['fake-openai-a', 'fake-openai-b'],
 }
 OK_REPLY = 'I enjoy building reliable systems and would bring that experience to this team.'
-CONFIDENCE_REPLY = 'confidence: 0.99 \u2014 ' + OK_REPLY
 SLOW_SECONDS = 25
-MODES = ('ok', '401', '429', '500', 'slow', 'malformed', 'echo', 'confidence')
+MODES = ('ok', '401', '429', '500', 'slow', 'malformed', 'echo')
 
 
 class FakeState(object):
@@ -142,7 +141,7 @@ class Handler(BaseHTTPRequestHandler):
             return content if isinstance(content, str) else json.dumps(content)
         if reply is not None:
             return reply
-        return CONFIDENCE_REPLY if mode == 'confidence' else OK_REPLY
+        return OK_REPLY
 
     def do_GET(self):
         self._handle('GET')

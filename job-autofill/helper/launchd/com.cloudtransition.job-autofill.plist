@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.cloudtransition.job-autofill</string>
+  <key>WorkingDirectory</key>
+  <string>/Volumes/SANDISK USB/work/Cloudtransition/job-autofill/helper</string>
+  <!-- launchd does not expand ~, so the shell resolves the default JOB_AUTOFILL_HOME and its log. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>d="${JOB_AUTOFILL_HOME:-$HOME/.config/job-autofill}"; mkdir -p "$d" &amp;&amp; chmod 700 "$d" &amp;&amp; exec /usr/bin/python3 server.py serve &gt;&gt; "$d/helper.log" 2&gt;&amp;1</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <dict>
+    <key>SuccessfulExit</key>
+    <false/>
+  </dict>
+</dict>
+</plist>

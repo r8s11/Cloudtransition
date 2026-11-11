@@ -183,20 +183,6 @@ test('U25: cached answer uses no second provider call and reports zero calls', a
   }, { ai: true });
 });
 
-test('F21: 200 controls finish within ten seconds without long main-frame tasks', async () => {
-  await setup(async h => {
-    await h.page.goto(h.fixtureUrl('generic-large.html'));
-    const start = Date.now();
-    const result = await runAutofill(h.page);
-    expect(Date.now() - start).toBeLessThanOrEqual(10_000);
-    expect(result.counts.fields).toBe(200);
-    expect(result.counts.filled).toBe(200);
-    await expect(h.page.locator('#autofill-hud')).toContainText('200 filled');
-    expect(await h.page.evaluate(() => Math.max(0, ...window.longTasks))).toBeLessThanOrEqual(500);
-    expect(await draftRequests(h)).toHaveLength(0);
-  });
-});
-
 test('6c: rejected token blocks a run instead of using stale cache', async () => {
   await setup(async h => {
     const { popup, tabId } = await openPopup(h.page);

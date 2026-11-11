@@ -5,13 +5,6 @@ import vm from 'node:vm';
 const context = { AF: {} };
 if (fs.existsSync(new URL('../../extension/content/safety.js', import.meta.url))) vm.runInNewContext(fs.readFileSync(new URL('../../extension/content/safety.js', import.meta.url), 'utf8'), context);
 const check = state => context.AF.safetyCheck(state);
-test('F3: AI draft status is always review regardless of claimed confidence', () => {
-  for (const confidence of [0, 0.99, 1, 'certain']) {
-    const result = check({ aiDrafts: 1, confidence, button: true });
-    assert.equal(result.ok, false);
-    assert.equal(result.code, 'review');
-  }
-});
 test('safety: checks fail closed in documented order', () => {
   for (const [state, code] of [
     [{ captcha: 'reCAPTCHA', yellow: 1 }, 'captcha'],

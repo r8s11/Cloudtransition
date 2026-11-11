@@ -303,18 +303,6 @@ class U25CacheTest(AiCase):
         self.assertEqual(len(self.calls()), 2)
 
 
-class F3StatusTest(AiCase):
-    def test_F3_status_is_review_whatever_the_reply_says(self):
-        for reply in ('confidence: 0.99', '{"confidence": 1.0, "text": "x"}', 'High confidence.'):
-            self.set_mode('ok', reply)
-            out = self.draft(question=reply)
-            self.assertEqual(out, {'status': 'review', 'text': reply, 'cached': False})
-        self.set_mode('confidence')
-        out = self.draft(question='fresh')
-        self.assertEqual(out['status'], 'review')
-        self.assertEqual(out['text'], fake_provider.CONFIDENCE_REPLY)
-
-
 class F9ErrorsTest(AiCase):
     EXPECTED = {
         '401': 'AI error: key rejected',

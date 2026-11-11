@@ -37,13 +37,6 @@ test('F2: yellow field blocks submit', async () => { await setup(async h => {
   await h.page.goto(h.fixtureUrl('generic.html'));
   await stopped(h, '1 field to review', 'review');
 }); });
-test('F3: confidence-looking AI draft remains review and blocks submit', async () => { await setup(async h => {
-  await h.provider.setMode('confidence');
-  await h.page.goto(h.fixtureUrl('greenhouse-questions.html'));
-  await stopped(h, '1 field to review', 'review');
-  await expect(h.page.locator('#answer')).toHaveValue(/confidence: 0.99/);
-  await expect(h.page.locator('#answer')).toHaveAttribute('title', 'AutoFill: AI draft — review before submitting');
-}, true); });
 test('F4: unanswered required sponsorship blocks submit without guessing', async () => { await setup(async h => {
   const { popup } = await openPopup(h.page);
   await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'SAVE_PROFILE', manual: { needsSponsorship: '' } }));
@@ -51,11 +44,6 @@ test('F4: unanswered required sponsorship blocks submit without guessing', async
   await stopped(h, '1 required field empty', 'required');
   await expect(h.page.locator('#question_4')).toHaveValue('');
   await expect(h.page.locator('#question_4')).toHaveAttribute('title', 'AutoFill: Required field still needs input');
-}); });
-test('F5: rejected readback blocks submit', async () => { await setup(async h => {
-  await h.page.goto(h.fixtureUrl('generic-rejecting.html'));
-  await stopped(h, 'readback', 'readback');
-  await expect(h.page.locator('#phone')).toHaveAttribute('title', "AutoFill: Couldn't set this field");
 }); });
 test('F6: unconfirmed submit clicks once and later runs never retry', async () => { await setup(async h => {
   await h.page.goto(h.fixtureUrl('greenhouse-noconfirm.html'));

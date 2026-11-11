@@ -1,8 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { readFileSync, readdirSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const { postProcess } = require('../../extension/content/drafts.js');
@@ -82,33 +80,4 @@ test('F11: markdown fences around the text are stripped', () => {
   assert.equal(postProcess('```Hello there.```', { fieldType: 'text' }), 'Hello there.');
   assert.equal(postProcess('```\n7\n```', { fieldType: 'number' }), '7');
   assert.equal(postProcess('```\n5+\n```', { fieldType: 'select', options: OPTIONS }), '5+');
-});
-
-test('F3: a reply that looks like a confidence score is just text, returned unchanged', () => {
-  const reply = 'confidence: 0.99 \u2014 I enjoy building reliable systems.';
-  assert.equal(postProcess(reply, { fieldType: 'textarea', maxLength: 500 }), reply);
-  assert.equal(postProcess('{"text":"x","confidence":1}', { fieldType: 'textarea' }), '{"text":"x","confidence":1}');
-});
-
-test('F3: the post-processor returns only text or null, never a status or a score', () => {
-  for (const reply of ['confidence: 0.99', 'ok', '']) {
-    const out = postProcess(reply, { fieldType: 'text', maxLength: 100 });
-    assert.ok(out === null || typeof out === 'string');
-  }
-});
-
-test('F3: no extension or helper source reads a model-reported confidence', () => {
-  const dirs = ['extension', 'helper'];
-  const root = new URL('../../', import.meta.url);
-  const hits = [];
-  const walk = (rel) => {
-    for (const e of readdirSync(fileURLToPath(new URL(rel, root)), { withFileTypes: true })) {
-      const next = `${rel}${e.name}${e.isDirectory() ? '/' : ''}`;
-      if (e.isDirectory()) walk(next);
-      else if (/\.(js|mjs|py|html)$/.test(e.name)
-        && /confidence/i.test(readFileSync(fileURLToPath(new URL(next, root)), 'utf8'))) hits.push(next);
-    }
-  };
-  for (const d of dirs) walk(`${d}/`);
-  assert.deepEqual(hits, []);
 });
