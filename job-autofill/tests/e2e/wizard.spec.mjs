@@ -31,7 +31,6 @@ test('F15: twelve-step wizard stops at ten', async () => scenario(async (h, p) =
 test('U18: clear restores styles and Stop prevents next arrival filling', async () => scenario(async (h, p) => {
   const original = await p.locator('input').evaluate(e => { e.style.border='3px dotted red'; e.style.boxShadow='red 0px 0px 2px'; e.title='Original'; return [e.style.border,e.style.boxShadow,e.title]; });
   await runAutofill(p);
-  await p.locator('#autofill-hud .pill').click();
   await p.getByRole('button', { name: 'Clear borders', exact: true }).click();
   expect(await p.locator('input').evaluate(e => [e.style.border,e.style.boxShadow,e.title])).toEqual(original);
   await p.getByRole('button', { name: 'Stop', exact: true }).click();
@@ -64,12 +63,20 @@ test('U18: Stop cancels pending AI fill before writing response', async () => sc
   }}),tabId);
   await p.locator('main').evaluate(e=>e.innerHTML='<form aria-label="Application"><label>Why this role?<textarea></textarea></label></form>');
   await popup.getByRole('button',{name:'Autofill page',exact:true}).click();
-  await p.locator('#autofill-hud .pill').click();
   await p.getByRole('button',{name:'Stop',exact:true}).click();
   await p.waitForTimeout(1800); await expect(p.locator('textarea')).toHaveValue(''); await popup.close();
 }));
 test('F15: idle wizard ends after five minutes without a new step', async () => scenario(async (h,p)=>{
-  await p.clock.install(); await runAutofill(p); await p.clock.fastForward(300001);
+  const {popup,tabId}=await openPopup(p); await popup.close();
+  await h.worker.evaluate(async tabId=>chrome.scripting.executeScript({target:{tabId},func:()=>{
+    const original=setTimeout;
+    globalThis.setTimeout=(cb,ms,...args)=>{
+      if(ms===300000) globalThis.expireWizardIdle=cb;
+      return original(cb,ms,...args);
+    };
+  }}),tabId);
+  await runAutofill(p);
+  await h.worker.evaluate(async tabId=>chrome.scripting.executeScript({target:{tabId},func:()=>globalThis.expireWizardIdle()}),tabId);
   await expect(p.locator('#autofill-hud')).toContainText('Stopped: 5-minute idle limit');
   await expect.poll(()=>logs(h).length).toBe(1);
 }));

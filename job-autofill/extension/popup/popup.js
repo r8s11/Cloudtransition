@@ -26,6 +26,7 @@ let local = {};           // chrome.storage.local snapshot
 let runs = {};            // chrome.storage.session.runs
 let syncStatus = 'checking'; // 'checking' | 'ok' | 'offline' | 'rejected'
 let submitOn = false;
+let starting = false;
 let startError = '';
 let modelsToken = 0;
 
@@ -110,8 +111,8 @@ function renderRun() {
   if (offline && hasCache) setText(line, `Helper offline — profile from last sync (${fmtDate(local.syncedAt)}); AI drafts unavailable`);
 
   const runBtn = $('run');
-  if (active) {
-    setText(runBtn, `Filling…${active.step > 1 ? ' step ' + active.step : ''}`);
+  if (active || starting) {
+    setText(runBtn, `Filling…${active?.step > 1 ? ' step ' + active.step : ''}`);
     runBtn.disabled = true;
   } else {
     setText(runBtn, 'Autofill page');
@@ -121,12 +122,12 @@ function renderRun() {
   const sw = $('submit');
   const on = active ? !!active.submit : submitOn;
   sw.setAttribute('aria-checked', String(on));
-  sw.setAttribute('aria-disabled', String(!!active));
+  sw.setAttribute('aria-disabled', String(!!active || starting));
   setText($('submit-hint'), active && active.submit
     ? 'On for this run. Turns off when the run ends.'
     : (offline && hasCache ? 'This run only.' : LONG_SUBMIT_HINT));
 
-  renderRunCard(run, active, canFill, hasCache);
+  renderRunCard(starting ? null : run, active, canFill, hasCache);
 }
 
 function renderRunCard(run, active, canFill, hasCache) {
@@ -186,9 +187,11 @@ async function onRun() {
   startError = '';
   const submit = submitOn;
   submitOn = false;
-  $('run').disabled = true;
+  starting = true;
+  renderRun();
   const res = await send({ type: 'RUN', tabId: tab.id, submit });
   if (res && res.error) startError = res.error;
+  starting = false;
   await refresh();
   renderRun();
 }

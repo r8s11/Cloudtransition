@@ -183,8 +183,8 @@
     }
     if (msg?.type === 'SAFE_CLICK' && sender.id === chrome.runtime.id && msg.runId === currentRun) {
       const button = AF.safeButton(AF.adapterFor(location.hostname));
-      if (button) AF.util.click(button.el);
-      sendResponse({ ok: !!button });
+      if (button && !cancellation?.signal.aborted) AF.util.click(button.el);
+      sendResponse({ ok: !!button && !cancellation?.signal.aborted });
       return false;
     }
     if (!msg || msg.type !== 'START' || sender.id !== chrome.runtime.id) return false;
