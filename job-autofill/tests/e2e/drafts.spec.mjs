@@ -1,0 +1,192 @@
+import { test, expect } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { launch, openPopup, runAutofill } from './harness.mjs';
+
+const YELLOW = 'rgb(202, 138, 4)';
+const GREEN = 'rgb(22, 163, 74)';
+async function setup(fn, { ai = false, fallback = true } = {}) {
+  const h = await launch({ fallback });
+  try {
+    if (ai) h.helper.setKey('anthropic', 'fixture-provider-key');
+    await h.pair();
+    await h.page.goto(h.fixtureUrl('greenhouse-questions.html'));
+    const { popup } = await openPopup(h.page);
+    if (ai) expect(await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'SAVE_CONFIG', patch: { provider: 'anthropic', models: { anthropic: 'fake-anthropic-a' } } }))).not.toHaveProperty('error');
+    expect(await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'SAVE_PROFILE', manual: { country: 'United States', workAuthorization: 'Yes', needsSponsorship: 'No', gender: 'Male' } }))).not.toHaveProperty('error');
+    await popup.close();
+    await fn(h);
+  } finally { await h.close(); }
+}
+const draftRequests = async (h) => (await h.provider.requests()).filter(r => r.path === '/v1/messages');
+async function reviewed(page, reason = 'AI draft — review before submitting') {
+  await expect(page.locator('#answer')).toHaveAttribute('title', `AutoFill: ${reason}`);
+  expect(await page.locator('#answer').evaluate(e => getComputedStyle(e).borderTopColor)).toBe(YELLOW);
+}
+
+test('U11: AI draft fills the question, stays yellow, and sends no profile values', async () => {
+  await setup(async h => {
+    const result = await runAutofill(h.page);
+    expect(result.counts.ai_drafts).toBe(1);
+    expect(result.counts.ai_calls).toBe(1);
+    const value = await h.page.locator('#answer').inputValue();
+    expect(value.length).toBeGreaterThan(0);
+    expect(value.length).toBeLessThanOrEqual(500);
+    await reviewed(h.page);
+    await expect(h.page.locator('#autofill-hud')).toContainText('1 to review');
+    const requests = await draftRequests(h);
+    expect(requests).toHaveLength(1);
+    const payload = JSON.stringify(requests[0].body);
+    expect(payload).toContain('Why do you want to work at Northwind?');
+    expect(payload).toContain('Northwind');
+    expect(payload).toContain('resume');
+    for (const secret of ['jordan.avery@example.test', '555-010-0199', 'workAuthorization', 'needsSponsorship', 'gender']) expect(payload).not.toContain(secret);
+    expect(JSON.stringify(await h.worker.evaluate(() => chrome.storage.local.get(null)))).not.toContain('fixture-provider-key');
+  }, { ai: true });
+});
+
+test('U19: trusted-input fallback attaches and detaches; disabled fallback leaves yellow', async () => {
+  await setup(async h => {
+    await h.page.goto(h.fixtureUrl('generic-trusted.html'));
+    await h.worker.evaluate(() => {
+      globalThis.__dbg = { attach: 0, detach: 0 };
+      for (const k of ['attach', 'detach']) {
+        const original = chrome.debugger[k].bind(chrome.debugger);
+        chrome.debugger[k] = (...args) => { globalThis.__dbg[k]++; return original(...args); };
+      }
+    });
+    await runAutofill(h.page);
+    await expect(h.page.locator('#email')).toHaveValue('jordan.avery@example.test');
+    expect(await h.page.locator('#email').evaluate(e => getComputedStyle(e).borderTopColor)).toBe(GREEN);
+    expect(await h.worker.evaluate(() => globalThis.__dbg)).toEqual({ attach: 1, detach: 1 });
+    await h.worker.evaluate(() => chrome.storage.local.set({ prefs: { fallback: false } }));
+    await h.page.reload();
+    await runAutofill(h.page);
+    await expect(h.page.locator('#email')).toHaveValue('');
+    await expect(h.page.locator('#email')).toHaveAttribute('title', "AutoFill: Couldn't set this field");
+    expect(await h.worker.evaluate(() => globalThis.__dbg)).toEqual({ attach: 1, detach: 1 });
+  });
+});
+
+test('F12: sign-in and account pages stay untouched', async () => {
+  await setup(async h => {
+    for (const name of ['workday-signin.html', 'indeed-signin.html']) {
+      await h.page.goto(h.fixtureUrl(name));
+      await runAutofill(h.page, { submit: true });
+      await expect(h.page.locator('input[type=email]')).toHaveValue('');
+      expect(await h.page.locator('body').getAttribute('data-clicks')).toBe('0');
+      await expect(h.page.locator('#autofill-hud')).toContainText("Sign in first — AutoFill doesn't sign in or create accounts");
+    }
+  });
+});
+
+test('F13: resume fills only resume slots and a single unlabeled upload needs review', async () => {
+  await setup(async h => {
+    await h.page.goto(h.fixtureUrl('file-slots.html'));
+    await runAutofill(h.page);
+    expect(await h.page.locator('input').evaluateAll(els => els.map(e => e.files.length))).toEqual([1, 0, 0, 0]);
+    await h.page.goto(h.fixtureUrl('file-unlabeled.html'));
+    await runAutofill(h.page);
+    expect(await h.page.locator('input').evaluate(e => e.files.length)).toBe(1);
+    await expect(h.page.locator('input')).toHaveAttribute('title', "AutoFill: Unlabeled upload — check it's the resume box");
+  });
+});
+
+test('U20: offline fills cached profile and resume but leaves AI unavailable', async () => {
+  await setup(async h => {
+    await h.helper.stop();
+    const result = await runAutofill(h.page);
+    expect(result.text).toContain('Helper offline — profile from last sync');
+    await expect(h.page.locator('#first_name')).toHaveValue('Jordan');
+    expect(await h.page.locator('#resume').evaluate(e => e.files.length)).toBe(1);
+    await expect(h.page.locator('#answer')).toHaveValue('');
+    await reviewed(h.page, 'Helper offline — AI drafts unavailable');
+  }, { ai: true });
+});
+
+test('F19: missing resume remains yellow while other fields fill', async () => {
+  await setup(async h => {
+    const { popup } = await openPopup(h.page);
+    await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'SAVE_CONFIG', patch: { resume_pdf: '/missing/resume.pdf' } }));
+    await popup.close();
+    await runAutofill(h.page);
+    await expect(h.page.locator('#first_name')).toHaveValue('Jordan');
+    expect(await h.page.locator('#resume').evaluate(e => e.files.length)).toBe(0);
+    await expect(h.page.locator('#resume')).toHaveAttribute('title', 'AutoFill: Resume file not found — pick it in Profile');
+    const p = await openPopup(h.page);
+    await p.popup.getByRole('tab', { name: 'Profile' }).click();
+    await expect(p.popup.locator('body')).toContainText('Resume file not found — pick it in Profile');
+    await p.popup.close();
+  });
+});
+
+for (const [mode, reason] of [['401', 'key rejected'], ['429', 'rate limited'], ['500', 'provider error 500'], ['slow', 'timed out'], ['malformed', 'unreadable reply']]) {
+  test(`F9: provider ${mode} surfaces errors and retries instead of caching`, async () => {
+    test.setTimeout(120_000);
+    await setup(async h => {
+      await h.provider.setMode(mode);
+      for (let i = 0; i < 2; i++) {
+        if (i) await h.page.reload();
+        await runAutofill(h.page, { timeout: 50_000 });
+        await expect(h.page.locator('#answer')).toHaveValue('');
+        await reviewed(h.page, `AI error: ${reason}`);
+      }
+      expect(await draftRequests(h)).toHaveLength(2);
+    }, { ai: true });
+  });
+}
+
+test('F20: hidden injection cannot change system rules and the echo remains yellow', async () => {
+  await setup(async h => {
+    await h.provider.setMode('echo');
+    await runAutofill(h.page, { submit: true });
+    const [request] = await draftRequests(h);
+    expect(request.body.system).toContain('resume');
+    expect(request.body.system).not.toContain('Northwind');
+    expect(JSON.stringify(request.body)).not.toContain('Ignore previous instructions');
+    const user = JSON.parse(request.body.messages[0].content);
+    expect(user.company).toBe('Northwind');
+    expect(user.question).toBe('Why do you want to work at Northwind?');
+    expect(user.page_title).toBe('Support at Northwind');
+    expect(user.job_heading).toBe('Support Specialist');
+    await reviewed(h.page);
+    expect(await h.page.locator('body').getAttribute('data-submit-clicks')).toBe('0');
+  }, { ai: true });
+});
+
+test('U25: cached answer uses no second provider call and reports zero calls', async () => {
+  await setup(async h => {
+    await runAutofill(h.page);
+    const first = await h.page.locator('#answer').inputValue();
+    await h.page.reload();
+    const second = await runAutofill(h.page);
+    await expect(h.page.locator('#answer')).toHaveValue(first);
+    expect(await draftRequests(h)).toHaveLength(1);
+    expect(second.counts.ai_calls).toBe(0);
+  }, { ai: true });
+});
+
+test('F21: 200 controls finish within ten seconds without long main-frame tasks', async () => {
+  await setup(async h => {
+    await h.page.goto(h.fixtureUrl('generic-large.html'));
+    const start = Date.now();
+    const result = await runAutofill(h.page);
+    expect(Date.now() - start).toBeLessThanOrEqual(10_000);
+    expect(result.counts.fields).toBe(200);
+    expect(result.counts.filled).toBe(200);
+    await expect(h.page.locator('#autofill-hud')).toContainText('200 filled');
+    expect(await h.page.evaluate(() => Math.max(0, ...window.longTasks))).toBeLessThanOrEqual(500);
+    expect(await draftRequests(h)).toHaveLength(0);
+  });
+});
+
+test('6c: rejected token blocks a run instead of using stale cache', async () => {
+  await setup(async h => {
+    const { popup, tabId } = await openPopup(h.page);
+    await popup.evaluate(() => chrome.storage.local.set({ token: 'rejected-token' }));
+    const result = await popup.evaluate(tabId => chrome.runtime.sendMessage({ type: 'RUN', tabId }), tabId);
+    expect(result.error).toContain('Not paired');
+    await expect(h.page.locator('#first_name')).toHaveValue('');
+    await popup.close();
+  });
+});

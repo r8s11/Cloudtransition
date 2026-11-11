@@ -202,7 +202,8 @@ async function startRun({ tabId, submit }) {
   const { token } = await chrome.storage.local.get('token');
   if (!token) return { error: 'Not paired with the helper.' };
 
-  await sync(); // best effort: offline runs use the last synced profile and resume
+  const syncResult = await sync(); // Offline runs may use cache; rejected credentials must not.
+  if (syncResult.status === 'rejected' || syncResult.status === 'unpaired') return { error: 'Not paired with the helper.' };
   const st = await chrome.storage.local.get(['profile', 'resume', 'prefs', 'syncedAt']);
   if (!st.profile || !st.syncedAt) return { error: NEEDS_SYNC };
 
@@ -367,7 +368,7 @@ async function handle(msg, sender) {
     case 'DRAFT': return draft(msg.req);
     case 'REPORT': return { ok: await applyReport(tabId, msg.summary, trusted ? 0 : sender.frameId || 0) };
     case 'LOG_RUN': return logRun(msg.rec);
-    case 'DEBUGGER_FILL': return debuggerFill(tabId, msg);
+    case 'DEBUGGER_FILL': return debuggerFill(tabId, { ...msg, frameId: trusted ? msg.frameId || 0 : sender.frameId || 0 });
     default: return { error: `unknown message ${msg.type}` };
   }
 }

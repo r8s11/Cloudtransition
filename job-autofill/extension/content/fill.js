@@ -13,7 +13,7 @@
   const U = AF.util;
 
   const SETTLE_MS = 150;
-  const TEXT_TYPES = new Set(['text', 'email', 'tel', 'url', '']);
+  const TEXT_TYPES = new Set(['text', 'email', 'tel', 'url', 'number', '']);
   const RESUME_RE = /\b(resume|r\u00e9sum\u00e9|cv|curriculum vitae)\b/i;
   const NEVER_RE = /\b(cover|letter|photo|picture|transcript|portfolio|writing sample|certificate|reference)\b/i;
 
@@ -74,6 +74,7 @@
   async function fillPage(scope, profile, resume, opts) {
     opts = opts || {};
     const adapter = opts.adapter || AF.adapterFor(root.location.hostname);
+    if (adapter.isSignIn(scope)) return { items: [], aiQueue: [], fields: 0, signIn: true };
     const claims = new Map();
     for (const { el, key } of adapter.fields(scope)) claims.set(el, key);
     const widgets = adapter.widgets ? adapter.widgets(scope)
@@ -134,17 +135,73 @@
 
     fillFiles(fileInputs, claims, resume, opts, pending, add, handled);
     fields += fileInputs.filter((f) => !f.disabled).length;
+    let widgetCount = 0;
     for (const widget of widgets) {
+      if (++widgetCount % 25 === 0) await tick();
       if (!U.isVisible(widget.el) || widget.el.disabled || widget.el.getAttribute('aria-disabled') === 'true') continue;
       fields += 1;
       if (!reuse(widget.el, add)) await fillWidget(widget, profile, resume, opts, pending, add, dropSlots.length);
     }
 
     await U.sleep(SETTLE_MS);
-    for (const p of pending) verify(p);
+    for (const p of pending) await verify(p, opts);
 
     requiredPass(all, items, add);
-    return { items, aiQueue: [], fields };
+    const aiQueue = all.filter((el) => {
+      if (handled.has(el) || widgetElements.has(el) || !U.isVisible(el) || el.disabled || el.readOnly) return false;
+      if (!el.closest('form') || el.value.trim() || claims.has(el) || AF.matchField(ctxOf(el)).key) return false;
+      if (!['TEXTAREA', 'SELECT'].includes(el.tagName) && !(el.tagName === 'INPUT' && ['text', 'number'].includes(el.type))) return false;
+      const context = `${U.labelText(el)} ${el.name} ${el.id} ${el.closest('form').getAttribute('role') || ''}`;
+      return !!U.labelText(el) && !/\b(search|sign.?in|log.?in|password|captcha|promo|coupon|newsletter|subscribe)\b/i.test(context);
+    });
+    // Required-pass entries are eligible too; replace their generic reason with the draft result.
+    for (const el of all) {
+      if (!items.some((item) => item.el === el && item.reason === R_REQUIRED)) continue;
+      handled.delete(el);
+    }
+    const requiredQuestions = all.filter((el) => !aiQueue.includes(el) && items.some((item) => item.el === el && item.reason === R_REQUIRED)
+      && U.isVisible(el) && !el.disabled && !el.readOnly && el.closest('form') && !claims.has(el) && !AF.matchField(ctxOf(el)).key
+      && (el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || (el.tagName === 'INPUT' && ['text', 'number'].includes(el.type)))
+      && U.labelText(el) && !/\b(search|sign.?in|log.?in|password|captcha|promo|coupon|newsletter|subscribe)\b/i.test(`${U.labelText(el)} ${el.name} ${el.id}`));
+    aiQueue.push(...requiredQuestions);
+    let aiCalls = 0;
+    let aiDrafts = 0;
+    if (opts.aiEnabled) {
+      for (const el of aiQueue) {
+        const fieldType = el.tagName === 'SELECT' ? 'select' : el.type === 'number' ? 'number' : 'text';
+        const options = el.tagName === 'SELECT' ? Array.from(el.options).filter((o) => !isPlaceholderOption(o)).map((o) => U.clean(o.textContent)) : undefined;
+        const req = {
+          question: U.labelText(el), field_type: fieldType, max_length: Math.max(0, el.maxLength || 0),
+          page_title: document.title,
+          company: U.clean(Array.from(document.querySelectorAll('.company-name, [data-company]')).find(U.isVisible)?.textContent || ''),
+          job_heading: U.clean(Array.from(document.querySelectorAll('h1')).find(U.isVisible)?.textContent || ''),
+        };
+        if (options) req.options = options;
+        let reply;
+        try { reply = await chrome.runtime.sendMessage({ type: 'DRAFT', req }); }
+        catch (_) { reply = { error: 'Helper offline — AI drafts unavailable' }; }
+        let entry = items.find((item) => item.el === el);
+        if (!entry) entry = add({ el, key: null, kind: 'text' });
+        Object.assign(entry, { filled: false, level: 'yellow', reason: 'AI draft — review before submitting', ai: true });
+        if (reply?.error) {
+          entry.reason = String(reply.error).replace(/^AutoFill: /, '');
+          continue;
+        }
+        if (reply?.cached === false) aiCalls += 1;
+        const value = AF.postProcess(reply?.text, { fieldType, maxLength: req.max_length, options });
+        if (value == null) { entry.reason = 'AI error: unreadable reply'; continue; }
+        const actual = options ? Array.from(el.options).find((o) => U.clean(o.textContent) === value)?.value : value;
+        U.setNative(el, actual);
+        Object.assign(entry, { value: actual, read: (e) => e.value === actual });
+        await U.sleep(SETTLE_MS);
+        await verify(entry, opts);
+        if (entry.reason !== R_STUCK) {
+          entry.filled = true;
+          aiDrafts += 1;
+        }
+      }
+    }
+    return { items, aiQueue, fields, aiCalls, aiDrafts };
   }
 
   // Portal lists are resolved after opening, never from hidden stale options.
@@ -308,8 +365,8 @@
       const label = U.labelText(el);
       const hint = label || `${el.name} ${el.id}`;
       let level = null;
-      if (claims.get(el) === 'resume') level = 'green';
-      else if (NEVER_RE.test(hint)) level = null;
+      if (NEVER_RE.test(hint)) level = null;
+      else if (claims.get(el) === 'resume') level = 'green';
       else if (RESUME_RE.test(hint)) level = 'green';
       else if (inputs.length === 1 && !label) level = 'yellow';
       if (!level) continue;
@@ -327,7 +384,21 @@
     }
   }
 
-  function verify(entry) {
+  async function verify(entry, opts = {}) {
+    if (!entry.read(entry.el) && opts.fallback && entry.kind === 'text' && typeof chrome !== 'undefined') {
+      const attribute = 'data-autofill-target';
+      const previous = entry.el.getAttribute(attribute);
+      const marker = crypto.randomUUID();
+      entry.el.setAttribute(attribute, marker);
+      try {
+        await chrome.runtime.sendMessage({ type: 'DEBUGGER_FILL', selector: `[${attribute}="${marker}"]`, kind: 'text', value: entry.value });
+        await U.sleep(SETTLE_MS);
+      } catch (_) { /* Read-back below remains authoritative when real input fails. */ }
+      finally {
+        if (previous == null) entry.el.removeAttribute(attribute);
+        else entry.el.setAttribute(attribute, previous);
+      }
+    }
     if (entry.read(entry.el)) {
       filledBefore.set(entry.el, { item: entry, read: entry.read });
       return;
