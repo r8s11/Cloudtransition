@@ -325,3 +325,25 @@ test('6c: review an independent login form does not block application filling', 
     await expect(h.page.locator('input[type=password]')).toHaveValue('');
   });
 });
+
+test('6c: sign-in form inside header is not filled', async () => {
+  await setup(async h => {
+    for (const container of ['header', 'nav']) {
+      for (const [heading, action] of [['Sign in', 'Sign in'], ['Sign in', 'Continue'], ['', 'Sign in']]) {
+        await h.page.goto(h.fixtureUrl('greenhouse-questions.html'));
+        await h.page.evaluate(({ container, heading, action }) => {
+          document.body.innerHTML = `<${container}><form>${heading ? `<h2>${heading}</h2>` : ''}<label>Email<input id="login-email" type="email"></label><button>${action}</button></form></${container}><main><h1>Apply for Support Specialist</h1><form><label>First Name<input id="first_name"></label><label>Email<input id="application-email" type="email"></label><button>Submit application</button></form></main>`;
+          document.body.dataset.clicks = '0';
+          document.querySelectorAll('button').forEach(button => {
+            button.onclick = e => { e.preventDefault(); document.body.dataset.clicks = String(+document.body.dataset.clicks + 1); };
+          });
+        }, { container, heading, action });
+        await runAutofill(h.page);
+        await expect(h.page.locator('#login-email')).toHaveValue('');
+        await expect(h.page.locator('#first_name')).toHaveValue('Jordan');
+        await expect(h.page.locator('#application-email')).toHaveValue('jordan.avery@example.test');
+        expect(await h.page.locator('body').getAttribute('data-clicks')).toBe('0');
+      }
+    }
+  });
+});

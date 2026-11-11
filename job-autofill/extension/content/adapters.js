@@ -46,11 +46,11 @@
       .map((id) => form.ownerDocument.getElementById(id)?.textContent || '').join(' ');
     if ([label, U.clean(labelledBy)].some((text) => AUTH_TITLE.test(text))) return true;
 
-    // Navigation links and secondary header actions do not describe the application.
+    // Only a form's own headings and native actions classify it; navigation links do not.
     const headings = U.deepQueryAll(form, 'h1, h2, h3, legend')
-      .filter((el) => U.isVisible(el) && !el.closest(NAVIGATION));
+      .filter((el) => U.isVisible(el) && el.closest('form') === form);
     if (headings.some((el) => AUTH_TITLE.test(U.clean(el.textContent)))) return true;
-    const actions = buttons(form).filter((el) => el.tagName !== 'A' && !el.closest(NAVIGATION) && el.type !== 'reset');
+    const actions = buttons(form).filter((el) => el.tagName !== 'A' && el.closest('form') === form && el.type !== 'reset');
     const primary = actions.findLast((el) => el.type === 'submit') || actions.at(-1);
     if (primary && AUTH_TITLE.test(buttonText(primary))) return true;
 
