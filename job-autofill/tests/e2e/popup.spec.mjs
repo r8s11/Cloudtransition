@@ -165,7 +165,7 @@ test('U13: pick provider and model from the provider\'s list', async () => {
     // OpenAI: exactly the provider's two ids (plus the placeholder), pick the second, save.
     await popup.getByLabel('OpenAI').check();
     await expect(popup.locator('#model')).toBeEnabled();
-    expect(await options()).toEqual(['— pick a model —', 'fake-openai-a', 'fake-openai-b']);
+    await expect(popup.locator('#model option')).toHaveText(['— pick a model —', 'fake-openai-a', 'fake-openai-b']);
     await expect(popup.locator('#key-line')).toHaveText('Key: saved in Keychain (job-autofill-openai)');
     await popup.locator('#model').selectOption('fake-openai-b');
     await popup.getByRole('button', { name: 'Save', exact: true }).click();
