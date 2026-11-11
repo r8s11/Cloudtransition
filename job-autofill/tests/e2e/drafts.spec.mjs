@@ -77,6 +77,16 @@ test('F12: sign-in and account pages stay untouched', async () => {
       expect(await h.page.locator('body').getAttribute('data-clicks')).toBe('0');
       await expect(h.page.locator('#autofill-hud')).toContainText("Sign in first — AutoFill doesn't sign in or create accounts");
     }
+    for (const form of [
+      '<label>Email<input type="email"></label><input type="password" hidden><button>Continue</button>',
+      '<label>Email<input type="email"></label><button>Create Account</button>',
+    ]) {
+      await h.page.goto(h.fixtureUrl('indeed-signin.html'));
+      await h.page.evaluate(form => { document.body.innerHTML = `<form>${form}</form>`; }, form);
+      await runAutofill(h.page, { submit: true });
+      await expect(h.page.locator('input[type=email]')).toHaveValue('');
+      await expect(h.page.locator('#autofill-hud')).toContainText("Sign in first — AutoFill doesn't sign in or create accounts");
+    }
   });
 });
 
@@ -127,7 +137,8 @@ for (const [mode, reason] of [['401', 'key rejected'], ['429', 'rate limited'], 
       await h.provider.setMode(mode);
       for (let i = 0; i < 2; i++) {
         if (i) await h.page.reload();
-        await runAutofill(h.page, { timeout: 50_000 });
+        const result = await runAutofill(h.page, { timeout: 50_000 });
+        expect(result.counts.ai_calls).toBe(1);
         await expect(h.page.locator('#answer')).toHaveValue('');
         await reviewed(h.page, `AI error: ${reason}`);
       }
@@ -161,6 +172,12 @@ test('U25: cached answer uses no second provider call and reports zero calls', a
     await h.page.reload();
     const second = await runAutofill(h.page);
     await expect(h.page.locator('#answer')).toHaveValue(first);
+    await expect.poll(() => {
+      try {
+        const lines = readFileSync(path.join(h.helper.home, 'runs.jsonl'), 'utf8').trim().split('\n');
+        return JSON.parse(lines.at(-1)).ai_calls;
+      } catch (_) { return null; }
+    }).toBe(0);
     expect(await draftRequests(h)).toHaveLength(1);
     expect(second.counts.ai_calls).toBe(0);
   }, { ai: true });
@@ -188,5 +205,51 @@ test('6c: rejected token blocks a run instead of using stale cache', async () =>
     expect(result.error).toContain('Not paired');
     await expect(h.page.locator('#first_name')).toHaveValue('');
     await popup.close();
+  });
+});
+
+test('6c: question types normalize unlimited length and exclude search and promo controls', async () => {
+  await setup(async h => {
+    await fetch(`http://127.0.0.1:${h.provider.port}/__mode`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ mode: 'ok', reply: '12' }),
+    });
+    await h.page.evaluate(() => {
+      document.querySelector('form').innerHTML = '<label>How many projects?<input id="number" type="number"></label><label>Describe your projects<textarea id="text"></textarea></label><label>Which project count?<select id="select"><option value="">Choose</option><option value="twelve">12</option><option>Other</option></select></label><label>Search<input id="search"></label><label>Promo code<input id="promo"></label>';
+    });
+    const result = await runAutofill(h.page);
+    expect(result.counts.ai_drafts).toBe(3);
+    await expect(h.page.locator('#number')).toHaveValue('12');
+    await expect(h.page.locator('#text')).toHaveValue('12');
+    await expect(h.page.locator('#select')).toHaveValue('twelve');
+    await expect(h.page.locator('#search')).toHaveValue('');
+    await expect(h.page.locator('#promo')).toHaveValue('');
+    const requests = await draftRequests(h);
+    expect(requests).toHaveLength(3);
+    for (const request of requests) {
+      const user = JSON.parse(request.body.messages[0].content);
+      expect(user.max_length || 0).toBe(0);
+    }
+  }, { ai: true });
+});
+
+test('6c: daily AI cap stays an empty yellow error without another provider call', async () => {
+  await setup(async h => {
+    const { popup } = await openPopup(h.page);
+    await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'SAVE_CONFIG', patch: { daily_cap: 0 } }));
+    await popup.close();
+    await runAutofill(h.page);
+    await expect(h.page.locator('#answer')).toHaveValue('');
+    await reviewed(h.page, 'Daily AI limit reached (0)');
+    expect(await draftRequests(h)).toHaveLength(0);
+  }, { ai: true });
+});
+
+test('6c: AI off leaves required questions empty without contacting provider', async () => {
+  await setup(async h => {
+    await runAutofill(h.page);
+    await expect(h.page.locator('#answer')).toHaveValue('');
+    await expect(h.page.locator('#answer')).toHaveAttribute('title', 'AutoFill: Required field still needs input');
+    expect(await draftRequests(h)).toHaveLength(0);
   });
 });

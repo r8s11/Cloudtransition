@@ -42,11 +42,12 @@
       name: 'generic',
       hosts: [],
       fields: () => [],
-      isSignIn: (scope) => U.deepQueryAll(scope, 'input[type=password]').some(U.isVisible)
+      isSignIn: (scope) => U.deepQueryAll(scope, 'input[type=password]').length > 0
         || U.deepQueryAll(scope, 'form').some((form) => {
           const label = U.clean(form.getAttribute('aria-label') || '');
           const headings = U.deepQueryAll(form, 'h1, h2, h3, legend').filter(U.isVisible).map((el) => U.clean(el.textContent));
-          return [label, ...headings].some((text) => /^(sign in|log in|create (an? )?account)$/i.test(text));
+          const actions = buttons(form).map(buttonText);
+          return [label, ...headings, ...actions].some((text) => /^(sign in|log in|create (an? )?account)$/i.test(text));
         }),
       confirm: { paths: [], text: [] },
       nextButton: (scope) => {

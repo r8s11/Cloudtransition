@@ -146,7 +146,6 @@
     await U.sleep(SETTLE_MS);
     for (const p of pending) await verify(p, opts);
 
-    requiredPass(all, items, add);
     const aiQueue = all.filter((el) => {
       if (handled.has(el) || widgetElements.has(el) || !U.isVisible(el) || el.disabled || el.readOnly) return false;
       if (!el.closest('form') || el.value.trim() || claims.has(el) || AF.matchField(ctxOf(el)).key) return false;
@@ -154,16 +153,7 @@
       const context = `${U.labelText(el)} ${el.name} ${el.id} ${el.closest('form').getAttribute('role') || ''}`;
       return !!U.labelText(el) && !/\b(search|sign.?in|log.?in|password|captcha|promo|coupon|newsletter|subscribe)\b/i.test(context);
     });
-    // Required-pass entries are eligible too; replace their generic reason with the draft result.
-    for (const el of all) {
-      if (!items.some((item) => item.el === el && item.reason === R_REQUIRED)) continue;
-      handled.delete(el);
-    }
-    const requiredQuestions = all.filter((el) => !aiQueue.includes(el) && items.some((item) => item.el === el && item.reason === R_REQUIRED)
-      && U.isVisible(el) && !el.disabled && !el.readOnly && el.closest('form') && !claims.has(el) && !AF.matchField(ctxOf(el)).key
-      && (el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || (el.tagName === 'INPUT' && ['text', 'number'].includes(el.type)))
-      && U.labelText(el) && !/\b(search|sign.?in|log.?in|password|captcha|promo|coupon|newsletter|subscribe)\b/i.test(`${U.labelText(el)} ${el.name} ${el.id}`));
-    aiQueue.push(...requiredQuestions);
+    requiredPass(all, items, add);
     let aiCalls = 0;
     let aiDrafts = 0;
     if (opts.aiEnabled) {
@@ -185,6 +175,7 @@
         Object.assign(entry, { filled: false, level: 'yellow', reason: 'AI draft — review before submitting', ai: true });
         if (reply?.error) {
           entry.reason = String(reply.error).replace(/^AutoFill: /, '');
+          if (/^AI error:/.test(entry.reason)) aiCalls += 1;
           continue;
         }
         if (reply?.cached === false) aiCalls += 1;
@@ -415,7 +406,7 @@
     const mark = (el, kind, group = [el]) => {
       const existing = items.find((item) => group.includes(item.el));
       const entry = { el, key: null, kind, filled: false, level: 'yellow', reason: R_REQUIRED };
-      if (existing) Object.assign(existing, { filled: false, level: 'yellow', reason: R_REQUIRED });
+      if (existing) Object.assign(existing, { filled: false, level: 'yellow', reason: existing.reason || R_REQUIRED });
       else add(entry);
     };
     for (const el of all) {
