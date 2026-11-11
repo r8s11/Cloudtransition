@@ -14,10 +14,11 @@ import json
 import os
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import quote, urlsplit
+from urllib.parse import parse_qs, quote, urlsplit
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+import ai  # noqa: E402
 import keychain  # noqa: E402
 import store as store_mod  # noqa: E402
 
@@ -62,6 +63,8 @@ class Handler(BaseHTTPRequestHandler):
         if content_type:
             self.send_header('Content-Type', content_type)
         self.send_header('Content-Length', str(len(body)))
+        if self.close_connection:
+            self.send_header('Connection', 'close')
         self.send_header('Cache-Control', 'no-store')
         for k, v in (headers or {}).items():
             self.send_header(k, v)
@@ -90,6 +93,9 @@ class Handler(BaseHTTPRequestHandler):
         try:
             length = int(self.headers.get('Content-Length') or 0)
         except ValueError:
+            length = -1
+        if length < 0:
+            self.close_connection = True  # the body, if any, was not read
             raise ApiError(400, 'bad Content-Length')
         if length > MAX_BODY:
             self.close_connection = True
@@ -110,6 +116,7 @@ class Handler(BaseHTTPRequestHandler):
         path = urlsplit(self.path).path
         route = self.ROUTES.get((method, path))
         if route is None:
+            self.close_connection = True  # a body of an unknown route is never read
             return self._json(404, {'error': 'not found'})
         try:
             getattr(self, route)()
@@ -150,6 +157,8 @@ class Handler(BaseHTTPRequestHandler):
         ('GET', '/config'): 'r_config_get',
         ('PUT', '/config'): 'r_config_put',
         ('POST', '/runs'): 'r_runs',
+        ('GET', '/models'): 'r_models',
+        ('POST', '/draft'): 'r_draft',
     }
 
     @property
@@ -200,6 +209,19 @@ class Handler(BaseHTTPRequestHandler):
         except ValueError as e:
             raise ApiError(400, str(e))
         self._json(200, {'ok': True})
+
+    def r_models(self):
+        provider = parse_qs(urlsplit(self.path).query).get('provider', [''])[0]
+        try:
+            models = ai.list_models(provider, env=self.store.env)
+        except ValueError:
+            raise ApiError(400, 'provider must be one of: %s' % ', '.join(store_mod.PROVIDERS))
+        except ai.AiError as e:
+            return self._json(200, {'error': e.message})
+        self._json(200, {'models': models})
+
+    def r_draft(self):
+        self._json(200, ai.draft(self._body(), self.store))
 
 
 class HelperServer(ThreadingHTTPServer):

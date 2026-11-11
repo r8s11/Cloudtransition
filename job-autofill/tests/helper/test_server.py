@@ -313,6 +313,39 @@ class RoutesTest(ServerCase):
         finally:
             s.close()
 
+    def _raw(self, request_line, extra=''):
+        s = socket.create_connection(('127.0.0.1', self.port), timeout=10)
+        try:
+            s.sendall(('%s HTTP/1.1\r\nHost: x\r\nOrigin: %s\r\nX-Job-Autofill-Token: %s\r\n%s\r\n'
+                       % (request_line, EXT_ORIGIN, self.token, extra)).encode())
+            data = b''
+            while b'\r\n\r\n' not in data:
+                chunk = s.recv(4096)
+                if not chunk:
+                    break
+                data += chunk
+            return data.split(b'\r\n\r\n')[0].decode('latin-1')
+        finally:
+            s.close()
+
+    def test_negative_content_length_is_a_400_and_closes_the_connection(self):
+        head = self._raw('PUT /config', 'Content-Length: -5\r\n')
+        self.assertTrue(head.startswith('HTTP/1.1 400'), head)
+        self.assertIn('Connection: close', head)
+        head = self._raw('POST /draft', 'Content-Length: abc\r\n')
+        self.assertTrue(head.startswith('HTTP/1.1 400'), head)
+        self.assertIn('Connection: close', head)
+
+    def test_unknown_route_closes_the_connection_so_an_unread_body_cannot_leak(self):
+        head = self._raw('POST /nope', 'Content-Length: 4\r\n')
+        self.assertTrue(head.startswith('HTTP/1.1 404'), head)
+        self.assertIn('Connection: close', head)
+
+    def test_a_normal_response_keeps_the_connection_open(self):
+        head = self._raw('GET /health')
+        self.assertTrue(head.startswith('HTTP/1.1 200'), head)
+        self.assertNotIn('Connection: close', head)
+
 
 class CliTest(unittest.TestCase):
     def setUp(self):
