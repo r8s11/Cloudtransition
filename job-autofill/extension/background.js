@@ -215,6 +215,7 @@ async function startRun({ tabId, submit }) {
       submit: !!submit,
       step: 0,
       fingerprints: [],
+      frames: {},
       counts: { green: 0, yellow: 0, filled: 0, ai_drafts: 0, ai_calls: 0, fields: null },
       status: 'running',
       reason: '',
@@ -245,14 +246,23 @@ async function startRun({ tabId, submit }) {
   return { ok: true, runId };
 }
 
-function applyReport(tabId, summary) {
+function applyReport(tabId, summary, frameId = 0) {
   return mutateRuns((all) => {
     const run = all[tabId];
     if (!run || !summary || (summary.runId && summary.runId !== run.runId)) return false;
     if (RUN_STATUSES.includes(summary.status)) run.status = summary.status;
     if (typeof summary.reason === 'string') run.reason = summary.reason;
-    if (Number.isInteger(summary.step)) run.step = summary.step;
-    if (summary.counts && typeof summary.counts === 'object') run.counts = Object.assign({}, run.counts, summary.counts);
+    if (Number.isInteger(summary.step)) run.step = Math.max(run.step || 0, summary.step);
+    if (summary.counts && typeof summary.counts === 'object') {
+      run.frames ||= {};
+      run.frames[frameId] = Object.assign({}, run.frames[frameId], summary.counts);
+      run.counts = { green: 0, yellow: 0, filled: 0, ai_drafts: 0, ai_calls: 0, fields: 0 };
+      for (const counts of Object.values(run.frames)) {
+        for (const key of Object.keys(run.counts)) {
+          if (Number.isFinite(counts[key]) && counts[key] >= 0) run.counts[key] += counts[key];
+        }
+      }
+    }
     run.updatedAt = Date.now();
     return true;
   });
@@ -355,7 +365,7 @@ async function handle(msg, sender) {
     case 'SAVE_CONFIG': return saveConfig(msg.patch, msg.fallback);
     case 'MODELS': return listModels(msg.provider);
     case 'DRAFT': return draft(msg.req);
-    case 'REPORT': return { ok: await applyReport(tabId, msg.summary) };
+    case 'REPORT': return { ok: await applyReport(tabId, msg.summary, trusted ? 0 : sender.frameId || 0) };
     case 'LOG_RUN': return logRun(msg.rec);
     case 'DEBUGGER_FILL': return debuggerFill(tabId, msg);
     default: return { error: `unknown message ${msg.type}` };

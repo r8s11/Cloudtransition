@@ -102,6 +102,62 @@
     },
   });
 
+  // Native fields use stable vendor markers; custom widgets share the fill engine's scorer.
+  const combos = (scope) => U.deepQueryAll(scope, '[role=combobox], [data-automation-id=selectWidget]')
+    .filter((el) => el.tagName !== 'SELECT')
+    .map((el) => ({ el, key: AF.matchField({ label: U.labelText(el), name: el.name || '' }).key, kind: 'combo' }));
+
+  registerAdapter({
+    name: 'ashby',
+    hosts: [/^jobs\.ashbyhq\.com$/],
+    fields: (scope) => claim(scope, [
+      ['[name="_systemfield_name"]', 'fullName'], ['[name="_systemfield_email"]', 'email'],
+      ['[name="_systemfield_phone"]', 'phone'],
+    ]),
+    widgets: combos,
+  });
+
+  registerAdapter({
+    name: 'workday',
+    hosts: [/(^|\.)myworkdayjobs\.com$/],
+    fields: (scope) => claim(scope, [
+      ['[data-automation-id="legalNameSection_firstName"]', 'firstName'],
+      ['[data-automation-id="legalNameSection_lastName"]', 'lastName'],
+      ['[data-automation-id="email"]', 'email'], ['[data-automation-id="phone-number"]', 'phone'],
+      ['[data-automation-id="addressSection_city"]', 'city'],
+      ['[data-automation-id="addressSection_postalCode"]', 'zip'],
+      ['[data-automation-id="gender"]', 'gender'],
+    ]),
+    widgets: (scope) => [...combos(scope), ...U.deepQueryAll(scope, '[data-automation-id="file-upload-drop-zone"]')
+      .map((el) => ({ el, key: 'resume', kind: 'drop' }))],
+    nextButton: (scope) => U.deepQueryAll(scope, '[data-automation-id="bottom-navigation-next-button"]')
+      .find((el) => U.isVisible(el) && !el.disabled) || null,
+  });
+
+  registerAdapter({
+    name: 'icims',
+    hosts: [/(^|\.)icims\.com$/],
+    fields: (scope) => claim(scope, [
+      ['[id="PersonProfileFields.FirstName"]', 'firstName'],
+      ['[id="PersonProfileFields.LastName"]', 'lastName'],
+      ['[id="PersonProfileFields.Email"]', 'email'],
+      ['[id="PersonProfileFields.PhoneNumber"]', 'phone'],
+      ['input[type=file][name*=resume i]', 'resume'],
+    ]),
+  });
+
+  registerAdapter({
+    name: 'indeed',
+    hosts: [/(^|\.)indeed\.com$/],
+    fields: (scope) => claim(scope, [
+      ['[name="fullName"]', 'fullName'], ['[name="firstName"]', 'firstName'],
+      ['[name="lastName"]', 'lastName'], ['[name="email"]', 'email'],
+      ['[name="phoneNumber"]', 'phone'], ['input[type=file][name="resume"]', 'resume'],
+      ['input[type=radio][name="workAuthorization"]', 'workAuthorization'],
+      ['input[type=radio][name="needsSponsorship"]', 'needsSponsorship'],
+    ]),
+  });
+
   // Fixtures are served from 127.0.0.1, so a page there may name its adapter in
   // <meta name="autofill-test-ats" content="greenhouse">. The meta is honored ONLY on
   // 127.0.0.1 and localhost; on any real host it is ignored.

@@ -126,12 +126,64 @@
 
     fillFiles(fileInputs, claims, resume, opts, pending, add, handled);
     fields += fileInputs.filter((f) => !f.disabled).length;
+    for (const widget of adapter.widgets ? adapter.widgets(scope) : []) {
+      if (!U.isVisible(widget.el) || widget.el.disabled || widget.el.getAttribute('aria-disabled') === 'true') continue;
+      fields += 1;
+      if (!reuse(widget.el, add)) await fillWidget(widget, profile, resume, opts, pending, add);
+    }
 
     await U.sleep(SETTLE_MS);
     for (const p of pending) verify(p);
 
     requiredPass(all, items, add);
     return { items, aiQueue: [], fields };
+  }
+
+  // Portal lists are resolved after opening, never from hidden stale options.
+  async function fillWidget({ el, key, kind }, profile, resume, opts, pending, add) {
+    if (kind === 'drop') {
+      if (!resume || !resume.b64) {
+        add({ el, key, kind, filled: false, level: 'yellow', reason: opts.resumeError || R_NO_RESUME });
+        return;
+      }
+      if (el.textContent.includes(resume.name)) return;
+      const dt = new root.DataTransfer();
+      dt.items.add(U.fileFrom(resume));
+      for (const type of ['dragenter', 'dragover', 'drop']) {
+        el.dispatchEvent(new root.DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: dt }));
+      }
+      pending.push(add({
+        el, key, kind, filled: true, level: 'green', reason: R_PROFILE,
+        read: (e) => e.textContent.includes(resume.name)
+          || U.deepQueryAll(e, 'input[type=file]').some((f) => f.files[0]?.name === resume.name),
+      }));
+      return;
+    }
+    const value = valueFor(key, profile);
+    const shown = () => U.clean(el.value || el.textContent);
+    if (!value || (shown() && !AF.isPlaceholder(shown()))) return;
+    U.click(el);
+    let options = [];
+    for (let tries = 0; tries < 10; tries += 1) {
+      const ids = (el.getAttribute('aria-controls') || el.getAttribute('aria-owns') || '').split(/\s+/);
+      const containers = ids.map((id) => el.getRootNode().getElementById(id) || el.ownerDocument.getElementById(id)).filter(Boolean);
+      options = (containers.length ? containers.flatMap((c) => U.deepQueryAll(c, '[role=option], [data-automation-id=promptOption]'))
+        : U.deepQueryAll(el.ownerDocument, '[role=option], [data-automation-id=promptOption]')).filter(U.isVisible);
+      if (options.length) break;
+      await U.sleep(50);
+    }
+    const hit = bestOption(options.map((option) => ({ option, label: U.clean(option.textContent), value: option.getAttribute('data-value') || '' })), value);
+    if (hit) U.click(hit.option.option);
+    if (el.getAttribute('aria-expanded') === 'true') {
+      el.dispatchEvent(new root.KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
+      if (el.getAttribute('aria-expanded') === 'true') U.click(el);
+    }
+    if (!hit) return;
+    pending.push(add({
+      el, key, kind, value, filled: true, level: hit.score >= 85 ? 'green' : 'yellow',
+      reason: hit.score >= 85 ? R_PROFILE : R_CLOSE,
+      read: () => AF.scoreOption(shown(), '', value) >= 70 && el.getAttribute('aria-expanded') !== 'true',
+    }));
   }
 
   function fillText(el, claims, profile, pending, add) {

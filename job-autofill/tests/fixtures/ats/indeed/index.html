@@ -1,0 +1,9 @@
+<!doctype html><meta name="autofill-test-ats" content="indeed"><main></main><script>
+let step=0;const values={};document.body.dataset.continueClicks='0';document.body.dataset.submitClicks='0';
+function render(){document.querySelector('main').innerHTML=[
+'<h1>Contact</h1><label>Full name<input name="fullName"></label><label>Email<input name="email"></label><button>Continue</button>',
+'<h1>Resume</h1><label>Resume<input type="file" name="resume"></label><button>Continue</button>',
+'<h1>Questions</h1><fieldset><legend>Are you authorized to work in the United States?</legend><label><input type="radio" name="workAuthorization" value="Yes">Yes</label><label><input type="radio" name="workAuthorization" value="No">No</label></fieldset><fieldset><legend>Do you need sponsorship?</legend><label><input type="radio" name="needsSponsorship" value="Yes">Yes</label><label><input type="radio" name="needsSponsorship" value="No">No</label></fieldset><button>Continue</button>',
+'<h1>Review</h1><pre id="review"></pre><button>Submit application</button>'
+][step];if(step===3)document.querySelector('#review').textContent=JSON.stringify(values);document.querySelector('button').onclick=()=>{if(step===3){document.body.dataset.submitClicks=String(+document.body.dataset.submitClicks+1);return}for(const el of document.querySelectorAll('input')){if(el.type==='radio'&&!el.checked)continue;values[el.name]=el.type==='file'?(el.files[0]?.name||''):el.value}document.body.dataset.continueClicks=String(+document.body.dataset.continueClicks+1);step++;render()}}render();
+</script>

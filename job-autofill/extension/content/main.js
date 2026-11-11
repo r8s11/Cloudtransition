@@ -13,6 +13,9 @@
   const AF = root.AF;
   const isTop = root.top === root;
   let currentRun = null;
+  let lastItems = [];
+  let lastStep = 1;
+  const stepCounts = new Map();
 
   async function loadResume() {
     const { resume, resumeError } = await chrome.storage.local.get(['resume', 'resumeError']);
@@ -50,33 +53,51 @@
     return { runId, counts, review, message, tone };
   }
 
-  async function run(msg) {
-    currentRun = msg.runId;
-    AF.clearHighlights();
-    if (isTop) AF.hud.render({ runId: msg.runId, message: 'Filling\u2026', tone: 'rv' });
-
+  async function fillStep(msg, step = 1) {
     const { resume, resumeError } = await loadResume();
     const adapter = AF.adapterFor(root.location.hostname);
     const result = await AF.fillPage(root.document, msg.profile || {}, resume, { adapter, resumeError, fallback: msg.fallback });
-    if (currentRun !== msg.runId) return; // a newer START took over
-
+    if (currentRun !== msg.runId) return;
     for (const it of result.items) AF.highlight(it.el, it.level, it.reason);
-    const counts = summarize(result.items, result.fields);
-    if (isTop) AF.hud.render(panelFor(msg.runId, counts, result.items));
-
-    // A frame with no controls of its own stays silent so it cannot wipe the top frame's counts.
-    if (isTop || result.fields > 0) {
-      await chrome.runtime.sendMessage({
-        type: 'REPORT',
-        summary: {
-          runId: msg.runId,
-          status: 'filled',
-          step: 1,
-          counts: { green: counts.green, yellow: counts.yellow, filled: counts.filled, ai_drafts: 0, ai_calls: 0, fields: counts.fields },
-        },
-      }).catch(() => {});
+    lastItems = result.items;
+    lastStep = step;
+    stepCounts.set(step, summarize(result.items, result.fields));
+    const counts = { green: 0, yellow: 0, filled: 0, fields: 0, ai_drafts: 0, ai_calls: 0 };
+    for (const snapshot of stepCounts.values()) {
+      for (const key of Object.keys(snapshot)) counts[key] += snapshot[key];
     }
+    await chrome.runtime.sendMessage({
+      type: 'REPORT',
+      summary: { runId: msg.runId, status: 'filled', step, counts },
+    }).catch(() => {});
   }
+
+  async function run(msg) {
+    AF.wizard.stop();
+    currentRun = msg.runId;
+    stepCounts.clear();
+    lastItems = [];
+    lastStep = 1;
+    AF.clearHighlights();
+    if (isTop) AF.hud.render({ runId: msg.runId, message: 'Filling\u2026', tone: 'rv' });
+    await fillStep(msg);
+    if (currentRun === msg.runId) AF.wizard.start(msg);
+  }
+
+  AF.wizard.onStep(({ runCtx, step }) => {
+    fillStep(runCtx, step).catch(() => {});
+  });
+
+  // Session updates include every frame. The top panel and popup consume the same totals.
+  if (isTop) chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'session' || !changes.runs || !currentRun) return;
+    const state = Object.values(changes.runs.newValue || {}).find((r) => r.runId === currentRun);
+    if (!state) return;
+    const summary = panelFor(currentRun, state.counts, lastItems);
+    const step = Math.max(lastStep, state.step || 1);
+    if (step > 1) summary.title = `AutoFill · ${state.counts.filled} filled · Step ${step}`;
+    AF.hud.render(summary);
+  });
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (!msg || msg.type !== 'START' || sender.id !== chrome.runtime.id) return false;
