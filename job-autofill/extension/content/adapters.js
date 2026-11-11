@@ -36,19 +36,48 @@
 
   const BACK = /\b(back|previous|cancel|save (as )?draft|upload|sign in|log in)\b/i;
 
+  const AUTH_TITLE = /^(sign in|log in|create (an? )?account)$/i;
+  const NAVIGATION = 'header, nav, footer, aside, [role=navigation]';
+
+  function isAuthForm(form) {
+    if (U.deepQueryAll(form, 'input[type=password]').length) return true;
+    const label = U.clean(form.getAttribute('aria-label') || '');
+    const labelledBy = (form.getAttribute('aria-labelledby') || '').split(/\s+/)
+      .map((id) => form.ownerDocument.getElementById(id)?.textContent || '').join(' ');
+    if ([label, U.clean(labelledBy)].some((text) => AUTH_TITLE.test(text))) return true;
+
+    // Navigation links and secondary header actions do not describe the application.
+    const headings = U.deepQueryAll(form, 'h1, h2, h3, legend')
+      .filter((el) => U.isVisible(el) && !el.closest(NAVIGATION));
+    if (headings.some((el) => AUTH_TITLE.test(U.clean(el.textContent)))) return true;
+    const actions = buttons(form).filter((el) => el.tagName !== 'A' && !el.closest(NAVIGATION) && el.type !== 'reset');
+    const primary = actions.findLast((el) => el.type === 'submit') || actions.at(-1);
+    if (primary && AUTH_TITLE.test(buttonText(primary))) return true;
+
+    // Email-first sign-in pages often put the page heading just before the form.
+    // A form's own heading takes precedence over surrounding page text.
+    if (headings.length) return false;
+    const section = form.closest('section, main, article, [role=main]') || form.parentElement;
+    if (!section) return false;
+    const preceding = U.deepQueryAll(section, 'h1, h2, h3')
+      .filter((el) => U.isVisible(el) && !el.closest('form') && !el.closest(NAVIGATION)
+        && (el.compareDocumentPosition(form) & root.Node.DOCUMENT_POSITION_FOLLOWING));
+    return !!preceding.length && AUTH_TITLE.test(U.clean(preceding.at(-1).textContent));
+  }
+
+  function isSignIn(scope) {
+    if (scope.matches?.('form')) return isAuthForm(scope);
+    const forms = U.deepQueryAll(scope, 'form');
+    return forms.length ? forms.every(isAuthForm) : U.deepQueryAll(scope, 'input[type=password]').length > 0;
+  }
+
   // Defaults every adapter shares.
   function adapter(spec) {
     return Object.assign({
       name: 'generic',
       hosts: [],
       fields: () => [],
-      isSignIn: (scope) => U.deepQueryAll(scope, 'input[type=password]').length > 0
-        || U.deepQueryAll(scope, 'form').some((form) => {
-          const label = U.clean(form.getAttribute('aria-label') || '');
-          const headings = U.deepQueryAll(form, 'h1, h2, h3, legend').filter(U.isVisible).map((el) => U.clean(el.textContent));
-          const actions = buttons(form).map(buttonText);
-          return [label, ...headings, ...actions].some((text) => /^(sign in|log in|create (an? )?account)$/i.test(text));
-        }),
+      isSignIn,
       confirm: { paths: [], text: [] },
       nextButton: (scope) => {
         const b = findButton(scope, /^(next|continue|save (and|&) continue)\b/i);

@@ -75,16 +75,19 @@
     opts = opts || {};
     const adapter = opts.adapter || AF.adapterFor(root.location.hostname);
     if (adapter.isSignIn(scope)) return { items: [], aiQueue: [], fields: 0, signIn: true };
+    const signInForms = new Set(U.deepQueryAll(scope, 'form').filter((form) => adapter.isSignIn(form)));
+    const inSignInForm = (el) => signInForms.has(el.form || el.closest('form'));
     const claims = new Map();
     for (const { el, key } of adapter.fields(scope)) claims.set(el, key);
-    const widgets = adapter.widgets ? adapter.widgets(scope)
+    const widgets = (adapter.widgets ? adapter.widgets(scope)
       : U.deepQueryAll(scope, '[role=combobox], [aria-haspopup=listbox]')
         .filter((el) => el.tagName !== 'SELECT')
-        .map((el) => ({ el, key: claims.get(el) || AF.matchField(ctxOf(el)).key, kind: 'combo' }));
+        .map((el) => ({ el, key: claims.get(el) || AF.matchField(ctxOf(el)).key, kind: 'combo' })))
+      .filter(({ el }) => !inSignInForm(el));
     const widgetElements = new Set(widgets.map(({ el }) => el));
     const dropSlots = widgets.filter(({ kind }) => kind === 'drop');
 
-    const all = U.deepQueryAll(scope, U.CONTROLS);
+    const all = U.deepQueryAll(scope, U.CONTROLS).filter((el) => !inSignInForm(el));
     const items = [];
     const pending = []; // entries that need a read-back
     const seenGroups = new Set();
@@ -148,10 +151,14 @@
 
     const aiQueue = all.filter((el) => {
       if (handled.has(el) || widgetElements.has(el) || !U.isVisible(el) || el.disabled || el.readOnly) return false;
-      if (!el.closest('form') || el.value.trim() || claims.has(el) || AF.matchField(ctxOf(el)).key) return false;
+      const form = el.form || el.closest('form');
+      const hasValue = el.tagName === 'SELECT' ? selectHasValue(el) : !!el.value.trim();
+      if (!form || hasValue || claims.has(el) || AF.matchField(ctxOf(el)).key) return false;
       if (!['TEXTAREA', 'SELECT'].includes(el.tagName) && !(el.tagName === 'INPUT' && ['text', 'number'].includes(el.type))) return false;
-      const context = `${U.labelText(el)} ${el.name} ${el.id} ${el.closest('form').getAttribute('role') || ''}`;
-      return !!U.labelText(el) && !/\b(search|sign.?in|log.?in|password|captcha|promo|coupon|newsletter|subscribe)\b/i.test(context);
+      const excluded = /\b(search|sign.?in|log.?in|password|captcha|promo|coupon|newsletter|subscribe)\b/i;
+      const formContext = ['aria-label', 'role', 'action', 'name'].map((attr) => form.getAttribute(attr) || '').join(' ');
+      const context = `${U.labelText(el)} ${el.name} ${el.id}`;
+      return !!U.labelText(el) && !excluded.test(formContext) && !excluded.test(context);
     });
     requiredPass(all, items, add);
     let aiCalls = 0;

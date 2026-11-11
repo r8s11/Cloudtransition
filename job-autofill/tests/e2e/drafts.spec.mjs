@@ -253,3 +253,75 @@ test('6c: AI off leaves required questions empty without contacting provider', a
     expect(await draftRequests(h)).toHaveLength(0);
   });
 });
+
+test('6c: review external sign-in heading blocks an email-only form', async () => {
+  await setup(async h => {
+    await h.page.evaluate(() => {
+      document.body.innerHTML = '<h1>Sign in</h1><form><label>Email<input type="email" id="login-email"></label><button>Continue</button></form>';
+      document.body.dataset.clicks = '0';
+      document.querySelector('button').onclick = e => { e.preventDefault(); document.body.dataset.clicks = String(+document.body.dataset.clicks + 1); };
+    });
+    await runAutofill(h.page, { submit: true });
+    await expect(h.page.locator('#login-email')).toHaveValue('');
+    await expect(h.page.locator('#autofill-hud')).toContainText("Sign in first — AutoFill doesn't sign in or create accounts");
+    expect(await h.page.locator('body').getAttribute('data-clicks')).toBe('0');
+  });
+});
+
+test('6c: review header sign-in links do not block an application form', async () => {
+  await setup(async h => {
+    await h.page.evaluate(() => {
+      document.body.innerHTML = '<form><header><a role="button" href="/login">Sign in</a></header><h1>Apply for Support Specialist</h1><label>First Name<input id="first_name"></label><button>Submit application</button></form>';
+      document.body.dataset.clicks = '0';
+      document.querySelector('a').onclick = e => { e.preventDefault(); document.body.dataset.clicks = String(+document.body.dataset.clicks + 1); };
+    });
+    await runAutofill(h.page);
+    await expect(h.page.locator('#first_name')).toHaveValue('Jordan');
+    expect(await h.page.locator('body').getAttribute('data-clicks')).toBe('0');
+  });
+});
+
+test('6c: review enclosing form context excludes non-application AI questions', async () => {
+  await setup(async h => {
+    await h.page.evaluate(() => {
+      document.body.innerHTML = '<form aria-label="Search"><label>Keywords<input id="q0"></label></form>'
+        + '<form name="newsletter"><label>Topics<input id="q1"></label></form>'
+        + '<form action="/login"><label>Account identifier<input id="q2"></label></form>'
+        + '<form action="/promo"><label>Offer identifier<input id="q3"></label></form>'
+        + '<form role="search"><label>Terms<input id="q4"></label></form>';
+    });
+    await runAutofill(h.page);
+    expect(await draftRequests(h)).toHaveLength(0);
+    expect(await h.page.locator('input').evaluateAll(els => els.map(e => e.value))).toEqual(['', '', '', '', '']);
+  }, { ai: true });
+});
+
+test('6c: review nonempty placeholder values still request a select draft', async () => {
+  await setup(async h => {
+    await fetch(`http://127.0.0.1:${h.provider.port}/__mode`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ mode: 'ok', reply: 'Internal referral' }),
+    });
+    await h.page.evaluate(() => {
+      document.querySelector('form').innerHTML = '<label>How did you learn about this position?<select id="answer" required><option value="-1">Select</option><option value="referral">Internal referral</option><option value="board">Job board</option></select></label>';
+    });
+    const result = await runAutofill(h.page);
+    await expect(h.page.locator('#answer')).toHaveValue('referral');
+    await reviewed(h.page);
+    expect(result.counts.ai_drafts).toBe(1);
+    const [request] = await draftRequests(h);
+    expect(JSON.parse(request.body.messages[0].content).options).toEqual(['Internal referral', 'Job board']);
+  }, { ai: true });
+});
+
+test('6c: review an independent login form does not block application filling', async () => {
+  await setup(async h => {
+    await h.page.evaluate(() => {
+      document.body.innerHTML = '<header><form aria-label="Sign in"><label>Email<input id="login-email" type="email"></label><label>Password<input type="password"></label><button>Sign in</button></form></header><main><h1>Apply for Support Specialist</h1><form><label>First Name<input id="first_name"></label><button>Submit application</button></form></main>';
+    });
+    await runAutofill(h.page);
+    await expect(h.page.locator('#first_name')).toHaveValue('Jordan');
+    await expect(h.page.locator('#login-email')).toHaveValue('');
+    await expect(h.page.locator('input[type=password]')).toHaveValue('');
+  });
+});
