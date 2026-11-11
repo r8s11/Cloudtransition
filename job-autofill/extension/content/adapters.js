@@ -103,7 +103,7 @@
   });
 
   // Native fields use stable vendor markers; custom widgets share the fill engine's scorer.
-  const combos = (scope) => U.deepQueryAll(scope, '[role=combobox], [data-automation-id=selectWidget]')
+  const combos = (scope) => U.deepQueryAll(scope, '[role=combobox], [aria-haspopup=listbox], [data-automation-id=selectWidget]')
     .filter((el) => el.tagName !== 'SELECT')
     .map((el) => ({ el, key: AF.matchField({ label: U.labelText(el), name: el.name || '' }).key, kind: 'combo' }));
 

@@ -76,6 +76,12 @@
     const adapter = opts.adapter || AF.adapterFor(root.location.hostname);
     const claims = new Map();
     for (const { el, key } of adapter.fields(scope)) claims.set(el, key);
+    const widgets = adapter.widgets ? adapter.widgets(scope)
+      : U.deepQueryAll(scope, '[role=combobox], [aria-haspopup=listbox]')
+        .filter((el) => el.tagName !== 'SELECT')
+        .map((el) => ({ el, key: claims.get(el) || AF.matchField(ctxOf(el)).key, kind: 'combo' }));
+    const widgetElements = new Set(widgets.map(({ el }) => el));
+    const dropSlots = widgets.filter(({ kind }) => kind === 'drop');
 
     const all = U.deepQueryAll(scope, U.CONTROLS);
     const items = [];
@@ -90,6 +96,8 @@
     let n = 0;
     for (const el of all) {
       if ((n += 1) % 25 === 0) await tick();
+      // Editable comboboxes must select an option, not merely accept a text value.
+      if (widgetElements.has(el)) continue;
       const tag = el.tagName;
       const type = tag === 'INPUT' ? el.type : tag === 'SELECT' ? 'select' : 'textarea';
       if (el.disabled || el.readOnly) continue;
@@ -126,10 +134,10 @@
 
     fillFiles(fileInputs, claims, resume, opts, pending, add, handled);
     fields += fileInputs.filter((f) => !f.disabled).length;
-    for (const widget of adapter.widgets ? adapter.widgets(scope) : []) {
+    for (const widget of widgets) {
       if (!U.isVisible(widget.el) || widget.el.disabled || widget.el.getAttribute('aria-disabled') === 'true') continue;
       fields += 1;
-      if (!reuse(widget.el, add)) await fillWidget(widget, profile, resume, opts, pending, add);
+      if (!reuse(widget.el, add)) await fillWidget(widget, profile, resume, opts, pending, add, dropSlots.length);
     }
 
     await U.sleep(SETTLE_MS);
@@ -140,8 +148,13 @@
   }
 
   // Portal lists are resolved after opening, never from hidden stale options.
-  async function fillWidget({ el, key, kind }, profile, resume, opts, pending, add) {
+  async function fillWidget({ el, key, kind }, profile, resume, opts, pending, add, dropCount) {
     if (kind === 'drop') {
+      const label = U.labelText(el);
+      const hint = label || `${el.getAttribute('name') || ''} ${el.id} ${U.clean(el.textContent)}`;
+      if (NEVER_RE.test(hint)) return;
+      const level = RESUME_RE.test(hint) ? 'green' : dropCount === 1 && !label ? 'yellow' : null;
+      if (!level) return;
       if (!resume || !resume.b64) {
         add({ el, key, kind, filled: false, level: 'yellow', reason: opts.resumeError || R_NO_RESUME });
         return;
@@ -153,7 +166,7 @@
         el.dispatchEvent(new root.DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: dt }));
       }
       pending.push(add({
-        el, key, kind, filled: true, level: 'green', reason: R_PROFILE,
+        el, key, kind, filled: true, level, reason: level === 'green' ? R_PROFILE : R_UNLABELED,
         read: (e) => e.textContent.includes(resume.name)
           || U.deepQueryAll(e, 'input[type=file]').some((f) => f.files[0]?.name === resume.name),
       }));
@@ -179,11 +192,18 @@
       if (el.getAttribute('aria-expanded') === 'true') U.click(el);
     }
     if (!hit) return;
-    pending.push(add({
+    const entry = {
       el, key, kind, value, filled: true, level: hit.score >= 85 ? 'green' : 'yellow',
       reason: hit.score >= 85 ? R_PROFILE : R_CLOSE,
-      read: () => AF.scoreOption(shown(), '', value) >= 70 && el.getAttribute('aria-expanded') !== 'true',
-    }));
+      read: () => {
+        const score = AF.scoreOption(shown(), '', value);
+        if (score < 70 || el.getAttribute('aria-expanded') === 'true') return false;
+        entry.level = score >= 85 ? 'green' : 'yellow';
+        entry.reason = score >= 85 ? R_PROFILE : R_CLOSE;
+        return true;
+      },
+    };
+    pending.push(add(entry));
   }
 
   function fillText(el, claims, profile, pending, add) {
