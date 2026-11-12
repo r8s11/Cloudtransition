@@ -132,10 +132,9 @@ test('final: 4 about-blank iframe does not block run completion', async () => { 
     func: () => true,
   }), tabId);
   expect(frames).toHaveLength(2);
-  const result = await runAutofill(h.page, { submit: true, timeout: 5000 });
-  expect(result.status).toBe('stopped');
-  await expect(h.page.locator('#autofill-hud')).toContainText('Stopped:');
-  expect(await h.page.locator('body').getAttribute('data-submit-clicks')).toBe('0');
+  const result = await runAutofill(h.page, { submit: true, timeout: 20_000 });
+  expect(result.status).toBe('submitted_unconfirmed');
+  expect(await h.page.locator('body').getAttribute('data-submit-clicks')).toBe('1');
 }); });
 
 for (const [mutation, label] of [['inserted', 'required field inserted'], ['cleared', 'prefilled required field cleared'], ['file', 'required file input inserted']]) {

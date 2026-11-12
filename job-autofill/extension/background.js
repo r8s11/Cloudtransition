@@ -180,19 +180,25 @@ function flatProfile(p) {
   return Object.assign({}, p.imported || {}, p.manual || {});
 }
 
-async function sendStart(tabId, msg) {
-  try {
-    await chrome.tabs.sendMessage(tabId, msg);
-    return true;
-  } catch (_) { /* no content script in the page (opened before install, or not allowed) */ }
+async function sendStart(tabId, msg, frameIds) {
+  const deliver = async () => {
+    const started = [];
+    for (const frameId of frameIds) {
+      try {
+        await chrome.tabs.sendMessage(tabId, msg, { frameId });
+        started.push(frameId);
+      } catch (_) { /* no content script in this frame */ }
+    }
+    return started;
+  };
+  let started = await deliver();
+  if (started.length) return started;
   try {
     const files = chrome.runtime.getManifest().content_scripts[0].js;
     await chrome.scripting.executeScript({ target: { tabId, allFrames: true }, files });
-    await chrome.tabs.sendMessage(tabId, msg);
-    return true;
-  } catch (_) {
-    return false;
-  }
+    started = await deliver();
+  } catch (_) { /* injection unavailable */ }
+  return started;
 }
 
 async function startRun({ tabId, submit }) {
@@ -237,15 +243,15 @@ async function startRun({ tabId, submit }) {
   });
 
   const resumeRef = st.resume ? { name: st.resume.name, type: st.resume.type, size: st.resume.size } : null;
-  const ok = await sendStart(tabId, {
+  const startedFrames = await sendStart(tabId, {
     type: 'START',
     runId,
     profile: flatProfile(st.profile),
     resumeRef,
     submit: !!submit,
     fallback: !(st.prefs && st.prefs.fallback === false),
-  });
-  if (!ok) {
+  }, frameIds);
+  if (!startedFrames.length) {
     await mutateRuns((all) => {
       if (all[tabId] && all[tabId].runId === runId) {
         Object.assign(all[tabId], { status: 'error', reason: CANT_FILL, updatedAt: Date.now() });
@@ -253,6 +259,9 @@ async function startRun({ tabId, submit }) {
     });
     return { error: CANT_FILL };
   }
+  await mutateRuns((all) => {
+    if (all[tabId] && all[tabId].runId === runId) all[tabId].frameIds = startedFrames;
+  });
   return { ok: true, runId };
 }
 

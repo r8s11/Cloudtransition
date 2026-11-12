@@ -446,7 +446,11 @@
     const signInForms = new Set(U.deepQueryAll(scope, 'form').filter(form => adapter.isSignIn(form)));
     const all = U.deepQueryAll(scope, U.CONTROLS)
       .filter(el => !signInForms.has(el.form || el.closest('form')));
+    const missing = [];
+    requiredPass(all, missing, entry => missing.push(entry));
+    const emptyFiles = all.filter(el => el.type === 'file' && !el.disabled && isRequired(el) && !el.files.length).length;
     const customEmpty = U.deepQueryAll(scope, '[role=combobox], [aria-haspopup=listbox]')
+      .filter(el => !signInForms.has(el.form || el.closest('form')))
       .filter(el => !el.disabled && isRequired(el))
       .filter(el => AF.isPlaceholder(U.clean(el.value || el.textContent))).length;
     return missing.length + emptyFiles + customEmpty;

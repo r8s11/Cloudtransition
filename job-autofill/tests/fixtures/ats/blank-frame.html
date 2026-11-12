@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Blank frame regression</title></head>
+<body>
+  <form><label for="first_name">First Name</label><input id="first_name" name="first_name" type="text"><button type="submit" id="submit">Submit</button></form>
+  <iframe></iframe>
+  <script>document.body.dataset.submitClicks = '0'; document.querySelector('#submit').addEventListener('click', event => { document.body.dataset.submitClicks = String(Number(document.body.dataset.submitClicks) + 1); event.preventDefault(); });</script>
+</body>
