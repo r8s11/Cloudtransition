@@ -99,6 +99,40 @@ test('final: 1 inverted sponsorship and citizenship labels need review', async (
   await expect(h.page.locator('#country')).toHaveValue('');
   expect(await h.page.locator('body').getAttribute('data-submit-clicks')).toBe('0');
 }); });
+test('final: 2 empty required custom combobox blocks submit', async () => { await setup(async h => {
+  const { popup, tabId } = await openPopup(h.page);
+  await popup.close();
+  await h.worker.evaluate(async tabId => chrome.scripting.executeScript({
+    target: { tabId },
+    func: () => {
+      const fill = AF.fillPage;
+      AF.fillPage = async (...args) => {
+        const result = await fill(...args);
+        const combo = document.createElement('div');
+        combo.setAttribute('role', 'combobox');
+        combo.setAttribute('aria-required', 'true');
+        combo.setAttribute('aria-label', 'Country');
+        document.querySelector('form').append(combo);
+        return result;
+      };
+    },
+  }), tabId);
+  await stopped(h, '1 required field empty', 'required');
+}); });
+test('final: 3 third-party apply is not a submit button', async () => { await setup(async h => {
+  await h.page.goto(h.fixtureUrl('greenhouse-submit.html'));
+  await h.page.locator('#submit_app').evaluate(el => el.insertAdjacentHTML('beforebegin', '<button id="linkedin-apply" type="button">Apply with LinkedIn</button>'));
+  const { popup, tabId } = await openPopup(h.page);
+  await popup.close();
+  const chosen = await h.worker.evaluate(async tabId => {
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: () => AF.safeButton(AF.adapterFor(location.hostname))?.el.id || '',
+    });
+    return result.result;
+  }, tabId);
+  expect(chosen).toBe('submit_app');
+}); });
 
 for (const [mutation, label] of [['inserted', 'required field inserted'], ['cleared', 'prefilled required field cleared'], ['file', 'required file input inserted']]) {
   test(`F4: ${label} after fill blocks submit`, async () => { await setup(async h => {

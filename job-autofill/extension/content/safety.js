@@ -15,14 +15,16 @@
   };
   AF.safeButton = function (adapter, scope = document) {
     const H = AF.adapterHelpers;
-    const forbidden = /\b(back|previous|cancel|save (as )?draft|upload|sign[ -]?in|log[ -]?in|create (an? )?account)\b/i;
+    const forbidden = /\b(back|previous|cancel|save (as )?draft|upload|sign[ -]?in|log[ -]?in|create (an? )?account|with (linkedin|indeed|google))\b/i;
     for (const [kind, method, pattern] of [
       ['next', 'nextButton', /^(next|continue|save (and|&) continue)\b/i],
       ['submit', 'submitButton', /^(submit|apply|send application)\b/i],
     ]) {
-      const el = adapter[method]?.(scope) || H.findButton(scope, pattern);
-      if (el && AF.util.isVisible(el) && !el.disabled && !forbidden.test(H.buttonText(el))
-        && !adapter.isSignIn(el.closest('form') || scope)) return { kind, el };
+      const valid = el => el && AF.util.isVisible(el) && !el.disabled && !forbidden.test(H.buttonText(el))
+        && !adapter.isSignIn(el.closest('form') || scope);
+      const preferred = adapter[method]?.(scope);
+      const el = valid(preferred) ? preferred : H.buttons(scope).find(button => pattern.test(H.buttonText(button)) && valid(button));
+      if (el) return { kind, el };
     }
     return null;
   };
