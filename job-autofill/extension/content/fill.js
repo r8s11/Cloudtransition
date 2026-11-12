@@ -159,6 +159,7 @@
       if (!form || hasValue || claims.has(el) || AF.matchField(ctxOf(el)).key) return false;
       if (!['TEXTAREA', 'SELECT'].includes(el.tagName) && !(el.tagName === 'INPUT' && ['text', 'number'].includes(el.type))) return false;
       const excluded = /\b(search|sign.?in|log.?in|password|captcha|promo|coupon|newsletter|subscribe|hispanic|latino|race|ethnicity|gender|sex|veteran|disabilit(y|ies)|demographic|self.?identify)\b/i;
+      const formContext = ['aria-label', 'role', 'action', 'name'].map(attr => form.getAttribute(attr) || '').join(' ');
       const context = `${U.labelText(el)} ${el.name} ${el.id}`;
       return !!U.labelText(el) && !excluded.test(formContext) && !excluded.test(context);
     });
