@@ -85,6 +85,21 @@ test('U21: exactly one value-free record per filled and submitted run', async ()
   }
 }); });
 
+test('final: 1 inverted sponsorship and citizenship labels need review', async () => { await setup(async h => {
+  await h.page.goto(h.fixtureUrl('greenhouse-submit.html'));
+  await h.page.locator('label[for="question_4"]').evaluate(el => { el.firstChild.textContent = 'Do you NOT require sponsorship? '; });
+  await h.page.locator('#candidate-location').evaluate(el => {
+    const field = document.createElement('div');
+    field.innerHTML = '<label for="country">Country of citizenship</label><input id="country" name="country" type="text">';
+    el.after(field);
+  });
+  const result = await runAutofill(h.page, { submit: true });
+  expect(result.status).toBe('stopped');
+  await expect(h.page.locator('#question_4')).toHaveValue('');
+  await expect(h.page.locator('#country')).toHaveValue('');
+  expect(await h.page.locator('body').getAttribute('data-submit-clicks')).toBe('0');
+}); });
+
 for (const [mutation, label] of [['inserted', 'required field inserted'], ['cleared', 'prefilled required field cleared'], ['file', 'required file input inserted']]) {
   test(`F4: ${label} after fill blocks submit`, async () => { await setup(async h => {
     const { popup, tabId } = await openPopup(h.page);

@@ -37,6 +37,7 @@
     '\\b(referr\\w*|emergency|reference|references|recommender|contact (person|name))\\b',
     '\\bphone (type|country|code|extension|ext)\\b',
     '\\b(country|area|dial|calling) code\\b',
+    '\\b(citizenship|nationality|ethnic origin)\\b',
     '\\b(state|describe|explain|tell us|share) (your|why|how|about)\\b',
     '\\b(your|the) (reason|answer|story|response)\\b',
     '\\bhear(d)? (about|of)\\b|\\bhow did you (find|hear|learn)\\b',
@@ -80,7 +81,10 @@
     if (!w) return undefined;
     if (NOT_THIS_FIELD.test(w)) return null;
     for (const m of FIELD_MATCHERS) {
-      if (m.test.test(w) && !(m.not && m.not.test(w))) return m.key;
+      if (m.test.test(w) && !(m.not && m.not.test(w))) {
+        if (m.key === 'needsSponsorship' && /\b(not|without|no longer|never)\b/.test(w)) return null;
+        return m.key;
+      }
     }
     return undefined;
   }
