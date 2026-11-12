@@ -44,6 +44,19 @@ test('U11: AI draft fills the question, stays yellow, and sends no profile value
     expect(JSON.stringify(await h.worker.evaluate(() => chrome.storage.local.get(null)))).not.toContain('fixture-provider-key');
   }, { ai: true });
 });
+test('final: 5 EEO questions never reach the AI provider', async () => {
+  await setup(async h => {
+    await h.page.locator('form').evaluate(form => {
+      const field = document.createElement('div');
+      field.innerHTML = '<label for="hispanic">Are you Hispanic/Latino?</label><textarea id="hispanic" name="hispanic"></textarea>';
+      form.append(field);
+    });
+    await runAutofill(h.page);
+    const requests = await draftRequests(h);
+    expect(JSON.stringify(requests)).not.toContain('Hispanic/Latino');
+    await expect(h.page.locator('#hispanic')).toHaveValue('');
+  }, { ai: true });
+});
 
 test('U19: trusted-input fallback attaches and detaches; disabled fallback leaves yellow', async () => {
   await setup(async h => {

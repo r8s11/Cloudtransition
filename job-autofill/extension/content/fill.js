@@ -158,8 +158,7 @@
       const hasValue = el.tagName === 'SELECT' ? selectHasValue(el) : !!el.value.trim();
       if (!form || hasValue || claims.has(el) || AF.matchField(ctxOf(el)).key) return false;
       if (!['TEXTAREA', 'SELECT'].includes(el.tagName) && !(el.tagName === 'INPUT' && ['text', 'number'].includes(el.type))) return false;
-      const excluded = /\b(search|sign.?in|log.?in|password|captcha|promo|coupon|newsletter|subscribe)\b/i;
-      const formContext = ['aria-label', 'role', 'action', 'name'].map((attr) => form.getAttribute(attr) || '').join(' ');
+      const excluded = /\b(search|sign.?in|log.?in|password|captcha|promo|coupon|newsletter|subscribe|hispanic|latino|race|ethnicity|gender|sex|veteran|disabilit(y|ies)|demographic|self.?identify)\b/i;
       const context = `${U.labelText(el)} ${el.name} ${el.id}`;
       return !!U.labelText(el) && !excluded.test(formContext) && !excluded.test(context);
     });
@@ -446,9 +445,9 @@
     const signInForms = new Set(U.deepQueryAll(scope, 'form').filter(form => adapter.isSignIn(form)));
     const all = U.deepQueryAll(scope, U.CONTROLS)
       .filter(el => !signInForms.has(el.form || el.closest('form')));
-    const missing = [];
-    requiredPass(all, missing, entry => missing.push(entry));
-    const emptyFiles = all.filter(el => el.type === 'file' && !el.disabled && isRequired(el) && !el.files.length).length;
-    return missing.length + emptyFiles;
+    const customEmpty = U.deepQueryAll(scope, '[role=combobox], [aria-haspopup=listbox]')
+      .filter(el => !el.disabled && isRequired(el))
+      .filter(el => AF.isPlaceholder(U.clean(el.value || el.textContent))).length;
+    return missing.length + emptyFiles + customEmpty;
   };
 })(globalThis);
