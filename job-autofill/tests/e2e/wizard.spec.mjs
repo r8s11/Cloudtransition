@@ -17,6 +17,31 @@ test('U16: safe wizard advances four steps and logs only final totals', async ()
   await expect.poll(() => logs(h).length).toBe(1);
   expect(logs(h)[0]).toMatchObject({ steps: 4, green: 3, outcome: 'submitted_confirmed' });
 }));
+test('final: 6 slow Next step is not treated as stalled', async () => scenario(async (h, p) => {
+  const { popup, tabId } = await openPopup(p);
+  await popup.close();
+  await h.worker.evaluate(async tabId => chrome.scripting.executeScript({
+    target: { tabId },
+    func: () => {
+      globalThis.__slowStep = { step: 1, stopped: '' };
+      AF.wizard.onStep(({ step }) => { globalThis.__slowStep.step = step; });
+      AF.wizard.start({ onStop: reason => { globalThis.__slowStep.stopped = reason; } });
+      AF.wizard.advancing();
+      setTimeout(() => {
+        const heading = document.createElement('h1');
+        heading.textContent = 'Delayed next step';
+        document.querySelector('main').append(heading);
+      }, 1500);
+    },
+  }), tabId);
+  await p.waitForTimeout(3000);
+  const result = await h.worker.evaluate(async tabId => {
+    const [state] = await chrome.scripting.executeScript({ target: { tabId }, func: () => globalThis.__slowStep });
+    return state.result;
+  }, tabId);
+  expect(result.step).toBe(2);
+  expect(result.stopped).toBe('');
+}));
 test('F15: validation rerender stops after one Next', async () => scenario(async (h, p) => {
   const r = await runAutofill(p, { submit: true });
   expect(r.reason).toBe("page didn't advance");

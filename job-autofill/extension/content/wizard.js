@@ -78,7 +78,7 @@
   }
   function advancing() {
     clearTimeout(advanceTimer);
-    advanceTimer = setTimeout(settled, 850);
+    advanceTimer = setTimeout(settled, 10000);
   }
   AF.wizard = { start, stop, advancing, fingerprint, onStep(cb) { callbacks.add(cb); return () => callbacks.delete(cb); } };
 })(globalThis);
