@@ -100,23 +100,13 @@ test('final: 1 inverted sponsorship and citizenship labels need review', async (
   expect(await h.page.locator('body').getAttribute('data-submit-clicks')).toBe('0');
 }); });
 test('final: 2 empty required custom combobox blocks submit', async () => { await setup(async h => {
-  const { popup, tabId } = await openPopup(h.page);
-  await popup.close();
-  await h.worker.evaluate(async tabId => chrome.scripting.executeScript({
-    target: { tabId },
-    func: () => {
-      const fill = AF.fillPage;
-      AF.fillPage = async (...args) => {
-        const result = await fill(...args);
-        const combo = document.createElement('div');
-        combo.setAttribute('role', 'combobox');
-        combo.setAttribute('aria-required', 'true');
-        combo.setAttribute('aria-label', 'Country');
-        document.querySelector('form').append(combo);
-        return result;
-      };
-    },
-  }), tabId);
+  await h.page.goto(h.fixtureUrl('greenhouse-submit.html'));
+  await h.page.locator('#candidate-location').evaluate(el => {
+    const combo = document.createElement('div');
+    combo.setAttribute('role', 'combobox');
+    combo.setAttribute('aria-required', 'true');
+    el.after(combo);
+  });
   await stopped(h, '1 required field empty', 'required');
 }); });
 test('final: 3 third-party apply is not a submit button', async () => { await setup(async h => {
@@ -132,6 +122,20 @@ test('final: 3 third-party apply is not a submit button', async () => { await se
     return result.result;
   }, tabId);
   expect(chosen).toBe('submit_app');
+}); });
+test('final: 4 about-blank iframe does not block run completion', async () => { await setup(async h => {
+  await h.page.goto(h.fixtureUrl('blank-frame.html'));
+  const { popup, tabId } = await openPopup(h.page);
+  await popup.close();
+  const frames = await h.worker.evaluate(async tabId => chrome.scripting.executeScript({
+    target: { tabId, allFrames: true },
+    func: () => true,
+  }), tabId);
+  expect(frames).toHaveLength(2);
+  const result = await runAutofill(h.page, { submit: true, timeout: 5000 });
+  expect(result.status).toBe('stopped');
+  await expect(h.page.locator('#autofill-hud')).toContainText('Stopped:');
+  expect(await h.page.locator('body').getAttribute('data-submit-clicks')).toBe('0');
 }); });
 
 for (const [mutation, label] of [['inserted', 'required field inserted'], ['cleared', 'prefilled required field cleared'], ['file', 'required file input inserted']]) {
