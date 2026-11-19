@@ -77,7 +77,7 @@ No dashboard code changes. The page lists the agent on its next load.
 
 ## Running an agent from its card (Phase 2)
 
-`AGENT_CARD_RUNNERS` in `app.py` maps an agent ID to an existing runner card. Today the only entry is `job-reader` → `job-reader`. The card embeds the same run grid as the Run and Interviews tabs. Starting a run goes through the existing `/api/skills/run`, `_resolve_run` and `_execute_run`, which provide the model check, input pattern, logging and output file. The Interviews tab's "Read posting" button still fills its own card.
+`AGENT_CARD_RUNNERS` in `core/config.py` maps an agent ID to an existing runner card. Today the only entry is `job-reader` → `job-reader`. The card embeds the same run grid as the Run and Interviews tabs. Starting a run goes through the existing `/api/skills/run`, `_resolve_run` and `_execute_run` (`routes/runs.py`), which provide the model check, input pattern, logging and output file. The Interviews tab's "Read posting" button still fills its own card.
 
 **What a run records.** Each record appears in `/api/skills/runs` and in the start and finish events in `runs.log`:
 

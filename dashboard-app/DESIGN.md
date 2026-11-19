@@ -135,7 +135,7 @@ highlight. No blur, no glass, no light fields.
 
 ### 3.4 Hues
 
-Re-lit for dark panels, each ≥ 4.5:1 on the panels. `SAFE_HUES` in `app.py`
+Re-lit for dark panels, each ≥ 4.5:1 on the panels. `SAFE_HUES` in `core/config.py`
 mirrors them; a test pins the pairing (**contract**).
 
 | Token | Value | Meaning |
