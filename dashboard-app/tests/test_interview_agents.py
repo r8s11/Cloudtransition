@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from fastapi.testclient import TestClient  # noqa: E402
 from core import agents  # noqa: E402
 import app as module  # noqa: E402
+from core import config  # noqa: E402
 
 CSRF = {"X-Requested-With": "XMLHttpRequest"}
 
@@ -91,7 +92,7 @@ def test_scout_leads_skip_tracked_and_malformed_jobs():
 
 @pytest.mark.parametrize("skill,agent", [("job-reader", "job-reader"), ("cv-base", "cv-adapter"), ("cv-tailor", "cv-adapter")])
 def test_agent_runners_are_opencode_only(skill, agent):
-    cfg = module.SKILL_RUNNERS[skill]
+    cfg = config.SKILL_RUNNERS[skill]
     assert (cfg["kind"], cfg["agent"], cfg["providers"]) == ("opencode-agent", agent, ["opencode"])
     assert module._card_allows_provider(cfg, "claude")[0] is False
 
@@ -125,7 +126,7 @@ def test_job_reader_prompt_carries_the_validated_input(monkeypatch):
     monkeypatch.setattr(module, "_resolve_opencode_exe", lambda: "/fake/opencode")
     monkeypatch.setattr(module, "_parse_model", lambda m: ("opencode", "free"))
     req = module.RunRequest(skill="job-reader", model="opencode:free", input="acme-admin https://a.example/{x}")
-    spec, _ = module._resolve_run(module.SKILL_RUNNERS["job-reader"], req)
+    spec, _ = module._resolve_run(config.SKILL_RUNNERS["job-reader"], req)
     assert spec["argv"][:5] == ["/fake/opencode", "run", "--standalone", "--agent", "job-reader"]
     assert "acme-admin https://a.example/{x}" in spec["argv"][-1]
 
@@ -136,7 +137,7 @@ def test_interviews_page_and_detail_carry_agent_state():
     assert page.status_code == 200
     assert 'id="interviewAgents"' in page.text
     assert 'data-skills="scout-scan,job-reader,cv-base,cv-tailor"' in page.text
-    rows = module.build_interview_view(module.load_yaml(module.JOBS_FILE))["interview_rows"]
+    rows = module.build_interview_view(module.load_yaml(config.JOBS_FILE))["interview_rows"]
     if rows:
         r = client.get("/api/interviews/detail", params={"company": rows[0]["company"], "role": rows[0]["role"]})
         assert set(r.json()["row"]["agent"]) == {"job_id", "reader_input", "reading", "tailored"}

@@ -5,6 +5,7 @@ import json
 from datetime import date
 
 import app
+from core import config
 
 
 def task(cat, done=False, text="t", realm="tasks"):
@@ -70,9 +71,9 @@ def test_mission_control_offline_or_garbled_is_a_state_not_a_crash(monkeypatch):
 def test_brain_summary_reads_the_catalogue_header(monkeypatch, tmp_path):
     catalogue = tmp_path / "catalogue.md"
     catalogue.write_text("# Catalogue\n\nSources: 200 · Memories: 63\n", "utf-8")
-    monkeypatch.setattr(app, "BRAIN_CATALOGUE", catalogue)
+    monkeypatch.setattr(config, "BRAIN_CATALOGUE", catalogue)
     summary = app.brain_summary()
     assert (summary["ok"], summary["sources"], summary["memories"]) == (True, 200, 63)
 
-    monkeypatch.setattr(app, "BRAIN_CATALOGUE", tmp_path / "missing.md")
+    monkeypatch.setattr(config, "BRAIN_CATALOGUE", tmp_path / "missing.md")
     assert app.brain_summary() == {"ok": False}

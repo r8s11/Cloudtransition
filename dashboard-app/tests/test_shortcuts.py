@@ -15,6 +15,7 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app as module  # noqa: E402
+from core import config  # noqa: E402
 
 ROW = re.compile(r'<a\s+class="daily-row"\s+href="([^"]+)"([^>]*)>', re.S)
 
@@ -50,7 +51,7 @@ def test_card_position_and_groups():
     order = [section.index(m) for m in ('id="mapFindForm"', "Find a file", ">Apps<", ">Files<", ">Folders<")]
     assert order == sorted(order)
     labels = re.findall(r'<span class="daily-label">([^<]+)</span>', section)
-    assert labels == [t["label"] for t in module.SHORTCUTS]
+    assert labels == [t["label"] for t in config.SHORTCUTS]
 
 
 def test_app_and_file_tiles_resolve():
@@ -88,7 +89,7 @@ def test_daily_job_search_and_money_rows(tmp_path, monkeypatch):
     tracker = tmp_path / "finance" / "tracker.yml"
     tracker.parent.mkdir()
     tracker.write_text("debts:\n  - name: Card A\n  - name: Card B\n")
-    monkeypatch.setattr(module, "MONEY_CANDIDATES", [tracker])
+    monkeypatch.setattr(config, "MONEY_CANDIDATES", [tracker])
     daily = centre({"tracked": 27, "active": 6, "leads": 21})
     labels = [d["label"] for d in daily]
     jobs = daily[labels.index("Job search")]
@@ -114,7 +115,7 @@ def test_port_tile_follows_listener(monkeypatch):
     server.bind(("127.0.0.1", 0))
     server.listen(1)
     port = server.getsockname()[1]
-    monkeypatch.setattr(module, "SHORTCUTS", [{"group": "Apps", "label": "Local app", "port": port, "note": "Mac only"}])
+    monkeypatch.setattr(config, "SHORTCUTS", [{"group": "Apps", "label": "Local app", "port": port, "note": "Mac only"}])
     try:
         row = module.shortcut_groups()[0]["rows"][0]
         assert row["ok"] and row["new_tab"] and row["note"] == "Mac only"
@@ -126,20 +127,16 @@ def test_port_tile_follows_listener(monkeypatch):
 
 
 def test_real_list_has_arms_review_fourth():
-    apps = [t for t in module.SHORTCUTS if t["group"] == "Apps"]
+    apps = [t for t in config.SHORTCUTS if t["group"] == "Apps"]
     assert (apps[3]["label"], apps[3]["port"]) == ("ARMS review", 8790)
 
 
 def test_unavailable_tiles_are_placeholders(monkeypatch):
-    monkeypatch.setattr(
-        module,
-        "SHORTCUTS",
-        [
-            {"group": "Files", "label": "Gone", "file": "nope/x.md"},
-            {"group": "Files", "label": "Private", "file": "College Planning/README.md"},
-            {"group": "Folders", "label": "Empty", "folder": "no-such-folder"},
-        ],
-    )
+    monkeypatch.setattr(config, "SHORTCUTS", [
+        {"group": "Files", "label": "Gone", "file": "nope/x.md"},
+        {"group": "Files", "label": "Private", "file": "College Planning/README.md"},
+        {"group": "Folders", "label": "Empty", "folder": "no-such-folder"},
+    ],)
     section = card(today_html())
     assert section.count('<span class="daily-row is-placeholder">') == 3
     assert section.count("Not available") == 3
@@ -151,7 +148,7 @@ def test_unavailable_tiles_are_placeholders(monkeypatch):
 def test_money_row_survives_bad_tracker(tmp_path, monkeypatch):
     path = tmp_path / "finance" / "tracker.yml"
     path.parent.mkdir()
-    monkeypatch.setattr(module, "MONEY_CANDIDATES", [path])
+    monkeypatch.setattr(config, "MONEY_CANDIDATES", [path])
     row = module.money_row()
     assert (row["value"], row["placeholder"]) == ("No money tracker yet", True)
     for text in ('debts: "oops"\n', "debts: [\n"):

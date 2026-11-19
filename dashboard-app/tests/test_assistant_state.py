@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app as module  # noqa: E402
+from core import config  # noqa: E402
 
 SECRET = "sk-test-DO-NOT-LEAK-1234567890"
 EMAIL = "recruiter@example.com"
@@ -21,7 +22,7 @@ EMAIL = "recruiter@example.com"
 
 @pytest.fixture()
 def workspace(tmp_path, monkeypatch):
-    for realm in module.REALMS:
+    for realm in config.REALMS:
         target = tmp_path / realm["file"]
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text("# Lane\n\n- [ ] open item\n- [x] done item\n", encoding="utf-8")
@@ -53,9 +54,9 @@ def workspace(tmp_path, monkeypatch):
         '  - company: "Gone"\n    role: "Desk"\n    status: "rejected"\n' % EMAIL,
         encoding="utf-8",
     )
-    monkeypatch.setattr(module, "WORKSPACE", tmp_path)
-    monkeypatch.setattr(module, "JOBS_FILE", tracker)
-    monkeypatch.setattr(module, "RUNS_LOG", tmp_path / "runs.log")
+    monkeypatch.setattr(config, "WORKSPACE", tmp_path)
+    monkeypatch.setattr(config, "JOBS_FILE", tracker)
+    monkeypatch.setattr(config, "RUNS_LOG", tmp_path / "runs.log")
     return tmp_path
 
 
@@ -83,7 +84,7 @@ def test_state_sections(workspace, monkeypatch):
     body = r.json()
     assert set(body) == {"generated_at", "tasks", "interviews", "runs", "missions"}
     tasks = body["tasks"]
-    assert tasks["source"] and len(tasks["realms"]) == len(module.REALMS)
+    assert tasks["source"] and len(tasks["realms"]) == len(config.REALMS)
     assert all(row["open"] == 1 and row["done"] == 1 for row in tasks["realms"])
     interviews = body["interviews"]
     assert interviews["counts"]["tracked"] == 3

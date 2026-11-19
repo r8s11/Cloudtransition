@@ -5,6 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 import app
+from core import config
 
 
 @pytest.fixture
@@ -15,10 +16,10 @@ def calendar_workspace(tmp_path, monkeypatch):
     jobs.parent.mkdir()
     jobs.write_text("active_applications: []\n")
     realms = [{"id": "tasks", "name": "Tasks", "file": "TASKS.md", "color": "#b3212e", "icon": ""}]
-    monkeypatch.setattr(app, "WORKSPACE", tmp_path)
-    monkeypatch.setattr(app, "TASKS_FILE", tasks)
-    monkeypatch.setattr(app, "JOBS_FILE", jobs)
-    monkeypatch.setattr(app, "REALMS", realms)
+    monkeypatch.setattr(config, "WORKSPACE", tmp_path)
+    monkeypatch.setattr(config, "TASKS_FILE", tasks)
+    monkeypatch.setattr(config, "JOBS_FILE", jobs)
+    monkeypatch.setattr(config, "REALMS", realms)
     return TestClient(app.app), tasks
 
 
@@ -86,11 +87,11 @@ def test_schedule_privacy_http(calendar_workspace):
 def test_schedule_sources_unrelated_ambiguous_application(calendar_workspace):
     from core import calendar_sources as sources
     _, tasks = calendar_workspace
-    jobs = app.JOBS_FILE
+    jobs = config.JOBS_FILE
     valid = 'active_applications:\n  - company: Valid\n    role: Engineer\n    next_steps:\n      - task: First action\n        date: 2026-11-16\n'
     ambiguous = '  - company: Ambiguous\n    role: Engineer\n    next_steps: []\n    next_steps:\n      - task: Must not send\n        date: 2026-11-17\n'
     jobs.write_text(valid + ambiguous)
-    items = sources.collect(app.WORKSPACE, app.REALMS, jobs, ["interviews"])
+    items = sources.collect(config.WORKSPACE, config.REALMS, jobs, ["interviews"])
     assert [item["title"] for item in items] == ["First action"]
     updated = sources.edit_first_action(valid + ambiguous, "Valid", "Engineer", "Changed first action", "2026-11-18")
     assert updated.endswith(ambiguous)

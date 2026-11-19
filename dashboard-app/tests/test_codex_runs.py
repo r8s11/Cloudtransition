@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import app as module
+from core import config
 
 CSRF = {"X-Requested-With": "XMLHttpRequest"}
 
@@ -28,9 +29,9 @@ def isolated(tmp_path, monkeypatch):
         exe.chmod(0o700)
     monkeypatch.setenv("PATH", str(bin_dir) + os.pathsep + os.environ.get("PATH", ""))
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
-    monkeypatch.setattr(module, "WORKSPACE", tmp_path)
-    monkeypatch.setattr(module, "RUNS_DIR", tmp_path / "runs")
-    monkeypatch.setattr(module, "RUNS_LOG", tmp_path / "runs.log")
+    monkeypatch.setattr(config, "WORKSPACE", tmp_path)
+    monkeypatch.setattr(config, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(config, "RUNS_LOG", tmp_path / "runs.log")
     monkeypatch.setattr(module, "_resolve_codex_exe", lambda: str(bin_dir / "codex"))
     monkeypatch.setattr(module, "_resolve_opencode_exe", lambda: str(bin_dir / "opencode"))
     for attr, data in {
@@ -81,7 +82,7 @@ def test_invalid_selection_rejected(isolated):
         no_key = client.post("/api/skills/run", headers=CSRF, json={"skill": "plan-today", "model": "openrouter:vendor/fixture:free"})
         assert no_key.status_code == 400 and "OPENROUTER_API_KEY" in no_key.json()["error"]
         assert client.get("/api/skills/runs").json()["runs"] == []
-        assert not module.RUNS_LOG.exists()
+        assert not config.RUNS_LOG.exists()
 
 
 @pytest.mark.parametrize("provider,model", [("codex", "fixture-codex"), ("opencode", "vendor/fixture-free"), ("openrouter", "vendor/fixture:free")])
@@ -117,7 +118,7 @@ def test_failure_lifecycle_and_duplicate(isolated, monkeypatch, provider, model,
             run = finish(client, start.json()["run"]["id"])
             assert run["status"] == "failed" and run["exit_code"] != 0
             assert run["duration"] and run["output"]
-            events = [json.loads(line) for line in module.RUNS_LOG.read_text().splitlines()]
+            events = [json.loads(line) for line in config.RUNS_LOG.read_text().splitlines()]
             assert [event["status"] for event in events] == ["running", "failed"]
             assert all(event["provider"] == provider and event["model"] == model for event in events)
             retry = client.post("/api/skills/run", headers=CSRF, json=body)
@@ -139,11 +140,11 @@ def test_missing_codex_executable_is_reported(monkeypatch):
 
 @pytest.mark.parametrize("provider,model", [("codex", "fixture-codex"), ("opencode", "vendor/fixture-free"), ("openrouter", "vendor/fixture:free")])
 def test_non_claude_skill_prompt_is_resolved(isolated, provider, model):
-    directory = module.WORKSPACE / ".claude" / "skills" / "youtube-summarizer"
+    directory = config.WORKSPACE / ".claude" / "skills" / "youtube-summarizer"
     directory.mkdir(parents=True)
     (directory / "SKILL.md").write_text("# Summarize\nExtract the transcript before summarizing. Never invent video content.\n")
     request = module.RunRequest(skill="youtube-summary", model=f"{provider}:{model}", input="https://youtu.be/example")
-    spec, _ = module._resolve_run(module.SKILL_RUNNERS["youtube-summary"], request)
+    spec, _ = module._resolve_run(config.SKILL_RUNNERS["youtube-summary"], request)
     prompt = spec["prompt"] if provider == "openrouter" else spec["argv"][-1]
     assert "Extract the transcript before summarizing." in prompt
     assert "https://youtu.be/example" in prompt
@@ -152,7 +153,7 @@ def test_non_claude_skill_prompt_is_resolved(isolated, provider, model):
 
 def test_shell_run_has_no_model(isolated):
     with pytest.MonkeyPatch.context() as patch:
-        patch.setitem(module.SKILL_RUNNERS, "brain-index", {**module.SKILL_RUNNERS["brain-index"], "argv": ["/bin/echo", "local output"]})
+        patch.setitem(config.SKILL_RUNNERS, "brain-index", {**config.SKILL_RUNNERS["brain-index"], "argv": ["/bin/echo", "local output"]})
         with TestClient(module.app) as client:
             response = client.post("/api/skills/run", headers=CSRF, json={"skill": "brain-index"})
             assert response.status_code == 200

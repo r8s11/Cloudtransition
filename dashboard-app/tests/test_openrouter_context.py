@@ -8,6 +8,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app  # noqa: E402
+from core import config  # noqa: E402
 
 
 @pytest.fixture
@@ -17,7 +18,7 @@ def workspace(tmp_path, monkeypatch):
     (tmp_path / "College Planning" / "notes.md").write_text(
         "private notes\n", encoding="utf-8"
     )
-    monkeypatch.setattr(app, "WORKSPACE", tmp_path)
+    monkeypatch.setattr(config, "WORKSPACE", tmp_path)
     return tmp_path
 
 
@@ -43,7 +44,7 @@ def test_context_respects_the_file_cap(workspace, monkeypatch):
 
 
 def test_openrouter_prompt_inlines_context(workspace):
-    cfg = dict(app.SKILL_RUNNERS["plan-today"])
+    cfg = dict(config.SKILL_RUNNERS["plan-today"])
     req = app.RunRequest(
         skill="plan-today", model="openrouter:nvidia/nemotron-3.5-lightning:free"
     )
@@ -54,7 +55,7 @@ def test_openrouter_prompt_inlines_context(workspace):
 
 
 def test_local_provider_prompt_gets_no_inlined_context(workspace):
-    cfg = dict(app.SKILL_RUNNERS["plan-today"])
+    cfg = dict(config.SKILL_RUNNERS["plan-today"])
     spec, _ = app._resolve_run(cfg, app.RunRequest(skill="plan-today", model="sonnet"))
     assert spec["kind"] == "claude"
     assert "Workspace context follows" not in spec["argv"][2]

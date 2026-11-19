@@ -22,6 +22,7 @@ INDEX = (ROOT / "templates" / "index.html").read_text()
 sys.path.insert(0, str(ROOT))
 
 import app as dashboard  # noqa: E402
+from core import config  # noqa: E402
 
 
 def _hex_ratio(fg: str, bg: str) -> float:
@@ -211,20 +212,20 @@ def test_metrics_heading_scale_steps_above_body():
 
 def test_data_hues_map_onto_the_verified_palette():
     """Legacy data colors must not bypass the contrast-checked palette."""
-    palette = set(dashboard.SAFE_HUES.values())
-    for legacy, safe in dashboard.SAFE_HUE_MAP.items():
+    palette = set(config.SAFE_HUES.values())
+    for legacy, safe in config.SAFE_HUE_MAP.items():
         assert safe in palette, f"{legacy} maps to unverified {safe}"
-    assert dashboard.safe_hue("#D97757") == dashboard.SAFE_HUES["ember"]
-    assert dashboard.safe_hue("#888") == dashboard.SAFE_HUES["ink-muted"]
-    assert dashboard.safe_hue("not-a-color") == dashboard.SAFE_HUES["ink-muted"]
+    assert config.safe_hue("#D97757") == config.SAFE_HUES["ember"]
+    assert config.safe_hue("#888") == config.SAFE_HUES["ink-muted"]
+    assert config.safe_hue("not-a-color") == config.SAFE_HUES["ink-muted"]
     # app.py and tokens.css stay in sync.
-    assert dashboard.SAFE_HUES["green"] == _token("green")
-    assert dashboard.SAFE_HUES["blue"] == _token("blue")
-    assert dashboard.SAFE_HUES["purple"] == _token("purple")
-    assert dashboard.SAFE_HUES["red"] == _token("red")
-    assert dashboard.SAFE_HUES["yellow"] == _token("yellow")
-    assert dashboard.SAFE_HUES["ember"] == _token("ember")
-    assert dashboard.SAFE_HUES["teal"] == _token("teal")
+    assert config.SAFE_HUES["green"] == _token("green")
+    assert config.SAFE_HUES["blue"] == _token("blue")
+    assert config.SAFE_HUES["purple"] == _token("purple")
+    assert config.SAFE_HUES["red"] == _token("red")
+    assert config.SAFE_HUES["yellow"] == _token("yellow")
+    assert config.SAFE_HUES["ember"] == _token("ember")
+    assert config.SAFE_HUES["teal"] == _token("teal")
 
 
 def test_printable_sheet_leading_and_fold_insets():
@@ -275,7 +276,7 @@ def test_every_data_supplied_color_is_covered_by_the_safe_map():
         ROOT.parent / "Books" / "books-data.yml",
         ROOT.parent / "College Planning" / "education-data.yml",
     ]
-    known = set(dashboard.SAFE_HUE_MAP) | {v.lower() for v in dashboard.SAFE_HUES.values()}
+    known = set(config.SAFE_HUE_MAP) | {v.lower() for v in config.SAFE_HUES.values()}
     for path in yaml_files:
         for raw in re.findall(r'color:\s*"(#[0-9a-fA-F]{3,6})"', path.read_text()):
             assert raw.lower() in known, f"{path.name} color {raw} bypasses SAFE_HUE_MAP"

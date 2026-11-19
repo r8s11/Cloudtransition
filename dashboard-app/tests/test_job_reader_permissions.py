@@ -19,10 +19,11 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import app as module  # noqa: E402
+from core import config  # noqa: E402
 from core import agents  # noqa: E402
 
-DEFINITION = module.WORKSPACE / ".opencode" / "agents" / "job-reader.md"
-POLICY = module.SKILL_RUNNERS["job-reader"]["policy"]
+DEFINITION = config.WORKSPACE / ".opencode" / "agents" / "job-reader.md"
+POLICY = config.SKILL_RUNNERS["job-reader"]["policy"]
 # OpenCode V2 base policy for every agent (opencode.ai/docs/permissions, Defaults).
 BASE = [
     {"action": "*", "resource": "*", "effect": "allow"},
@@ -84,7 +85,7 @@ OPENCODE = module._resolve_opencode_exe()
 def test_opencode_resolves_the_hardened_rules_for_job_reader():
     proc = subprocess.run(
         [OPENCODE, "debug", "agents", "--standalone"],
-        cwd=module.WORKSPACE, env=module._run_env(), capture_output=True, text=True, timeout=60, check=True,
+        cwd=config.WORKSPACE, env=module._run_env(), capture_output=True, text=True, timeout=60, check=True,
     )
     import json
 

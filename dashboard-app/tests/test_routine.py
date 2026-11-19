@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app as dashboard  # noqa: E402
+from core import config  # noqa: E402
 
 
 def test_parse_routine_view_extracts_today_review_rules_and_dates(tmp_path):
@@ -78,7 +79,7 @@ def test_routine_toggle_requires_csrf_and_only_writes_weekly_review(tmp_path, mo
         "- [ ] Review me\n"
     )
     routine_file.write_text(source)
-    monkeypatch.setattr(dashboard, "WORKSPACE", tmp_path)
+    monkeypatch.setattr(config, "WORKSPACE", tmp_path)
 
     with TestClient(dashboard.app) as client:
         missing_csrf = client.post(

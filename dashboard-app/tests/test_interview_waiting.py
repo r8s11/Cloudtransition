@@ -18,6 +18,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app as module  # noqa: E402
+from core import config  # noqa: E402
 
 CSRF = {"X-Requested-With": "XMLHttpRequest"}
 TODAY = date(2026, 11, 16)
@@ -57,7 +58,7 @@ def write_tracker(path: Path, applications: list[dict]) -> Path:
 @pytest.fixture()
 def tracker(tmp_path, monkeypatch):
     target = write_tracker(tmp_path / "job-applications.yml", APPLICATIONS)
-    monkeypatch.setattr(module, "JOBS_FILE", target)
+    monkeypatch.setattr(config, "JOBS_FILE", target)
     return target
 
 
@@ -262,7 +263,7 @@ def test_no_waiting_card_when_empty(tmp_path, monkeypatch):
         tmp_path / "job-applications.yml",
         [a for a in APPLICATIONS if a["status"] != "waiting"],
     )
-    monkeypatch.setattr(module, "JOBS_FILE", target)
+    monkeypatch.setattr(config, "JOBS_FILE", target)
     with TestClient(module.app) as client:
         page = interviews_page(client)
     assert 'data-interview-section="waiting"' not in page

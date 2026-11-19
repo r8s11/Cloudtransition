@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app as module  # noqa: E402
+from core import config  # noqa: E402
 from core import now  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent.parent
@@ -143,7 +144,7 @@ def test_evening_with_nothing_urgent_is_rest_and_closed_rows_never_show():
 def tracker(tmp_path, monkeypatch):
     target = tmp_path / "job-applications.yml"
     shutil.copyfile(ROOT / "interviews" / "job-applications.yml", target)
-    monkeypatch.setattr(module, "JOBS_FILE", target)
+    monkeypatch.setattr(config, "JOBS_FILE", target)
     return target
 
 

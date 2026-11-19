@@ -16,8 +16,9 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app as module  # noqa: E402
+from core import config  # noqa: E402
 
-UPSTREAM = module.MISSION_CONTROL_UPSTREAM
+UPSTREAM = config.MISSION_CONTROL_UPSTREAM
 TAILNET_HOST = "roosevelts-macbook-air.tail9aa23.ts.net"
 
 
@@ -123,7 +124,7 @@ def tracker(tmp_path, monkeypatch):
         "    job_url: https://example.com/job/123?x=1\n",
         encoding="utf-8",
     )
-    monkeypatch.setattr(module, "JOBS_FILE", target)
+    monkeypatch.setattr(config, "JOBS_FILE", target)
     return target
 
 

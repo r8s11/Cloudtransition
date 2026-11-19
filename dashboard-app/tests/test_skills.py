@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from fastapi.testclient import TestClient  # noqa: E402
 
 import app as module  # noqa: E402
+from core import config  # noqa: E402
 from core import agents, skills  # noqa: E402
 
 
@@ -164,7 +165,7 @@ def test_no_opencode_answer_means_nothing_is_evaluated(homes):
 def test_job_reader_definition_denies_every_skill():
     import yaml
 
-    text = (module.WORKSPACE / ".opencode" / "agents" / "job-reader.md").read_text()
+    text = (config.WORKSPACE / ".opencode" / "agents" / "job-reader.md").read_text()
     rules = BASE + yaml.safe_load(text.split("---", 2)[1])["permissions"]
     for skill_id in ("pdf", "impeccable", "using-superpowers", "anything"):
         assert agents.permission_effect(rules, "skill", skill_id) == "deny"
