@@ -35,14 +35,14 @@ def test_schedule_sources_http(calendar_workspace):
     item = reply.json()
     assert item["text"] == "Prepare résumé"
     assert "<!-- calendar:" in tasks.read_text()
-    parsed = app.parse_tasks_from_file(tasks, "tasks")
+    parsed = parse_tasks_from_file(tasks, "tasks")
     added = next(row for row in parsed if row["text"] == "Prepare résumé")
     assert added["schedule"] == {"date": "2026-11-16"}
     tasks.write_text("\n" + tasks.read_text())
     toggled = client.post("/api/tasks/toggle", json={"realm": "tasks", "line": item["line"], "text": item["raw_text"], "done": True}, headers=HEADERS)
     assert toggled.status_code == 200
     assert "- [x] Prepare résumé <!-- calendar:" in tasks.read_text()
-    saved = next(t for t in app.parse_tasks_from_file(tasks, "tasks") if t["raw_text"] == item["raw_text"])
+    saved = next(t for t in parse_tasks_from_file(tasks, "tasks") if t["raw_text"] == item["raw_text"])
     assert (saved["text"], saved["done"], saved["schedule"]) == ("Prepare résumé", True, {"date": "2026-11-16"})
 
 

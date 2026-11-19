@@ -76,7 +76,7 @@ def fake_upstream(monkeypatch, payload=None, error=None):
             raise error
         return Resp(json.dumps(payload).encode())
 
-    monkeypatch.setattr(module.urllib.request, "urlopen", urlopen)
+    monkeypatch.setattr(urllib.request, "urlopen", urlopen)
 
 
 def test_state_sections(workspace, monkeypatch):

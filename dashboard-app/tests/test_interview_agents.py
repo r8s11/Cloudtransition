@@ -140,7 +140,7 @@ def test_interviews_page_and_detail_carry_agent_state():
     assert page.status_code == 200
     assert 'id="interviewAgents"' in page.text
     assert 'data-skills="scout-scan,job-reader,cv-base,cv-tailor"' in page.text
-    rows = module.build_interview_view(module.load_yaml(config.JOBS_FILE))["interview_rows"]
+    rows = build_interview_view(load_yaml(config.JOBS_FILE))["interview_rows"]
     if rows:
         r = client.get("/api/interviews/detail", params={"company": rows[0]["company"], "role": rows[0]["role"]})
         assert set(r.json()["row"]["agent"]) == {"job_id", "reader_input", "reading", "tailored"}

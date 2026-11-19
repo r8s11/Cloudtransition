@@ -45,7 +45,7 @@ _Last updated: 2026-11-06 (Week 45 weekly review)_
     path = tmp_path / "routine.md"
     path.write_text(source)
 
-    routine = dashboard.parse_routine_view(date(2026, 11, 9), path)
+    routine = parse_routine_view(date(2026, 11, 9), path)
 
     assert routine["available"] is True
     assert routine["updated"] == "2026-11-06 (Week 45 weekly review)"

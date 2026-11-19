@@ -12,7 +12,7 @@ from core.today import command_centre, shortcut_groups  # noqa: E402
 def test_course_shortcut_is_available_from_today():
     row = next(
         row
-        for group in module.shortcut_groups()
+        for group in shortcut_groups()
         if group["name"] == "Apps"
         for row in group["rows"]
         if row["label"] == "Pydantic AI course"
@@ -22,7 +22,7 @@ def test_course_shortcut_is_available_from_today():
         True,
         "8 lessons",
     )
-    daily = module.command_centre(
+    daily = command_centre(
         {"total_active": 0}, {"today_blocks": [], "inbox_items": []}, 0
     )["daily"]
     daily_course = next(row for row in daily if row["label"] == "Pydantic AI course")

@@ -64,7 +64,7 @@ def tracker(tmp_path, monkeypatch):
 
 
 def view_of(applications=APPLICATIONS) -> dict:
-    return module.build_interview_view({"active_applications": applications}, TODAY)
+    return build_interview_view({"active_applications": applications}, TODAY)
 
 
 def set_status(client, company: str, role: str, value: str):
@@ -196,9 +196,9 @@ def test_today_never_picks_waiting():
         "next_steps": [{"task": "Follow up", "date": later}],
     }
     rows = view_of([parked, sent])["interview_rows"]
-    assert module.next_interview_action(rows, TODAY)["company"] == "Sent"
+    assert next_interview_action(rows, TODAY)["company"] == "Sent"
     only_waiting = view_of([parked])["interview_rows"]
-    assert module.next_interview_action(only_waiting, TODAY) is None
+    assert next_interview_action(only_waiting, TODAY) is None
 
 
 def test_waiting_row_keeps_controls(tracker):

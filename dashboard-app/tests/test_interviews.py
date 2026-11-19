@@ -48,7 +48,7 @@ def test_row_maps_status_contact_timeline_and_next_step():
             )
         ]
     }
-    view = module.build_interview_view(data, date(2026, 11, 6))
+    view = build_interview_view(data, date(2026, 11, 6))
     row = view["interview_rows"][0]
 
     assert row["status_label"] == "Interviewing"
@@ -71,7 +71,7 @@ def test_row_maps_status_contact_timeline_and_next_step():
 
 
 def test_missing_fields_stay_blank_and_do_not_crash():
-    view = module.build_interview_view({"active_applications": [entry()]}, date(2026, 11, 6))
+    view = build_interview_view({"active_applications": [entry()]}, date(2026, 11, 6))
     row = view["interview_rows"][0]
 
     assert row["location"] == ""
@@ -94,7 +94,7 @@ def test_sorting_puts_closest_stage_first_and_priority_breaks_ties():
             entry(company="High interview", status="interviewing", priority="high"),
         ]
     }
-    view = module.build_interview_view(data, date(2026, 11, 6))
+    view = build_interview_view(data, date(2026, 11, 6))
     assert [r["company"] for r in view["interview_rows"]] == [
         "Offer",
         "High interview",
@@ -106,7 +106,7 @@ def test_sorting_puts_closest_stage_first_and_priority_breaks_ties():
 
 
 def test_unknown_status_gets_a_readable_fallback():
-    view = module.build_interview_view(
+    view = build_interview_view(
         {"active_applications": [entry(status="take_home")]}, date(2026, 11, 6)
     )
     row = view["interview_rows"][0]
@@ -116,7 +116,7 @@ def test_unknown_status_gets_a_readable_fallback():
 
 def test_empty_and_malformed_sources_return_an_empty_view():
     for data in ({}, {"active_applications": None}, {"active_applications": [None]}):
-        view = module.build_interview_view(data, date(2026, 11, 6))
+        view = build_interview_view(data, date(2026, 11, 6))
         assert view["interview_rows"] == []
         assert view["interview_counts"]["tracked"] == 0
 
@@ -176,7 +176,7 @@ def test_row_maps_preparation_prep_files_fit_notes_and_history():
             )
         ]
     }
-    row = module.build_interview_view(data, date(2026, 11, 6))["interview_rows"][0]
+    row = build_interview_view(data, date(2026, 11, 6))["interview_rows"][0]
 
     assert row["questions"] == "What does success look like?"
     assert row["preparation"] == "Outage story"
@@ -199,10 +199,10 @@ def test_row_maps_preparation_prep_files_fit_notes_and_history():
 
 
 def test_prep_files_accepts_a_bare_string_and_skips_junk():
-    assert [f["label"] for f in module._prep_files("interviews/x/prep.md")] == ["Prep notes"]
-    assert module._prep_files(None) == []
-    assert [f["label"] for f in module._prep_files([None, "", "  ", "a/b.md"])] == ["B"]
-    assert [f["label"] for f in module._prep_files(["a/jd-senior-it.md", "a/company-notes.md"])] == [
+    assert [f["label"] for f in _prep_files("interviews/x/prep.md")] == ["Prep notes"]
+    assert _prep_files(None) == []
+    assert [f["label"] for f in _prep_files([None, "", "  ", "a/b.md"])] == ["B"]
+    assert [f["label"] for f in _prep_files(["a/jd-senior-it.md", "a/company-notes.md"])] == [
         "Job description",
         "Company notes",
     ]
@@ -218,7 +218,7 @@ def _dated(company, status, priority, task, due):
 
 
 def test_next_interview_action_picks_the_soonest_upcoming_date():
-    rows = module.build_interview_view(
+    rows = build_interview_view(
         {
             "active_applications": [
                 _dated("Later", "screening", "high", "Second", "2026-11-09"),
@@ -228,7 +228,7 @@ def test_next_interview_action_picks_the_soonest_upcoming_date():
         },
         date(2026, 11, 6),
     )["interview_rows"]
-    action = module.next_interview_action(rows, date(2026, 11, 6))
+    action = next_interview_action(rows, date(2026, 11, 6))
     assert action["company"] == "Today"
     assert action["when"] == "today"
     assert action["overdue"] is False
@@ -237,7 +237,7 @@ def test_next_interview_action_picks_the_soonest_upcoming_date():
 
 
 def test_next_interview_action_falls_back_to_the_most_recent_overdue():
-    rows = module.build_interview_view(
+    rows = build_interview_view(
         {
             "active_applications": [
                 _dated("Older", "screening", "high", "Old", "2026-10-01"),
@@ -246,23 +246,23 @@ def test_next_interview_action_falls_back_to_the_most_recent_overdue():
         },
         date(2026, 11, 6),
     )["interview_rows"]
-    action = module.next_interview_action(rows, date(2026, 11, 6))
+    action = next_interview_action(rows, date(2026, 11, 6))
     assert action["company"] == "Recent"
     assert action["overdue"] is True
     assert action["when"] == "overdue 5 days"
 
 
 def test_next_interview_action_without_dates_is_none():
-    rows = module.build_interview_view(
+    rows = build_interview_view(
         {"active_applications": [entry(company="No date", status="screening")]},
         date(2026, 11, 6),
     )["interview_rows"]
-    assert module.next_interview_action(rows, date(2026, 11, 6)) is None
-    assert module.next_interview_action([], date(2026, 11, 6)) is None
+    assert next_interview_action(rows, date(2026, 11, 6)) is None
+    assert next_interview_action([], date(2026, 11, 6)) is None
 
 
 def test_today_daily_list_starts_with_the_interview_action():
-    centre = module.command_centre(
+    centre = command_centre(
         {"total_active": 0},
         {"today_blocks": [], "inbox_items": []},
         0,
@@ -293,14 +293,14 @@ def test_today_page_and_script_wire_the_quick_action():
 
 
 def test_rows_carry_a_sheet_href():
-    row = module.build_interview_view(
+    row = build_interview_view(
         {"active_applications": [entry(company="A B", role="R/S")]}, date(2026, 11, 6)
     )["interview_rows"][0]
     assert row["sheet_href"] == "/interviews/sheet?company=A+B&role=R%2FS"
 
 
 def test_next_interview_action_ignores_closed_threads():
-    rows = module.build_interview_view(
+    rows = build_interview_view(
         {
             "active_applications": [
                 _dated("Closed", "rejected", "high", "Dead follow-up", "2026-11-07"),
@@ -309,12 +309,12 @@ def test_next_interview_action_ignores_closed_threads():
         },
         date(2026, 11, 6),
     )["interview_rows"]
-    action = module.next_interview_action(rows, date(2026, 11, 6))
+    action = next_interview_action(rows, date(2026, 11, 6))
     assert action["company"] == "Live"
 
 
 def test_next_interview_action_is_none_when_only_closed_threads_have_dates():
-    rows = module.build_interview_view(
+    rows = build_interview_view(
         {
             "active_applications": [
                 _dated("Withdrawn", "withdrawn", "high", "Nope", "2026-11-01"),
@@ -322,7 +322,7 @@ def test_next_interview_action_is_none_when_only_closed_threads_have_dates():
         },
         date(2026, 11, 6),
     )["interview_rows"]
-    assert module.next_interview_action(rows, date(2026, 11, 6)) is None
+    assert next_interview_action(rows, date(2026, 11, 6)) is None
 
 
 def test_closed_threads_are_split_out_of_live_cards_and_counts():
@@ -339,7 +339,7 @@ def test_closed_threads_are_split_out_of_live_cards_and_counts():
             entry(company="Gone", status="withdrawn", priority="low"),
         ]
     }
-    view = module.build_interview_view(data, date(2026, 11, 6))
+    view = build_interview_view(data, date(2026, 11, 6))
     assert [r["company"] for r in view["interview_active"]] == ["Live"]
     assert [r["company"] for r in view["interview_leads"]] == ["Lead"]
     assert [r["company"] for r in view["interview_closed"]] == ["Dead", "Gone"]
@@ -370,7 +370,7 @@ def test_closed_threads_sort_newest_signal_first():
             entry(company="No signal", status="withdrawn"),
         ]
     }
-    closed = module.build_interview_view(data, date(2026, 11, 6))["interview_closed"]
+    closed = build_interview_view(data, date(2026, 11, 6))["interview_closed"]
     assert [r["company"] for r in closed] == [
         "Recent rejection",
         "Old rejection",

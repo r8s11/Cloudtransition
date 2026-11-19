@@ -40,7 +40,7 @@ def group(section: str, name: str, following: str | None) -> str:
 
 
 def centre(counts=None) -> list[dict]:
-    return module.command_centre(
+    return command_centre(
         {"total_active": 0}, {"today_blocks": [], "inbox_items": []}, 0, None, counts
     )["daily"]
 
@@ -103,11 +103,11 @@ def test_daily_job_search_and_money_rows(tmp_path, monkeypatch):
     assert not money.get("placeholder")
 
     tracker.write_text("as_of: today\ndebts: []\n")
-    money = module.money_row()
+    money = money_row()
     assert money["value"] == "No debts entered yet" and money["placeholder"] is True
 
     action = {"key": "Acme|IT", "company": "Acme", "when": "today", "date": "2026-11-12", "overdue": False}
-    first = module.command_centre({"total_active": 0}, {"today_blocks": [], "inbox_items": []}, 0, action)["daily"][0]
+    first = command_centre({"total_active": 0}, {"today_blocks": [], "inbox_items": []}, 0, action)["daily"][0]
     assert first["label"] == "Interview mode"
 
 
@@ -118,12 +118,12 @@ def test_port_tile_follows_listener(monkeypatch):
     port = server.getsockname()[1]
     monkeypatch.setattr(config, "SHORTCUTS", [{"group": "Apps", "label": "Local app", "port": port, "note": "Mac only"}])
     try:
-        row = module.shortcut_groups()[0]["rows"][0]
+        row = shortcut_groups()[0]["rows"][0]
         assert row["ok"] and row["new_tab"] and row["note"] == "Mac only"
         assert row["href"] == f"http://127.0.0.1:{port}/"
     finally:
         server.close()
-    row = module.shortcut_groups()[0]["rows"][0]
+    row = shortcut_groups()[0]["rows"][0]
     assert row["ok"] is False and row["note"] == "Not running"
 
 
@@ -150,11 +150,11 @@ def test_money_row_survives_bad_tracker(tmp_path, monkeypatch):
     path = tmp_path / "finance" / "tracker.yml"
     path.parent.mkdir()
     monkeypatch.setattr(config, "MONEY_CANDIDATES", [path])
-    row = module.money_row()
+    row = money_row()
     assert (row["value"], row["placeholder"]) == ("No money tracker yet", True)
     for text in ('debts: "oops"\n', "debts: [\n"):
         path.write_text(text)
-        row = module.money_row()
+        row = money_row()
         assert (row["value"], row["placeholder"]) == ("Tracker unreadable", True)
     assert any(d["label"] == "Money" for d in centre())
 
