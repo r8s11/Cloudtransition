@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app as module  # noqa: E402
 from core import config  # noqa: E402
+from routes import calendar  # noqa: E402
 
 SECRET = "sk-test-DO-NOT-LEAK-1234567890"
 EMAIL = "recruiter@example.com"
@@ -100,12 +101,12 @@ def test_include_filter(workspace, monkeypatch):
         r = client.get("/api/assistant/state", params={"include": "interviews,runs"})
         assert set(r.json()) == {"generated_at", "interviews", "runs"}
         monkeypatch.setattr(
-            module.calendar_service, "snapshot", lambda: {"events": []}
+            calendar.calendar_service, "snapshot", lambda: {"events": []}
         )
         r = client.get("/api/assistant/state", params={"include": "calendar"})
         assert r.json()["calendar"]["events"] == []
         monkeypatch.setattr(
-            module.calendar_service,
+            calendar.calendar_service,
             "snapshot",
             lambda: (_ for _ in ()).throw(RuntimeError("no consent")),
         )
@@ -156,7 +157,7 @@ def test_unknown_include(workspace, monkeypatch):
 
 def test_state_has_no_secrets(workspace, monkeypatch):
     fake_upstream(monkeypatch, payload=[])
-    monkeypatch.setattr(module.calendar_service, "snapshot", lambda: {"events": []})
+    monkeypatch.setattr(calendar.calendar_service, "snapshot", lambda: {"events": []})
     with TestClient(module.app) as client:
         r = client.get("/api/assistant/state", params={"include": "tasks,interviews,runs,missions,calendar"})
     text = r.text

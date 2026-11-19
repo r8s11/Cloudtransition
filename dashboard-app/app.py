@@ -19,7 +19,6 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import date, datetime, timedelta
-from contextlib import asynccontextmanager
 from pathlib import Path
 from uuid import uuid4
 
@@ -46,7 +45,6 @@ from core import agents as forge_agents
 from core import skills as skill_reg
 from core.agents import build_agents_view
 from core import calendar_sources
-from core.google_calendar import CalendarService
 from core.interview_view import build_interview_view, next_interview_action
 from core.store import _FILE_WRITE_LOCK, _atomic_write, load_yaml
 from core.tasks import CHECKBOX_RE, insert_inbox_item, parse_all_realms, parse_tasks_from_file
@@ -61,7 +59,7 @@ from core.today import (
     money_available,
     parse_routine_folds,
 )
-from routes import metrics
+from routes import calendar, metrics
 
 
 def _load_env_file(path: Path, environ: dict[str, str] | None = None) -> None:
@@ -98,28 +96,8 @@ _load_env_file(Path(__file__).resolve().parent / ".env")
 # ── App ────────────────────────────────────────────────────────
 
 
-@asynccontextmanager
-async def calendar_lifespan(application):
-    calendar_service.start()
-    try:
-        yield
-    finally:
-        calendar_service.stop()
-
-
-app = FastAPI(title="Command Center", lifespan=calendar_lifespan)
-
-
-@app.middleware("http")
-async def calendar_origin_guard(request: Request, call_next):
-    if request.method != "GET" and (
-        request.url.path.startswith("/api/calendar/") or request.url.path == "/api/capture"
-    ):
-        origin = request.headers.get("origin")
-        expected = f"{request.url.scheme}://{request.url.netloc}"
-        if (origin and origin != expected) or request.headers.get("sec-fetch-site") == "cross-site":
-            return JSONResponse({"error": "Same-origin requests only"}, status_code=403)
-    return await call_next(request)
+app = FastAPI(title="Command Center", lifespan=calendar.calendar_lifespan)
+app.middleware("http")(calendar.calendar_origin_guard)
 
 app.mount(
     "/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static"
@@ -158,11 +136,6 @@ CAPTURE_MAX = 300
 class CaptureRequest(BaseModel):
     text: str
     schedule: dict | None = None
-
-
-calendar_service = CalendarService(
-    config.WORKSPACE, config.REALMS, config.JOBS_FILE, source_lock=_FILE_WRITE_LOCK, write_source=_atomic_write
-)
 
 
 templates.env.filters["md"] = md_inline
@@ -801,66 +774,6 @@ def toggle_task(req: ToggleRequest, x_requested_with: str = Header(default="")):
     )
 
 
-# ── Google Calendar: local source writes and explicit policy ────
-@app.get("/api/calendar")
-def calendar_snapshot():
-    return calendar_service.snapshot()
-
-
-def _calendar_action(action, x_requested_with):
-    if x_requested_with != "XMLHttpRequest":
-        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
-    try:
-        return JSONResponse(action())
-    except ValueError as exc:
-        return JSONResponse({"error": str(exc)}, status_code=400)
-    except (OSError, RuntimeError):
-        return JSONResponse({"error": "Calendar unavailable; local work is unchanged."}, status_code=503)
-
-
-@app.post("/api/calendar/refresh")
-def calendar_refresh(x_requested_with: str = Header(default="")):
-    return _calendar_action(calendar_service.refresh, x_requested_with)
-
-
-@app.post("/api/calendar/config")
-def calendar_config(payload: dict, x_requested_with: str = Header(default="")):
-    return _calendar_action(lambda: calendar_service.configure(payload), x_requested_with)
-
-
-@app.post("/api/calendar/preview")
-def calendar_preview(payload: dict, x_requested_with: str = Header(default="")):
-    return _calendar_action(lambda: calendar_service.preview(payload), x_requested_with)
-
-
-@app.post("/api/calendar/enable")
-def calendar_enable(payload: dict, x_requested_with: str = Header(default="")):
-    return _calendar_action(
-        lambda: calendar_service.enable(payload.get("config"), payload.get("review")),
-        x_requested_with,
-    )
-
-
-@app.post("/api/calendar/pause")
-def calendar_pause(x_requested_with: str = Header(default="")):
-    return _calendar_action(calendar_service.pause, x_requested_with)
-
-
-@app.post("/api/calendar/schedule")
-def calendar_schedule(payload: dict, x_requested_with: str = Header(default="")):
-    def save():
-        with _FILE_WRITE_LOCK:
-            target, updated = calendar_sources.schedule_item(
-                config.WORKSPACE, config.REALMS, config.JOBS_FILE, payload
-            )
-            _atomic_write(target, updated)
-        result = {"ok": True, "message": "Saved locally. Google outcome appears in Upcoming calendar."}
-        if payload.get("source") != "interviews":
-            result["items"] = parse_tasks_from_file(target, payload["source"])
-        return result
-    return _calendar_action(save, x_requested_with)
-
-
 @app.post("/api/capture")
 def capture(req: CaptureRequest, x_requested_with: str = Header(default="")):
     """Append one item to the Inbox section of TASKS.md."""
@@ -1023,7 +936,7 @@ def assistant_state(include: str = Query(default="tasks,interviews,runs,missions
             out["missions"] = {"unavailable": f"Mission Control not reachable: {type(exc).__name__}"}
     if "calendar" in wanted:
         try:
-            out["calendar"] = {"source": "calendar service", **calendar_service.snapshot()}
+            out["calendar"] = {"source": "calendar service", **calendar.calendar_service.snapshot()}
         except Exception as exc:  # calendar may need Google consent; degrade, never fail the call
             out["calendar"] = {"unavailable": f"{type(exc).__name__}: {exc}"}
     return JSONResponse(out)
@@ -2433,3 +2346,4 @@ def api_skill_runs():
 
 # ── Routers ────────────────────────────────────────────────────
 app.include_router(metrics.router)
+app.include_router(calendar.router)

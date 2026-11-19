@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 import app
 from core import config
 from core.tasks import parse_tasks_from_file
+from routes import calendar
 
 
 @pytest.fixture
@@ -61,7 +62,7 @@ def test_authorization_http(calendar_workspace, monkeypatch):
             return {"enabled": False, "connection": {"calendar": "disconnected"}}
         def pause(self):
             raise AssertionError("Unauthorized call reached service")
-    monkeypatch.setattr(app, "calendar_service", Service())
+    monkeypatch.setattr(calendar, "calendar_service", Service())
     before = tasks.read_bytes()
     assert client.get("/api/calendar").json()["enabled"] is False
     assert client.get("/api/calendar/pause").status_code == 405
