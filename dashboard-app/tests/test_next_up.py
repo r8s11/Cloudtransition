@@ -14,7 +14,7 @@ import pytest  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import app as module  # noqa: E402
+from core.today import select_next_up  # noqa: E402
 
 
 def task(cat: str, text: str) -> dict:

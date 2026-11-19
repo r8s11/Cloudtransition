@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app as dashboard  # noqa: E402
 from core import config  # noqa: E402
+from core.today import parse_routine_view  # noqa: E402
 
 
 def test_parse_routine_view_extracts_today_review_rules_and_dates(tmp_path):

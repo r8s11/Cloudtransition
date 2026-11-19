@@ -12,6 +12,8 @@ from fastapi.testclient import TestClient  # noqa: E402
 from core import agents  # noqa: E402
 import app as module  # noqa: E402
 from core import config  # noqa: E402
+from core.interview_view import build_interview_view  # noqa: E402
+from core.store import load_yaml  # noqa: E402
 
 CSRF = {"X-Requested-With": "XMLHttpRequest"}
 

@@ -1,6 +1,6 @@
 """Task text is file content: markdown renders, everything else is escaped."""
 
-import app
+from core.today import md_inline
 
 
 def test_code_and_bold_render_and_links_keep_their_text():

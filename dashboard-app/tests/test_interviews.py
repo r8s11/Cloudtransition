@@ -13,7 +13,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import app as module  # noqa: E402
+from core.interview_view import _prep_files, build_interview_view, next_interview_action  # noqa: E402
+from core.today import command_centre  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 

@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app as module  # noqa: E402
 from core import config  # noqa: E402
+from core.interview_view import build_interview_view, next_interview_action  # noqa: E402
 
 CSRF = {"X-Requested-With": "XMLHttpRequest"}
 TODAY = date(2026, 11, 16)

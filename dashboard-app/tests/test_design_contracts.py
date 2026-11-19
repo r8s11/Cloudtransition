@@ -21,7 +21,6 @@ INDEX = (ROOT / "templates" / "index.html").read_text()
 
 sys.path.insert(0, str(ROOT))
 
-import app as dashboard  # noqa: E402
 from core import config  # noqa: E402
 
 

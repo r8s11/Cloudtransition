@@ -186,3 +186,7 @@ def file_headers(path: Path, download: bool) -> tuple[str, dict]:
     inline = not download and media != "application/octet-stream"
     headers["Content-Disposition"] = f"{'inline' if inline else 'attachment'}; filename*=UTF-8''{quote(path.name)}"
     return media, headers
+
+
+def workspace_file_href(rel: str) -> str:
+    return "/workspace-file/" + quote(rel)

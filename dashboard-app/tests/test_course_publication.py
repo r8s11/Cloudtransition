@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app as module  # noqa: E402
+from core.today import command_centre, shortcut_groups  # noqa: E402
 
 
 def test_course_shortcut_is_available_from_today():

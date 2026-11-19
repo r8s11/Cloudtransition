@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from app import insert_inbox_item  # noqa: E402
+from core.tasks import insert_inbox_item  # noqa: E402
 
 HEADER = "# Tasks\n\n_Last updated: x_\n\n"
 

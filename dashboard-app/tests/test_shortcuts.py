@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app as module  # noqa: E402
 from core import config  # noqa: E402
+from core.today import command_centre, money_row, shortcut_groups  # noqa: E402
 
 ROW = re.compile(r'<a\s+class="daily-row"\s+href="([^"]+)"([^>]*)>', re.S)
 

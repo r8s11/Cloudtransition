@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 import app
 from core import config
+from core.tasks import parse_tasks_from_file
 
 
 @pytest.fixture
