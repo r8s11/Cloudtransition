@@ -1,9 +1,24 @@
-{% from "_macros.html" import task_check %}
+{% from "_macros.html" import task_check, readout %}
+{# One action button from a core/now.py item; the kinds map to existing
+   delegated handlers (data-interview-open in app.js, the rest in now.js). #}
+{% macro now_action(a, quiet=false) -%}
+  {%- if a.mark_applied -%}
+  <button type="button" class="action-btn{% if quiet %} action-btn-ghost{% endif %}" data-mark-applied="{{ a.mark_applied }}">{{ a.label }}</button>
+  {%- elif a.interview_open -%}
+  <a class="action-btn action-btn-ghost" href="#interviews" data-interview-open="{{ a.interview_open }}">{{ a.label }}</a>
+  {%- elif a.file -%}
+  <a class="action-btn action-btn-ghost" href="/workspace-file/{{ a.file|urlencode }}" target="_blank" rel="noopener noreferrer">{{ a.label }}</a>
+  {%- elif a.scroll -%}
+  <button type="button" class="action-btn action-btn-ghost" data-now-scroll="{{ a.scroll }}">{{ a.label }}</button>
+  {%- else -%}
+  <a class="action-btn action-btn-ghost" href="{{ a.href }}"{% if a.new_tab %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ a.label }}</a>
+  {%- endif -%}
+{%- endmacro %}
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- TODAY PAGE — capture, inbox, next up, quick tools, brain     -->
 <!-- Phone-first: the home-screen shortcut opens /#today.         -->
 <!-- ════════════════════════════════════════════════════════════ -->
-<div class="page active" id="page-today" role="tabpanel" aria-labelledby="tab-today">
+<div class="page active deck spatial" id="page-today" role="tabpanel" aria-labelledby="tab-today">
   <div class="page-header">
     <h2>Today</h2>
     <p>
@@ -11,6 +26,130 @@
       {% for block in today_blocks %}<br />{{ block }}{% endfor %}
     </p>
   </div>
+
+  <!-- Now ← core/now.py: one directive for this moment from the clock,
+       routine.md and the interview tracker, plus the next two. Rendered on
+       load; now.js offers a refresh once the routine block it was built
+       for has ended. -->
+  {% set np = now_plan %}
+  {% set n = np.now %}
+  <section class="card now-card is-{{ n.tone }}" aria-labelledby="nowTitle" data-now-until="{{ np.until }}">
+    <div class="now-head">
+      <h3 class="card-title now-title" id="nowTitle">Now <span class="now-asof">as of {{ np.as_of }}</span></h3>
+      {{ readout([
+        ("Applied today", np.counts.today ~ "/" ~ np.counts.day_goal, none),
+        ("This week", np.counts.week ~ "/" ~ np.counts.week_goal, none),
+        ("Leads left", np.leads_left, none),
+      ], "Application count from the tracker's applied entries") }}
+    </div>
+    <p class="now-directive"><span class="now-verb">{{ n.verb }}</span> <span class="now-subject">{{ n.title }}</span></p>
+    <p class="now-detail">{{ n.detail|md if n.detail_md else n.detail }}</p>
+    <p class="now-why">{{ n.why }}</p>
+    {% if n.actions %}
+    <div class="now-actions">
+      {% for a in n.actions %}{{ now_action(a) }}{% endfor %}
+    </div>
+    {% endif %}
+    <p class="run-status" data-now-status role="status" aria-live="polite"></p>
+    {% if np.then %}
+    <h4 class="now-then-title">Then</h4>
+    <ol class="now-then">
+      {% for t in np.then %}
+      <li class="is-{{ t.tone }}">
+        <span class="now-then-verb">{{ t.verb }}</span>
+        <span class="now-then-text"><strong>{{ t.title }}</strong> &middot; {{ t.detail|md if t.detail_md else t.detail }}</span>
+        {% if t.actions %}<span class="now-then-actions">{{ now_action(t.actions[0], quiet=true) }}</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+    {% endif %}
+    <p class="now-stale" data-now-stale hidden>
+      This plan was for the last routine block.
+      <button type="button" class="action-btn action-btn-ghost" data-now-refresh>Refresh plan</button>
+    </p>
+  </section>
+
+  <!-- Reticle hero (static/spatial.css + spatial.js) in the base colours: a
+       reticle with leader lines to the first three Daily rows. Visual echo
+       only — the same links live in the Daily card below, so the overlay is
+       aria-hidden and out of tab order. Yellow "alert" state when any Daily
+       row is flagged warn. -->
+  {% set fui_alert = daily|selectattr("warn")|list %}
+  <section class="fui-hero" data-fui-hero data-state="{{ 'alert' if fui_alert else 'idle' }}" aria-hidden="true">
+    <svg class="fui-reticle" viewBox="0 0 960 360" preserveAspectRatio="xMidYMid slice" focusable="false">
+      <defs>
+        <linearGradient id="fuiSweepFill" gradientUnits="userSpaceOnUse" x1="480" y1="180" x2="480" y2="86">
+          <stop offset="0" stop-color="currentColor" stop-opacity="0.32" />
+          <stop offset="1" stop-color="currentColor" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+      <g class="fui-lattice">
+        {% for x in range(80, 960, 80) %}<path d="M{{ x - 4 }} {{ 40 }}h8M{{ x }} 36v8M{{ x - 4 }} 320h8M{{ x }} 316v8" />{% endfor %}
+      </g>
+      <g class="fui-rig">
+        <circle class="fui-ring" cx="480" cy="180" r="150" />
+        <circle class="fui-ring fui-ring-mid" cx="480" cy="180" r="132" />
+        <circle class="fui-ring fui-ring-inner" cx="480" cy="180" r="60" />
+        {# Live arcs, anchored at 12 o'clock (spatial.js keeps them current):
+           outer = Weekly Review checks, inner = how far through the week. #}
+        {% set rv_total = routine.review|length if routine.available else 0 %}
+        {% set rv_done = routine.review|selectattr("done")|list|length if routine.available else 0 %}
+        <circle class="fui-arc fui-arc-review" cx="480" cy="180" r="132" pathLength="100" transform="rotate(-90 480 180)" stroke-dasharray="{{ (100 * rv_done / rv_total)|round(2) if rv_total else 0 }} 100" data-fui-review />
+        <circle class="fui-arc fui-arc-week" cx="480" cy="180" r="60" pathLength="100" transform="rotate(-90 480 180)" stroke-dasharray="0 100" data-fui-week />
+        <g class="fui-sweep">
+          <path class="fui-sweep-wedge" d="M480 180 L626 180 A146 146 0 0 0 591.84 86.15 Z" fill="url(#fuiSweepFill)" />
+          <path class="fui-sweep-lead" d="M480 180 L626 180" />
+        </g>
+        <g class="fui-ticks">
+          {% for i in range(72) %}<path class="{{ 'fui-tick-major' if i % 6 == 0 else 'fui-tick' }}" d="M480 {{ 58 if i % 6 == 0 else 62 }}V68" transform="rotate({{ i * 5 }} 480 180)" />{% endfor %}
+        </g>
+        <g class="fui-lock" data-fui-lock>
+          <g class="fui-brackets">
+            <path d="M436.16 90.12 A100 100 0 0 1 523.84 90.12M480 88V80" />
+            <path d="M579.76 186.98 A100 100 0 0 1 535.92 262.9M559.67 226L566.6 230" />
+            <path d="M424.08 262.9 A100 100 0 0 1 380.24 186.98M400.33 226L393.4 230" />
+          </g>
+        </g>
+        <circle class="fui-flash" cx="480" cy="180" r="20" data-fui-flash />
+        <g class="fui-core">
+          <circle cx="480" cy="180" r="14" />
+          <circle class="fui-core-dot" cx="480" cy="180" r="2.5" />
+          <path d="M480 152v-8M480 208v8M452 180h-8M508 180h8" />
+        </g>
+        <text class="fui-readout" x="480" y="138" text-anchor="middle">WK {{ current_week }}</text>
+        <text class="fui-readout fui-readout-big" x="480" y="238" text-anchor="middle" data-fui-inbox>{{ inbox_items|length }}</text>
+        <text class="fui-readout" x="480" y="254" text-anchor="middle">INBOX</text>
+        <text class="fui-readout" x="480" y="108" text-anchor="middle" data-fui-review-text>{% if rv_total %}REVIEW {{ rv_done }}/{{ rv_total }}{% endif %}</text>
+      </g>
+      <g class="fui-leaders">
+        <path d="M374 74L352 52H262" /><circle cx="374" cy="74" r="4" />
+        <path d="M586 74L608 52H698" /><circle cx="586" cy="74" r="4" />
+        <path d="M586 286L608 308H698" /><circle cx="586" cy="286" r="4" />
+        <path d="M374 286L352 308H262" /><circle cx="374" cy="286" r="4" />
+      </g>
+    </svg>
+    <div class="fui-callouts">
+      <div class="fui-pill fui-pill-tl">
+        <span class="fui-pill-head"><span class="fui-dot"></span>{{ 'Alert' if fui_alert else 'Standby' }}</span>
+        <span class="fui-pill-val">{{ today_weekday }} {{ today }}</span>
+        <span class="fui-pill-sub">Week {{ current_week }} &middot; <time data-fui-clock></time></span>
+      </div>
+      {% for d in daily[:3] %}
+      <a
+        class="fui-pill fui-pill-{{ ['tr', 'br', 'bl'][loop.index0] }}{% if d.warn %} is-warn{% endif %}"
+        href="{{ d.href }}"
+        tabindex="-1"
+        {% if d.new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
+        {% if d.map_query %}data-map-query="{{ d.map_query }}"{% endif %}
+        {% if d.interview_key %}data-interview-open="{{ d.interview_key }}"{% endif %}
+        {% if d.focus %}data-focus="{{ d.focus }}"{% endif %}
+      >
+        <span class="fui-pill-head">{{ d.label }}<span class="fui-pill-tag">N{{ loop.index }}</span></span>
+        <span class="fui-pill-val">{{ d.value }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
 
   <!-- Daily destinations ← command_centre() in app.py. Numbers come from the
        same parsers as their tabs; rows that cannot read a number say so.
@@ -26,6 +165,7 @@
           {% if d.new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
           {% if d.map_query %}data-map-query="{{ d.map_query }}"{% endif %}
           {% if d.interview_key %}data-interview-open="{{ d.interview_key }}"{% endif %}
+          {% if d.focus %}data-focus="{{ d.focus }}"{% endif %}
         >
           <span class="daily-label">{{ d.label }}{% if d.note %} <span class="daily-note">{{ d.note }}</span>{% endif %}</span>
           <span class="daily-value">{{ d.value }}</span>
@@ -38,10 +178,11 @@
         {% if map_index.ok %}Workspace map is a snapshot from {{ map_index.generated }}{% if map_index.stale %}, older than a week{% endif %}.{% else %}{{ map_index.reason }}.{% endif %}
         Refresh it
       </summary>
-      <p>Run after files move or new work lands, then reload this page:</p>
-      <pre class="daily-cmd">{{ map_refresh }}</pre>
+      <p>Run <em>Refresh map</em> in Quick tools below after files move or new work lands, then reload this page.</p>
     </details>
   </section>
+
+  {% include "_calendar.html" %}
 
   <!-- Next up: the top 3 open TASKS.md items, ranked by routine.md's lanes
        (security → income/job search → debt → live project week → DevOps →
@@ -52,11 +193,11 @@
     {% for t in next_up %}
       {% if t.cat != ns.cat %}
         {% set ns.cat = t.cat %}
-        <div class="task-category-header">{{ t.cat }}</div>
+        <div class="task-category-header">{{ t.cat|md }}</div>
       {% endif %}
       <div class="task-item">
         {{ task_check(t) }}
-        <span class="task-text">{{ t.text }}</span>
+        <span class="task-text">{{ t.text|md }}</span>
       </div>
     {% else %}
       <p class="run-empty">No open items in TASKS.md.</p>
@@ -81,6 +222,11 @@
         />
       </label>
       <button class="action-btn" type="submit">Add</button>
+      <details class="calendar-capture-schedule">
+        <summary>Optional schedule</summary>
+        <div data-calendar-fields></div>
+        <p class="calendar-note">No date stays local. Explicit start, end and timezone create an event only after automation is enabled.</p>
+      </details>
     </form>
     <p class="run-status" id="captureStatus" role="status" aria-live="polite"></p>
   </div>
@@ -94,7 +240,7 @@
       {% for t in inbox_items %}
       <div class="task-item">
         {{ task_check(t) }}
-        <span class="task-text">{{ t.text }}</span>
+        <span class="task-text">{{ t.text|md }}</span>
       </div>
       {% endfor %}
     </div>
@@ -102,6 +248,45 @@
       Inbox zero. Capture above; run <em>Triage inbox</em> to file items.
     </p>
   </div>
+
+  <!-- Shortcuts ← SHORTCUTS in app.py (shortcut_groups()). Add a tile: append one
+       dict there. Find a file hands its text to the Workspace map (app.js,
+       #mapFindForm). A target that cannot be opened is a placeholder, not a link. -->
+  <section class="card" aria-labelledby="shortcutsTitle">
+    <h3 class="card-title" id="shortcutsTitle">Shortcuts</h3>
+    <form class="today-form" id="mapFindForm">
+      <label class="run-field today-field-grow">
+        <span class="run-field-label">Find a file</span>
+        <input class="run-input today-input" name="q" type="search" maxlength="200" enterkeyhint="search" />
+      </label>
+      <button class="action-btn" type="submit">Open map</button>
+    </form>
+    {% for group in shortcuts %}
+    <div class="task-category-header">{{ group.name }}</div>
+    <ul class="daily-list">
+      {% for s in group.rows %}
+      <li>
+        {% if s.ok %}
+        <a
+          class="daily-row"
+          href="{{ s.href }}"
+          {% if s.new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
+          {% if s.map_query %}data-map-query="{{ s.map_query }}"{% endif %}
+        >
+          <span class="daily-label">{{ s.label }}</span>
+          <span class="shortcut-path">{{ s.note }}</span>
+        </a>
+        {% else %}
+        <span class="daily-row is-placeholder">
+          <span class="daily-label">{{ s.label }}</span>
+          <span class="shortcut-path">{{ s.note }}</span>
+        </span>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+  </section>
 
   <!-- Routine content and Weekly Review checks are read from routine.md. -->
   <section class="card routine-card" aria-labelledby="routineTitle">
@@ -252,6 +437,7 @@
         <span class="run-field-label">Ask the workspace</span>
         <input
           class="run-input today-input"
+          id="brainAsk"
           name="q"
           type="search"
           minlength="2"

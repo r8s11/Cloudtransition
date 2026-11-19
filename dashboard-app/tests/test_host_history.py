@@ -8,7 +8,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import metrics  # noqa: E402
+from collectors import metrics  # noqa: E402
 
 NATIVE = "integrations/windows_exporter"
 

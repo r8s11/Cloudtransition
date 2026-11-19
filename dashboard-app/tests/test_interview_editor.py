@@ -10,7 +10,7 @@ import yaml  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import interview_editor as ie  # noqa: E402
+from core import interview_editor as ie  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 

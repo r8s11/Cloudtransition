@@ -8,7 +8,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import leads_jev  # noqa: E402
+from scripts import leads_jev  # noqa: E402
 
 RESUME = """# Roosevelt Segura
 

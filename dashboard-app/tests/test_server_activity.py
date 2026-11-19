@@ -7,7 +7,7 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import server_activity  # noqa: E402
+from collectors import server_activity  # noqa: E402
 
 NOW = 1793474000.0
 PROM, LOKI = "http://prom.test", "http://loki.test"

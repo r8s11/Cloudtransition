@@ -63,6 +63,7 @@ def test_row_maps_status_contact_timeline_and_next_step():
         "tracked": 1,
         "active": 1,
         "leads": 0,
+        "waiting": 0,
         "high": 1,
         "closed": 0,
     }
@@ -346,6 +347,7 @@ def test_closed_threads_are_split_out_of_live_cards_and_counts():
         "tracked": 2,
         "active": 1,
         "leads": 1,
+        "waiting": 0,
         "high": 1,
         "closed": 2,
     }

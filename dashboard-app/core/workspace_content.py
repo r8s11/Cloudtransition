@@ -16,7 +16,7 @@ import mimetypes
 from pathlib import Path
 from urllib.parse import quote
 
-WORKSPACE = Path(__file__).resolve().parent.parent
+WORKSPACE = Path(__file__).resolve().parents[2]
 VIEWER_DIR = WORKSPACE / "visual-second-brain"
 VIEWER_HTML = VIEWER_DIR / "visual-second-brain.html"
 INDEX_FILE = VIEWER_DIR / "workspace-index.json"

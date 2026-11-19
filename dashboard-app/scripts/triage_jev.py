@@ -6,9 +6,9 @@ one); the filing itself is code, so the truth table below is visible and
 testable. Item wording is never rewritten: a filed line is the same character
 string that sat in the Inbox.
 
-    python3 dashboard-app/triage_jev.py            # file items, edit TASKS.md
-    python3 dashboard-app/triage_jev.py --dry-run  # call Jev, print, no write
-    python3 dashboard-app/triage_jev.py --payload  # print the request, no call
+    python3 dashboard-app/scripts/triage_jev.py            # file items, edit TASKS.md
+    python3 dashboard-app/scripts/triage_jev.py --dry-run  # call Jev, print, no write
+    python3 dashboard-app/scripts/triage_jev.py --payload  # print the request, no call
 
 Exit codes: 0 filed or nothing to do, 2 not configured, 3 API failure.
 A failure never writes TASKS.md and never reads as "no section fits".
@@ -25,7 +25,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-WORKSPACE = Path(__file__).resolve().parent.parent
+WORKSPACE = Path(__file__).resolve().parents[2]
 TASKS_FILE = WORKSPACE / "TASKS.md"
 
 API_URL = "https://api.typesafe.ai/v1/systemone"

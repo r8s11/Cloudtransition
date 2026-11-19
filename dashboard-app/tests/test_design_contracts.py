@@ -1,4 +1,4 @@
-"""Design-contract regression tests for the Orizuru visual system.
+"""Design-contract regression tests for the dark-blue FUI visual system.
 
 These gate the specific regressions that the audit found: muted-ink contrast
 falling below WCAG AA, blanket `prefers-reduced-motion` overrides killing the
@@ -44,19 +44,19 @@ def _token(name: str, source: str = TOKENS) -> str:
 
 
 def _paper_surfaces() -> list[str]:
-    """Every washi face the muted ink renders on."""
+    """Every panel face the muted ink renders on."""
     return [
-        _token("paper"),
-        _token("paper-deep"),
-        _token("paper-hi"),
-        _token("fold-white"),
+        _token("panel"),
+        _token("panel-deep"),
+        _token("panel-hi"),
+        _token("void"),
     ]
 
 
-def test_muted_ink_passes_wcag_aa_on_every_washi_face():
+def test_muted_ink_passes_wcag_aa_on_every_panel_face():
     fg = _token("ink-muted")
     worst = min(_hex_ratio(fg, bg) for bg in _paper_surfaces())
-    assert worst >= 4.5, f"{fg} on washi faces is {worst:.2f}:1, needs 4.5:1"
+    assert worst >= 4.5, f"{fg} on panel faces is {worst:.2f}:1, needs 4.5:1"
 
 
 def test_reader_loads_shared_tokens_instead_of_duplicating_them():
@@ -65,8 +65,8 @@ def test_reader_loads_shared_tokens_instead_of_duplicating_them():
     assert "/static/tokens.css" in INDEX
     reader_root = re.search(r":root\s*\{(.*?)\}", READER, re.S).group(1)
     for shared in (
-        "--vermilion:",
-        "--paper:",
+        "--ember:",
+        "--panel:",
         "--ink-muted:",
         "--border:",
         "--accent:",
@@ -74,17 +74,17 @@ def test_reader_loads_shared_tokens_instead_of_duplicating_them():
         "--radius:",
     ):
         assert shared not in reader_root, f"reader re-declares shared token {shared}"
-    assert "--surface: var(--paper-hi);" in reader_root
-    assert "--accent-warm: var(--vermilion-light);" in reader_root
+    assert "--surface: var(--panel-hi);" in reader_root
+    assert "--accent-warm: var(--ember-light);" in reader_root
 
 
-def test_run_state_colors_pass_wcag_aa_on_every_washi_face():
-    """Run status text (yellow/green/red) must be readable on all paper faces."""
+def test_run_state_colors_pass_wcag_aa_on_every_panel_face():
+    """Run status text (yellow/green/red) must be readable on all panel faces."""
     for name in ("yellow", "green", "red"):
         fg = _token(name)
         worst = min(_hex_ratio(fg, bg) for bg in _paper_surfaces())
         assert worst >= 4.5, (
-            f"run state color --{name} {fg} on washi faces is {worst:.2f}:1, needs 4.5:1"
+            f"run state color --{name} {fg} on panel faces is {worst:.2f}:1, needs 4.5:1"
         )
 
 
@@ -214,7 +214,7 @@ def test_data_hues_map_onto_the_verified_palette():
     palette = set(dashboard.SAFE_HUES.values())
     for legacy, safe in dashboard.SAFE_HUE_MAP.items():
         assert safe in palette, f"{legacy} maps to unverified {safe}"
-    assert dashboard.safe_hue("#D97757") == dashboard.SAFE_HUES["vermilion"]
+    assert dashboard.safe_hue("#D97757") == dashboard.SAFE_HUES["ember"]
     assert dashboard.safe_hue("#888") == dashboard.SAFE_HUES["ink-muted"]
     assert dashboard.safe_hue("not-a-color") == dashboard.SAFE_HUES["ink-muted"]
     # app.py and tokens.css stay in sync.
@@ -223,7 +223,7 @@ def test_data_hues_map_onto_the_verified_palette():
     assert dashboard.SAFE_HUES["purple"] == _token("purple")
     assert dashboard.SAFE_HUES["red"] == _token("red")
     assert dashboard.SAFE_HUES["yellow"] == _token("yellow")
-    assert dashboard.SAFE_HUES["vermilion"] == _token("vermilion")
+    assert dashboard.SAFE_HUES["ember"] == _token("ember")
     assert dashboard.SAFE_HUES["teal"] == _token("teal")
 
 

@@ -9,7 +9,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from fastapi.testclient import TestClient  # noqa: E402
-import agents  # noqa: E402
+from core import agents  # noqa: E402
 import app as module  # noqa: E402
 
 CSRF = {"X-Requested-With": "XMLHttpRequest"}

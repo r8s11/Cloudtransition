@@ -2,39 +2,100 @@ document.addEventListener("DOMContentLoaded", () => {
 	var tabs = Array.from(document.querySelectorAll('.section-nav [role="tab"]'));
 	var panels = document.querySelectorAll('[role="tabpanel"]');
 
-	function activateTab(tab, updateHash) {
-		// Deactivate all tabs
-		tabs.forEach((t) => {
-			t.classList.remove("active");
-			t.setAttribute("aria-selected", "false");
-			t.setAttribute("tabindex", "-1");
-		});
+	var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+	var pageTransition = null;
+	var pendingApply = null;
 
-		// Activate selected tab
-		tab.classList.add("active");
-		tab.setAttribute("aria-selected", "true");
-		tab.setAttribute("tabindex", "0");
-
-		// Show correct panel
-		panels.forEach((p) => {
-			p.classList.remove("active");
-		});
-		var target = document.getElementById("page-" + tab.dataset.page);
-		if (target) {
-			target.classList.add("active");
-			animateBars(target);
+	// Smooth page-to-page change (washi ↔ deck/spatial): the incoming face
+	// expands in a circular wipe from the tab that triggered it, so dark→light
+	// and light→dark read as one world opening over the other. Reduced motion,
+	// no View Transitions, or a transition already in flight: instant, as before.
+	// A request that arrives mid-flight applies immediately and cancels the
+	// queued apply, so rapid clicks never snap back to a stale tab.
+	function withPageTransition(origin, mutate) {
+		if (!origin || !document.startViewTransition || reduceMotion.matches || pageTransition) {
+			pendingApply = null;
+			mutate();
+			return;
 		}
+		pendingApply = mutate;
+		pageTransition = document.startViewTransition(() => {
+			const apply = pendingApply;
+			pendingApply = null;
+			if (apply) apply();
+		});
+		const clear = () => {
+			pageTransition = null;
+		};
+		pageTransition.finished.then(clear, clear);
+		pageTransition.ready
+			.then(() => {
+				const radius = Math.hypot(
+					Math.max(origin.x, innerWidth - origin.x),
+					Math.max(origin.y, innerHeight - origin.y),
+				);
+				document.documentElement.animate(
+					{
+						clipPath: [
+							`circle(0px at ${origin.x}px ${origin.y}px)`,
+							`circle(${radius}px at ${origin.x}px ${origin.y}px)`,
+						],
+					},
+					{
+						duration: 460,
+						easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+						pseudoElement: "::view-transition-new(root)",
+					},
+				);
+			})
+			.catch(() => {});
+	}
 
-		// Update URL hash
-		if (updateHash !== false) {
-			history.replaceState(null, "", "#" + tab.dataset.page);
+	function tabOrigin(tab, event) {
+		if (event && (event.clientX || event.clientY)) {
+			return { x: event.clientX, y: event.clientY };
 		}
+		const rect = tab.getBoundingClientRect();
+		return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+	}
+
+	function activateTab(tab, updateHash, origin) {
+		const mutate = () => {
+			// Deactivate all tabs
+			tabs.forEach((t) => {
+				t.classList.remove("active");
+				t.setAttribute("aria-selected", "false");
+				t.setAttribute("tabindex", "-1");
+			});
+
+			// Activate selected tab
+			tab.classList.add("active");
+			tab.setAttribute("aria-selected", "true");
+			tab.setAttribute("tabindex", "0");
+
+			// Show correct panel
+			panels.forEach((p) => {
+				p.classList.remove("active");
+			});
+			var target = document.getElementById("page-" + tab.dataset.page);
+			if (target) {
+				target.classList.add("active");
+				animateBars(target);
+			}
+
+			// Update URL hash
+			if (updateHash !== false) {
+				history.replaceState(null, "", "#" + tab.dataset.page);
+			}
+		};
+		if (origin) withPageTransition(origin, mutate);
+		else mutate();
 	}
 
 	// Click handler
 	tabs.forEach((tab) => {
-		tab.addEventListener("click", () => {
-			activateTab(tab);
+		tab.addEventListener("click", (e) => {
+			activateTab(tab, undefined, tabOrigin(tab, e));
 			tab.focus();
 		});
 	});
@@ -60,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 
 			if (next) {
-				activateTab(next);
+				activateTab(next, undefined, tabOrigin(next));
 				next.focus();
 			}
 		});
@@ -79,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	window.addEventListener("hashchange", () => {
 		var h = window.location.hash.replace("#", "");
 		var t = tabs.find((tab) => tab.dataset.page === h);
-		if (t) activateTab(t, false);
+		if (t) activateTab(t, false, tabOrigin(t));
 	});
 
 	// Animate progress bars on load
@@ -123,8 +184,15 @@ function animateBars(scope) {
 		return;
 	}
 
+	// Today repeats Next up and Inbox rows; count each task once. The later
+	// Tasks-tab copy wins because it carries the category pill.
 	var taskRows = Array.from(
-		document.querySelectorAll(".task-check[data-realm]"),
+		new Map(
+			Array.from(
+				document.querySelectorAll(".task-check[data-realm]"),
+				(box) => [box.dataset.realm + ":" + box.dataset.line, box],
+			),
+		).values(),
 	).map((box) => {
 		var text =
 			box.parentElement && box.parentElement.querySelector(".task-text");
@@ -1378,7 +1446,15 @@ Context:
 		e.preventDefault();
 		const submit = captureForm.querySelector("button");
 		submit.disabled = true;
-		post("/api/capture", { text: captureInput.value })
+		let schedule;
+		try {
+			schedule = window.dashboardCalendar.readSchedule(captureForm);
+		} catch (error) {
+			captureStatus.textContent = error.message;
+			submit.disabled = false;
+			return;
+		}
+		post("/api/capture", { text: captureInput.value, schedule })
 			.then(({ ok, body }) => {
 				if (!ok) {
 					captureStatus.textContent = errorText(body);
@@ -1393,19 +1469,22 @@ Context:
 				box.tabIndex = 0;
 				box.setAttribute("aria-label", body.text);
 				box.dataset.realm = body.realm;
+				box.dataset.text = body.raw_text || body.text;
+				box.dataset.calendarSource = body.realm;
+				box.dataset.calendarSchedule = JSON.stringify(body.schedule || {});
 				box.dataset.line = String(body.line);
-				box.dataset.text = body.text;
 				const span = document.createElement("span");
 				span.className = "task-text";
 				span.textContent = body.text;
 				row.append(box, span);
 				paintTaskCheck(box, false);
 				inboxList.appendChild(row);
+				document.dispatchEvent(new CustomEvent("calendar:capture", { detail: row }));
 				bindTaskCheck(box);
 				inboxCount.textContent = String(inboxList.children.length);
 				inboxEmpty.hidden = true;
-				captureInput.value = "";
-				captureStatus.textContent = `added to TASKS.md:${body.line}`;
+				captureForm.reset();
+				captureStatus.textContent = `Saved locally to TASKS.md:${body.line}. Google outcome appears in Upcoming calendar.`;
 				captureStatus.className = "run-status is-done";
 			})
 			.catch(() => {
@@ -1435,8 +1514,13 @@ Context:
 					return;
 				}
 				for (const ev of body.evidence) {
-					const cite = document.createElement("div");
+					// shortcut: /workspace-file serves only files in the Workspace map
+					// index, so a cite outside it (agent runtime data) opens a 404.
+					const cite = document.createElement("a");
 					cite.className = "brain-cite";
+					cite.href = "/workspace-file/" + ev.path.split("/").map(encodeURIComponent).join("/");
+					cite.target = "_blank";
+					cite.rel = "noopener noreferrer";
 					cite.textContent = `${ev.path}:${ev.start_line}-${ev.end_line}`;
 					const text = document.createElement("p");
 					text.className = "brain-text";
@@ -1490,6 +1574,24 @@ document.addEventListener("click", (e) => {
 	if (link && frame) frame.src = "/workspace-map/?" + link.dataset.mapQuery;
 });
 
+// Today → Shortcuts → Find a file: hand the text to the map and switch tabs.
+document.getElementById("mapFindForm")?.addEventListener("submit", (e) => {
+	e.preventDefault();
+	const q = e.target.elements.q.value.trim();
+	const frame = document.getElementById("workspaceMapFrame");
+	if (frame) frame.src = "/workspace-map/" + (q ? "?q=" + encodeURIComponent(q) : "");
+	window.location.hash = "#workspace-map";
+});
+
+// A Daily row with data-focus (Today: Second brain) jumps to that control.
+document.addEventListener("click", (e) => {
+	const link = e.target.closest("[data-focus]");
+	const target = link && document.getElementById(link.dataset.focus);
+	if (!target) return;
+	e.preventDefault();
+	target.focus();
+});
+
 // ── Interviews tab: inline tracker edits ────────────────────
 // Every control writes through a small JSON endpoint and updates the row in
 // place; status changes also move the row between the two cards. Notes and
@@ -1503,6 +1605,9 @@ document.addEventListener("click", (e) => {
 	);
 	const closedStatuses = new Set(
 		(page.dataset.interviewClosed || "").split(",").filter(Boolean),
+	);
+	const waitingStatuses = new Set(
+		(page.dataset.interviewWaiting || "").split(",").filter(Boolean),
 	);
 
 	function post(url, payload) {
@@ -1555,6 +1660,7 @@ document.addEventListener("click", (e) => {
 	}
 
 	function paintNext(row, data) {
+		if (window.dashboardCalendar) window.dashboardCalendar.updateInterviews(row, data);
 		const line = row.querySelector("[data-interview-next]");
 		if (!line) return;
 		line.hidden = !data.next_step;
@@ -1565,6 +1671,7 @@ document.addEventListener("click", (e) => {
 			? data.next_step.date
 			: "";
 		row.querySelector("[data-interview-overdue]").hidden = !data.overdue;
+		page.dispatchEvent(new CustomEvent("interview:next", { detail: { row, data } }));
 	}
 
 	function paintSignal(row, data) {
@@ -1607,25 +1714,41 @@ document.addEventListener("click", (e) => {
 				select.disabled = false;
 				paintStatus(row, body.row);
 				setCounts(body.counts);
+				// The deck list regroups its row; the detail stays on this entry.
+				page.dispatchEvent(
+					new CustomEvent("interview:status", { detail: { row, data: body.row } }),
+				);
+				const deck = page.classList.contains("deck");
 				// Closed threads leave the live cards for the collapsed Closed list;
 				// reopening a row sends it back to the card its new status belongs to.
 				let target
 				if (closedStatuses.has(body.row.status)) {
 					target = page.querySelector("[data-interview-list-closed]");
 				} else {
-					const sectionKey = activeStatuses.has(body.row.status) ? "active" : "leads";
+					const sectionKey = waitingStatuses.has(body.row.status)
+						? "waiting"
+						: activeStatuses.has(body.row.status)
+							? "active"
+							: "leads";
 					target = page.querySelector(
 						`[data-interview-section="${sectionKey}"] [data-interview-list]`,
 					);
 				}
 				if (target) {
 					if (row.parentElement !== target) target.appendChild(row);
+				} else if (deck) {
+					// List–detail view: the entry stays put; deck-interviews.js regroups the list row.
+				} else if (waitingStatuses.has(body.row.status)) {
+					// No Waiting card rendered yet; the server builds it on reload.
+					window.location.reload();
+					return;
 				} else if (closedStatuses.has(body.row.status)) {
 					// No Closed list on the page yet; the next load will show it.
 					row.remove();
 				}
 				if (status) {
-					status.textContent = "Saved.";
+					const at = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+					status.textContent = `Saved ${at}`;
 					status.className = "run-status is-done";
 				}
 			})

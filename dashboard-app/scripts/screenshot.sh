@@ -2,7 +2,7 @@
 # Screenshot one dashboard tab with headless Chrome, for headless review runs
 # (the Polish button allowlists exactly this script).
 #
-#   sh dashboard-app/screenshot.sh <tab> <width>   e.g.  today 390  |  run 1280
+#   sh dashboard-app/scripts/screenshot.sh <tab> <width>   e.g.  today 390  |  run 1280
 #
 # Writes dashboard-app/runs/shots/<tab>-<width>.png and prints the path. Reads
 # the always-on server on 127.0.0.1:8000, which hot-reloads templates and
@@ -23,7 +23,7 @@ case $width in '' | *[!0-9]*)
 esac
 
 chrome="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-out="$(cd "$(dirname "$0")" && pwd)/runs/shots"
+out="$(cd "$(dirname "$0")/.." && pwd)/runs/shots"
 mkdir -p "$out"
 file="$out/$tab-$width.png"
 

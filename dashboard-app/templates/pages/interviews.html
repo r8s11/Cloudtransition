@@ -1,7 +1,7 @@
 {# One application row + its inline editor. data-company/data-role are the
    tracker's key; app.js sends them with each write. #}
 {% macro interview_entry(a) %}
-<div class="interview-entry" data-interview data-company="{{ a.company }}" data-role="{{ a.role }}">
+<div class="interview-entry" data-interview data-company="{{ a.company }}" data-role="{{ a.role }}" data-key="{{ a.company }}|{{ a.role }}" tabindex="-1">
   <article class="interview-row">
     <div class="interview-main">
       <div class="interview-heading">
@@ -38,20 +38,54 @@
         <span class="interview-date" data-interview-next-date>{{ a.next_step.date if a.next_step else "" }}</span>
         <span class="interview-overdue" data-interview-overdue {% if not a.overdue %}hidden{% endif %}>past target date</span>
       </p>
+      {% for step in a.calendar_steps %}
+      <div class="calendar-interview-action">
+        {# The step already shown as "Next:" keeps only its button; no second copy of the text. #}
+        <span>{% if not a.next_step or step.task != a.next_step.task %}{{ step.task }}{% endif %}</span>
+        <button class="action-btn action-btn-ghost calendar-schedule-button" type="button"
+                data-calendar-interview='{{ {"source":"interviews", "company":a.company, "role":a.role, "index":step.index, "text":step.task}|tojson }}'
+                data-calendar-schedule='{{ step.schedule|tojson }}' aria-label="Add to calendar for {{ a.company }}: {{ step.task }}">Add to calendar{% if loop.length > 1 %} · step {{ loop.index }}{% endif %}</button>
+      </div>
+      {% endfor %}
     </div>
+    {% if a.agent %}
+    <ol class="iv-pipeline" aria-label="Agent pipeline for {{ a.company }}">
+      <li class="iv-step" data-state="{% if a.agent.reading %}done{% elif a.agent.reader_input %}ready{% else %}blocked{% endif %}">
+        <span class="iv-step-name">Read posting</span>
+        <span class="iv-step-state">{% if a.agent.reading %}Read{% elif a.agent.reader_input %}Ready{% else %}Needs a posting URL{% endif %}</span>
+        {% if a.agent.reader_input and not a.agent.reading %}
+        <button class="action-btn action-btn-ghost" type="button" data-agent-fill="job-reader" data-agent-input="{{ a.agent.reader_input }}" aria-label="Read posting for {{ a.company }} with Job Reader">Read posting</button>
+        {% endif %}
+      </li>
+      <li class="iv-step" data-state="{% if a.agent.tailored %}done{% elif a.agent.reading %}ready{% else %}blocked{% endif %}">
+        <span class="iv-step-name">Tailor CV</span>
+        <span class="iv-step-state">{% if a.agent.tailored %}Tailored{% elif a.agent.reading %}Ready{% else %}After the posting is read{% endif %}</span>
+        {% if a.agent.reading and not a.agent.tailored %}
+        <button class="action-btn action-btn-ghost" type="button" data-agent-fill="cv-tailor" data-agent-input="{{ a.agent.job_id }}" aria-label="Tailor CV for {{ a.company }} with CV Adapter">Tailor CV</button>
+        {% endif %}
+      </li>
+      <li class="iv-step" data-state="{% if a.agent.tailored %}done{% else %}blocked{% endif %}">
+        <span class="iv-step-name">Tailored CV</span>
+        <span class="iv-step-state">{% if a.agent.tailored %}Ready to open{% else %}Not yet{% endif %}</span>
+        {% if a.agent.tailored %}
+        <button class="action-btn action-btn-ghost" type="button" data-output="{{ a.agent.tailored }}" data-output-label="Tailored CV · {{ a.company }}" aria-label="Open Tailored CV for {{ a.company }}">Tailored CV</button>
+        {% endif %}
+      </li>
+    </ol>
+    {% endif %}
     <div class="interview-actions">
-      <button class="action-btn" type="button" data-interview-mode>Interview mode</button>
+      {% if a.status == "new_lead" %}
+      <button class="action-btn" type="button" data-mark-applied="{{ a.company }}|{{ a.role }}" aria-label="Mark {{ a.company }} applied today">Mark applied</button>
+      {% endif %}
+      <button class="action-btn{% if a.status == 'new_lead' %} action-btn-ghost{% endif %}" type="button" data-interview-mode aria-label="Interview mode for {{ a.company }}">Interview mode</button>
+      {% if a.sheet_href %}
+      <a class="action-btn action-btn-ghost" href="{{ a.sheet_href }}" target="_blank" rel="noopener" aria-label="Prep sheet for {{ a.company }}">Prep sheet</a>
+      {% endif %}
+      {% if is_local %}
+      <a class="action-btn action-btn-ghost" href="http://localhost:8787/#session-prepare?company={{ a.company|urlencode }}&amp;role={{ a.role|urlencode }}&amp;url={{ a.url|urlencode }}" aria-label="Mission for {{ a.company }}">Mission</a>
+      {% endif %}
       {% if a.url %}
       <a class="action-btn action-btn-ghost" href="{{ a.url }}" target="_blank" rel="noopener noreferrer" aria-label="Posting for {{ a.company }}">Posting</a>
-      {% endif %}
-      {% if a.agent and a.agent.reader_input and not a.agent.reading %}
-      <button class="action-btn action-btn-ghost" type="button" data-agent-fill="job-reader" data-agent-input="{{ a.agent.reader_input }}" aria-label="Read the posting for {{ a.company }} with Job Reader">Read posting</button>
-      {% endif %}
-      {% if a.agent and a.agent.reading and not a.agent.tailored %}
-      <button class="action-btn action-btn-ghost" type="button" data-agent-fill="cv-tailor" data-agent-input="{{ a.agent.job_id }}" aria-label="Tailor the CV for {{ a.company }} with CV Adapter">Tailor CV</button>
-      {% endif %}
-      {% if a.agent and a.agent.tailored %}
-      <button class="action-btn action-btn-ghost" type="button" data-output="{{ a.agent.tailored }}" data-output-label="Tailored CV · {{ a.company }}">Tailored CV</button>
       {% endif %}
     </div>
   </article>
@@ -59,7 +93,8 @@
   <details class="interview-tools">
     <summary>Update application</summary>
 
-    <div class="interview-grid">
+    <fieldset class="interview-group interview-group-status">
+      <legend>Status and priority</legend>
       <label class="interview-field">
         <span>Status</span>
         <select class="run-select" data-interview-select="status">
@@ -76,77 +111,138 @@
           {% endfor %}
         </select>
       </label>
-      <div class="interview-form-actions">
-        <span class="run-status" data-interview-field-status role="status" aria-live="polite"></span>
-      </div>
-    </div>
+      <span class="run-status" data-interview-field-status role="status" aria-live="polite"></span>
+    </fieldset>
 
-    <form class="interview-grid" data-interview-next-form>
-      <label class="interview-field interview-field-wide">
-        <span>Next action</span>
-        <input class="run-input" name="task" maxlength="300" placeholder="Follow up, schedule, send thank-you" value="{{ a.next_step.task if a.next_step else '' }}">
-      </label>
-      <label class="interview-field">
-        <span>Date</span>
-        <input class="run-input" type="date" name="date" value="{{ a.next_step.date if a.next_step else '' }}">
-      </label>
-      <div class="interview-form-actions">
+    <form data-interview-next-form>
+      <fieldset class="interview-group interview-group-next">
+        <legend>Next action</legend>
+        <label class="interview-field">
+          <span>What to do</span>
+          <textarea class="run-input" name="task" rows="3" maxlength="300" placeholder="Follow up, schedule, send thank-you">{{ a.next_step.task if a.next_step else '' }}</textarea>
+        </label>
+        <label class="interview-field">
+          <span>Date</span>
+          <input class="run-input interview-field-date" type="date" name="date" value="{{ a.next_step.date if a.next_step else '' }}">
+        </label>
         <button class="action-btn action-btn-ghost" type="submit">Save next action</button>
-        <span class="run-status" data-interview-feedback role="status" aria-live="polite"></span>
-      </div>
+        <span class="run-status interview-group-feedback" data-interview-feedback role="status" aria-live="polite"></span>
+      </fieldset>
     </form>
 
-    <form class="interview-grid" data-interview-signal-form>
-      <label class="interview-field">
-        <span>Signal date</span>
-        <input class="run-input" type="date" name="date" value="{{ today }}" required>
-      </label>
-      <label class="interview-field">
-        <span>Stage</span>
-        <input class="run-input" name="stage" maxlength="80" placeholder="phone_screen" required>
-      </label>
-      <label class="interview-field interview-field-wide">
-        <span>What happened</span>
-        <input class="run-input" name="notes" maxlength="1000" placeholder="Interviewer, questions to revisit, next round">
-      </label>
-      <div class="interview-form-actions">
+    <form data-interview-signal-form>
+      <fieldset class="interview-group interview-group-signal">
+        <legend>Log a signal</legend>
+        <label class="interview-field">
+          <span>Date</span>
+          <input class="run-input interview-field-date" type="date" name="date" value="{{ today }}" required>
+        </label>
+        <label class="interview-field">
+          <span>Stage</span>
+          <input class="run-input" name="stage" maxlength="80" placeholder="Phone screen" required>
+        </label>
+        <label class="interview-field">
+          <span>What happened</span>
+          <input class="run-input" name="notes" maxlength="1000" placeholder="Interviewer, questions to revisit, next round">
+        </label>
         <button class="action-btn action-btn-ghost" type="submit">Log signal</button>
-        <span class="run-status" data-interview-feedback role="status" aria-live="polite"></span>
-      </div>
+        <span class="run-status interview-group-feedback" data-interview-feedback role="status" aria-live="polite"></span>
+      </fieldset>
     </form>
 
-    <form class="interview-grid" data-interview-notes-form>
-      <label class="interview-field interview-field-wide">
-        <span>Interview notes</span>
-        <textarea class="run-input interview-notes" name="notes" rows="4" maxlength="4000" placeholder="Questions asked, answers to sharpen, follow-ups">{{ a.notes }}</textarea>
-      </label>
-      <div class="interview-form-actions">
-        <button class="action-btn action-btn-ghost" type="submit">Save notes</button>
-        <span class="run-status" data-interview-feedback role="status" aria-live="polite"></span>
-      </div>
+    <form data-interview-notes-form>
+      <fieldset class="interview-group interview-group-notes">
+        <legend>Interview notes</legend>
+        <textarea class="run-input interview-notes" name="notes" rows="4" maxlength="4000" aria-label="Interview notes" placeholder="Questions asked, answers to sharpen, follow-ups">{{ a.notes }}</textarea>
+        <div class="interview-form-actions">
+          <button class="action-btn action-btn-ghost" type="submit">Save notes</button>
+          <span class="run-status" data-interview-feedback role="status" aria-live="polite"></span>
+        </div>
+      </fieldset>
     </form>
   </details>
 </div>
 {% endmacro %}
 
+{# Compact row in the left list; data-key matches the entry it selects. #}
+{% macro interview_list_row(a, group) %}
+<li class="deck-row iv-row" role="option" aria-selected="false" tabindex="-1"
+    data-iv-row data-key="{{ a.company }}|{{ a.role }}" data-group="{{ group }}"
+    data-status="{{ a.status }}" data-overdue="{{ 'true' if a.overdue else 'false' }}"
+    data-search="{{ (a.company ~ ' ' ~ a.role ~ ' ' ~ (a.location or '') ~ ' ' ~ (a.next_step.task if a.next_step else ''))|lower }}">
+  <span class="deck-dot" data-iv-dot aria-hidden="true"></span>
+  <span class="iv-row-text">
+    <span class="deck-row-title">{{ a.company }}</span>
+    <span class="deck-row-sub">{{ a.role }}</span>
+  </span>
+  <span class="deck-row-meta iv-row-meta">
+    {% if a.next_step and a.next_step.date %}<time datetime="{{ a.next_step.date }}">{{ a.next_step.date }}</time>{% endif %}
+    <span class="iv-overdue" {% if not a.overdue %}hidden{% endif %}>overdue</span>
+  </span>
+</li>
+{% endmacro %}
+
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- INTERVIEWS PAGE                                             -->
 <!-- ════════════════════════════════════════════════════════════ -->
-<div class="page" id="page-interviews" role="tabpanel" aria-labelledby="tab-interviews"
+<div class="page deck" id="page-interviews" role="tabpanel" aria-labelledby="tab-interviews"
      data-interview-active="{{ interview_active_statuses|join(',') }}"
+     data-interview-waiting="{{ interview_waiting_statuses|join(',') }}"
      data-interview-closed="rejected,withdrawn">
+  <div class="deck-hud">
   <div class="page-header">
-    <h2>Interview dashboard</h2>
-    <p>
-      Live applications, their last recorded signal and the next action &mdash;
-      edited in place and written back to interviews/job-applications.yml.
-      <strong>Interview mode</strong> opens one application full-screen: who
-      you're talking to, your resume and prep files, the posting, questions to
-      ask and notes to take during the call.
-    </p>
+    <h2>Interviews</h2>
+    <p>Select an application and update it in place; edits are written to interviews/job-applications.yml.</p>
   </div>
 
-  <div class="card">
+  {% if interview_rows %}
+  <div class="card iv-stats-card">
+    <div class="card-title">Pipeline</div>
+    <div class="grid-5 mb-12 job-stats deck-readout">
+      {% for label, key, color in [
+        ("Tracked", "tracked", "color-blue"),
+        ("In conversation", "active", "color-purple"),
+        ("New leads", "leads", "color-yellow"),
+        ("Waiting", "waiting", ""),
+        ("High priority", "high", "color-accent"),
+      ] %}
+      <div class="stat-box stat-sm">
+        <div class="stat-value {{ color }}" data-interview-count="{{ key }}">{{ interview_counts[key] }}</div>
+        <div class="stat-label">{{ label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <details class="iv-count-help">
+      <summary>How counts work</summary>
+      <p class="interview-note">
+        Counts come from the tracker's status field and cover live threads only.
+        A lead counts as &ldquo;new&rdquo; until the file records an application.
+        Waiting threads count as tracked but not as active work; rejected and
+        withdrawn applications sit under Closed threads and are not counted as work.
+      </p>
+    </details>
+  </div>
+  {% endif %}
+  </div>
+
+  <div class="deck-toolbar iv-toolbar">
+    {% if interview_rows %}
+    <label class="iv-search">
+      <span class="sr-only">Filter applications</span>
+      <svg class="iv-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+      <input type="search" class="deck-search" data-iv-filter placeholder="Filter by company, role, location or next action" autocomplete="off">
+      <kbd aria-hidden="true">/</kbd>
+    </label>
+    <div class="deck-segments" role="group" aria-label="Show applications">
+      <button type="button" data-iv-segment="needs" aria-pressed="false">Needs action <span class="deck-num" data-iv-count="needs"></span></button>
+      <button type="button" data-iv-segment="active" aria-pressed="false">In conversation <span class="deck-num" data-iv-count="active"></span></button>
+      <button type="button" data-iv-segment="leads" aria-pressed="false">Leads <span class="deck-num" data-iv-count="leads"></span></button>
+      <button type="button" data-iv-segment="waiting" aria-pressed="false">Waiting <span class="deck-num" data-iv-count="waiting"></span></button>
+      <button type="button" data-iv-segment="closed" aria-pressed="false">Closed <span class="deck-num" data-iv-count="closed"></span></button>
+      <button type="button" data-iv-segment="all" aria-pressed="false">All <span class="deck-num" data-iv-count="all"></span></button>
+    </div>
+    {% endif %}
+  <div class="card iv-add-card">
     <details class="interview-add">
       <summary class="card-title">Add application</summary>
       <form class="interview-grid" id="interviewAddForm">
@@ -201,35 +297,74 @@
       </form>
     </details>
   </div>
+  </div>
 
   {% if not interview_rows %}
   <div class="card">
     <div class="card-title">Pipeline</div>
-    <p class="run-empty">No applications in interviews/job-applications.yml yet.</p>
+    <p class="run-empty">The tracker is an empty file. Open <strong>Add application</strong> above and the first lead lands in interviews/job-applications.yml.</p>
   </div>
   {% else %}
 
-  <div class="card">
-    <div class="card-title">Pipeline</div>
-    <div class="grid-3 mb-12 job-stats">
-      {% for label, key, color in [
-        ("Tracked", "tracked", "color-blue"),
-        ("In conversation", "active", "color-purple"),
-        ("New leads", "leads", "color-yellow"),
-        ("High priority", "high", "color-accent"),
+  <div class="deck-split iv-split">
+  <div class="iv-list-col">
+    <ul class="deck-list iv-list" role="listbox" aria-label="Applications" data-iv-list>
+      {% for group, label, rows in [
+        ("active", "In conversation", interview_active),
+        ("leads", "New leads", interview_leads),
+        ("waiting", "Waiting", interview_waiting),
+        ("closed", "Closed", interview_closed),
       ] %}
-      <div class="stat-box stat-sm">
-        <div class="stat-value {{ color }}" data-interview-count="{{ key }}">{{ interview_counts[key] }}</div>
-        <div class="stat-label">{{ label }}</div>
-      </div>
+      <li class="deck-group" role="presentation" data-iv-group="{{ group }}" {% if not rows %}hidden{% endif %}>{{ label }}</li>
+      {% for a in rows %}{{ interview_list_row(a, group) }}{% endfor %}
+      {% endfor %}
+    </ul>
+    <p class="deck-empty iv-empty" data-iv-empty hidden>
+      Nothing matches that filter. Press <kbd>Esc</kbd> to clear it, or pick another group.
+    </p>
+  </div>
+
+  <div class="deck-detail iv-detail" data-iv-detail>
+  <button class="action-btn action-btn-ghost iv-back" type="button" data-iv-back>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+    Back to list
+  </button>
+
+  <div class="card" data-interview-section="active">
+    <div class="card-title">
+      In conversation
+      <span class="badge badge-count" data-interview-count="active">{{ interview_active|length }}</span>
+    </div>
+
+    {% if not interview_active %}
+    <p class="run-empty">
+      No application is past the lead stage yet. Apply to a lead, set its
+      status to <code>applied</code>, and it is tracked here.
+    </p>
+    {% endif %}
+
+    <div data-interview-list>
+      {% for a in interview_active %}
+        {{ interview_entry(a) }}
       {% endfor %}
     </div>
-    <p class="interview-note">
-      Counts come from the tracker's status field and cover live threads only.
-      A lead counts as &ldquo;new&rdquo; until the file records an application;
-      rejected and withdrawn applications sit under Closed threads and are not
-      counted as work.
-    </p>
+  </div>
+
+  <div class="card" data-interview-section="leads">
+    <div class="card-title">
+      New leads
+      <span class="badge badge-count" data-interview-count="leads">{{ interview_leads|length }}</span>
+    </div>
+
+    {% if not interview_leads %}
+    <p class="run-empty">No open leads. Add one above, or pull one from a Scout scan below.</p>
+    {% endif %}
+
+    <div data-interview-list>
+      {% for a in interview_leads %}
+        {{ interview_entry(a) }}
+      {% endfor %}
+    </div>
   </div>
 
   <section class="card" id="interviewAgents" aria-labelledby="interview-agents-title">
@@ -257,7 +392,7 @@
     </ul>
     <p class="run-status" id="interviewLeadStatus" role="status" aria-live="polite"></p>
     {% elif agent_scan %}
-    <p class="ops-empty">Every job in the latest Scout scan is already in the tracker.</p>
+    <p class="ops-empty">Scout has nothing new: every job in the latest scan is already tracked.</p>
     {% else %}
     <p class="ops-empty">No Scout scan yet. Run one below.</p>
     {% endif %}
@@ -267,42 +402,23 @@
     </div>
   </section>
 
-  <div class="card" data-interview-section="active">
+  {% if interview_waiting %}
+  <div class="card" data-interview-section="waiting">
     <div class="card-title">
-      In conversation
-      <span class="badge badge-count" data-interview-count="active">{{ interview_active|length }}</span>
+      Waiting
+      <span class="badge badge-count" data-interview-count="waiting">{{ interview_waiting|length }}</span>
     </div>
-
-    {% if not interview_active %}
-    <p class="run-empty">
-      No application past the lead stage. Apply to a lead below, then set its
-      status to <code>applied</code>.
+    <p class="interview-note">
+      Applied or interviewed; waiting to hear back. Not counted as active work.
+      Change the status in the row to bring it back.
     </p>
-    {% endif %}
-
     <div data-interview-list>
-      {% for a in interview_active %}
+      {% for a in interview_waiting %}
         {{ interview_entry(a) }}
       {% endfor %}
     </div>
   </div>
-
-  <div class="card" data-interview-section="leads">
-    <div class="card-title">
-      New leads
-      <span class="badge badge-count" data-interview-count="leads">{{ interview_leads|length }}</span>
-    </div>
-
-    {% if not interview_leads %}
-    <p class="run-empty">No unapplied leads in the tracker.</p>
-    {% endif %}
-
-    <div data-interview-list>
-      {% for a in interview_leads %}
-        {{ interview_entry(a) }}
-      {% endfor %}
-    </div>
-  </div>
+  {% endif %}
 
   {% if interview_closed %}
   <div class="card">
@@ -323,6 +439,14 @@
     </details>
   </div>
   {% endif %}
+  </div>
+  </div>
 
+  <p class="deck-dock iv-keys" aria-hidden="true">
+    <span class="deck-hint"><kbd>/</kbd> filter</span>
+    <span class="deck-hint"><kbd>j</kbd><kbd>k</kbd> move</span>
+    <span class="deck-hint"><kbd>Enter</kbd> edit</span>
+    <span class="deck-hint"><kbd>Esc</kbd> back</span>
+  </p>
   {% endif %}
 </div>

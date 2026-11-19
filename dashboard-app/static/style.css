@@ -1,9 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
-   CloudTransition — The Orizuru Design System
-   One uncut sheet of vermilion washi, becoming a crane through
-   discrete, numbered folds. Every task is a fold; the finished
-   shape still carries every crease. Files are recoverable — every
-   fold can be unmade.
+   CloudTransition — Dark-blue FUI Design System
+   A deep navy ground, raised panels with hairline edges, and one
+   orange signal for the active, the primary and the changed.
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── Fonts — self-hosted (OFL, licenses beside the files) so the dashboard
@@ -33,29 +31,12 @@
 /* Shared palette, type, and shape tokens live in tokens.css so the reader
    resolves the same values. This block keeps only sheet-specific texture. */
 :root {
-	--surface-hover: var(--paper-hi);
+	--surface-hover: var(--panel-hi);
 
-	/* Paper shadows — a tight contact layer plus a soft lift, so hairline
-	   borders never sit under a single wide blur. */
-	--shadow: 0 1px 2px rgba(90, 62, 31, 0.1), 0 2px 8px rgba(90, 62, 31, 0.08);
-	--shadow-lg: 0 2px 4px rgba(90, 62, 31, 0.1), 0 10px 24px rgba(90, 62, 31, 0.16);
+	/* Shadows — a tight contact layer plus a soft lift on the dark ground. */
+	--shadow: 0 1px 2px rgba(0, 4, 12, 0.5), 0 2px 8px rgba(0, 4, 12, 0.35);
+	--shadow-lg: 0 2px 4px rgba(0, 4, 12, 0.5), 0 12px 28px rgba(0, 4, 12, 0.55);
 
-	/* Fiber texture — layered gradients suggest kozo strands */
-	--washi-fiber:
-		repeating-linear-gradient(
-			102deg,
-			rgba(179, 33, 46, 0.05) 0px,
-			rgba(179, 33, 46, 0) 2px,
-			rgba(255, 245, 225, 0.04) 3px,
-			rgba(255, 245, 225, 0) 5px
-		),
-		repeating-linear-gradient(
-			16deg,
-			rgba(140, 24, 32, 0.05) 0px,
-			rgba(140, 24, 32, 0) 2px,
-			rgba(255, 245, 225, 0.03) 3px,
-			rgba(255, 245, 225, 0) 5px
-		);
 }
 
 /* Spacing scale — 4px base: 8 / 12 / 16 / 20 / 24px.
@@ -74,28 +55,29 @@
 
 body {
 	font-family: var(--sans);
-	background-color: var(--vermilion-deep);
-	background-image: var(--washi-fiber);
+	background-color: var(--void);
+	background-image:
+		radial-gradient(900px 480px at 85% -10%, rgba(255, 122, 26, 0.09), transparent 70%),
+		radial-gradient(1100px 600px at 0% 0%, rgba(40, 96, 190, 0.16), transparent 70%);
 	background-attachment: fixed;
-	/* The ground is vermilion; inherited text must read on it. Washi faces
-	   (.card, .sheet-faces) reset to --text on their own paper surfaces. */
-	color: var(--fold-white);
+	/* Panels (.card, .sheet-faces) reset to --text on their own surfaces. */
+	color: var(--bright);
 	line-height: 1.6;
 	min-height: 100vh;
 	-webkit-font-smoothing: antialiased;
 }
 
-/* Paper tooth — faint turbulence over the whole sheet */
+/* Instrument grid — a faint 48px lattice behind everything */
 body::before {
 	content: "";
 	position: fixed;
 	inset: 0;
 	z-index: 0;
 	pointer-events: none;
-	opacity: 0.05;
-	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-	background-repeat: repeat;
-	background-size: 256px 256px;
+	background-image:
+		linear-gradient(rgba(106, 169, 255, 0.045) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(106, 169, 255, 0.045) 1px, transparent 1px);
+	background-size: 48px 48px;
 }
 
 body > * {
@@ -104,8 +86,8 @@ body > * {
 }
 
 ::selection {
-	background: var(--vermilion);
-	color: var(--fold-white);
+	background: var(--ember);
+	color: var(--on-ember);
 }
 
 :focus-visible {
@@ -120,8 +102,8 @@ body > * {
 	left: -9999px;
 	top: 0;
 	z-index: 200;
-	background: var(--paper-hi);
-	color: var(--sumi);
+	background: var(--panel-hi);
+	color: var(--ink-strong);
 	padding: 10px 18px;
 	font-weight: 600;
 	border-radius: 0 0 var(--radius) 0;
@@ -136,13 +118,13 @@ body > * {
 	position: sticky;
 	top: 0;
 	z-index: 100;
-	background: var(--vermilion);
-	background-image: var(--washi-fiber);
-	border-bottom: 2px solid rgba(79, 9, 14, 0.55);
-	color: var(--fold-white);
+	background: rgba(7, 16, 31, 0.92);
+	backdrop-filter: blur(12px);
+	border-bottom: 1px solid var(--border);
+	color: var(--bright);
 	box-shadow:
-		0 1px 0 rgba(244, 234, 216, 0.28) inset,
-		0 3px 12px rgba(70, 10, 15, 0.28);
+		0 2px 0 -1px var(--ember),
+		0 6px 18px rgba(0, 4, 12, 0.5);
 }
 
 .masthead-bar {
@@ -163,7 +145,7 @@ body > * {
 	font-family: var(--sans);
 	font-size: 22px;
 	font-weight: 600;
-	color: var(--fold-white);
+	color: var(--bright);
 	letter-spacing: 0.4px;
 	line-height: 1.2;
 	margin: 0;
@@ -171,9 +153,9 @@ body > * {
 
 .brand-issue {
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 500;
-	color: rgba(244, 234, 216, 0.9); /* 4.7:1 on vermilion */
+	color: rgba(233, 241, 252, 0.9); /* 7:1 on the navy ground */
 	text-transform: uppercase;
 	letter-spacing: 2px;
 	white-space: nowrap;
@@ -182,7 +164,7 @@ body > * {
 .masthead-date {
 	font-family: var(--mono);
 	font-size: 12px;
-	color: rgba(244, 234, 216, 0.8);
+	color: rgba(233, 241, 252, 0.8);
 	letter-spacing: 0.5px;
 	white-space: nowrap;
 }
@@ -195,18 +177,18 @@ body > * {
 }
 
 .masthead .action-btn {
-	background: var(--fold-white);
-	color: var(--vermilion-deep);
-	border-color: rgba(244, 234, 216, 0.55);
+	background: transparent;
+	color: var(--ember-text);
+	border-color: var(--ember);
 }
 
 .masthead .action-btn:hover {
-	background: var(--paper-hi);
-	color: var(--sumi);
+	background: var(--ember);
+	color: var(--on-ember);
 }
 
 .masthead .action-status {
-	color: rgba(244, 234, 216, 0.9);
+	color: rgba(233, 241, 252, 0.9);
 }
 
 /* ── Sheet layout ──────────────────────────────────────────── */
@@ -222,12 +204,11 @@ body > * {
 
 /* ── Fold column — the week as a numbered margin ───────────── */
 .fold-column {
-	background: var(--vermilion);
-	background-image: var(--washi-fiber);
-	border: 1px solid rgba(79, 9, 14, 0.6);
-	border-top: 2px solid rgba(79, 9, 14, 0.7);
+	background: var(--panel-deep);
+	border: 1px solid var(--border);
+	border-top: 2px solid var(--ember);
 	border-radius: var(--radius-lg);
-	color: var(--fold-white);
+	color: var(--bright);
 	box-shadow: var(--shadow);
 	position: sticky;
 	top: 96px;
@@ -237,15 +218,15 @@ body > * {
 
 .fold-column-header {
 	padding: 16px 18px 10px;
-	border-bottom: 1px solid rgba(244, 234, 216, 0.22);
+	border-bottom: 1px solid rgba(233, 241, 252, 0.22);
 }
 
 .fold-column-kicker {
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	text-transform: uppercase;
 	letter-spacing: 2.2px;
-	color: rgba(244, 234, 216, 0.62);
+	color: rgba(233, 241, 252, 0.62);
 	margin-bottom: 2px;
 }
 
@@ -255,7 +236,7 @@ body > * {
 	gap: 8px;
 	font-size: 17px;
 	font-weight: 600;
-	color: var(--fold-white);
+	color: var(--bright);
 }
 
 .fold-column-note {
@@ -263,7 +244,7 @@ body > * {
 	margin-top: 4px;
 	font-size: 12px;
 	line-height: 1.5;
-	color: rgba(244, 234, 216, 0.72);
+	color: rgba(233, 241, 252, 0.72);
 }
 
 .fold-steps {
@@ -279,10 +260,7 @@ body > * {
 	align-items: baseline;
 	/* right padding clears the absolute fold-dot (10px inset + 8px dot) */
 	padding: 9px 30px 9px 12px;
-	border-bottom: 1px solid rgba(244, 234, 216, 0.14);
-}
-
-.fold-step {
+	border-bottom: 1px solid rgba(233, 241, 252, 0.14);
 	cursor: pointer;
 	transition:
 		background-color 160ms ease,
@@ -291,7 +269,7 @@ body > * {
 
 .fold-step:hover,
 .fold-step.is-focused {
-	background: rgba(255, 245, 225, 0.11);
+	background: rgba(106, 169, 255, 0.1);
 	box-shadow: inset 3px 0 0 rgba(244, 201, 93, 0.72);
 }
 
@@ -302,7 +280,7 @@ body > * {
 
 .fold-step.is-focused .fold-number,
 .fold-step.is-focused .fold-label {
-	color: var(--fold-white);
+	color: var(--bright);
 }
 
 .fold-step.is-focused .fold-number {
@@ -312,35 +290,35 @@ body > * {
 .fold-focus-card {
 	margin: 0 12px 12px;
 	padding: 12px 12px 11px;
-	border: 1px solid rgba(244, 234, 216, 0.25);
+	border: 1px solid rgba(233, 241, 252, 0.25);
 	border-radius: var(--radius);
-	background: rgba(44, 5, 8, 0.18);
+	background: rgba(0, 4, 12, 0.35);
 }
 
 .fold-focus-kicker,
 .fold-focus-meta {
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	letter-spacing: 1.1px;
 	text-transform: uppercase;
 }
 
 .fold-focus-kicker {
-	color: rgba(244, 234, 216, 0.6);
+	color: rgba(233, 241, 252, 0.6);
 }
 
 .fold-focus-title {
 	display: block;
 	margin-top: 4px;
-	color: var(--fold-white);
+	color: var(--bright);
 	font-size: 13px;
 	line-height: 1.35;
 }
 
 .fold-focus-detail {
 	margin: 5px 0 9px;
-	color: rgba(244, 234, 216, 0.78);
-	font-size: 11.5px;
+	color: rgba(233, 241, 252, 0.78);
+	font-size: 12px;
 	line-height: 1.45;
 }
 
@@ -349,7 +327,7 @@ body > * {
 	margin-bottom: 7px;
 	overflow: hidden;
 	border-radius: 999px;
-	background: rgba(244, 234, 216, 0.18);
+	background: rgba(233, 241, 252, 0.18);
 }
 
 .fold-focus-progress span {
@@ -364,7 +342,7 @@ body > * {
 }
 
 .fold-focus-meta {
-	color: rgba(244, 234, 216, 0.58);
+	color: rgba(233, 241, 252, 0.58);
 	letter-spacing: 0.5px;
 }
 
@@ -377,18 +355,18 @@ body > * {
 }
 
 .fold-neural-graph .neural-line {
-	stroke: rgba(244, 234, 216, 0.15);
+	stroke: rgba(233, 241, 252, 0.15);
 	stroke-width: 1;
 	fill: none;
 }
 
 .fold-neural-graph .neural-line.is-active {
-	stroke: rgba(201, 162, 39, 0.45);
+	stroke: rgba(255, 194, 71, 0.45);
 	stroke-width: 1.3;
 }
 
 .fold-neural-graph .neural-dot {
-	fill: rgba(244, 234, 216, 0.2);
+	fill: rgba(233, 241, 252, 0.2);
 	transition: fill 200ms ease;
 }
 
@@ -397,7 +375,7 @@ body > * {
 }
 
 .fold-neural-graph .neural-dot.is-done {
-	fill: rgba(244, 234, 216, 0.35);
+	fill: rgba(233, 241, 252, 0.35);
 }
 
 
@@ -410,7 +388,7 @@ body > * {
 	font-size: 12px;
 	font-weight: 500;
 	text-align: right;
-	color: rgba(244, 234, 216, 0.55);
+	color: rgba(233, 241, 252, 0.55);
 	font-variant-numeric: tabular-nums;
 }
 
@@ -422,22 +400,22 @@ body > * {
 
 .fold-day {
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	text-transform: uppercase;
 	letter-spacing: 1.2px;
-	color: rgba(244, 234, 216, 0.62);
+	color: rgba(233, 241, 252, 0.62);
 }
 
 .fold-label {
 	font-size: 12.5px;
 	line-height: 1.35;
-	color: rgba(244, 234, 216, 0.92);
+	color: rgba(233, 241, 252, 0.92);
 	overflow-wrap: anywhere;
 }
 
 /* Active fold — today. Gold dot marks the active step. */
 .fold-step.active {
-	background: rgba(255, 245, 225, 0.07);
+	background: rgba(106, 169, 255, 0.07);
 	box-shadow: inset 3px 0 0 var(--gold);
 }
 
@@ -447,7 +425,7 @@ body > * {
 }
 
 .fold-step.active .fold-label {
-	color: var(--fold-white);
+	color: var(--bright);
 	font-weight: 600;
 }
 
@@ -460,7 +438,7 @@ body > * {
 	height: 8px;
 	border-radius: 50%;
 	background: transparent;
-	border: 1px solid rgba(244, 234, 216, 0.35);
+	border: 1px solid rgba(233, 241, 252, 0.35);
 }
 
 /* The title dot sits inline beside "Week N"; absolute placement anchored it
@@ -474,7 +452,7 @@ body > * {
 .fold-step.active .fold-dot {
 	background: var(--gold);
 	border-color: var(--gold);
-	box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.28);
+	box-shadow: 0 0 0 3px rgba(255, 194, 71, 0.28);
 }
 
 /* ── Section nav — the pages as faces of the sheet, in four groups ── */
@@ -495,7 +473,7 @@ body > * {
 	min-width: 0;
 	padding-right: 10px;
 	margin-right: 10px;
-	border-right: 1px solid rgba(244, 234, 216, 0.26);
+	border-right: 1px solid rgba(233, 241, 252, 0.26);
 }
 
 .nav-group:last-child {
@@ -504,15 +482,15 @@ body > * {
 	border-right: 0;
 }
 
-/* 0.9 alpha holds 4.7:1 on the vermilion ground at this size. */
+/* 0.9 alpha holds 7:1 on the navy ground at this size. */
 .nav-group-label {
 	font-family: var(--mono);
-	font-size: 10px;
+	font-size: 12px;
 	font-weight: 500;
 	line-height: 1;
 	letter-spacing: 1.6px;
 	text-transform: uppercase;
-	color: rgba(244, 234, 216, 0.9);
+	color: rgba(233, 241, 252, 0.9);
 	padding-left: 8px;
 }
 
@@ -528,7 +506,7 @@ body > * {
 	appearance: none;
 	border: 1px solid transparent;
 	background: transparent;
-	color: rgba(244, 234, 216, 0.92);
+	color: rgba(233, 241, 252, 0.92);
 	font-family: var(--sans);
 	font-size: 13px;
 	font-weight: 500;
@@ -544,31 +522,31 @@ body > * {
 }
 
 .nav-tab:hover {
-	background: rgba(255, 245, 225, 0.14);
-	color: var(--fold-white);
+	background: rgba(106, 169, 255, 0.14);
+	color: var(--bright);
 }
 
 .nav-tab.active {
-	background: var(--fold-white);
-	color: var(--vermilion-deep);
-	border-color: var(--fold-white);
-	box-shadow: 0 1px 0 rgba(79, 9, 14, 0.4) inset;
+	background: var(--ember);
+	color: var(--on-ember);
+	border-color: var(--ember);
+	font-weight: 600;
 }
 
 /* Reader leaves the sheet for its own page, so it alone keeps an outline. */
 .nav-tab-reader {
 	text-decoration: none;
 	margin-left: 6px;
-	border: 1px dashed rgba(244, 234, 216, 0.5);
+	border: 1px dashed rgba(233, 241, 252, 0.5);
 }
 
 /* ── Sheet faces — the unfolded content area ───────────────── */
 .sheet-faces {
-	background: var(--paper);
+	background: var(--panel);
 	color: var(--text);
 	border: 1px solid var(--border);
-	border-top: 3px solid var(--vermilion);
-	border-radius: var(--radius-lg);
+	border-top: 2px solid var(--ember);
+	border-radius: 0;
 	box-shadow: var(--shadow);
 	padding: 24px 28px 12px;
 	min-height: calc(100vh - 150px);
@@ -595,6 +573,15 @@ body > * {
 	}
 }
 
+/* Page-to-page wipe (app.js withPageTransition): the outgoing face holds still
+   while the incoming one is revealed by a clip-path circle, so the base and
+   deck grounds cross as one world opening over the other instead of a muddy
+   blend. The circle itself is animated from JS on ::view-transition-new(root). */
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation: none;
+}
+
 .page-header {
 	display: flex;
 	flex-direction: column;
@@ -607,13 +594,408 @@ body > * {
 .page-header h2 {
 	font-size: 24px;
 	font-weight: 700;
-	color: var(--sumi);
+	color: var(--ink-strong);
 	letter-spacing: -0.2px;
 }
 
 .page-header p {
 	font-size: 13.5px;
 	color: var(--text-muted);
+}
+
+/* ── HUD layout grammar (base theme, 2026-11-18) ─────────────────
+   Perimeter header: title and one line on the left, a telemetry readout
+   on the right. Body: one focal instrument on a 12-column stage, wings
+   beside it, a dock below. Panels are square with two signal brackets. */
+.page-header.hud-header {
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 16px 32px;
+	padding-bottom: 16px;
+	margin-bottom: 24px;
+}
+
+.hud-title {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	flex: 1 1 320px;
+	min-width: 0;
+	max-width: 68ch;
+}
+
+.hud-readout {
+	position: relative;
+	display: flex;
+	flex-wrap: wrap;
+	min-width: 0;
+	background: var(--panel-deep);
+	border: 1px solid var(--border);
+}
+
+.hud-readout > div {
+	display: flex;
+	flex-direction: column-reverse;
+	justify-content: flex-end;
+	gap: 4px;
+	min-width: 0;
+	padding: 8px 16px;
+	border-left: 1px solid var(--border-light);
+}
+
+.hud-readout > div:first-child {
+	border-left: 0;
+}
+
+.hud-readout dt {
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 1.3;
+	color: var(--text-muted);
+}
+
+.hud-readout dd {
+	font-family: var(--mono);
+	font-size: 20px;
+	font-weight: 600;
+	line-height: 1.1;
+	color: var(--ink-strong);
+	font-variant-numeric: tabular-nums;
+	overflow-wrap: anywhere;
+}
+
+/* A readout inside a panel (Books by quarter) fills the panel width. */
+.hud-readout-fill {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+	gap: 1px;
+}
+
+.hud-readout-fill > div {
+	border-left: 0;
+	box-shadow: 0 0 0 1px var(--border);
+}
+
+.hud-readout > .is-now dt,
+.hud-readout > .is-now dd {
+	color: var(--ember-text);
+}
+
+/* The current period: the signal rule on top, the word "now" in the key. */
+.hud-readout > .is-now {
+	box-shadow:
+		inset 0 2px 0 var(--ember),
+		0 0 0 1px var(--border);
+}
+
+/* Inside a bracketed panel the readout drops its own brackets. */
+.card .hud-readout::before,
+.card .hud-readout::after {
+	content: none;
+}
+
+/* Command bar: the controls that drive the page, in one hairline strip. */
+.hud-command {
+	padding: 8px;
+	margin-bottom: 24px;
+	background: var(--panel-deep);
+	border: 1px solid var(--border);
+}
+
+.hud-stage {
+	display: grid;
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+	gap: 24px;
+	align-items: start;
+}
+
+.hud-stage > * {
+	min-width: 0;
+}
+
+.hud-stage > .card,
+.hud-wing > .card,
+.hud-pair > .card {
+	margin-bottom: 0;
+}
+
+.span-12 {
+	grid-column: span 12;
+}
+.span-8 {
+	grid-column: span 8;
+}
+.span-6 {
+	grid-column: span 6;
+}
+.span-4 {
+	grid-column: span 4;
+}
+
+.hud-wing {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+}
+
+/* Three-cell telemetry rows in a narrow wing: key left, the goal and its
+   measure stacked to its right, so neither collapses into a word column. */
+.span-4.hud-wing .metric-row:not(.cost-row) {
+	grid-template-columns: minmax(0, 64px) minmax(0, 1fr);
+	row-gap: 2px;
+}
+
+.span-4.hud-wing .metric-row:not(.cost-row) .metric-measure {
+	grid-column: 2;
+	text-align: left;
+}
+
+/* Focal pair (Skills): two columns of category panels. */
+.hud-pair {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 24px;
+	align-items: start;
+}
+
+/* Realm task lists: two columns while several show; a single filtered realm
+   takes the full row because hidden sections leave the grid. */
+.realm-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+	gap: 24px;
+	align-items: start;
+}
+
+.realm-grid .card {
+	margin-bottom: 0;
+}
+
+/* Square panels, 1px hairline, ember brackets top-left and bottom-right. */
+.page:not(.deck) .card,
+.page:not(.deck) .stat-box,
+.page:not(.deck) .host-panel,
+.hud-readout {
+	border-radius: 0;
+}
+
+.page:not(.deck) .card,
+.page:not(.deck) .host-panel {
+	position: relative;
+}
+
+.page:not(.deck) .card:not(.card-dark)::before,
+.page:not(.deck) .card:not(.card-dark)::after,
+.page:not(.deck) .host-panel::before,
+.page:not(.deck) .host-panel::after,
+.hud-readout::before,
+.hud-readout::after {
+	content: "";
+	position: absolute;
+	width: 10px;
+	height: 10px;
+	border: 0 solid var(--ember);
+	pointer-events: none;
+}
+
+.page:not(.deck) .card:not(.card-dark)::before,
+.page:not(.deck) .host-panel::before,
+.hud-readout::before {
+	top: -1px;
+	left: -1px;
+	border-width: 2px 0 0 2px;
+}
+
+.page:not(.deck) .card:not(.card-dark)::after,
+.page:not(.deck) .host-panel::after,
+.hud-readout::after {
+	right: -1px;
+	bottom: -1px;
+	border-width: 0 2px 2px 0;
+}
+
+/* Panel header hairline: the lighter rule vanished on the raised face. */
+.page:not(.deck) .card-title {
+	border-bottom-color: var(--border);
+}
+
+/* Base faces are square like their panels; the top signal rule stays. */
+.sheet-faces:not(:has(.page.deck.active)) {
+	border-radius: 0;
+}
+
+/* Second-level label inside a panel (project features, career vision). */
+.card-subtitle {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--ink-strong);
+	margin: 16px 0 8px;
+}
+
+/* Realm / book-group identity: a swatch in the title inset, never a thick rule. */
+.realm-title {
+	position: relative;
+	padding-left: 20px;
+}
+
+.realm-title::before {
+	content: "";
+	position: absolute;
+	left: 2px;
+	top: 0.45em;
+	width: 8px;
+	height: 8px;
+	background: var(--realm-color, var(--ember));
+}
+
+/* Panel meta (counts) sits right of the title. */
+.card-title > .badge:first-of-type {
+	margin-left: auto;
+}
+
+.page:not(.deck) .card {
+	padding: 16px 20px 20px;
+}
+
+.page:not(.deck) .card::before,
+.page:not(.deck) .card::after,
+.page:not(.deck) .host-panel::before,
+.page:not(.deck) .host-panel::after {
+	z-index: 1;
+}
+
+/* Embedded tools: the frame fills the panel; brackets stay on top of it. */
+.page:not(.deck) .embed-card {
+	padding: 0;
+	overflow: visible;
+}
+
+/* Fold column: a scrolling panel, so its brackets are painted in the
+   background (they hold still while the steps scroll). */
+.fold-column {
+	border-radius: 0;
+	border-top: 1px solid var(--border);
+	background:
+		linear-gradient(var(--ember), var(--ember)) left top / 10px 2px no-repeat,
+		linear-gradient(var(--ember), var(--ember)) left top / 2px 10px no-repeat,
+		linear-gradient(var(--ember), var(--ember)) right bottom / 10px 2px no-repeat,
+		linear-gradient(var(--ember), var(--ember)) right bottom / 2px 10px no-repeat,
+		var(--panel-deep);
+}
+
+.fold-focus-card {
+	border-radius: 0;
+}
+
+/* Year Progress wing: the year leads, the quarters sit in one row under it. */
+.ring-grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 16px 8px;
+	justify-items: center;
+	padding-top: 4px;
+}
+
+.ring-grid .ring-lead {
+	grid-column: 1 / -1;
+}
+
+.ring-grid .ring-lead .ring-svg {
+	width: 104px;
+	height: 104px;
+}
+
+.ring-grid .ring-svg {
+	width: 60px;
+	height: 60px;
+}
+
+/* Projects page and work-search: the panel header carries the hairline. */
+.page:not(.deck) .work-search-heading {
+	padding-bottom: 12px;
+	margin-bottom: 12px;
+	border-bottom: 1px solid var(--border-light);
+}
+
+/* The stage answers to the page's own width: beside the fold column a
+   1024px window leaves ~660px, too narrow for 4-column wings. */
+.page {
+	container-type: inline-size;
+}
+
+@media (max-width: 960px) {
+	.hud-stage,
+	.hud-pair {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.span-12,
+	.span-8,
+	.span-6,
+	.span-4 {
+		grid-column: 1 / -1;
+	}
+}
+
+@container (max-width: 780px) {
+	.hud-stage,
+	.hud-pair {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.span-12,
+	.span-8,
+	.span-6,
+	.span-4 {
+		grid-column: 1 / -1;
+	}
+}
+
+@media (max-width: 900px) {
+	/* The readout wraps under the title as an even 2- or 3-column grid. */
+	.hud-title {
+		flex: 1 1 auto;
+	}
+
+	.page-header.hud-header > .hud-readout {
+		flex: 1 1 100%;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 136px), 1fr));
+		gap: 1px;
+	}
+
+	.page-header.hud-header > .hud-readout > div {
+		border-left: 0;
+		box-shadow: 0 0 0 1px var(--border);
+		padding: 8px 12px;
+	}
+
+	.hud-readout dd {
+		font-size: 18px;
+	}
+
+	.hud-stage,
+	.hud-wing,
+	.hud-pair,
+	.realm-grid {
+		gap: 16px;
+	}
+}
+
+@media (max-width: 640px) {
+	/* The command bar keeps one row and scrolls, so the focal panel stays in
+	   the first screen. */
+	.hud-command .realm-filters {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+
+	.hud-command .realm-pill {
+		flex: 0 0 auto;
+	}
 }
 
 /* ── Utility grids ─────────────────────────────────────────── */
@@ -653,13 +1035,6 @@ body > * {
 .mb-16 {
 	margin-bottom: 16px;
 }
-.pad-y-8 {
-	padding-bottom: 8px;
-	padding-top: 8px;
-}
-.justify-center {
-	justify-items: center;
-}
 .items-center-gap-24 {
 	display: flex;
 	align-items: center;
@@ -682,7 +1057,7 @@ body > * {
 	font-size: 20px;
 }
 .color-accent {
-	color: var(--vermilion);
+	color: var(--ember-text);
 }
 .color-green {
 	color: var(--green);
@@ -700,47 +1075,51 @@ body > * {
 	color: var(--text-muted);
 }
 
-/* ── Cards — creased regions of the sheet ──────────────────── */
+/* ── Cards — raised panels ──────────────────── */
 .card {
-	background: var(--paper-hi);
+	background: var(--panel-hi);
 	color: var(--text);
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	padding: 20px 22px;
 	margin-bottom: 16px;
-	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
-	/* a faint diagonal crease catching light on the upper-left fold */
+	box-shadow: 0 1px 0 rgba(106, 169, 255, 0.12) inset;
+	/* a faint cool sheen on the upper-left edge */
 	background-image:
 		linear-gradient(
 			160deg,
-			rgba(255, 255, 255, 0.6) 0%,
-			rgba(255, 255, 255, 0) 34%
+			rgba(106, 169, 255, 0.07) 0%,
+			rgba(106, 169, 255, 0) 34%
 		),
-		radial-gradient(rgba(179, 33, 46, 0.028) 1px, transparent 1.5px);
+		radial-gradient(rgba(255, 122, 26, 0.035) 1px, transparent 1.5px);
 	background-size:
 		100% 100%,
 		7px 7px;
 }
 
+/* A standing note: recessed panel under one orange rule. The signal marks
+   the note's edge, not a slab of fill, so it never outshouts an action. */
 .card-dark {
-	background: var(--vermilion);
-	background-image: var(--washi-fiber);
-	border-color: rgba(79, 9, 14, 0.6);
-	color: var(--fold-white);
+	background: var(--panel-deep);
+	background-image: none;
+	border-color: var(--border);
+	box-shadow: inset 0 2px 0 var(--ember);
+	color: var(--ink);
 }
 
 .card-dark .card-title {
-	color: var(--fold-white);
+	color: var(--ember-text);
+	border-bottom-color: var(--border-light);
 }
 
 .card-dark p {
-	color: rgba(244, 234, 216, 0.85);
+	color: var(--ink-mid);
 }
 
 .card-title {
 	font-size: 16px;
 	font-weight: 700;
-	color: var(--sumi);
+	color: var(--ink-strong);
 	margin-top: 0;
 	padding-bottom: 10px;
 	margin-bottom: 12px;
@@ -774,18 +1153,16 @@ body > * {
 	min-width: 200px;
 	padding: 8px 12px;
 	border: 1px solid var(--border);
-	border-radius: 6px;
-	background: var(--paper-hi);
+	border-radius: var(--radius-sm);
+	background: var(--panel-hi);
 	color: var(--text);
 	font-size: 13px;
 	font-family: inherit;
-	transition: border-color 120ms ease, box-shadow 120ms ease;
 }
 
-.todo-input:focus {
-	outline: none;
-	border-color: var(--accent);
-	box-shadow: 0 0 0 3px var(--accent-alpha);
+.todo-input:focus-visible {
+	outline: 2px solid var(--gold);
+	outline-offset: 1px;
 }
 
 .todo-input::placeholder {
@@ -794,23 +1171,25 @@ body > * {
 
 .action-btn {
 	appearance: none;
-	background: var(--vermilion);
-	color: var(--fold-white);
-	border: 1px solid var(--vermilion-deep);
+	background: var(--ember);
+	color: var(--on-ember);
+	border: 1px solid var(--ember-deep);
 	padding: 7px 14px;
-	border-radius: 6px;
+	border-radius: var(--radius-sm);
 	font-size: 12.5px;
 	font-weight: 600;
 	letter-spacing: 0.2px;
 	cursor: pointer;
 	transition:
-		background 120ms var(--ease-out, ease-out),
-		transform 120ms var(--ease-out, ease-out);
+		background 120ms var(--ease),
+		transform 120ms var(--ease);
 	line-height: 1.2;
 }
 
+/* Hover lifts to the lit orange: dark ink holds 9:1 on it (the deep fill
+   dropped to 4.4:1). Pressed keeps the scale-down. */
 .action-btn:hover {
-	background: var(--vermilion-deep);
+	background: var(--ember-light);
 }
 .action-btn:active {
 	transform: scale(0.97);
@@ -849,27 +1228,24 @@ body > * {
 /* ── Prompt Generation Bar ───────────────────────────────────── */
 .prompt-gen-bar {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
-	gap: 10px;
-	padding: 10px 12px;
-	background: var(--accent-alpha, rgba(124, 92, 191, 0.12));
-	border: 1px solid var(--accent-border, rgba(124, 92, 191, 0.3));
-	border-radius: 8px;
+	gap: 8px 12px;
+	padding: 8px 12px;
+	background: var(--accent-soft);
+	border: 1px solid rgba(255, 122, 26, 0.35);
 	margin-bottom: 12px;
-	opacity: 0;
-	transform: translateY(-8px);
-	transition: opacity 180ms var(--ease-out, ease-out), transform 180ms var(--ease-out, ease-out);
 }
-
-.prompt-gen-bar:not([hidden]) {
-	opacity: 1;
-	transform: translateY(0);
+/* The bar shows only while prompts are selected; its display:flex used to
+   override the hidden attribute. */
+.prompt-gen-bar[hidden] {
+	display: none;
 }
 
 .prompt-gen-count {
 	font-size: 13px;
 	font-weight: 600;
-	color: var(--accent, #7c5cbf);
+	color: var(--ember-text);
 	flex-shrink: 0;
 }
 
@@ -897,8 +1273,7 @@ body > * {
 	height: 18px;
 	border: 2px solid var(--border);
 	border-radius: 4px;
-	background: var(--paper-hi);
-	transition: border-color 120ms var(--ease-out, ease-out), background 120ms var(--ease-out, ease-out), transform 100ms var(--ease-out, ease-out);
+	background: var(--panel-hi);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -906,22 +1281,19 @@ body > * {
 
 .task-select-box::after {
 	content: "✓";
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 700;
-	color: var(--fold-white);
-	opacity: 0;
-	transform: scale(0.5);
-	transition: opacity 100ms var(--ease-out, ease-out), transform 100ms var(--ease-out, ease-out);
+	color: var(--on-ember);
+	visibility: hidden;
 }
 
 .task-select-input:checked + .task-select-box {
-	border-color: var(--accent, #7c5cbf);
-	background: var(--accent, #7c5cbf);
+	border-color: var(--ember);
+	background: var(--ember);
 }
 
 .task-select-input:checked + .task-select-box::after {
-	opacity: 1;
-	transform: scale(1);
+	visibility: visible;
 }
 
 .task-select-input:focus-visible + .task-select-box {
@@ -930,51 +1302,7 @@ body > * {
 }
 
 .task-item.selected {
-	background: var(--accent-alpha, rgba(124, 92, 191, 0.08));
-}
-
-/* Stagger animation for task items */
-.task-item {
-	animation: taskItemEnter 200ms var(--ease-out, ease-out) forwards;
-	opacity: 0;
-	transform: translateY(6px);
-}
-
-@keyframes taskItemEnter {
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
-}
-
-/* Stagger delays */
-.task-item:nth-child(1)  { animation-delay: 0ms; }
-.task-item:nth-child(2)  { animation-delay: 30ms; }
-.task-item:nth-child(3)  { animation-delay: 60ms; }
-.task-item:nth-child(4)  { animation-delay: 90ms; }
-.task-item:nth-child(5)  { animation-delay: 120ms; }
-.task-item:nth-child(6)  { animation-delay: 150ms; }
-.task-item:nth-child(7)  { animation-delay: 180ms; }
-.task-item:nth-child(8)  { animation-delay: 210ms; }
-.task-item:nth-child(9)  { animation-delay: 240ms; }
-.task-item:nth-child(10) { animation-delay: 270ms; }
-.task-item:nth-child(11) { animation-delay: 300ms; }
-.task-item:nth-child(12) { animation-delay: 330ms; }
-.task-item:nth-child(13) { animation-delay: 360ms; }
-.task-item:nth-child(14) { animation-delay: 390ms; }
-.task-item:nth-child(15) { animation-delay: 420ms; }
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-	.task-item,
-	.prompt-gen-bar,
-	.task-select-box,
-	.task-select-box::after {
-		animation: none !important;
-		transition: none !important;
-		opacity: 1 !important;
-		transform: none !important;
-	}
+	background: var(--accent-soft);
 }
 
 /* ── Embedded systems (Mission Control, Second Brain) ──────── */
@@ -982,7 +1310,7 @@ body > * {
 	padding: 0;
 	overflow: hidden;
 	border: 1px solid var(--border-light);
-	border-radius: 10px;
+	border-radius: var(--radius);
 }
 
 .embed-frame {
@@ -991,16 +1319,16 @@ body > * {
 	height: 78vh;
 	min-height: 480px;
 	border: 0;
-	background: var(--paper-hi);
+	background: var(--panel-hi);
 }
 
 /* ── Stat boxes ────────────────────────────────────────────── */
 .stat-box {
-	background: var(--paper-hi);
+	background: var(--panel-hi);
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	padding: 16px 20px;
-	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+	box-shadow: 0 1px 0 rgba(106, 169, 255, 0.12) inset;
 }
 
 .stat-box.stat-sm {
@@ -1011,14 +1339,14 @@ body > * {
 	font-family: var(--mono);
 	font-size: 22px;
 	font-weight: 700;
-	color: var(--sumi);
+	color: var(--ink-strong);
 	font-variant-numeric: tabular-nums;
 	line-height: 1.1;
 }
 
 .stat-label {
 	margin-top: 2px;
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 1px;
@@ -1058,7 +1386,7 @@ body > * {
 }
 
 .ring-svg .ring-text {
-	fill: var(--sumi);
+	fill: var(--ink-strong);
 	font-family: var(--mono);
 	font-size: 7px;
 	font-weight: 700;
@@ -1067,7 +1395,7 @@ body > * {
 }
 
 .ring-label {
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 600;
 	color: var(--text-mid);
 	text-transform: uppercase;
@@ -1091,12 +1419,12 @@ body > * {
 
 .progress-label .pct {
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	color: var(--text-muted);
 }
 
 .progress-track {
-	background: var(--paper-deep);
+	background: var(--panel-deep);
 	border: 1px solid var(--border-light);
 	border-radius: 3px;
 	height: 8px;
@@ -1112,17 +1440,13 @@ body > * {
 	right: 0;
 	top: 50%;
 	height: 1px;
-	background: rgba(120, 90, 45, 0.14);
-}
-
-.progress-track-mb {
-	margin-bottom: 14px;
+	background: rgba(106, 169, 255, 0.16);
 }
 
 .progress-fill {
 	height: 100%;
 	width: 100%;
-	background: var(--vermilion);
+	background: var(--ember);
 	transform: scaleX(0);
 	transform-origin: left center;
 	transition: transform 0.5s ease-out;
@@ -1134,7 +1458,7 @@ body > * {
 	align-items: center;
 	gap: 4px;
 	font-family: var(--sans);
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 600;
 	line-height: 1;
 	padding: 4px 9px;
@@ -1146,53 +1470,54 @@ body > * {
 }
 
 .badge-count {
-	background: var(--vermilion);
-	border-color: var(--vermilion);
-	color: var(--fold-white);
+	background: var(--ember);
+	border-color: var(--ember);
+	color: var(--on-ember);
 }
 .badge-done {
 	background: var(--green-light);
-	border-color: rgba(63, 125, 84, 0.4);
+	border-color: color-mix(in srgb, var(--green) 40%, transparent);
 	color: var(--green);
 }
 .badge-p1 {
 	background: var(--red-light);
-	border-color: rgba(168, 50, 44, 0.4);
+	border-color: color-mix(in srgb, var(--red) 40%, transparent);
 	color: var(--red);
 }
 .badge-p2 {
 	background: var(--purple-light);
-	border-color: rgba(111, 88, 168, 0.4);
+	border-color: color-mix(in srgb, var(--purple) 40%, transparent);
 	color: var(--purple);
 }
 .badge-p3 {
 	background: var(--blue-light);
-	border-color: rgba(56, 97, 140, 0.4);
+	border-color: color-mix(in srgb, var(--blue) 40%, transparent);
 	color: var(--blue);
 }
 .badge-status-done {
 	background: var(--green-light);
-	border-color: rgba(63, 125, 84, 0.4);
+	border-color: color-mix(in srgb, var(--green) 40%, transparent);
 	color: var(--green);
 }
 .badge-status-active {
 	background: var(--gold);
 	border-color: var(--gold);
-	color: var(--sumi);
+	color: var(--on-ember);
 }
 .badge-status-cert-active {
 	background: var(--green-light);
-	border-color: rgba(63, 125, 84, 0.4);
+	border-color: color-mix(in srgb, var(--green) 40%, transparent);
 	color: var(--green);
 }
 .badge-status-pending {
 	background: var(--yellow-light);
-	border-color: rgba(123, 88, 14, 0.45);
+	border-color: color-mix(in srgb, var(--yellow) 40%, transparent);
 	color: var(--yellow);
 }
-.badge-status-planned {
+.badge-status-planned,
+.badge-new {
 	background: var(--blue-light);
-	border-color: rgba(56, 97, 140, 0.4);
+	border-color: color-mix(in srgb, var(--blue) 40%, transparent);
 	color: var(--blue);
 }
 .badge-status-upcoming {
@@ -1200,25 +1525,32 @@ body > * {
 	border-color: var(--border);
 	color: var(--text-muted);
 }
+.badge-status-waiting {
+	background: transparent;
+	border: 1px dashed var(--border);
+	color: var(--ink-muted);
+}
+/* Proficiency is a magnitude on one blue ladder: lightness and chroma rise
+   with level, and the word always names it. */
+.badge-beginner,
+.badge-intermediate,
+.badge-advanced,
+.badge-expert {
+	background: color-mix(in oklch, var(--lvl) 14%, transparent);
+	border-color: color-mix(in oklch, var(--lvl) 45%, transparent);
+	color: var(--lvl);
+}
 .badge-beginner {
-	background: var(--red-light);
-	border-color: rgba(168, 50, 44, 0.4);
-	color: var(--red);
+	--lvl: var(--level-1);
 }
 .badge-intermediate {
-	background: var(--yellow-light);
-	border-color: rgba(123, 88, 14, 0.45);
-	color: var(--yellow);
+	--lvl: var(--level-2);
 }
 .badge-advanced {
-	background: var(--blue-light);
-	border-color: rgba(56, 97, 140, 0.4);
-	color: var(--blue);
+	--lvl: var(--level-3);
 }
 .badge-expert {
-	background: var(--green-light);
-	border-color: rgba(63, 125, 84, 0.4);
-	color: var(--green);
+	--lvl: var(--level-4);
 }
 
 /* ── Metric rows ─────────────────────────────────────────────
@@ -1231,8 +1563,8 @@ body > * {
 	grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.5fr) minmax(0, 1fr);
 	gap: 12px;
 	align-items: baseline;
-	padding: 9px 5px;
-	border-bottom: 1px dashed var(--border-light);
+	padding: 8px 0;
+	border-bottom: 1px solid var(--border-light);
 }
 
 .metric-row > * {
@@ -1246,9 +1578,13 @@ body > * {
 /* Long single-word categories (CERTIFICATIONS) hyphenate at syllables
    instead of splitting mid-syllable. */
 .metric-cat {
+	font-size: 12px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.8px;
+	color: var(--text-muted);
 	hyphens: auto;
 	overflow-wrap: break-word;
-	letter-spacing: 0.5px;
 }
 
 /* Two-cell rows (Education Cost Projection) right-align the amount. */
@@ -1260,16 +1596,8 @@ body > * {
 	border-bottom: none;
 }
 
-.metric-cat {
-	font-size: 12px;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.8px;
-	color: var(--text-muted);
-}
-
 .metric-cat.month-active {
-	color: var(--vermilion);
+	color: var(--ember-text);
 }
 
 .metric-goal {
@@ -1282,6 +1610,7 @@ body > * {
 	font-size: 12px;
 	color: var(--ink-mid);
 	text-align: right;
+	font-variant-numeric: tabular-nums;
 	overflow-wrap: anywhere;
 }
 
@@ -1292,19 +1621,25 @@ body > * {
 
 .metric-row.cost-total .metric-measure,
 .metric-row.cost-net .metric-measure {
-	color: var(--vermilion);
+	color: var(--ember-text);
 	font-weight: 700;
 }
 
 /* ── Projects ──────────────────────────────────────────────── */
+/* Overview: projects read as one strip of cells sharing 1px hairlines,
+   not cards nested in a card (each cell rings itself; the 1px gap merges them). */
+.project-strip {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+	gap: 1px;
+	margin: 1px;
+}
+
 .project-card {
-	background: var(--paper-hi);
+	min-width: 0;
 	color: var(--text);
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	/* symmetric inset clears the 4px fold accent set on the element */
-	padding: 16px 20px;
-	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+	padding: 12px 16px 16px;
+	box-shadow: 0 0 0 1px var(--border);
 }
 
 .project-header {
@@ -1315,19 +1650,58 @@ body > * {
 	margin-bottom: 8px;
 }
 
-.project-header h3 {
+.live-project + .live-project {
+	margin-top: 16px;
+	padding-top: 16px;
+	border-top: 1px solid var(--border);
+}
+
+.project-header h3,
+.project-header h4 {
 	font-size: 15px;
 	font-weight: 700;
-	color: var(--sumi);
+	color: var(--ink-strong);
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+/* Projects page: name and status form the panel header over a hairline. */
+.project-panel .project-header.card-title {
+	justify-content: space-between;
+	margin-bottom: 12px;
 }
 
 .project-badge {
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 600;
 	padding: 4px 10px;
 	border-radius: var(--radius-xl);
 	/* long statuses ("Planned — Phase 7 …") wrap inside the card */
 	max-width: 100%;
+}
+
+/* Status words pick the colour: paused is quiet, planned is information,
+   anything else is live work. */
+.project-badge.is-paused {
+	background: transparent;
+	border: 1px dashed var(--border);
+	color: var(--ink-muted);
+}
+.project-badge.is-planned {
+	background: var(--blue-light);
+	border: 1px solid color-mix(in srgb, var(--blue) 40%, transparent);
+	color: var(--blue);
+}
+.project-badge.is-active {
+	background: var(--green-light);
+	border: 1px solid color-mix(in srgb, var(--green) 40%, transparent);
+	color: var(--green);
+}
+
+/* The current quarter (Books) carries the signal; the word "now" repeats it. */
+.badge.book-quarter.is-now {
+	border-color: color-mix(in srgb, var(--ember) 50%, transparent);
+	color: var(--ember-text);
 }
 
 .feature-list {
@@ -1353,8 +1727,8 @@ body > * {
 	top: 11px;
 	width: 10px;
 	height: 5px;
-	border-bottom: 2px solid var(--vermilion);
-	border-left: 2px solid var(--vermilion);
+	border-bottom: 2px solid var(--ember);
+	border-left: 2px solid var(--ember);
 }
 
 /* ── Task items — the fold/unfold toggle ───────────────────── */
@@ -1374,9 +1748,9 @@ body > * {
 	flex-shrink: 0;
 	width: 22px;
 	height: 22px;
-	border: 1.5px solid rgba(33, 29, 24, 0.55);
+	border: 1.5px solid rgba(157, 177, 204, 0.6);
 	border-radius: 5px;
-	color: var(--fold-white);
+	color: var(--bright);
 	font-size: 13px;
 	font-weight: 700;
 	display: flex;
@@ -1384,7 +1758,7 @@ body > * {
 	justify-content: center;
 	cursor: pointer;
 	user-select: none;
-	background: var(--paper-hi);
+	background: var(--panel-hi);
 	/* flat sheet — one uncut square */
 	transition:
 		background 0.12s,
@@ -1392,7 +1766,7 @@ body > * {
 }
 
 .task-check:hover {
-	border-color: var(--vermilion);
+	border-color: var(--ember);
 }
 
 .task-check:focus-visible {
@@ -1401,9 +1775,9 @@ body > * {
 }
 
 .task-check.done {
-	background: var(--vermilion);
-	border-color: var(--vermilion);
-	box-shadow: 0 1px 0 rgba(79, 9, 14, 0.5) inset;
+	background: var(--ember);
+	border-color: var(--ember);
+	box-shadow: 0 1px 0 rgba(0, 4, 12, 0.5) inset;
 }
 
 .task-text {
@@ -1415,15 +1789,21 @@ body > * {
 .task-text.done {
 	color: var(--text-muted);
 	text-decoration: line-through;
-	text-decoration-color: rgba(169, 126, 20, 0.6);
+	text-decoration-color: rgba(242, 193, 78, 0.6);
+}
+
+.task-text code,
+.task-category-header code {
+	font-family: var(--mono);
+	font-size: 0.92em;
 }
 
 .task-done-row {
-	background: rgba(224, 210, 178, 0.16);
+	background: rgba(106, 169, 255, 0.06);
 }
 
 .task-cat {
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 600;
 	padding: 3px 9px;
 	border-radius: var(--radius-xl);
@@ -1433,16 +1813,16 @@ body > * {
 .task-cat-priority {
 	background: var(--yellow-light);
 	color: var(--yellow);
-	border: 1px solid rgba(123, 88, 14, 0.45);
+	border: 1px solid color-mix(in srgb, var(--yellow) 40%, transparent);
 }
 
+/* Category names are written in the source files; they read as written
+   (long ones were unreadable in tracked capitals). */
 .task-category-header {
-	font-size: 11px;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 1px;
-	color: var(--text-muted);
-	margin: 14px 8px 4px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--ink-mid);
+	margin: 16px 8px 4px;
 }
 
 /* Under a category header the per-row pill repeats the header verbatim and
@@ -1464,7 +1844,7 @@ body > * {
 	align-items: center;
 	gap: 7px;
 	border: 1px solid var(--border);
-	background: var(--paper-hi);
+	background: var(--panel-hi);
 	color: var(--ink-mid);
 	font-size: 12.5px;
 	font-weight: 500;
@@ -1480,19 +1860,56 @@ body > * {
 
 .realm-pill:hover {
 	border-color: var(--accent);
-	color: var(--vermilion);
+	color: var(--ember-text);
 }
 
 .realm-pill.active {
-	background: var(--vermilion);
-	border-color: var(--vermilion);
-	color: var(--fold-white);
+	background: var(--ember);
+	border-color: var(--ember);
+	color: var(--on-ember);
 	font-weight: 600;
+}
+
+/* Each realm writes in its own SAFE_HUES ink (all ≥4.5:1 on the panels); the
+   swatch dot repeats the hue so identity never rests on text color alone. */
+.realm-pill[style] {
+	border-color: color-mix(in srgb, var(--realm-color) 35%, var(--border));
+	color: var(--realm-color);
+}
+
+.realm-pill[style]::before {
+	content: "";
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--realm-color);
+}
+
+.realm-pill[style]:hover {
+	border-color: var(--realm-color);
+	background: color-mix(in srgb, var(--realm-color) 8%, var(--panel-hi));
+	color: var(--realm-color);
+}
+
+/* Every realm ink is a light hue: the filled pill takes the ground's navy. */
+.realm-pill[style].active {
+	background: var(--realm-color);
+	border-color: var(--realm-color);
+	color: var(--void);
+}
+
+.realm-pill[style].active::before {
+	background: var(--void);
+}
+
+.realm-progress-row[style] .progress-track {
+	background: color-mix(in srgb, var(--realm-color) 12%, var(--panel-deep));
+	border-color: color-mix(in srgb, var(--realm-color) 25%, var(--border-light));
 }
 
 .pill-count {
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	opacity: 0.85;
 }
 
@@ -1501,8 +1918,8 @@ body > * {
 	grid-template-columns: 170px 1fr 64px;
 	gap: 14px;
 	align-items: center;
-	padding: 10px 5px;
-	border-bottom: 1px dashed var(--border-light);
+	padding: 10px 0;
+	border-bottom: 1px solid var(--border-light);
 }
 
 .realm-progress-row:last-child {
@@ -1515,15 +1932,12 @@ body > * {
 	word-spacing: 0.2em;
 }
 
-/* Data-driven hues (REALMS colors, status badges) were authored as text
-   colors for the old dark world and fall to 1.4–4:1 on washi. Hue stays on
-   the tint, border and progress bar; the words are written in ink. */
-.realm-label[style],
+/* Data-driven hues authored for the old dark world fall below 4.5:1 on the panels;
+   these keep ink words. Realm, project and book-group colors now resolve
+   through SAFE_HUES (≥4.5:1), so their badges and labels keep their hue. */
 .task-cat[style],
-.badge[style],
-.project-badge[style],
 .stat-value[style] {
-	color: var(--sumi) !important;
+	color: var(--ink-strong) !important;
 }
 
 .realm-fraction {
@@ -1535,8 +1949,8 @@ body > * {
 
 /* ── Skills ────────────────────────────────────────────────── */
 .skill-row {
-	padding: 10px 5px;
-	border-bottom: 1px dashed var(--border-light);
+	padding: 10px 0;
+	border-bottom: 1px solid var(--border-light);
 }
 
 .skill-row:last-child {
@@ -1552,7 +1966,7 @@ body > * {
 
 .skill-years {
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	color: var(--text-muted);
 }
 
@@ -1572,7 +1986,7 @@ body > * {
 .cert-icon {
 	width: 40px;
 	height: 40px;
-	border-radius: var(--radius);
+	border-radius: 2px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -1582,7 +1996,7 @@ body > * {
 
 .cert-icon-obtained {
 	background: var(--green-light);
-	border: 1px solid rgba(63, 125, 84, 0.35);
+	border: 1px solid color-mix(in srgb, var(--green) 35%, transparent);
 }
 
 .cert-icon-pending {
@@ -1607,7 +2021,7 @@ body > * {
 }
 
 .cert-status {
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 600;
 	padding: 4px 10px;
 	border-radius: var(--radius-xl);
@@ -1615,12 +2029,15 @@ body > * {
 }
 
 /* ── Books ─────────────────────────────────────────────────── */
+/* Title leads; tags wrap under it when the row is narrow instead of
+   squeezing the title to a few words per line. */
 .book-row {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	justify-content: space-between;
-	gap: 14px;
-	padding: 12px 16px 12px 20px;
+	gap: 8px 14px;
+	padding: 12px 0;
 	border-bottom: 1px solid var(--border-light);
 }
 
@@ -1629,6 +2046,7 @@ body > * {
 }
 
 .book-info {
+	flex: 1 1 240px;
 	min-width: 0;
 }
 
@@ -1654,12 +2072,12 @@ body > * {
 	gap: 7px;
 	flex-wrap: wrap;
 	min-width: 0;
-	flex-shrink: 0;
+	flex-shrink: 1;
 }
 
 .book-tag {
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	color: var(--ink-muted);
 	border: 1px dashed var(--border);
 	padding: 2px 7px;
@@ -1674,8 +2092,8 @@ body > * {
 	align-items: baseline;
 	justify-content: space-between;
 	gap: 12px;
-	padding: 7px 5px;
-	border-bottom: 1px dashed var(--border-light);
+	padding: 8px 0;
+	border-bottom: 1px solid var(--border-light);
 	font-size: 13px;
 	color: var(--ink-mid);
 }
@@ -1683,11 +2101,12 @@ body > * {
 .edu-stat-line strong {
 	font-family: var(--mono);
 	font-size: 12.5px;
-	color: var(--sumi);
+	color: var(--ink-strong);
+	font-variant-numeric: tabular-nums;
 }
 
 .stack-bar-track {
-	background: var(--paper-deep);
+	background: var(--panel-deep);
 	border: 1px solid var(--border-light);
 	border-radius: 3px;
 	height: 14px;
@@ -1696,7 +2115,7 @@ body > * {
 }
 
 .stacked-bar-container .stacked-bar {
-	background: var(--paper-deep);
+	background: var(--panel-deep);
 	border: 1px solid var(--border-light);
 	border-radius: 3px;
 	height: 16px;
@@ -1719,7 +2138,7 @@ body > * {
 	font-size: 12.5px;
 	color: var(--ink-mid);
 	padding: 5px 0;
-	border-bottom: 1px dashed var(--border-light);
+	border-bottom: 1px solid var(--border-light);
 }
 
 .legend-dot {
@@ -1738,14 +2157,32 @@ body > * {
 	font-family: var(--mono);
 	font-size: 12px;
 	color: var(--text-muted);
+	white-space: nowrap;
+}
+
+/* Credit strategy: phases as cells of one hairline grid, each named by a
+   swatch in its phase ink rather than a thick top rule. Each cell draws its
+   own 1px ring; the 1px gap makes neighbours share one hairline. */
+.phase-strip {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+	gap: 1px;
+	margin: 1px;
 }
 
 .phase-card {
-	background: var(--paper-hi);
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	padding: 16px 20px;
-	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+	min-width: 0;
+	padding: 12px 16px 16px;
+	box-shadow: 0 0 0 1px var(--border);
+}
+
+.phase-number::before {
+	content: "";
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	margin-right: 8px;
+	background: var(--phase-color, var(--ember));
 }
 
 .phase-header {
@@ -1758,7 +2195,7 @@ body > * {
 
 .phase-number {
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 1px;
@@ -1768,7 +2205,7 @@ body > * {
 .phase-name {
 	font-size: 14px;
 	font-weight: 700;
-	color: var(--sumi);
+	color: var(--ink-strong);
 	margin-bottom: 4px;
 }
 
@@ -1782,7 +2219,7 @@ body > * {
 .phase-stats {
 	display: flex;
 	gap: 10px;
-	font-size: 11.5px;
+	font-size: 12px;
 	color: var(--text-muted);
 	flex-wrap: wrap;
 }
@@ -1807,10 +2244,6 @@ body > * {
 	border-left: 1px solid var(--border);
 }
 
-.timeline-item:last-child {
-	border-bottom: none;
-}
-
 .timeline-dot {
 	position: absolute;
 	left: -6px;
@@ -1818,7 +2251,7 @@ body > * {
 	width: 11px;
 	height: 11px;
 	border-radius: 50%;
-	background: var(--paper-deep);
+	background: var(--panel-deep);
 	border: 1px solid var(--border);
 }
 
@@ -1830,11 +2263,11 @@ body > * {
 .timeline-dot-active {
 	background: var(--gold);
 	border-color: var(--gold);
-	box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.3);
+	box-shadow: 0 0 0 3px rgba(255, 194, 71, 0.3);
 }
 
 .timeline-dot-future {
-	background: var(--paper-hi);
+	background: var(--panel-hi);
 }
 
 .timeline-milestone {
@@ -1861,7 +2294,7 @@ body > * {
 
 .matrix-table thead th {
 	text-align: left;
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.7px;
@@ -1878,7 +2311,7 @@ body > * {
 }
 
 .matrix-table tbody tr:hover td {
-	background: rgba(201, 162, 39, 0.06);
+	background: rgba(255, 194, 71, 0.06);
 }
 
 .dot {
@@ -1889,8 +2322,8 @@ body > * {
 }
 
 .dot-on {
-	background: var(--vermilion);
-	border: 1px solid var(--vermilion-deep);
+	background: var(--ember);
+	border: 1px solid var(--ember-deep);
 }
 
 .dot-off {
@@ -1904,8 +2337,8 @@ body > * {
 	align-items: center;
 	justify-content: space-between;
 	gap: 14px;
-	padding: 10px 5px;
-	border-bottom: 1px dashed var(--border-light);
+	padding: 10px 0;
+	border-bottom: 1px solid var(--border-light);
 }
 
 .net-goal-text h4 {
@@ -1919,14 +2352,15 @@ body > * {
 	color: var(--text-muted);
 }
 
+/* A telemetry value: mono, right-aligned, signal ink; no pill. */
 .net-goal-progress {
+	flex-shrink: 0;
 	font-family: var(--mono);
-	font-size: 12px;
-	font-weight: 700;
-	color: var(--vermilion);
-	background: var(--rose-soft);
-	padding: 4px 10px;
-	border-radius: var(--radius-xl);
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--ember-text);
+	font-variant-numeric: tabular-nums;
+	text-align: right;
 }
 
 /* ── Empty states ──────────────────────────────────────────── */
@@ -1972,7 +2406,7 @@ body > * {
 
 .run-field-label {
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	text-transform: uppercase;
 	letter-spacing: 1.2px;
 	color: var(--text-muted);
@@ -1982,7 +2416,7 @@ body > * {
 	font-family: var(--sans);
 	font-size: 13px;
 	color: var(--text);
-	background: var(--paper);
+	background: var(--panel);
 	border: 1px solid var(--border);
 	border-radius: var(--radius-sm);
 	padding: 7px 10px;
@@ -2071,7 +2505,7 @@ body > * {
 	top: 0.64em;
 	width: 6px;
 	height: 1px;
-	background: var(--vermilion);
+	background: var(--ember);
 }
 
 /* A collapsible card ("Other workspace tools"): the flex title hid the
@@ -2090,7 +2524,7 @@ details.card > summary.card-title::after {
 	content: "Show" / "";
 	margin-left: auto;
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 500;
 	letter-spacing: 1.2px;
 	text-transform: uppercase;
@@ -2102,7 +2536,7 @@ details.card[open] > summary.card-title::after {
 }
 
 details.card > summary.card-title:hover::after {
-	color: var(--vermilion);
+	color: var(--ember-text);
 }
 
 details.card > summary.card-title:focus-visible {
@@ -2143,7 +2577,7 @@ details.card:not([open]) > summary.card-title {
 .run-item-text h4 {
 	font-size: 14px;
 	font-weight: 600;
-	color: var(--sumi);
+	color: var(--ink-strong);
 	margin: 0;
 }
 
@@ -2169,7 +2603,7 @@ details.card:not([open]) > summary.card-title {
    call is the marked state, and each is named in text as well as ink. */
 .run-tag {
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 500;
 	font-variant-numeric: tabular-nums;
 	line-height: 1;
@@ -2181,22 +2615,22 @@ details.card:not([open]) > summary.card-title {
 }
 
 .run-tag-api {
-	border-color: rgba(123, 88, 14, 0.45);
+	border-color: color-mix(in srgb, var(--yellow) 40%, transparent);
 	background: var(--yellow-light);
 	color: var(--yellow);
 }
 
 .run-tag-model {
-	border-color: rgba(179, 33, 46, 0.4);
+	border-color: rgba(255, 122, 26, 0.4);
 	background: var(--rose-soft);
-	color: var(--vermilion-deep);
+	color: var(--ember-text);
 }
 
 .run-input {
 	font-family: var(--mono);
 	font-size: 12px;
 	color: var(--text);
-	background: var(--paper);
+	background: var(--panel);
 	border: 1px solid var(--border);
 	border-radius: var(--radius-sm);
 	padding: 7px 9px;
@@ -2364,7 +2798,7 @@ details.card:not([open]) > summary.card-title {
 	max-height: calc(100dvh - 48px);
 	margin: auto;
 	padding: 0;
-	background: var(--paper-hi);
+	background: var(--panel-hi);
 	color: var(--text);
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
@@ -2372,7 +2806,7 @@ details.card:not([open]) > summary.card-title {
 }
 
 .run-output-dialog::backdrop {
-	background: rgba(23, 21, 18, 0.55);
+	background: rgba(2, 6, 14, 0.7);
 }
 
 .run-output-head {
@@ -2383,14 +2817,14 @@ details.card:not([open]) > summary.card-title {
 	justify-content: space-between;
 	gap: 12px;
 	padding: 12px 16px;
-	background: var(--paper-deep);
+	background: var(--panel-deep);
 	border-bottom: 1px solid var(--border);
 }
 
-.run-output-head h3 {
+.run-output-head h2 {
 	font-size: 14px;
 	font-weight: 600;
-	color: var(--sumi);
+	color: var(--ink-strong);
 	overflow-wrap: anywhere;
 }
 
@@ -2457,6 +2891,7 @@ details.card:not([open]) > summary.card-title {
 
 .today-form .action-btn {
 	padding: 9px 16px;
+	min-height: 44px; /* same touch target as the field beside it */
 }
 
 #captureStatus {
@@ -2469,8 +2904,9 @@ details.card:not([open]) > summary.card-title {
 }
 
 .brain-cite {
+	display: block;
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	color: var(--text-muted);
 	overflow-wrap: anywhere;
 }
@@ -2520,16 +2956,25 @@ details.card:not([open]) > summary.card-title {
 	gap: 10px;
 }
 
+/* The realm icon alone: the name is in the ticks' accessible label. */
 .crease-realm-name {
-	width: 30px;
+	width: 24px;
 	flex-shrink: 0;
-	text-align: center;
-	font-size: 14px;
+	font-size: 12px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+	.crease-realm + .crease-realm {
+		margin-top: 4px;
+	}
 }
 
 .crease-realm-total {
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	color: var(--text-muted);
 	flex-shrink: 0;
 	width: 46px;
@@ -2551,13 +2996,13 @@ details.card:not([open]) > summary.card-title {
 	height: 16px;
 	border-radius: 1px;
 	background: transparent;
-	border: 1px solid var(--border);
+	border: 1px solid color-mix(in srgb, var(--realm-color, var(--ember)) 35%, var(--border));
 }
 
 .crease-tick.folded {
-	background: var(--vermilion);
-	border-color: var(--vermilion);
-	box-shadow: 0 1px 0 rgba(79, 9, 14, 0.45) inset;
+	background: var(--realm-color, var(--ember));
+	border-color: var(--realm-color, var(--ember));
+	box-shadow: 0 1px 0 rgba(0, 4, 12, 0.5) inset;
 }
 
 /* ── Footer ────────────────────────────────────────────────── */
@@ -2582,13 +3027,13 @@ details.card:not([open]) > summary.card-title {
 	background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-	background: rgba(149, 104, 46, 0.35);
+	background: rgba(106, 169, 255, 0.3);
 	border-radius: 5px;
 	border: 2px solid transparent;
 	background-clip: content-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-	background-color: rgba(149, 104, 46, 0.55);
+	background-color: rgba(106, 169, 255, 0.5);
 }
 
 /* ── Responsive — folds stack, faces full width ────────────── */
@@ -2620,7 +3065,7 @@ details.card:not([open]) > summary.card-title {
 		gap: 8px;
 		padding: 8px 14px 8px 10px;
 		border-bottom: none;
-		border-right: 1px solid rgba(244, 234, 216, 0.16);
+		border-right: 1px solid rgba(233, 241, 252, 0.16);
 		width: 180px;
 	}
 
@@ -2779,25 +3224,25 @@ details.card:not([open]) > summary.card-title {
 	.task-check::before {
 		position: absolute;
 		inset: 7px;
-		border: 1.5px solid rgba(33, 29, 24, 0.55);
+		border: 1.5px solid rgba(157, 177, 204, 0.6);
 		border-radius: 5px;
-		background: var(--paper-hi);
+		background: var(--panel-hi);
 		content: "";
 	}
 
 	.task-check:hover::before {
-		border-color: var(--vermilion);
+		border-color: var(--ember);
 	}
 
 	.task-check.done {
-		color: var(--fold-white);
+		color: var(--bright);
 		background: transparent;
 		box-shadow: none;
 	}
 
 	.task-check.done::before {
-		border-color: var(--vermilion);
-		background: var(--vermilion);
+		border-color: var(--ember);
+		background: var(--ember);
 	}
 
 	.today-form {
@@ -2823,14 +3268,13 @@ details.card:not([open]) > summary.card-title {
 		transition: none;
 	}
 }
-/* ── Metrics — a compact operational view on the washi sheet ── */
+/* ── Metrics — a compact operational view on the dark base theme ── */
 #page-metrics {
-	/* Shared --green reads at 3.78:1 on tinted badges; use darker status ink. */
-	--metrics-success-ink: #2d613e;
-	/* Measurement inks stay distinct from health; ochre must read on washi. */
+	--metrics-success-ink: var(--green);
+	/* Measurement inks stay distinct from health; ochre must read on the panels. */
 	--metrics-capacity-ink: var(--purple);
-	--metrics-read-ink: #27686a;
-	--metrics-warning-ink: #805b0a;
+	--metrics-read-ink: var(--teal);
+	--metrics-warning-ink: var(--yellow);
 }
 .sheet-faces:has(#page-metrics.active) {
 	padding: 16px 16px 12px;
@@ -2856,7 +3300,7 @@ details.card:not([open]) > summary.card-title {
 	color: var(--text);
 	border: 1px solid var(--border);
 	border-radius: var(--radius-sm);
-	background: var(--paper-hi);
+	background: var(--panel-hi);
 	min-height: 44px;
 	padding: 8px 12px;
 	cursor: pointer;
@@ -2897,7 +3341,7 @@ details.card:not([open]) > summary.card-title {
 .metrics-section-heading h3 {
 	font-size: 20px;
 	font-weight: 700;
-	color: var(--sumi);
+	color: var(--ink-strong);
 }
 .metrics-section-heading p {
 	font-size: 12px;
@@ -2911,7 +3355,7 @@ details.card:not([open]) > summary.card-title {
 	align-items: start;
 }
 .host-panel {
-	background: var(--paper-hi);
+	background: var(--panel-hi);
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	padding: 12px;
@@ -2930,7 +3374,7 @@ details.card:not([open]) > summary.card-title {
 .metrics-state {
 	display: inline-block;
 	width: fit-content;
-	font: 500 11.5px/1.4 var(--sans);
+	font: 500 12px/1.4 var(--sans);
 	color: var(--text-mid);
 	background: var(--surface-alt);
 	border-radius: 4px;
@@ -2952,7 +3396,7 @@ details.card:not([open]) > summary.card-title {
 }
 .host-address {
 	margin-top: 6px;
-	font-size: 11px;
+	font-size: 12px;
 	color: var(--text-muted);
 }
 .host-stats {
@@ -2967,7 +3411,7 @@ details.card:not([open]) > summary.card-title {
 }
 .host-stats dt span {
 	display: block;
-	font-size: 11px;
+	font-size: 12px;
 	color: var(--text-muted);
 	margin-top: 2px;
 }
@@ -2979,7 +3423,7 @@ details.card:not([open]) > summary.card-title {
 }
 .host-capacity {
 	display: block;
-	font: 400 11px/1.5 var(--sans);
+	font: 400 12px/1.5 var(--sans);
 	color: var(--text-muted);
 	letter-spacing: normal;
 	margin-top: 4px;
@@ -3012,11 +3456,11 @@ details.card:not([open]) > summary.card-title {
 	padding: 4px 0;
 }
 .host-facts dt {
-	font-size: 11px;
+	font-size: 12px;
 	color: var(--text-muted);
 }
 .host-facts dd {
-	font: 400 11px/1.6 var(--mono);
+	font: 400 12px/1.6 var(--mono);
 	margin: 0;
 	overflow-wrap: anywhere;
 	font-variant-numeric: tabular-nums;
@@ -3041,7 +3485,7 @@ details.card:not([open]) > summary.card-title {
 }
 .host-diagnostics summary:focus-visible,
 .metrics-methods summary:focus-visible {
-	outline: 2px solid var(--accent);
+	outline: 2px solid var(--gold);
 	outline-offset: 3px;
 }
 .metrics-visually-hidden {
@@ -3095,7 +3539,7 @@ details.card:not([open]) > summary.card-title {
 }
 .metrics-refresh:focus-visible,
 .metrics-inline-action:focus-visible {
-	outline: 2px solid var(--accent);
+	outline: 2px solid var(--gold);
 	outline-offset: 3px;
 }
 @media (hover: hover) {
@@ -3152,7 +3596,7 @@ details.card:not([open]) > summary.card-title {
 .ops-host-button[aria-pressed="true"] { color: var(--accent); }
 .ops-host-button:active { background: var(--surface-alt); }
 .host-stats dt .ops-volume-label { font: inherit; color: var(--text-mid); margin: 0; }
-.ops-host-footer { display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 11px; color: var(--text-muted); }
+.ops-host-footer { display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 12px; color: var(--text-muted); }
 .ops-host-footer > span { flex-basis: 100%; }
 .ops-inspector { border-top: 1px solid var(--border); padding-top: 8px; }
 .ops-toolbar,
@@ -3168,7 +3612,7 @@ details.card:not([open]) > summary.card-title {
 	top: var(--ops-sticky-top, 110px);
 	z-index: 10;
 	padding: 4px 0;
-	background: var(--paper);
+	background: var(--panel);
 	border-bottom: 1px solid var(--border);
 }
 .ops-toolbar h3 { font-size: 20px; margin-right: auto; }
@@ -3179,7 +3623,7 @@ details.card:not([open]) > summary.card-title {
 .ops-workload-filters input {
 	font: 400 12px/1.5 var(--sans);
 	color: var(--text);
-	background: var(--paper-hi);
+	background: var(--panel-hi);
 	border: 1px solid var(--border);
 	border-radius: var(--radius-sm);
 	min-height: 44px;
@@ -3209,7 +3653,7 @@ details.card:not([open]) > summary.card-title {
 .ops-chart-grid { stroke: var(--border); stroke-width: 1; }
 .ops-chart-label { fill: var(--text-mid); font: 500 12px var(--sans); font-variant-numeric: tabular-nums; }
 .ops-history-line { stroke-width: 2; vector-effect: non-scaling-stroke; }
-.ops-history-point { fill: var(--paper-hi); stroke-width: 2; }
+.ops-history-point { fill: var(--panel-hi); stroke-width: 2; }
 .ops-history-series-0 { stroke: var(--accent); }
 .ops-history-series-1 { stroke: var(--blue); stroke-dasharray: 6 3; }
 .ops-history-series-2 { stroke: var(--metrics-capacity-ink); stroke-dasharray: 2 3; }
@@ -3222,13 +3666,13 @@ details.card:not([open]) > summary.card-title {
 .ops-table td:first-child { text-align: left; padding-left: 0; }
 .ops-table th:last-child,
 .ops-table td:last-child { padding-right: 0; }
-.ops-table thead th { font-size: 11px; font-weight: 500; color: var(--text-muted); }
+.ops-table thead th { font-size: 12px; font-weight: 500; color: var(--text-muted); }
 .ops-table tbody th { font-weight: 500; }
 .ops-table tbody tr:last-child > * { border-bottom: 0; }
-.ops-table small { display: block; font-size: 10px; color: var(--text-muted); font-weight: 400; margin-top: 3px; }
+.ops-table small { display: block; font-size: 12px; color: var(--text-muted); font-weight: 400; margin-top: 3px; }
 .ops-key-values th { width: 55%; color: var(--text-mid); }
-.ops-key-values td { font-family: var(--mono); font-size: 11px; }
-.ops-table-scroll { overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-color: var(--border) var(--paper); margin-top: 8px; }
+.ops-key-values td { font-family: var(--mono); font-size: 12px; }
+.ops-table-scroll { overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-color: var(--border) var(--panel); margin-top: 8px; }
 .ops-table-scroll > .ops-table { min-width: 540px; }
 .ops-table-scroll > .ops-workload-table { min-width: 650px; }
 .ops-workload-table th:first-child { min-width: 180px; max-width: 300px; }
@@ -3236,14 +3680,14 @@ details.card:not([open]) > summary.card-title {
 .ops-empty { font-size: 12px; line-height: 1.6; color: var(--text-muted); margin: 8px 0; }
 .ops-subheading { font-size: 15px; font-weight: 600; margin: 16px 0 6px; }
 .ops-subheading > span { font-size: 12px; font-weight: 400; color: var(--text-muted); }
-.ops-source-list { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11px; color: var(--text-mid); margin: 8px 0; }
+.ops-source-list { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--text-mid); margin: 8px 0; }
 .ops-log-list { list-style: none; padding: 0; margin: 0; }
 .ops-log-entry { border-bottom: 1px solid var(--border-light); }
-.ops-log-entry summary { min-height: 44px; padding: 6px 0; cursor: pointer; font-size: 11px; line-height: 1.7; }
+.ops-log-entry summary { min-height: 44px; padding: 6px 0; cursor: pointer; font-size: 12px; line-height: 1.7; }
 .ops-log-entry summary > * { margin-right: 8px; }
 .ops-log-entry time { font-variant-numeric: tabular-nums; color: var(--text-muted); }
 .ops-log-entry summary > span:last-child { display: block; color: var(--text-mid); overflow-wrap: anywhere; }
-.ops-log-entry pre { font: 11px/1.7 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 12px; padding: 8px; background: var(--paper-hi); max-height: 240px; overflow: auto; }
+.ops-log-entry pre { font: 12px/1.7 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 12px; padding: 8px; background: var(--panel-hi); max-height: 240px; overflow: auto; }
 .ops-coverage { padding-left: 18px; font-size: 12px; line-height: 1.7; color: var(--text-mid); }
 .ops-coverage li + li { margin-top: 4px; }
 .ops-connections { display: flex; flex-wrap: wrap; gap: 4px 20px; }
@@ -3255,7 +3699,7 @@ details.card:not([open]) > summary.card-title {
 .ops-table-scroll:focus-visible,
 .ops-live-toggle input:focus-visible,
 .ops-log-entry summary:focus-visible,
-.ops-connections a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ops-connections a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 @media (hover: hover) {
 	.ops-host-button:hover,
 	.ops-log-entry summary:hover { background: var(--surface-alt); }
@@ -3295,7 +3739,7 @@ details.card:not([open]) > summary.card-title {
 	border-bottom: 1px solid var(--border-light);
 	color: var(--text);
 	text-decoration: none;
-	transition: background-color 120ms var(--ease-out, ease-out);
+	transition: background-color 120ms var(--ease);
 }
 
 .daily-row {
@@ -3306,18 +3750,18 @@ details.card:not([open]) > summary.card-title {
 
 .daily-row:active,
 .artifact-row:active {
-	background: var(--paper-deep);
+	background: var(--panel-deep);
 }
 
 .daily-label {
 	font-weight: 600;
-	color: var(--sumi);
+	color: var(--ink-strong);
 	white-space: nowrap;
 }
 
 .daily-note {
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 400;
 	color: var(--text-muted);
 }
@@ -3331,13 +3775,32 @@ details.card:not([open]) > summary.card-title {
 }
 
 .daily-row.is-warn .daily-value {
-	color: var(--vermilion-deep);
+	color: var(--ember-text);
 	font-weight: 600;
 }
 
 .daily-row.is-placeholder .daily-value {
 	font-style: italic;
 	color: var(--text-muted);
+}
+
+/* Shortcuts card: the path or address on the right of a tile row. */
+.shortcut-path {
+	font-family: var(--mono);
+	font-size: 12px;
+	color: var(--text-muted);
+	text-align: right;
+	overflow-wrap: anywhere;
+	min-width: 0;
+}
+
+.daily-row.is-placeholder .shortcut-path {
+	font-family: var(--sans);
+	font-style: italic;
+}
+
+span.daily-row:hover {
+	background: none;
 }
 
 .daily-refresh {
@@ -3360,17 +3823,6 @@ details.card:not([open]) > summary.card-title {
 	margin: 4px 0 8px;
 }
 
-.daily-cmd {
-	padding: 10px 12px;
-	background: var(--paper-deep);
-	border-radius: var(--radius-sm);
-	font-family: var(--mono);
-	font-size: 12px;
-	white-space: pre-wrap;
-	word-break: break-all;
-	user-select: all;
-}
-
 .artifact-row {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto;
@@ -3384,7 +3836,7 @@ details.card:not([open]) > summary.card-title {
 .artifact-title {
 	grid-area: title;
 	font-weight: 600;
-	color: var(--sumi);
+	color: var(--ink-strong);
 	overflow-wrap: anywhere;
 }
 
@@ -3399,7 +3851,7 @@ details.card:not([open]) > summary.card-title {
 .artifact-meta {
 	grid-area: meta;
 	font-family: var(--mono);
-	font-size: 11.5px;
+	font-size: 12px;
 	color: var(--text-muted);
 	overflow-wrap: anywhere;
 }
@@ -3407,7 +3859,7 @@ details.card:not([open]) > summary.card-title {
 .artifact-kind {
 	font-family: var(--sans);
 	font-weight: 600;
-	color: var(--vermilion-deep);
+	color: var(--ember-text);
 }
 
 .artifact-more {
@@ -3418,7 +3870,7 @@ details.card:not([open]) > summary.card-title {
 	display: inline-flex;
 	align-items: center;
 	min-height: 44px;
-	color: var(--vermilion-deep);
+	color: var(--ember-text);
 	font-weight: 600;
 	text-underline-offset: 3px;
 }
@@ -3426,7 +3878,7 @@ details.card:not([open]) > summary.card-title {
 @media (hover: hover) {
 	.daily-row:hover,
 	.artifact-row:hover {
-		background: var(--paper-deep);
+		background: var(--panel-deep);
 	}
 }
 
@@ -3446,7 +3898,7 @@ details.card:not([open]) > summary.card-title {
 .routine-source {
 	margin-left: auto;
 	color: var(--text-muted);
-	font: 500 10.5px/1.4 var(--mono);
+	font: 500 12px/1.4 var(--mono);
 	text-align: right;
 }
 
@@ -3477,14 +3929,14 @@ details.card:not([open]) > summary.card-title {
 
 .routine-section-heading h4 {
 	margin: 0;
-	color: var(--sumi);
+	color: var(--ink-strong);
 	font-size: 15px;
 	font-weight: 650;
 }
 
 .routine-review-progress {
 	color: var(--text-muted);
-	font: 500 11px/1.4 var(--mono);
+	font: 500 12px/1.4 var(--mono);
 	font-variant-numeric: tabular-nums;
 	white-space: nowrap;
 }
@@ -3508,7 +3960,7 @@ details.card:not([open]) > summary.card-title {
 	padding: 10px 12px;
 	border: 1px solid var(--gold);
 	border-radius: var(--radius-sm);
-	background: var(--paper-deep);
+	background: var(--panel-deep);
 }
 
 .routine-slot-heading {
@@ -3518,19 +3970,19 @@ details.card:not([open]) > summary.card-title {
 	gap: 8px;
 }
 
+/* Slot names are phrases ("Project block (Sat, 60–90 min)"); they read as
+   written, like the task category headers. */
 .routine-slot-label {
 	color: var(--ink-mid);
-	font: 600 10.5px/1.4 var(--mono);
-	letter-spacing: 0.035em;
-	text-transform: uppercase;
+	font: 600 13px/1.4 var(--sans);
 }
 
 .routine-today-mark {
 	padding: 2px 6px;
 	border-radius: 3px;
 	background: var(--gold);
-	color: var(--sumi);
-	font-size: 10px;
+	color: var(--on-ember);
+	font-size: 12px;
 	font-weight: 700;
 }
 
@@ -3562,7 +4014,7 @@ details.card:not([open]) > summary.card-title {
 	display: inline-flex;
 	align-items: center;
 	min-height: 44px;
-	color: var(--vermilion-deep);
+	color: var(--ember-text);
 	cursor: pointer;
 	text-decoration: underline;
 	text-decoration-color: var(--border);
@@ -3603,26 +4055,26 @@ details.card:not([open]) > summary.card-title {
 #page-today .routine-review-item .task-check::before {
 	position: absolute;
 	inset: 11px;
-	border: 1.5px solid rgba(33, 29, 24, 0.55);
+	border: 1.5px solid rgba(157, 177, 204, 0.6);
 	border-radius: 5px;
-	background: var(--paper-hi);
+	background: var(--panel-hi);
 	content: "";
 }
 
 #page-today .routine-review-item .task-check:hover::before {
-	border-color: var(--vermilion);
+	border-color: var(--ember);
 }
 
 #page-today .routine-review-item .task-check.done {
 	border: 0;
 	background: transparent;
 	box-shadow: none;
-	color: var(--fold-white);
+	color: var(--bright);
 }
 
 #page-today .routine-review-item .task-check.done::before {
-	border-color: var(--vermilion);
-	background: var(--vermilion);
+	border-color: var(--ember);
+	background: var(--ember);
 }
 
 .routine-review-item .task-check[aria-disabled="true"] {
@@ -3641,7 +4093,7 @@ details.card:not([open]) > summary.card-title {
 }
 
 .routine-save-status.is-error {
-	color: var(--vermilion-deep);
+	color: var(--ember-text);
 }
 
 .routine-disclosure {
@@ -3654,19 +4106,19 @@ details.card:not([open]) > summary.card-title {
 	justify-content: space-between;
 	gap: 12px;
 	min-height: 46px;
-	color: var(--sumi);
+	color: var(--ink-strong);
 	cursor: pointer;
 	font-size: 13.5px;
 	font-weight: 650;
 }
 
 .routine-disclosure summary::marker {
-	color: var(--vermilion);
+	color: var(--ember);
 }
 
 .routine-disclosure-meta {
 	color: var(--text-muted);
-	font: 400 10.5px/1.4 var(--mono);
+	font: 400 12px/1.4 var(--mono);
 }
 
 .routine-rule-list {
@@ -3697,12 +4149,12 @@ details.card:not([open]) > summary.card-title {
 
 .routine-date {
 	color: var(--ink-mid);
-	font: 500 10.5px/1.5 var(--mono);
+	font: 500 12px/1.5 var(--mono);
 	font-variant-numeric: tabular-nums;
 }
 
 .routine-date-item strong {
-	color: var(--sumi);
+	color: var(--ink-strong);
 	font-weight: 600;
 }
 
@@ -3731,7 +4183,7 @@ details.card:not([open]) > summary.card-title {
 	}
 }
 
-/* ── Metrics charts — flat washi bars and ink lines; gaps stay gaps ── */
+/* ── Metrics charts — flat bars and ink lines; gaps stay gaps ── */
 #page-metrics .ops-cbar { position: relative; display: block; height: 6px; margin-top: 6px; background: var(--surface-alt); border-radius: 3px; overflow: hidden; }
 #page-metrics .ops-cbar i { position: absolute; inset: 0; border-radius: 3px; transform: scaleX(0); transform-origin: left center; }
 #page-metrics .ops-cbar b { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--text-muted); opacity: 0.5; }
@@ -3785,10 +4237,10 @@ details.card:not([open]) > summary.card-title {
 .ops-volume-numbers { font: 500 12px/1.6 var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
 
 .ops-seg { display: inline-flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; align-self: flex-end; }
-.ops-seg button { font: 600 11.5px var(--sans); background: var(--surface-hover); color: var(--text-mid); border: 0; padding: 5px 10px; cursor: pointer; }
-.ops-seg button[aria-pressed="true"] { background: var(--accent); color: var(--paper-hi); }
+.ops-seg button { font: 600 12px var(--sans); background: var(--surface-hover); color: var(--text-mid); border: 0; padding: 5px 10px; cursor: pointer; }
+.ops-seg button[aria-pressed="true"] { background: var(--accent); color: var(--panel-hi); }
 .ops-seg button[data-rank="memory"][aria-pressed="true"] { background: var(--blue); }
-.ops-seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.ops-seg button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
 .ops-rank-block { margin: 4px 0 8px; }
 .ops-rank { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
 .ops-rank-item { display: grid; grid-template-columns: minmax(120px, 240px) minmax(0, 1fr) 96px; gap: 2px 10px; align-items: center; font-size: 12px; }
@@ -3880,7 +4332,7 @@ details.card:not([open]) > summary.card-title {
 	margin: 0;
 	font-size: 15px;
 	line-height: 1.3;
-	color: var(--sumi);
+	color: var(--ink-strong);
 }
 .interview-role {
 	margin: 4px 0 0;
@@ -3910,6 +4362,28 @@ details.card:not([open]) > summary.card-title {
 	color: var(--red);
 }
 
+/* Fixed action rail: long next-step text can no longer squeeze the buttons
+   into two-line labels, and every row's buttons share one column edge. */
+.interview-actions {
+	flex: none;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 8px;
+	min-width: 132px;
+}
+.interview-actions > .action-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}
+@media (pointer: coarse), (max-width: 520px) {
+	.interview-actions > .action-btn {
+		min-height: 44px;
+	}
+}
+
 /* Inline editor: closed by default so the pipeline stays scannable; open it
    for status changes, logging a signal, or writing notes during a call. */
 .interview-tools {
@@ -3923,7 +4397,7 @@ details.card:not([open]) > summary.card-title {
 	border-bottom: 1px dotted var(--border);
 }
 .interview-tools > summary:hover {
-	color: var(--sumi);
+	color: var(--ink-strong);
 }
 .interview-grid {
 	display: grid;
@@ -3938,7 +4412,7 @@ details.card:not([open]) > summary.card-title {
 	min-width: 0;
 }
 .interview-field > span {
-	font-size: 11.5px;
+	font-size: 12px;
 	font-weight: 600;
 	letter-spacing: 0.02em;
 	color: var(--ink-muted);
@@ -3960,6 +4434,68 @@ details.card:not([open]) > summary.card-title {
 	gap: 10px;
 	flex-wrap: wrap;
 }
+
+/* Update application panel: one labelled group per write, a dashed crease
+   between groups, fields sized to their content rather than half the row. */
+.interview-group {
+	display: grid;
+	gap: 8px 12px;
+	align-items: end;
+	min-width: 0;
+	margin: 0;
+	padding: 16px 0 0;
+	border: 0;
+}
+.interview-tools form .interview-group {
+	margin-top: 16px;
+	border-top: 1px dashed var(--border-light);
+}
+.interview-group > legend {
+	float: left; /* a floated legend joins the grid instead of the fieldset border */
+	grid-column: 1 / -1;
+	padding: 0;
+	margin-bottom: 2px;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--ink-strong);
+}
+.interview-group-status {
+	grid-template-columns: repeat(2, minmax(0, 13rem)) minmax(0, 1fr);
+}
+.interview-group-next {
+	grid-template-columns: minmax(0, 1fr) 11rem auto;
+}
+.interview-group-signal {
+	grid-template-columns: 11rem 12rem minmax(0, 1fr) auto;
+}
+.interview-group-notes {
+	grid-template-columns: minmax(0, 1fr);
+}
+.interview-group .run-input,
+.interview-group .run-select {
+	width: 100%;
+	min-height: 36px;
+}
+.interview-group textarea.run-input {
+	font-family: var(--sans);
+	font-size: 13px;
+	line-height: 1.5;
+	resize: vertical;
+}
+.interview-group-next textarea {
+	min-height: 84px;
+	field-sizing: content;
+}
+.interview-group > .run-status {
+	align-self: center;
+}
+.interview-group-feedback {
+	grid-column: 1 / -1;
+}
+.interview-group-feedback:empty {
+	display: none;
+}
 .interview-add > summary {
 	list-style: none;
 	cursor: pointer;
@@ -3969,7 +4505,7 @@ details.card:not([open]) > summary.card-title {
 }
 .interview-add > summary::before {
 	content: "+";
-	color: var(--accent);
+	color: var(--ember-text);
 	font-weight: 700;
 }
 .interview-add[open] > summary::before {
@@ -3981,9 +4517,29 @@ details.card:not([open]) > summary.card-title {
 .interview-add[open] > summary.card-title {
 	margin-bottom: 12px;
 }
+@media (max-width: 640px) {
+	.job-stats.grid-5 {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	.interview-group-status,
+	.interview-group-next,
+	.interview-group-signal {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.interview-group .run-input,
+	.interview-group .run-select,
+	.interview-group .action-btn {
+		min-height: 44px;
+	}
+}
 @media (max-width: 520px) {
 	.interview-row {
 		flex-direction: column;
+	}
+	.interview-actions {
+		flex-direction: row;
+		flex-wrap: wrap;
+		min-width: 0;
 	}
 	.interview-grid {
 		grid-template-columns: minmax(0, 1fr);
@@ -3999,14 +4555,14 @@ details.card:not([open]) > summary.card-title {
 	max-height: calc(100dvh - 32px);
 	margin: auto;
 	padding: 0;
-	background: var(--paper-hi);
+	background: var(--panel-hi);
 	color: var(--text);
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	box-shadow: var(--shadow-lg);
 }
 .interview-dialog::backdrop {
-	background: rgba(23, 21, 18, 0.58);
+	background: rgba(2, 6, 14, 0.7);
 }
 .interview-dialog-head {
 	position: sticky;
@@ -4017,22 +4573,22 @@ details.card:not([open]) > summary.card-title {
 	justify-content: space-between;
 	gap: 16px;
 	padding: 14px 18px;
-	background: var(--paper-deep);
+	background: var(--panel-deep);
 	border-bottom: 1px solid var(--border);
 }
 .interview-dialog-kicker {
 	margin: 0;
-	font-size: 11px;
+	font-size: 12px;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
-	color: var(--vermilion);
+	color: var(--ember-text);
 	font-weight: 700;
 }
-.interview-dialog-id h3 {
+.interview-dialog-id h2 {
 	margin: 2px 0 0;
 	font-size: 18px;
 	line-height: 1.25;
-	color: var(--sumi);
+	color: var(--ink-strong);
 }
 .interview-dialog-role {
 	margin: 2px 0 0;
@@ -4069,12 +4625,12 @@ details.card:not([open]) > summary.card-title {
 .interview-dialog-section:last-child {
 	border-bottom: 0;
 }
-.interview-dialog-section h4 {
+.interview-dialog-section h3 {
 	margin: 0 0 6px;
 	font-size: 13px;
 	font-weight: 700;
 	letter-spacing: 0.02em;
-	color: var(--sumi);
+	color: var(--ink-strong);
 }
 .interview-dialog-hint {
 	margin: 4px 0 8px;
@@ -4084,7 +4640,7 @@ details.card:not([open]) > summary.card-title {
 }
 .interview-dialog-hint code {
 	font-family: var(--mono);
-	font-size: 11.5px;
+	font-size: 12px;
 }
 .interview-dialog-contact {
 	display: flex;
@@ -4105,7 +4661,7 @@ details.card:not([open]) > summary.card-title {
 .interview-dialog-contact-email {
 	font-family: var(--mono);
 	font-size: 12px;
-	color: var(--vermilion);
+	color: var(--ember-text);
 	overflow-wrap: anywhere;
 }
 .interview-dialog-files {
@@ -4123,7 +4679,7 @@ details.card:not([open]) > summary.card-title {
 }
 .interview-dialog-file-link {
 	font-weight: 600;
-	color: var(--vermilion);
+	color: var(--ember-text);
 	overflow-wrap: anywhere;
 }
 .interview-dialog-file-link.is-missing {
@@ -4133,7 +4689,7 @@ details.card:not([open]) > summary.card-title {
 }
 .interview-dialog-file-note {
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	color: var(--ink-muted);
 	overflow-wrap: anywhere;
 }
@@ -4162,7 +4718,7 @@ details.card:not([open]) > summary.card-title {
 }
 .interview-dialog-event-date {
 	font-family: var(--mono);
-	font-size: 11.5px;
+	font-size: 12px;
 	color: var(--ink-muted);
 }
 .interview-dialog-event-stage {
@@ -4237,7 +4793,7 @@ details.card:not([open]) > summary.card-title {
 }
 .interview-closed > summary::before {
 	content: "\25B8";
-	font-size: 11px;
+	font-size: 12px;
 	color: var(--ink-muted);
 	transition: transform 120ms ease;
 }
@@ -4268,9 +4824,9 @@ details.card:not([open]) > summary.card-title {
 	overflow: auto;
 	white-space: pre-wrap;
 	font-family: var(--mono);
-	font-size: 11px;
+	font-size: 12px;
 	line-height: 1.5;
-	background: var(--paper-deep);
+	background: var(--panel-deep);
 	border: 1px solid var(--border-light);
 	border-radius: var(--radius);
 }
@@ -4285,7 +4841,51 @@ details.card:not([open]) > summary.card-title {
 .agent-event-when {
 	color: var(--text-muted);
 	font-family: var(--mono);
-	font-size: 10px;
+	font-size: 12px;
+}
+.agent-badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	justify-content: flex-end;
+}
+.agent-warnings {
+	margin: 8px 0;
+	padding-left: 18px;
+	color: var(--red);
+	font-size: 12px;
+}
+.agent-details {
+	margin-top: 10px;
+}
+.agent-details > summary {
+	cursor: pointer;
+	font-size: 12px;
+}
+.agent-files {
+	list-style: none;
+	margin: 8px 0 0;
+	padding: 0;
+	display: grid;
+	gap: 4px;
+	font-size: 12px;
+}
+.agent-run {
+	margin-top: 10px;
+}
+.agent-last-run {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: 4px 12px;
+	margin: 10px 0 0;
+	font-size: 12px;
+}
+.agent-last-run dt {
+	color: var(--text-muted);
+}
+.agent-last-run dd {
+	margin: 0;
+	overflow-wrap: anywhere;
 }
 .ops-table-scroll > .agents-scan-table {
 	min-width: 900px;
@@ -4300,8 +4900,8 @@ details.card:not([open]) > summary.card-title {
 }
 
 /* Interviews tab · agents card: Scout leads list. Reuses card, badge and action-btn. */
-.interview-agents-subhead { margin: var(--space-4, 16px) 0 var(--space-2, 8px); font-size: 0.9rem; }
-.interview-agents-leads { list-style: none; margin: 0 0 var(--space-4, 16px); padding: 0; }
+.interview-agents-subhead { margin: 16px 0 8px; font-size: 14px; }
+.interview-agents-leads { list-style: none; margin: 0 0 16px; padding: 0; }
 .interview-agents-leads li {
   display: flex; gap: 16px; align-items: flex-start; justify-content: space-between;
   padding: 12px 0; border-top: 1px solid var(--border);
@@ -4309,3 +4909,213 @@ details.card:not([open]) > summary.card-title {
 .interview-agents-leads li > div { min-width: 0; }
 .interview-agents-leads .action-btn { flex: none; }
 @media (max-width: 560px) { .interview-agents-leads li { flex-direction: column; } }
+
+/* Calendar extends the existing panel cards without changing other tabs. */
+.calendar-heading, .calendar-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.calendar-heading .card-title { margin-bottom: 6px; }
+.calendar-note { color: var(--text-muted); font-size: 13px; line-height: 1.5; margin: 6px 0; overflow-wrap: anywhere; }
+.calendar-card .action-btn, .calendar-schedule-button, .calendar-schedule-form .action-btn { min-height: 44px; }
+.calendar-card code { overflow-wrap: anywhere; white-space: normal; }
+.calendar-agenda { list-style: none; margin: 12px 0; padding: 0; }
+.calendar-agenda li { display: flex; align-items: start; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--border); overflow-wrap: anywhere; }
+.calendar-agenda li > div { min-width: 0; }
+.calendar-google-link { flex-shrink: 0; padding: 12px 0; min-height: 44px; font-size: 12px; }
+.calendar-settings { border-top: 1px solid var(--border); padding-top: 10px; margin-top: 12px; }
+.calendar-settings summary, .calendar-capture-schedule summary, #calendarOutcomes summary { min-height: 44px; padding: 12px 0; cursor: pointer; }
+.calendar-card fieldset { border: 1px solid var(--border); margin: 14px 0; padding: 12px; min-width: 0; }
+.calendar-card legend { font-weight: 600; padding: 0 6px; }
+.calendar-choice, .calendar-consent { display: flex; align-items: start; gap: 10px; min-height: 44px; padding: 10px 0; overflow-wrap: anywhere; }
+.calendar-choice input, .calendar-consent input { margin-top: 4px; flex-shrink: 0; width: 18px; height: 18px; accent-color: var(--accent); }
+.calendar-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; margin: 12px 0; min-width: 0; }
+.calendar-fields label { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 13px; }
+.calendar-fields input, .calendar-fields select { min-height: 44px; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; }
+.calendar-fields [hidden], .calendar-schedule-form[hidden] { display: none; }
+.calendar-capture-schedule { flex-basis: 100%; min-width: 0; }
+#captureForm { flex-wrap: wrap; }
+.task-item:has(.calendar-schedule-button) { flex-wrap: wrap; }
+.task-item:has(.calendar-schedule-button) > .task-text { flex: 1; min-width: min(140px, 50%); }
+.calendar-schedule-button { font-size: 12px; }
+.calendar-schedule-form { flex-basis: 100%; width: 100%; border-top: 1px solid var(--border); padding: 12px 0; min-width: 0; }
+.calendar-schedule-form h4 { margin: 0; font-size: 14px; }
+.calendar-interview-action { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 6px; }
+.calendar-interview-action > span { flex: 1; min-width: 0; font-size: 13px; color: var(--ink-muted); overflow-wrap: anywhere; }
+.calendar-interview-action > span:empty { display: none; }
+@media (max-width: 560px) {
+  .calendar-agenda li { flex-direction: column; gap: 0; }
+  .calendar-heading { align-items: start; }
+  .calendar-card .calendar-actions { justify-content: start; }
+}
+
+/* Career's weekly ledger inherits the existing panel, ink and form controls. */
+.work-search-heading, .work-search-actions, .work-search-period {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.work-search-heading { justify-content: space-between; }
+.work-search-heading h3, .work-search-heading h4 { margin: 0; }
+.work-search-heading h4 { flex: 1; min-width: min(100%, 220px); overflow-wrap: anywhere; }
+.work-search-period { align-items: end; margin: 16px 0; }
+.work-search-period p { flex-basis: 100%; margin: 0; font-size: 14px; }
+.work-search .action-btn, .work-search .run-input, .work-search .run-select { min-height: 44px; }
+.work-search .interview-field, .work-search .run-input, .work-search .run-select { min-width: 0; max-width: 100%; }
+.work-search [hidden] { display: none; }
+.work-search-activity { border-top: 1px solid var(--border); padding: 20px 0; }
+.work-search-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; margin: 16px 0 0; }
+.work-search-field { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; align-content: start; gap: 4px 12px; }
+.work-search-field dt { grid-column: 1; color: var(--text-muted); font-size: 13px; }
+.work-search-field dd { grid-column: 1; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.work-search-field button { grid-column: 2; grid-row: 1 / 3; font-size: 12px; }
+.work-search-text { margin: 12px 0; }
+.work-search-text summary { min-height: 44px; padding: 12px 0; cursor: pointer; }
+.work-search textarea { width: 100%; box-sizing: border-box; resize: vertical; }
+@media (max-width: 700px) {
+  .work-search-fields { grid-template-columns: minmax(0, 1fr); }
+  .work-search-heading { align-items: start; }
+}
+
+/* ── Today: Now (core/now.py) ─────────────────────────────────
+   The page's focal line: one verb chip in the state colour, the subject
+   large, the detail and the routine rule it serves, the actions, then the
+   next two as telemetry rows. */
+.now-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px 24px;
+	margin-bottom: 16px;
+}
+.now-card .now-title {
+	margin: 0;
+	padding: 0;
+	border-bottom: 0;
+	align-items: baseline;
+}
+.now-asof {
+	font: 400 12px/1.4 var(--mono);
+	color: var(--ink-muted);
+}
+.now-directive {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 8px 12px;
+	margin: 0 0 8px;
+	font-size: 24px;
+	font-weight: 700;
+	line-height: 1.25;
+	color: var(--ink-strong);
+}
+.now-verb {
+	padding: 5px 10px;
+	font: 600 13px/1.2 var(--sans);
+	background: var(--ember);
+	color: var(--on-ember);
+}
+.now-card.is-warn .now-verb {
+	background: var(--yellow);
+}
+.now-card.is-calm .now-verb {
+	background: var(--panel-deep);
+	color: var(--ink);
+	box-shadow: inset 0 0 0 1px var(--border);
+}
+.now-detail {
+	max-width: 72ch;
+	margin: 0 0 4px;
+	font-size: 15px;
+	color: var(--ink);
+	overflow-wrap: anywhere;
+}
+.now-why {
+	max-width: 72ch;
+	margin: 0 0 16px;
+	font-size: 13px;
+	color: var(--ink-muted);
+}
+.now-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+.now-then-title {
+	margin: 24px 0 4px;
+	padding-top: 12px;
+	border-top: 1px solid var(--border-light);
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--ink-mid);
+}
+.now-then {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.now-then li {
+	display: grid;
+	grid-template-columns: 88px minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 0;
+	border-bottom: 1px solid var(--border-light);
+}
+.now-then li:last-child {
+	border-bottom: 0;
+}
+.now-then-verb {
+	font: 600 12px/1.3 var(--sans);
+	color: var(--ember-text);
+}
+.now-then li.is-warn .now-then-verb {
+	color: var(--yellow);
+}
+.now-then li.is-calm .now-then-verb {
+	color: var(--ink-muted);
+}
+.now-then-text {
+	font-size: 14px;
+	color: var(--ink);
+	overflow-wrap: anywhere;
+}
+.now-stale {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+	margin: 16px 0 0;
+	font-size: 13px;
+	color: var(--yellow);
+}
+.now-stale[hidden] {
+	display: none;
+}
+@media (max-width: 640px) {
+	.now-directive {
+		font-size: 20px;
+	}
+	.now-then li {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 4px;
+	}
+}
+
+/* Touch: every control on every tab reaches 44px. The task checkbox keeps
+   its 22px mark and grows an invisible hit area instead. !important because
+   this is an accessibility floor that component and ID rules (deck
+   segments, run fields) must not undercut. */
+@media (pointer: coarse) {
+	.page :is(button, summary, select, .action-btn, .realm-pill),
+	.page input:not([type="checkbox"], [type="radio"], [type="hidden"]) {
+		min-height: 44px !important;
+	}
+	.page .task-check {
+		position: relative;
+	}
+	.page .task-check::after {
+		content: "";
+		position: absolute;
+		inset: -11px;
+	}
+}

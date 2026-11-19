@@ -1,0 +1,693 @@
+/* Deck: Interviews tab. Builds on deck.css tokens and primitives. */
+
+#page-interviews {
+	--iv-bad-edge: rgba(243, 123, 112, 0.35);
+	--iv-ok-edge: rgba(98, 207, 146, 0.3);
+}
+
+/* ── Add application: a toolbar button; its form opens full width below ── */
+#page-interviews .iv-toolbar .iv-add-card,
+#page-interviews .iv-toolbar .interview-add {
+	display: contents;
+}
+#page-interviews .iv-toolbar .interview-add > summary {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 32px;
+	padding: 0 12px;
+	margin: 0;
+	font-size: 13px;
+	font-weight: 600;
+	white-space: nowrap;
+	color: var(--deck-accent-ink);
+	border: 1px solid var(--deck-accent);
+	border-radius: var(--deck-radius-sm);
+	background: var(--deck-accent);
+	transition: background var(--deck-fast) var(--deck-ease);
+}
+#page-interviews .iv-toolbar .interview-add > summary:hover,
+#page-interviews .iv-toolbar .interview-add[open] > summary {
+	background: var(--ember-light);
+}
+#page-interviews .iv-toolbar .interview-add > summary::before {
+	content: "";
+	color: inherit;
+	width: 14px;
+	height: 14px;
+	background:
+		linear-gradient(currentColor, currentColor) center / 12px 1.5px no-repeat,
+		linear-gradient(currentColor, currentColor) center / 1.5px 12px no-repeat;
+	transition: transform var(--deck-fast) var(--deck-ease);
+}
+#page-interviews .iv-toolbar .interview-add[open] > summary::before {
+	transform: rotate(45deg);
+}
+/* The details slot box would otherwise size the form to its content. */
+#page-interviews .iv-toolbar .interview-add::details-content {
+	display: contents;
+}
+#page-interviews .iv-toolbar .interview-add > form {
+	order: 10;
+	flex: 1 1 100%;
+	background: var(--deck-brackets), var(--deck-panel), var(--deck-raised);
+	border: 1px solid var(--deck-edge);
+	border-radius: var(--deck-radius);
+}
+/* display: contents on the slot drops the closed-state hiding; restore it. */
+#page-interviews .iv-toolbar .interview-add:not([open]) > form {
+	display: none;
+}
+#page-interviews .interview-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 12px;
+	padding: 16px;
+}
+#page-interviews .interview-field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-width: 0;
+}
+#page-interviews .interview-field > span {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--deck-text-2);
+}
+#page-interviews .interview-field-wide {
+	grid-column: span 2;
+}
+#page-interviews .interview-form-actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+/* ── Pipeline readout: right of the title in the HUD header ── */
+#page-interviews .iv-stats-card {
+	display: grid;
+	justify-items: end;
+	gap: 8px;
+	background: none;
+	border: 0;
+	box-shadow: none;
+	padding: 0;
+	margin: 0;
+}
+#page-interviews .iv-stats-card > .card-title {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+}
+#page-interviews .iv-stats-card .interview-note {
+	font-size: 12px;
+	color: var(--deck-text-3);
+	max-width: 60ch;
+	margin: 0;
+}
+@media (max-width: 900px) {
+	#page-interviews .iv-stats-card {
+		justify-items: start;
+	}
+}
+
+/* ── Toolbar ─────────────────────────────────────────────── */
+#page-interviews .iv-search {
+	position: relative;
+	flex: 1 1 280px;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+}
+#page-interviews .iv-search .deck-search {
+	width: 100%;
+	padding-left: 34px;
+	padding-right: 34px;
+}
+#page-interviews .iv-search-icon {
+	position: absolute;
+	left: 10px;
+	color: var(--deck-text-3);
+	pointer-events: none;
+}
+#page-interviews .iv-search kbd {
+	position: absolute;
+	right: 8px;
+	pointer-events: none;
+}
+#page-interviews .iv-search:focus-within kbd {
+	visibility: hidden;
+}
+
+/* ── List ────────────────────────────────────────────────── */
+#page-interviews .iv-list-col {
+	min-width: 0;
+}
+#page-interviews .iv-row {
+	grid-template-columns: auto minmax(0, 1fr) auto;
+}
+#page-interviews .iv-row-text {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	gap: 1px;
+}
+#page-interviews .iv-row-meta {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 3px;
+}
+#page-interviews .iv-overdue {
+	font-family: var(--deck-font);
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--deck-bad);
+}
+#page-interviews .iv-row:focus-visible {
+	outline-offset: -2px;
+}
+#page-interviews .deck-row[hidden],
+#page-interviews .deck-group[hidden] {
+	display: none;
+}
+
+/* ── Detail: one application at a time ──────────────────── */
+#page-interviews .iv-detail {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+#page-interviews .iv-detail > .card,
+#page-interviews .iv-detail [data-interview-list],
+#page-interviews .iv-detail [data-interview-list-closed] {
+	display: contents;
+}
+#page-interviews .iv-detail [data-interview-section] > .card-title,
+#page-interviews .iv-detail [data-interview-section] > .run-empty,
+#page-interviews .iv-detail [data-interview-section] > .interview-note,
+#page-interviews .iv-detail .interview-closed > summary,
+#page-interviews .iv-detail .interview-closed > .interview-note {
+	display: none;
+}
+#page-interviews .iv-detail .interview-closed {
+	order: 1;
+}
+#page-interviews .iv-detail #interviewAgents {
+	order: 3;
+	display: block;
+	margin: 0;
+}
+#page-interviews .iv-back {
+	display: none;
+	align-self: flex-start;
+	order: 0;
+}
+#page-interviews .iv-detail[hidden],
+#page-interviews .iv-list[hidden],
+#page-interviews .iv-detail .interview-closed:not(:has(.is-current)) {
+	display: none;
+}
+#page-interviews .interview-actions > .action-btn {
+	flex: none;
+}
+
+#page-interviews .interview-entry {
+	display: none;
+	order: 1;
+	background: var(--deck-brackets), var(--deck-panel), var(--deck-raised);
+	border: 1px solid var(--deck-edge);
+	scroll-margin-top: 12px;
+}
+#page-interviews .interview-entry.is-current {
+	display: block;
+	animation: iv-enter var(--deck-fast) var(--deck-ease);
+}
+#page-interviews .interview-entry:focus {
+	outline: none;
+}
+@keyframes iv-enter {
+	from {
+		opacity: 0.4;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+#page-interviews .interview-row {
+	display: grid;
+	gap: 14px;
+	padding: 20px 20px 16px;
+	border-bottom: 1px solid var(--deck-edge);
+}
+#page-interviews .interview-main {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-width: 0;
+}
+#page-interviews .interview-heading {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+#page-interviews .interview-heading h3 {
+	font-size: 18px;
+	font-weight: 700;
+	letter-spacing: -0.015em;
+	margin: 0 4px 0 0;
+}
+#page-interviews .interview-role {
+	font-size: 14px;
+	color: var(--deck-text-2);
+	margin: 0;
+}
+#page-interviews .interview-main .interview-meta {
+	font-size: 13px;
+	color: var(--deck-text-3);
+	margin: 0;
+}
+#page-interviews .interview-main .interview-meta strong {
+	font-family: var(--deck-mono);
+	font-weight: 500;
+	color: var(--deck-text-2);
+}
+
+/* Next action: the most prominent thing in the detail. */
+#page-interviews .interview-next {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 6px 10px;
+	margin: 12px 0 0;
+	padding: 16px 18px;
+	font-size: 16px;
+	font-weight: 500;
+	line-height: 1.45;
+	color: var(--deck-text);
+	background: rgba(255, 255, 255, 0.05);
+	border: 1px solid var(--deck-edge-strong);
+	border-top-color: var(--deck-edge-light);
+	border-radius: var(--deck-radius);
+}
+#page-interviews .interview-next[hidden] {
+	display: none;
+}
+#page-interviews .interview-next strong {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--deck-text-2);
+}
+#page-interviews .interview-next [data-interview-next-task] {
+	flex: 1 1 320px;
+	min-width: 0;
+}
+#page-interviews .interview-date {
+	font-family: var(--deck-mono);
+	font-variant-numeric: tabular-nums;
+	font-size: 13px;
+	color: var(--deck-text-2);
+}
+#page-interviews .interview-overdue {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--deck-bad);
+}
+#page-interviews .interview-next:has([data-interview-overdue]:not([hidden])) {
+	background: var(--deck-bad-weak);
+	border-color: var(--deck-bad);
+}
+#page-interviews .calendar-interview-action {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+	color: var(--deck-text-2);
+}
+#page-interviews .calendar-interview-action > span:empty {
+	display: none;
+}
+
+/* Agent pipeline: three steps, the next one carries the action. */
+#page-interviews .iv-pipeline {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	/* Three across when there is room; steps wrap before a button overflows. */
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 136px), 1fr));
+	gap: 8px;
+}
+#page-interviews .iv-step {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 10px 12px;
+	border: 1px solid var(--deck-edge);
+	border-radius: var(--deck-radius-sm);
+	background: var(--deck-sunken);
+	min-width: 0;
+}
+#page-interviews .iv-step-name {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--deck-text);
+}
+#page-interviews .iv-step-name::before {
+	content: "";
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	border: 1.5px solid var(--deck-text-3);
+	flex: none;
+}
+#page-interviews .iv-step[data-state="done"] .iv-step-name::before {
+	background: var(--deck-ok);
+	border-color: var(--deck-ok);
+}
+#page-interviews .iv-step[data-state="ready"] {
+	border-color: var(--deck-accent-edge);
+	background: var(--deck-accent-weak);
+}
+#page-interviews .iv-step[data-state="ready"] .iv-step-name::before {
+	border-color: var(--deck-accent);
+}
+#page-interviews .iv-step-state {
+	font-size: 12px;
+	color: var(--deck-text-2);
+}
+#page-interviews .iv-step[data-state="blocked"] .iv-step-state {
+	color: var(--deck-text-3);
+}
+#page-interviews .iv-step .action-btn {
+	align-self: flex-start;
+	margin-top: 2px;
+}
+#page-interviews .iv-step[data-state="ready"] .action-btn {
+	background: var(--deck-accent);
+	border-color: var(--deck-accent);
+	color: var(--deck-accent-ink);
+	font-weight: 600;
+}
+#page-interviews .iv-step[data-state="ready"] .action-btn:hover {
+	background: var(--ember-light);
+	border-color: var(--ember-light);
+}
+
+#page-interviews .interview-actions {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+#page-interviews .interview-field :is(input, select, textarea) {
+	min-width: 0;
+	max-width: 100%;
+}
+
+/* Editor: always open, grouped; summary hidden. */
+#page-interviews .interview-tools {
+	padding: 16px 20px 20px;
+}
+#page-interviews .interview-tools > summary {
+	display: none;
+}
+#page-interviews .interview-tools[open] {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 24px;
+}
+#page-interviews .interview-tools form {
+	min-width: 0;
+}
+#page-interviews .interview-tools form[data-interview-signal-form],
+#page-interviews .interview-tools form[data-interview-notes-form] {
+	grid-column: 1 / -1;
+}
+#page-interviews .interview-group {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 10px 12px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	min-width: 0;
+}
+#page-interviews .interview-group > legend {
+	float: left;
+	width: 100%;
+	margin: 0 0 2px;
+	padding: 0;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--deck-text);
+}
+#page-interviews .interview-group .interview-field {
+	flex: 1 1 140px;
+}
+#page-interviews .interview-group-next .interview-field:first-of-type,
+#page-interviews .interview-group-signal .interview-field:last-of-type,
+#page-interviews .interview-group-notes textarea {
+	flex: 1 1 100%;
+}
+#page-interviews .interview-group-signal .interview-field:last-of-type {
+	flex-basis: 260px;
+}
+#page-interviews .interview-group textarea,
+#page-interviews .interview-group input,
+#page-interviews .interview-group select {
+	width: 100%;
+}
+#page-interviews .interview-field-date {
+	min-width: 150px;
+}
+#page-interviews .interview-group .run-status:empty {
+	display: none;
+}
+#page-interviews .interview-group-notes .interview-form-actions {
+	width: 100%;
+}
+#page-interviews .interview-group select:disabled {
+	opacity: 0.45;
+}
+
+/* Agents panel below the detail. */
+#page-interviews #interviewAgents > p {
+	font-size: 13px;
+	margin: 0 0 12px;
+	max-width: 80ch;
+}
+#page-interviews .interview-agents-subhead {
+	font-size: 13px;
+	font-weight: 600;
+	margin: 12px 0 8px;
+}
+#page-interviews .interview-agents-subhead small {
+	font-size: 12px;
+	font-weight: 400;
+	color: var(--deck-text-3);
+}
+#page-interviews .interview-agents-leads {
+	list-style: none;
+	margin: 0 0 12px;
+	padding: 0;
+	display: grid;
+	gap: 2px;
+}
+#page-interviews .interview-agents-leads li {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 8px 10px;
+	border-radius: var(--deck-radius-sm);
+}
+#page-interviews .interview-agents-leads li:hover {
+	background: var(--deck-hover);
+}
+#page-interviews .interview-agents-leads .interview-meta {
+	font-size: 12px;
+	margin: 2px 0 0;
+}
+#page-interviews .ops-empty {
+	font-size: 13px;
+	color: var(--deck-text-3);
+}
+
+/* ── Narrow ──────────────────────────────────────────────── */
+@media (max-width: 960px) {
+	#page-interviews .iv-back {
+		display: inline-flex;
+	}
+	#page-interviews .deck-list {
+		max-height: 60vh;
+		overflow-y: auto;
+	}
+}
+@media (max-width: 720px) {
+	#page-interviews .iv-pipeline {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	#page-interviews .interview-field-wide {
+		grid-column: auto;
+	}
+	#page-interviews .interview-row,
+	#page-interviews .interview-tools {
+		padding-left: 14px;
+		padding-right: 14px;
+	}
+	#page-interviews .iv-toolbar .deck-segments {
+		width: 100%;
+	}
+	#page-interviews .interview-agents-leads li {
+		flex-direction: column;
+	}
+}
+
+/* ── Count help, key hints, quick controls, touch targets ── */
+#page-interviews .iv-count-help > summary {
+	font-size: 12px;
+	color: var(--deck-text-3);
+	text-decoration: underline dotted;
+	text-underline-offset: 3px;
+}
+#page-interviews .iv-count-help > summary:hover {
+	color: var(--deck-text-2);
+}
+#page-interviews .iv-count-help .interview-note {
+	margin-top: 6px;
+}
+
+/* Quick controls: status, priority, next action under the title. */
+#page-interviews .iv-quick {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+	gap: 12px 20px;
+	align-items: start;
+	padding: 14px;
+	background: var(--deck-sunken);
+	border: 1px solid var(--deck-edge);
+	border-radius: var(--deck-radius-sm);
+}
+#page-interviews .iv-quick textarea[name="task"] {
+	min-height: 0;
+	height: 2.6em;
+	resize: vertical;
+}
+#page-interviews .iv-quick .run-status.is-done,
+#page-interviews .interview-tools .run-status.is-done {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 8px;
+	border-radius: 999px;
+	background: var(--deck-ok-weak);
+	border: 1px solid var(--iv-ok-edge);
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+}
+#page-interviews .iv-quick .run-status.is-failed,
+#page-interviews .interview-tools .run-status.is-failed {
+	display: inline-flex;
+	padding: 3px 8px;
+	border-radius: 999px;
+	background: var(--deck-bad-weak);
+	border: 1px solid var(--iv-bad-edge);
+	font-size: 12px;
+}
+/* Signal and notes are their own tasks: a hairline and air set them apart
+   from the quick controls above instead of stacking at one rhythm. */
+#page-interviews .interview-tools form[data-interview-notes-form] {
+	padding-top: 20px;
+	border-top: 1px solid var(--deck-edge);
+}
+#page-interviews .interview-group input,
+#page-interviews .interview-group select {
+	min-height: 36px;
+}
+@media (pointer: coarse) {
+	#page-interviews .interview-group input,
+	#page-interviews .interview-group select,
+	#page-interviews .iv-toolbar .interview-add > summary,
+	#page-interviews .iv-count-help > summary {
+		min-height: 44px;
+	}
+	#page-interviews .iv-count-help > summary {
+		display: inline-flex;
+		align-items: center;
+	}
+}
+#page-interviews .interview-group-notes {
+	gap: 8px 12px;
+}
+/* One solid accent per pane: the ready pipeline step. */
+#page-interviews .interview-actions [data-interview-mode] {
+	background: transparent;
+	border-color: var(--deck-edge-strong);
+	color: var(--deck-text);
+	font-weight: 500;
+	box-shadow: none;
+}
+#page-interviews .interview-actions [data-interview-mode]:hover {
+	background: var(--deck-hover);
+	border-color: var(--deck-edge-light);
+}
+@media (max-width: 960px) {
+	#page-interviews .iv-quick {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	#page-interviews .interview-row {
+		padding-top: 14px;
+	}
+	/* The masthead stays pinned on phones; land the selected entry below it. */
+	#page-interviews .interview-entry {
+		scroll-margin-top: 190px;
+	}
+}
+
+/* Overdrive: odometer count roll. The track clips to one line so the old and
+   new digits slide past each other without shifting the surrounding layout. */
+#page-interviews .iv-odo {
+	display: inline-block;
+	overflow: hidden;
+	height: 1.25em;
+	line-height: 1.25;
+	vertical-align: bottom;
+	text-align: inherit;
+}
+#page-interviews .iv-odo-col {
+	display: flex;
+	flex-direction: column;
+	will-change: transform;
+}
+#page-interviews .iv-odo-col > span {
+	display: block;
+	height: 1.25em;
+	line-height: 1.25;
+}
+@media (prefers-reduced-motion: reduce) {
+	#page-interviews .iv-odo-col {
+		transform: none !important;
+	}
+	#page-interviews .interview-entry.is-current {
+		animation: none;
+	}
+	#page-interviews .iv-toolbar .interview-add > summary,
+	#page-interviews .iv-toolbar .interview-add > summary::before {
+		transition: none;
+	}
+}

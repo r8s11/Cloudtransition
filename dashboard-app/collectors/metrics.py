@@ -619,7 +619,7 @@ def collect_metric_history(window: str = "1h") -> dict:
 
 def collect_all_metrics() -> dict:
     """Collect independent monitoring sources concurrently within their timeouts."""
-    from server_activity import collect_server_activity
+    from collectors.server_activity import collect_server_activity
 
     with ThreadPoolExecutor(max_workers=2) as pool:
         infrastructure_job = pool.submit(collect_infrastructure_metrics)

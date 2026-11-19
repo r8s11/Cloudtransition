@@ -8,9 +8,9 @@ file counts those answers into met / thin / missing and an apply / gap story /
 skip verdict. Nothing is written: the tracker, the resume and the leads doc are
 read only.
 
-    python3 dashboard-app/leads_jev.py             # judge every tagged lead
-    python3 dashboard-app/leads_jev.py --payload   # print the requests, no call
-    python3 dashboard-app/leads_jev.py --company CAIS
+    python3 dashboard-app/scripts/leads_jev.py             # judge every tagged lead
+    python3 dashboard-app/scripts/leads_jev.py --payload   # print the requests, no call
+    python3 dashboard-app/scripts/leads_jev.py --company CAIS
 
 The requirements are the posting's own must-haves, recorded in the tracker; the
 "why / gaps" prose from the leads doc is deliberately not sent, so Jev's answer
@@ -33,7 +33,7 @@ from pathlib import Path
 
 import yaml
 
-WORKSPACE = Path(__file__).resolve().parent.parent
+WORKSPACE = Path(__file__).resolve().parents[2]
 LEADS_FILE = WORKSPACE / "interviews" / "job-applications.yml"
 RESUME_DIR = WORKSPACE / "resume"
 

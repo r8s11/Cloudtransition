@@ -11,7 +11,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import workspace_content as wc  # noqa: E402
+from core import workspace_content as wc  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 _spec = importlib.util.spec_from_file_location("catalog", ROOT / "artifacts" / "catalog.py")

@@ -1,0 +1,551 @@
+/* Deck: run tab. Builds on deck.css tokens and primitives.
+   Also owns deck styling of runner cards (.run-grid / .run-item) on every
+   deck page; Today keeps the base-theme runner look because it is not a deck. */
+
+.deck .sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+.deck .run-item[hidden],
+.deck .run-section[hidden],
+.deck .run-item .action-btn[hidden],
+.deck .run-log-row .action-btn[hidden],
+.deck .deck-empty[hidden] {
+	display: none;
+}
+
+/* ── Run page: bounds note, toolbar, console layout ───────── */
+#page-run .run-bounds {
+	margin: 0;
+	font-size: 13px;
+	color: var(--deck-text-2);
+}
+#page-run .run-bounds > summary {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 32px;
+	color: var(--deck-text-2);
+	border-radius: var(--deck-radius-sm);
+	transition: color var(--deck-fast) var(--deck-ease);
+}
+#page-run .run-bounds > summary:hover {
+	color: var(--deck-text);
+}
+#page-run .run-bounds > summary::before {
+	content: "";
+	width: 6px;
+	height: 6px;
+	border-right: 1.5px solid currentColor;
+	border-bottom: 1.5px solid currentColor;
+	transform: rotate(-45deg);
+	transition: transform var(--deck-fast) var(--deck-ease);
+}
+#page-run .run-bounds[open] > summary::before {
+	transform: rotate(45deg);
+}
+/* Opens across the full width of the HUD header, in flow, so it never covers
+   the command bar below it. */
+#page-run .run-bounds[open] {
+	grid-column: 1 / -1;
+}
+#page-run .run-rules {
+	max-width: 82ch;
+	margin: 8px 0 0;
+	padding: 12px 16px;
+	color: var(--deck-text-2);
+	border: 1px solid var(--deck-edge-strong);
+	border-radius: var(--deck-radius-sm);
+	background: var(--deck-sunken);
+}
+#page-run .run-rules li::before {
+	background: var(--deck-text-3);
+}
+
+#page-run .run-toolbar {
+	justify-content: space-between;
+}
+#page-run .run-filter {
+	position: relative;
+	display: flex;
+	align-items: center;
+	max-width: 420px;
+}
+#page-run .run-filter input {
+	width: 100%;
+	padding-left: 32px;
+	padding-right: 32px;
+}
+#page-run .run-filter-icon {
+	position: absolute;
+	left: 10px;
+	color: var(--deck-text-3);
+	pointer-events: none;
+}
+#page-run .run-filter kbd {
+	position: absolute;
+	right: 8px;
+	pointer-events: none;
+}
+#page-run .run-filter input:focus ~ kbd,
+#page-run .run-filter input:not(:placeholder-shown) ~ kbd {
+	visibility: hidden;
+}
+#page-run .run-actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-left: auto;
+}
+#page-run .refresh-status {
+	font-size: 12px;
+	color: var(--deck-text-3);
+}
+
+#page-run .run-console {
+	display: grid;
+	gap: 24px;
+	align-items: start;
+}
+@media (min-width: 1100px) {
+	#page-run .run-console {
+		grid-template-columns: minmax(0, 8fr) minmax(320px, 4fr);
+	}
+	#page-run .run-activity {
+		position: sticky;
+		top: 16px;
+		max-height: calc(100vh - 32px);
+		overflow: auto;
+	}
+}
+
+#page-run .run-section-title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 4px;
+}
+#page-run .run-count {
+	margin-left: auto;
+	font: 500 12px/1 var(--deck-mono);
+	font-variant-numeric: tabular-nums;
+	color: var(--deck-text-3);
+}
+#page-run details.run-section > summary {
+	min-height: 32px;
+}
+#page-run details.run-section > summary::after {
+	content: "";
+	width: 6px;
+	height: 6px;
+	margin-left: 4px;
+	border-right: 1.5px solid var(--deck-text-3);
+	border-bottom: 1.5px solid var(--deck-text-3);
+	transform: rotate(-45deg);
+	transition: transform var(--deck-fast) var(--deck-ease);
+}
+#page-run details.run-section[open] > summary::after {
+	transform: rotate(45deg);
+}
+#page-run details.run-section:not([open]) {
+	padding-bottom: 12px;
+}
+#page-run details.run-section:not([open]) > summary {
+	margin-bottom: 0;
+}
+
+/* ── Activity log (#runHistory rows rendered by app.js) ───── */
+.deck .run-log-row {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 2px 10px;
+	padding: 8px 4px;
+	border-bottom: 1px solid var(--deck-edge);
+	font-size: 13px;
+	color: var(--deck-text);
+}
+.deck .run-log-row:last-child {
+	border-bottom: 0;
+}
+.deck .run-log-status {
+	grid-row: 1;
+	grid-column: 1;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font: 500 12px/1 var(--deck-font);
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--deck-text-2);
+}
+.deck .run-log-status.is-running {
+	color: var(--deck-info);
+}
+.deck .run-log-status.is-done {
+	color: var(--deck-ok);
+}
+.deck .run-log-status.is-failed {
+	color: var(--deck-bad);
+}
+.deck .run-log-dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--deck-text-3);
+}
+.deck .run-log-dot.is-running {
+	background: var(--deck-info);
+}
+.deck .run-log-dot.is-done {
+	background: var(--deck-ok);
+}
+.deck .run-log-dot.is-failed {
+	background: var(--deck-bad);
+}
+.deck .run-log-label {
+	grid-row: 1;
+	grid-column: 2;
+	font-weight: 500;
+	color: var(--deck-text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.deck .run-log-time,
+.deck .run-log-dur,
+.deck .run-log-out {
+	font: 12px/1.4 var(--deck-mono);
+	font-variant-numeric: tabular-nums;
+	color: var(--deck-text-3);
+}
+.deck .run-log-dur {
+	grid-row: 1;
+	grid-column: 3;
+	text-align: right;
+}
+.deck .run-log-time {
+	grid-row: 2;
+	grid-column: 2;
+}
+.deck .run-log-out {
+	grid-row: 2;
+	grid-column: 3;
+	justify-self: end;
+}
+.deck .run-log-out .action-btn {
+	min-height: 28px;
+	padding: 0 10px;
+	font-size: 12px;
+}
+
+/* ── Runner cards on every deck page ──────────────────────── */
+.deck .run-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+	gap: 8px;
+}
+.deck .run-empty {
+	font-size: 13px;
+	color: var(--deck-text-2);
+}
+.deck .run-item {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 12px;
+	color: var(--deck-text);
+	background: var(--deck-sunken);
+	border: 1px solid var(--deck-edge);
+	border-radius: var(--deck-radius-sm);
+	overflow: hidden;
+	transition: border-color var(--deck-fast) var(--deck-ease);
+}
+.deck .run-item:hover,
+.deck .run-item:focus-within {
+	border-color: var(--deck-edge-strong);
+}
+/* Running: a hairline sweeps the card's top edge. */
+.deck .run-item:has(.run-status.is-running)::before {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto;
+	height: 2px;
+	background: linear-gradient(90deg, transparent, var(--deck-info), transparent);
+	background-size: 40% 100%;
+	background-repeat: no-repeat;
+	animation: deck-run-sweep 1.4s var(--deck-ease) infinite;
+}
+@keyframes deck-run-sweep {
+	from { background-position: -40% 0; }
+	to { background-position: 140% 0; }
+}
+.deck .run-item-head {
+	display: flex;
+	gap: 10px;
+	align-items: flex-start;
+}
+.deck .run-item-icon {
+	display: grid;
+	place-items: center;
+	width: 28px;
+	height: 28px;
+	flex-shrink: 0;
+	font-size: 16px;
+	border-radius: var(--deck-radius-sm);
+	background: rgba(255, 255, 255, 0.05);
+	border: 1px solid var(--deck-edge);
+}
+.deck .run-item-text {
+	min-width: 0;
+}
+.deck .run-item-title {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 8px;
+	margin-bottom: 2px;
+}
+.deck .run-item-text h4 {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--deck-text);
+}
+.deck .run-item-text p {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--deck-text-2);
+}
+
+/* Spend tag as a chip: local neutral, paid API warn, model info. */
+.deck .run-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font: 500 12px/1 var(--deck-font);
+	padding: 3px 8px;
+	border-radius: 999px;
+	border: 1px solid var(--deck-edge-strong);
+	background: rgba(255, 255, 255, 0.04);
+	color: var(--deck-text-2);
+	white-space: nowrap;
+}
+.deck .run-tag::before {
+	content: "";
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: currentColor;
+}
+.deck .run-tag-api {
+	color: var(--deck-warn);
+	background: var(--deck-warn-weak);
+	border-color: rgba(233, 182, 94, 0.3);
+}
+.deck .run-tag-model {
+	color: var(--deck-info);
+	background: var(--deck-accent-weak);
+	border-color: color-mix(in srgb, var(--ember) 30%, transparent);
+}
+
+/* Inputs and pickers: one row when the card is wide enough. */
+.deck .run-field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+.deck .run-field-label {
+	/* style.css gives the base theme a mono uppercase label; the deck uses Inter. */
+	font: 500 12px/1.4 var(--deck-font);
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--deck-text-2);
+}
+.deck .run-settings-row {
+	display: grid;
+	grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+	gap: 8px;
+}
+.deck .run-input,
+.deck .run-select {
+	width: 100%;
+	min-width: 0;
+	min-height: 32px;
+	font-family: var(--deck-mono);
+	font-size: 13px;
+}
+.deck .run-select {
+	font-family: var(--deck-font);
+}
+
+.deck .run-item-foot {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: auto;
+	flex-wrap: wrap;
+}
+.deck .run-item-foot .run-status {
+	order: -1;
+	flex: 1 1 auto;
+	min-width: 0;
+	font-size: 13px;
+	overflow-wrap: anywhere;
+}
+.deck .run-item-foot [data-run] {
+	min-width: 72px;
+}
+.deck .run-item-foot .action-btn,
+.deck .run-item-foot [data-run] {
+	min-height: 32px;
+}
+@media (pointer: coarse) {
+	.deck .run-item-foot .action-btn,
+	.deck .run-item-foot [data-run],
+	.deck .run-input,
+	.deck .run-select {
+		min-height: 44px;
+	}
+}
+@media (max-width: 400px) {
+	.deck .run-settings-row {
+		grid-template-columns: 1fr;
+	}
+	.deck .run-item-foot .run-status {
+		flex-basis: 100%;
+		text-align: left;
+	}
+	.deck .run-item-foot .action-btn {
+		flex: 1 1 auto;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.deck .run-item:has(.run-status.is-running)::before {
+		animation: none;
+		background: var(--deck-info);
+		opacity: 0.6;
+	}
+	.deck .run-item,
+	#page-run .run-bounds > summary,
+	#page-run .run-bounds > summary::before,
+	#page-run details.run-section > summary::after {
+		transition: none;
+	}
+}
+
+/* ── Run page: tools as dense rows, not tall cards ───────── */
+#page-run .run-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+#page-run .run-item {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	grid-template-areas:
+		"head foot"
+		"fields fields";
+	align-items: center;
+	gap: 8px 16px;
+	padding: 10px 4px;
+	background: transparent;
+	border: 0;
+	border-bottom: 1px solid var(--deck-edge);
+	border-radius: 0;
+	box-shadow: none;
+	min-height: 0;
+}
+#page-run .run-item:last-child {
+	border-bottom: 0;
+}
+#page-run .run-item:hover {
+	background: rgba(255, 255, 255, 0.02);
+}
+#page-run .run-item-head {
+	grid-area: head;
+	min-width: 0;
+}
+#page-run .run-item-text p {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	margin: 2px 0 0;
+}
+#page-run .run-item-foot {
+	grid-area: foot;
+	flex-wrap: nowrap;
+	margin: 0;
+	justify-content: flex-end;
+}
+#page-run .run-item-foot .run-status {
+	flex: none;
+	min-width: 64px;
+	text-align: right;
+}
+#page-run .run-item > .run-field,
+#page-run .run-item > .run-settings-row {
+	grid-column: 1 / -1;
+	max-width: 560px;
+	margin-left: 44px;
+}
+#page-run .run-item > .run-field {
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
+}
+#page-run .run-item > .run-field .run-field-label {
+	flex: none;
+}
+/* The group header already says "No model · $0"; rows don't repeat it. */
+#page-run .run-tools > .run-section:first-child .run-item .run-tag {
+	display: none;
+}
+#page-run .run-jump {
+	display: none;
+}
+@media (max-width: 1099px) {
+	#page-run .run-jump {
+		display: inline-flex;
+	}
+}
+@media (max-width: 640px) {
+	#page-run .run-toolbar {
+		flex-wrap: wrap;
+	}
+	#page-run .run-filter {
+		flex: 1 1 100%;
+		max-width: none;
+	}
+	#page-run .run-item {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-areas:
+			"head"
+			"fields"
+			"foot";
+	}
+	#page-run .run-item > .run-field,
+	#page-run .run-item > .run-settings-row {
+		margin-left: 0;
+	}
+	#page-run .run-item > .run-field {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	#page-run .run-item-foot .run-status {
+		flex: 1 1 auto;
+		text-align: left;
+	}
+}

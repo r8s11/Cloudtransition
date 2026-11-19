@@ -1,10 +1,14 @@
+{% from "_macros.html" import readout %}
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- MISSION CONTROL PAGE                                        -->
 <!-- ════════════════════════════════════════════════════════════ -->
 <div class="page" id="page-mission-control" role="tabpanel" aria-labelledby="tab-mission-control">
-  <div class="page-header">
-    <h2>Mission Control</h2>
-    <p>The agentic-os command center &mdash; live missions, approvals, and transitions, embedded from localhost:8787</p>
+  <div class="page-header hud-header">
+    <div class="hud-title">
+      <h2>Mission Control</h2>
+      <p>The agentic-os command center &mdash; live missions, approvals, and transitions, embedded from localhost:8787</p>
+    </div>
+    {{ readout([("Source", "localhost:8787", none)]) }}
   </div>
 
   <div class="card embed-card">

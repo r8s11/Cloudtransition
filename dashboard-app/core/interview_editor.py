@@ -21,6 +21,8 @@ from datetime import date
 
 import yaml
 
+from core.calendar_sources import CalendarSourceError, edit_first_action
+
 SECTION = "active_applications:"
 STATUSES = (
     "new_lead",
@@ -30,6 +32,7 @@ STATUSES = (
     "interviewing",
     "onsite",
     "offer",
+    "waiting",
     "rejected",
     "withdrawn",
 )
@@ -195,7 +198,7 @@ def set_field(text: str, company: str, role: str, key: str, value: str) -> str:
 
 
 def set_next_step(text: str, company: str, role: str, task: str, due: str) -> str:
-    """Replace the entry's next_steps list with one action (optionally dated)."""
+    """Edit the first next action, preserving siblings, comments and calendar identity."""
     task = _check_text(task, "next action")
     if not task:
         raise InterviewEditError("next action is empty")
@@ -205,14 +208,23 @@ def set_next_step(text: str, company: str, role: str, task: str, due: str) -> st
 
     lines, entries = _entries(text)
     entry = _find(entries, company, role)
+    try:
+        updated = edit_first_action(text, company, role, task, due)
+    except CalendarSourceError as exc:
+        raise InterviewEditError(str(exc)) from None
+    if updated is not None:
+        steps = _validate(updated, company, role).get("next_steps") or []
+        if not steps or steps[0].get("task") != task:
+            raise InterviewEditError("next action did not stick")
+        return updated
+
     block = ["    next_steps:\n", f"      - task: {_scalar(task)}\n"]
     block.append(f"        date: {_scalar(due)}\n" if due else "        date:\n")
-
-    if "next_steps" in entry.block_bounds:
-        start, end = entry.block_bounds["next_steps"]
-        lines[start:end] = block
-    elif "next_steps" in entry.field_lines:
+    if "next_steps" in entry.field_lines:
         idx = entry.field_lines["next_steps"]
+        comment = re.search(r"[ \t]+(#.*)$", lines[idx].rstrip("\r\n"))
+        if comment:
+            block[0] = f"    next_steps: {comment.group(1)}\n"
         lines[idx : idx + 1] = block
     else:
         at = _insert_before(entry, ("notes", "interview_notes"))

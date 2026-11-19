@@ -12,8 +12,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlencode
 
-import metrics
-from server_activity import HOSTS, clean_text, resolve_host
+from collectors import metrics
+from collectors.server_activity import HOSTS, clean_text, resolve_host
 
 MAX_CHART_DISKS = 8
 MAX_CHART_PROBES = 30
