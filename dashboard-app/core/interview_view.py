@@ -5,6 +5,7 @@ from datetime import date
 from pathlib import Path
 
 from core import config
+from core import agents as forge_agents
 from core import interview_editor as ie
 from core.workspace_content import workspace_file_href
 
@@ -345,3 +346,9 @@ def build_interview_view(jobs_data: dict, today: date | None = None) -> dict:
             for priority in ie.PRIORITIES
         ],
     }
+
+
+def attach_agents(row: dict) -> dict:
+    """Add the Job Reader / CV Adapter state for one tracker row (read-only)."""
+    row["agent"] = forge_agents.application_agents(row["company"], row["role"], row.get("url") or "")
+    return row

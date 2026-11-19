@@ -18,11 +18,10 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from pathlib import Path
 from uuid import uuid4
 
-import yaml
 from fastapi import FastAPI, Header, Query, Request
 from fastapi.responses import (
     FileResponse,
@@ -33,33 +32,29 @@ from fastapi.responses import (
     Response,
 )
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from core import config
-from core import interview_editor as ie
 from core import now as now_engine
-from core import work_search as ws
 from core import workspace_content as wc
 from core import agents as forge_agents
 from core import skills as skill_reg
 from core.agents import build_agents_view
 from core import calendar_sources
-from core.interview_view import build_interview_view, next_interview_action
+from core.interview_view import attach_agents, build_interview_view, next_interview_action
 from core.store import _FILE_WRITE_LOCK, _atomic_write, load_yaml
 from core.tasks import CHECKBOX_RE, insert_inbox_item, parse_all_realms, parse_tasks_from_file
 from core.today import (
-    _routine_plain_text,
     _routine_review_items,
     build_today_view,
     command_centre,
     current_week_of_year,
     live_projects,
-    md_inline,
     money_available,
     parse_routine_folds,
 )
-from routes import calendar, metrics
+from routes import calendar, interviews, metrics
+from routes.common import templates
 
 
 def _load_env_file(path: Path, environ: dict[str, str] | None = None) -> None:
@@ -117,7 +112,6 @@ app.mount(
     StaticFiles(directory=config.COURSE_REFERENCE, follow_symlink=False),
     name="pydantic-ai-reference",
 )
-templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 
 class ToggleRequest(BaseModel):
@@ -136,10 +130,6 @@ CAPTURE_MAX = 300
 class CaptureRequest(BaseModel):
     text: str
     schedule: dict | None = None
-
-
-templates.env.filters["md"] = md_inline
-templates.env.filters["plain"] = _routine_plain_text
 
 
 # ── Build Context ─────────────────────────────────────────────
@@ -204,7 +194,7 @@ def build_context() -> dict:
 
     interview_view = build_interview_view(jobs_data, today)
     for interview_row in interview_view["interview_rows"]:
-        _attach_agents(interview_row)
+        attach_agents(interview_row)
     agents_view = build_agents_view()
     scout_leads = forge_agents.scout_leads(
         agents_view["agent_scan"],
@@ -472,12 +462,6 @@ def build_context() -> dict:
         },
         "interview_scout_leads": scout_leads,
     }
-
-
-def _attach_agents(row: dict) -> dict:
-    """Add the Job Reader / CV Adapter state for one tracker row (read-only)."""
-    row["agent"] = forge_agents.application_agents(row["company"], row["role"], row.get("url") or "")
-    return row
 
 
 # ── Markdown File Discovery ───────────────────────────────────
@@ -941,303 +925,6 @@ def assistant_state(include: str = Query(default="tasks,interviews,runs,missions
             out["calendar"] = {"unavailable": f"{type(exc).__name__}: {exc}"}
     return JSONResponse(out)
 
-
-
-class WorkSearchRequest(BaseModel):
-    id: str
-    date: str
-    activity_type: str
-    description: str
-    position: str = ""
-    employer: str
-    address: str = ""
-    result: str = ""
-
-
-@app.get("/api/career/work-search")
-def work_search_report(start: date | None = None):
-    from datetime import timedelta
-
-    start = start or (date.today() - timedelta(days=date.today().weekday()))
-    try:
-        return ws.report(load_yaml(config.JOBS_FILE), start)
-    except (ValueError, yaml.YAMLError, OverflowError) as exc:
-        return JSONResponse({"error": str(exc)}, status_code=400)
-
-
-@app.post("/api/career/work-search")
-def work_search_save(req: WorkSearchRequest, x_requested_with: str = Header(default="")):
-    if x_requested_with != "XMLHttpRequest":
-        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
-    if not config.JOBS_FILE.is_file():
-        return JSONResponse({"error": "Application tracker not found"}, status_code=404)
-    try:
-        with _FILE_WRITE_LOCK:
-            text = config.JOBS_FILE.read_text(encoding="utf-8")
-            updated = ws.save(text, req.model_dump())
-            _atomic_write(config.JOBS_FILE, updated)
-    except (ValueError, yaml.YAMLError) as exc:
-        return JSONResponse({"error": str(exc)}, status_code=400)
-    except OSError:
-        return JSONResponse({"error": "Could not save activity. Check tracker permissions and try again."}, status_code=500)
-    return {"ok": True}
-
-# ── Interview dashboard writes ─────────────────────────────────────────────
-# Each endpoint edits only the lines it owns in interviews/job-applications.yml
-# (see interview_editor.py), then answers with the rebuilt row so the page can
-# update without a reload.
-class InterviewFieldRequest(BaseModel):
-    company: str
-    role: str
-    field: str
-    value: str
-
-
-class InterviewNextStepRequest(BaseModel):
-    company: str
-    role: str
-    task: str
-    date: str | None = None
-
-
-class InterviewSignalRequest(BaseModel):
-    company: str
-    role: str
-    date: str
-    stage: str
-    notes: str | None = None
-
-
-class InterviewTextRequest(BaseModel):
-    company: str
-    role: str
-    field: str
-    text: str
-
-
-class InterviewTargetRequest(BaseModel):
-    company: str
-    role: str
-
-
-class InterviewCreateRequest(BaseModel):
-    company: str
-    role: str
-    status: str = "new_lead"
-    priority: str = "medium"
-    location: str | None = None
-    salary_range: str | None = None
-    job_url: str | None = None
-    next_step: str | None = None
-    date: str | None = None
-
-
-def _interview_target(company: str, role: str) -> tuple[str, str] | None:
-    company, role = company.strip(), role.strip()
-    if not company or not role or len(company) > 200 or len(role) > 200:
-        return None
-    return company, role
-
-
-def _interview_write(edit, company: str, role: str):
-    """Apply one editor function under the file lock, then return the new row."""
-    if not config.JOBS_FILE.exists():
-        return JSONResponse({"error": "Application tracker not found"}, status_code=404)
-    with _FILE_WRITE_LOCK:
-        text = config.JOBS_FILE.read_text(encoding="utf-8")
-        try:
-            updated = edit(text)
-        except ie.InterviewEditError as exc:
-            return JSONResponse({"error": str(exc)}, status_code=400)
-        _atomic_write(config.JOBS_FILE, updated)
-
-    view = build_interview_view(load_yaml(config.JOBS_FILE), date.today())
-    row = next(
-        (
-            r
-            for r in view["interview_rows"]
-            if r["company"] == company and r["role"] == role
-        ),
-        None,
-    )
-    return JSONResponse({"ok": True, "row": row, "counts": view["interview_counts"]})
-
-
-def _csrf_ok(x_requested_with: str) -> bool:
-    return x_requested_with == "XMLHttpRequest"
-
-
-@app.post("/api/interviews/field")
-def interview_field(
-    req: InterviewFieldRequest, x_requested_with: str = Header(default="")
-):
-    if not _csrf_ok(x_requested_with):
-        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
-    target = _interview_target(req.company, req.role)
-    if not target:
-        return JSONResponse({"error": "Company and role are required"}, status_code=400)
-    company, role = target
-    return _interview_write(
-        lambda text: ie.set_field(text, company, role, req.field, req.value),
-        company,
-        role,
-    )
-
-
-@app.post("/api/interviews/next-step")
-def interview_next_step(
-    req: InterviewNextStepRequest, x_requested_with: str = Header(default="")
-):
-    if not _csrf_ok(x_requested_with):
-        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
-    target = _interview_target(req.company, req.role)
-    if not target:
-        return JSONResponse({"error": "Company and role are required"}, status_code=400)
-    company, role = target
-    return _interview_write(
-        lambda text: ie.set_next_step(text, company, role, req.task, req.date or ""),
-        company,
-        role,
-    )
-
-
-@app.post("/api/interviews/timeline")
-def interview_timeline(
-    req: InterviewSignalRequest, x_requested_with: str = Header(default="")
-):
-    if not _csrf_ok(x_requested_with):
-        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
-    target = _interview_target(req.company, req.role)
-    if not target:
-        return JSONResponse({"error": "Company and role are required"}, status_code=400)
-    company, role = target
-    return _interview_write(
-        lambda text: ie.append_timeline(
-            text, company, role, req.date, req.stage, req.notes or ""
-        ),
-        company,
-        role,
-    )
-
-
-@app.post("/api/interviews/applied")
-def interview_applied(
-    req: InterviewTargetRequest, x_requested_with: str = Header(default="")
-):
-    """One tap after submitting an application: log it, park it, schedule the follow-up.
-
-    Appends an `applied` timeline entry dated today, sets status `waiting` and
-    makes the first next step a follow-up a week out, in one atomic write.
-    """
-    if not _csrf_ok(x_requested_with):
-        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
-    target = _interview_target(req.company, req.role)
-    if not target:
-        return JSONResponse({"error": "Company and role are required"}, status_code=400)
-    company, role = target
-    today = date.today()
-    follow_up = (today + timedelta(days=now_engine.FOLLOW_UP_DAYS)).isoformat()
-
-    def edit(text: str) -> str:
-        if str(ie._validate(text, company, role).get("status") or "new_lead") != "new_lead":
-            raise ie.InterviewEditError("only a new lead can be marked applied")
-        text = ie.append_timeline(text, company, role, today.isoformat(), "applied", "")
-        text = ie.set_field(text, company, role, "status", "waiting")
-        return ie.set_next_step(text, company, role, "Follow up if no reply", follow_up)
-
-    return _interview_write(edit, company, role)
-
-
-@app.get("/api/interviews/detail")
-def interview_detail(
-    company: str = Query(..., min_length=1, max_length=200),
-    role: str = Query(..., min_length=1, max_length=200),
-):
-    """One application as the Interview mode dialog needs it."""
-    view = build_interview_view(load_yaml(config.JOBS_FILE), date.today())
-    row = next(
-        (
-            r
-            for r in view["interview_rows"]
-            if r["company"] == company.strip() and r["role"] == role.strip()
-        ),
-        None,
-    )
-    if row is None:
-        return JSONResponse({"error": "Application not found"}, status_code=404)
-    return JSONResponse({"ok": True, "row": _attach_agents(row)})
-
-
-@app.get("/interviews/sheet", response_class=HTMLResponse)
-def interview_sheet(
-    request: Request,
-    company: str = Query(..., min_length=1, max_length=200),
-    role: str = Query(..., min_length=1, max_length=200),
-):
-    """Standalone printable prep sheet: browser Print → PDF for offline use."""
-    view = build_interview_view(load_yaml(config.JOBS_FILE), date.today())
-    row = next(
-        (
-            r
-            for r in view["interview_rows"]
-            if r["company"] == company.strip() and r["role"] == role.strip()
-        ),
-        None,
-    )
-    if row is None:
-        return HTMLResponse("Application not found", status_code=404)
-    return templates.TemplateResponse(
-        request,
-        "interview_sheet.html",
-        {"row": row, "printed": date.today().isoformat(), "workspace": str(config.WORKSPACE)},
-    )
-
-
-@app.post("/api/interviews/text")
-def interview_text(
-    req: InterviewTextRequest, x_requested_with: str = Header(default="")
-):
-    if not _csrf_ok(x_requested_with):
-        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
-    target = _interview_target(req.company, req.role)
-    if not target:
-        return JSONResponse({"error": "Company and role are required"}, status_code=400)
-    if req.field not in ie.TEXT_BLOCKS:
-        return JSONResponse({"error": "Unknown field"}, status_code=400)
-    company, role = target
-    return _interview_write(
-        lambda text: ie.set_text_block(text, company, role, req.field, req.text),
-        company,
-        role,
-    )
-
-
-@app.post("/api/interviews/create")
-def interview_create(
-    req: InterviewCreateRequest, x_requested_with: str = Header(default="")
-):
-    if not _csrf_ok(x_requested_with):
-        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
-    target = _interview_target(req.company, req.role)
-    if not target:
-        return JSONResponse({"error": "Company and role are required"}, status_code=400)
-    company, role = target
-
-    def edit(text: str) -> str:
-        return ie.add_application(
-            text,
-            company=company,
-            role=role,
-            status=req.status,
-            priority=req.priority,
-            location=req.location or "",
-            salary_range=req.salary_range or "",
-            job_url=req.job_url or "",
-            next_step=req.next_step or "",
-            due=req.date or "",
-        )
-
-    return _interview_write(edit, company, role)
 
 
 # ── Connected systems: Mission Control ─────────────────────────
@@ -2347,3 +2034,4 @@ def api_skill_runs():
 # ── Routers ────────────────────────────────────────────────────
 app.include_router(metrics.router)
 app.include_router(calendar.router)
+app.include_router(interviews.router)
