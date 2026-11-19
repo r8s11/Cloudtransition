@@ -14,14 +14,13 @@ import urllib.request
 from datetime import date, datetime
 from pathlib import Path
 
-from fastapi import FastAPI, Header, Query, Request
+from fastapi import FastAPI, Query, Request
 from fastapi.responses import (
     HTMLResponse,
     JSONResponse,
     Response,
 )
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 
 from core import config
 from core import now as now_engine
@@ -29,12 +28,10 @@ from core import workspace_content as wc
 from core import agents as forge_agents
 from core import skills as skill_reg
 from core.agents import build_agents_view
-from core import calendar_sources
 from core.interview_view import attach_agents, build_interview_view, next_interview_action
-from core.store import _FILE_WRITE_LOCK, _atomic_write, load_yaml
-from core.tasks import CHECKBOX_RE, insert_inbox_item, parse_all_realms, parse_tasks_from_file
+from core.store import load_yaml
+from core.tasks import parse_all_realms, parse_tasks_from_file
 from core.today import (
-    _routine_review_items,
     build_today_view,
     command_centre,
     current_week_of_year,
@@ -42,7 +39,7 @@ from core.today import (
     money_available,
     parse_routine_folds,
 )
-from routes import calendar, files, interviews, metrics
+from routes import calendar, files, interviews, metrics, tasks
 from routes import runs as run_routes
 from routes.common import templates
 
@@ -102,24 +99,6 @@ app.mount(
     StaticFiles(directory=config.COURSE_REFERENCE, follow_symlink=False),
     name="pydantic-ai-reference",
 )
-
-
-class ToggleRequest(BaseModel):
-    realm: str
-    line: int
-    done: bool
-    # Task text as rendered. Lines shift when a capture or an outside edit lands
-    # after the page loaded; the text lets the server find the item again.
-    text: str | None = None
-
-
-# ── Inbox capture ─────────────────────────────────────────────
-CAPTURE_MAX = 300
-
-
-class CaptureRequest(BaseModel):
-    text: str
-    schedule: dict | None = None
 
 
 # ── Build Context ─────────────────────────────────────────────
@@ -536,108 +515,6 @@ async def mission_control_post(path: str, request: Request):
         return JSONResponse({"error": "Mission Control is offline"}, status_code=502)
 
 
-@app.post("/api/tasks/toggle")
-def toggle_task(req: ToggleRequest, x_requested_with: str = Header(default="")):
-    """Toggle a checkbox in the source markdown file."""
-    if x_requested_with != "XMLHttpRequest":
-        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
-    if req.realm == "routine":
-        target = config.WORKSPACE / "routine.md"
-    else:
-        realm_cfg = next((r for r in config.REALMS if r["id"] == req.realm), None)
-        if not realm_cfg:
-            return JSONResponse({"error": "Unknown realm"}, status_code=400)
-        target = config.WORKSPACE / realm_cfg["file"]
-    if not target.exists():
-        return JSONResponse({"error": "File not found"}, status_code=404)
-
-    with _FILE_WRITE_LOCK:
-        lines = target.read_text().splitlines(keepends=True)
-        idx = req.line - 1  # convert to 0-based
-        allowed_routine_lines = (
-            {item["line"]: item["text"] for item in _routine_review_items(lines)}
-            if req.realm == "routine"
-            else None
-        )
-        if (
-            allowed_routine_lines is not None
-            and idx + 1 not in allowed_routine_lines
-            and req.text not in allowed_routine_lines.values()
-        ):
-            return JSONResponse(
-                {"error": "Only Weekly Review items can be changed here"},
-                status_code=400,
-            )
-
-        def text_at(i: int) -> str | None:
-            if not 0 <= i < len(lines):
-                return None
-            if allowed_routine_lines is not None:
-                return allowed_routine_lines.get(i + 1)
-            m = CHECKBOX_RE.match(lines[i].rstrip("\r\n"))
-            return m.group(3)[2:] if m else None
-
-        if req.text is not None and not (
-            0 <= idx < len(lines) and text_at(idx) == req.text
-        ):
-            # The file moved under the page. Follow the text, but only if unique.
-            hits = [i for i in range(len(lines)) if text_at(i) == req.text]
-            if len(hits) != 1:
-                return JSONResponse(
-                    {"error": "Task moved or changed — reload the page"},
-                    status_code=409,
-                )
-            idx = hits[0]
-
-        if idx < 0 or idx >= len(lines):
-            return JSONResponse({"error": "Line out of range"}, status_code=400)
-
-        m = CHECKBOX_RE.match(lines[idx].rstrip("\n").rstrip("\r"))
-        if not m:
-            return JSONResponse({"error": "No checkbox on that line"}, status_code=400)
-        if allowed_routine_lines is not None and idx + 1 not in allowed_routine_lines:
-            return JSONResponse(
-                {"error": "Only Weekly Review items can be changed here"},
-                status_code=400,
-            )
-
-        new_mark = "x" if req.done else " "
-        lines[idx] = m.group(1) + new_mark + m.group(3) + "\n"
-        _atomic_write(target, "".join(lines))
-
-    return JSONResponse(
-        {"ok": True, "realm": req.realm, "line": idx + 1, "done": req.done}
-    )
-
-
-@app.post("/api/capture")
-def capture(req: CaptureRequest, x_requested_with: str = Header(default="")):
-    """Append one item to the Inbox section of TASKS.md."""
-    if x_requested_with != "XMLHttpRequest":
-        return JSONResponse({"error": "Missing CSRF header"}, status_code=403)
-    # Collapse newlines/tabs: one capture is exactly one checkbox line.
-    text = " ".join(req.text.split())
-    if not text:
-        return JSONResponse({"error": "Nothing to capture"}, status_code=400)
-    if len(text) > CAPTURE_MAX:
-        return JSONResponse(
-            {"error": f"Keep it under {CAPTURE_MAX} characters"}, status_code=400
-        )
-
-    try:
-        schedule = calendar_sources.validate_schedule(req.schedule or {})
-        scheduled_text = calendar_sources.annotate(text, schedule)
-    except ValueError as exc:
-        return JSONResponse({"error": str(exc)}, status_code=400)
-    with _FILE_WRITE_LOCK:
-        source = config.TASKS_FILE.read_text() if config.TASKS_FILE.exists() else "# Tasks\n"
-        new_text, line = insert_inbox_item(source, scheduled_text)
-        _atomic_write(config.TASKS_FILE, new_text)
-
-    return JSONResponse({"ok": True, "realm": "tasks", "line": line, "text": text,
-                         "raw_text": scheduled_text, "schedule": schedule})
-
-
 # Read-only live state for the bot/ personal assistant (Brain). One aggregating
 # GET so any agent can answer from current data without scraping HTML.
 ASSISTANT_SECTIONS = ("tasks", "interviews", "runs", "missions", "calendar")
@@ -783,3 +660,4 @@ app.include_router(calendar.router)
 app.include_router(interviews.router)
 app.include_router(run_routes.router)
 app.include_router(files.router)
+app.include_router(tasks.router)
