@@ -1,0 +1,200 @@
+/* Education tab (templates/pages/education.html), moved from style.css. */
+/* ── Education ─────────────────────────────────────────────── */
+.edu-stat-line {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 8px 0;
+	border-bottom: 1px solid var(--border-light);
+	font-size: 13px;
+	color: var(--ink-mid);
+}
+
+.edu-stat-line strong {
+	font-family: var(--mono);
+	font-size: 12.5px;
+	color: var(--ink-strong);
+	font-variant-numeric: tabular-nums;
+}
+
+.stack-bar-track {
+	background: var(--panel-deep);
+	border: 1px solid var(--border-light);
+	border-radius: 3px;
+	height: 14px;
+	overflow: hidden;
+	display: flex;
+}
+
+.stacked-bar-container .stacked-bar {
+	background: var(--panel-deep);
+	border: 1px solid var(--border-light);
+	border-radius: 3px;
+	height: 16px;
+	overflow: hidden;
+	display: flex;
+}
+
+.stacked-segment {
+	height: 100%;
+}
+
+.stacked-legend {
+	margin-top: 12px;
+}
+
+.legend-item {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+	font-size: 12.5px;
+	color: var(--ink-mid);
+	padding: 5px 0;
+	border-bottom: 1px solid var(--border-light);
+}
+
+.legend-dot {
+	width: 10px;
+	height: 10px;
+	border-radius: 2px;
+	flex-shrink: 0;
+	transform: translateY(1px);
+}
+
+.legend-label {
+	font-weight: 500;
+}
+
+.legend-value {
+	font-family: var(--mono);
+	font-size: 12px;
+	color: var(--text-muted);
+	white-space: nowrap;
+}
+
+/* Credit strategy: phases as cells of one hairline grid, each named by a
+   swatch in its phase ink rather than a thick top rule. Each cell draws its
+   own 1px ring; the 1px gap makes neighbours share one hairline. */
+.phase-strip {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+	gap: 1px;
+	margin: 1px;
+}
+
+.phase-card {
+	min-width: 0;
+	padding: 12px 16px 16px;
+	box-shadow: 0 0 0 1px var(--border);
+}
+
+.phase-number::before {
+	content: "";
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	margin-right: 8px;
+	background: var(--phase-color, var(--ember));
+}
+
+.phase-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-bottom: 6px;
+}
+
+.phase-number {
+	font-family: var(--mono);
+	font-size: 12px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	color: var(--text-muted);
+}
+
+.phase-name {
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--ink-strong);
+	margin-bottom: 4px;
+}
+
+.phase-desc {
+	font-size: 12.5px;
+	color: var(--ink-mid);
+	line-height: 1.5;
+	margin-bottom: 8px;
+}
+
+.phase-stats {
+	display: flex;
+	gap: 10px;
+	font-size: 12px;
+	color: var(--text-muted);
+	flex-wrap: wrap;
+}
+
+.phase-stats div {
+	background: var(--surface-alt);
+	padding: 3px 8px;
+	border-radius: 5px;
+}
+
+.phase-stats strong {
+	color: var(--ink-mid);
+}
+
+.edu-timeline {
+	padding: 4px 0;
+}
+
+.timeline-item {
+	position: relative;
+	padding: 4px 0 10px 26px;
+	border-left: 1px solid var(--border);
+}
+
+.timeline-dot {
+	position: absolute;
+	left: -6px;
+	top: 8px;
+	width: 11px;
+	height: 11px;
+	border-radius: 50%;
+	background: var(--panel-deep);
+	border: 1px solid var(--border);
+}
+
+.timeline-dot-completed {
+	background: var(--green);
+	border-color: var(--green);
+}
+
+.timeline-dot-active {
+	background: var(--gold);
+	border-color: var(--gold);
+	box-shadow: 0 0 0 3px rgba(255, 194, 71, 0.3);
+}
+
+.timeline-dot-future {
+	background: var(--panel-hi);
+}
+
+.timeline-milestone {
+	font-size: 13.5px;
+	font-weight: 600;
+	color: var(--ink);
+}
+
+.timeline-target {
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.timeline-future .timeline-milestone {
+	color: var(--text-muted);
+}
+

@@ -1,0 +1,497 @@
+/* Run tab (templates/pages/run.html), moved from style.css. */
+/* ── Run tab — headless skill runners ──────────────────────── */
+.run-settings-row {
+	display: flex;
+	align-items: flex-end;
+	gap: 18px;
+	flex-wrap: wrap;
+}
+
+/* Long model names are select options: without min-width:0 the field
+   takes its min-content width and pushes the whole card off-screen. */
+.run-settings-row .run-field {
+	flex: 1 1 168px;
+	min-width: 0;
+}
+
+.run-field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.run-field-label {
+	font-family: var(--mono);
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 1.2px;
+	color: var(--text-muted);
+}
+
+.run-select {
+	font-family: var(--sans);
+	font-size: 13px;
+	color: var(--text);
+	background: var(--panel);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	padding: 7px 10px;
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+	min-height: 44px;
+}
+
+.run-select:focus-visible {
+	outline: 2px solid var(--gold);
+	outline-offset: 1px;
+}
+
+.run-settings-note {
+	flex: 1;
+	min-width: 220px;
+	font-size: 12.5px;
+	color: var(--text-muted);
+	line-height: 1.5;
+}
+
+.run-card-title {
+	justify-content: space-between;
+}
+
+.run-card-heading {
+	font: inherit;
+	margin: 0;
+}
+
+.run-actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	margin-left: auto;
+}
+
+.refresh-status {
+	max-width: 42ch;
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.run-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+	column-gap: 28px;
+	row-gap: 0;
+}
+
+.run-grid[aria-busy="true"] .run-empty {
+	font-family: var(--mono);
+	font-size: 12px;
+}
+
+.run-empty {
+	font-size: 13.5px;
+	color: var(--text-muted);
+}
+
+/* Standing rules: three facts, read as one quiet block. */
+.run-rules {
+	display: grid;
+	gap: 6px;
+	max-width: 82ch;
+	margin: 0 0 22px;
+	padding: 0;
+	list-style: none;
+	font-size: 12.5px;
+	line-height: 1.5;
+	color: var(--text-mid);
+}
+
+.run-rules li {
+	position: relative;
+	padding-left: 14px;
+}
+
+.run-rules li::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0.64em;
+	width: 6px;
+	height: 1px;
+	background: var(--ember);
+}
+
+/* A collapsible card ("Other workspace tools"): the flex title hid the
+   native disclosure marker, leaving an empty-looking card with no cue. */
+details.card > summary.card-title {
+	min-height: 44px;
+	cursor: pointer;
+	list-style: none;
+}
+
+details.card > summary.card-title::-webkit-details-marker {
+	display: none;
+}
+
+details.card > summary.card-title::after {
+	content: "Show" / "";
+	margin-left: auto;
+	font-family: var(--mono);
+	font-size: 12px;
+	font-weight: 500;
+	letter-spacing: 1.2px;
+	text-transform: uppercase;
+	color: var(--text-muted);
+}
+
+details.card[open] > summary.card-title::after {
+	content: "Hide" / "";
+}
+
+details.card > summary.card-title:hover::after {
+	color: var(--ember-text);
+}
+
+details.card > summary.card-title:focus-visible {
+	outline: 2px solid var(--gold);
+	outline-offset: 3px;
+	border-radius: var(--radius-sm);
+}
+
+details.card:not([open]) > summary.card-title {
+	padding-bottom: 0;
+	margin-bottom: 0;
+	border-bottom: 0;
+}
+
+/* A ledger inside the card, not a card inside a card: each runner is a
+   folded row separated by a crease, so the sheet keeps one frame. */
+.run-item {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	color: var(--text);
+	border-top: 1px solid var(--border-light);
+	padding: 14px 2px 18px;
+}
+
+.run-item-head {
+	display: flex;
+	gap: 10px;
+	align-items: flex-start;
+}
+
+.run-item-icon {
+	font-size: 16px;
+	line-height: 1.3;
+	flex-shrink: 0;
+}
+
+.run-item-text h4 {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--ink-strong);
+	margin: 0;
+}
+
+.run-item-text p {
+	font-size: 12.5px;
+	line-height: 1.5;
+	color: var(--text-mid);
+}
+
+.run-item-text {
+	min-width: 0;
+}
+
+.run-item-title {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 8px;
+	margin-bottom: 3px;
+}
+
+/* What a run spends. No model is the quiet default; a paid API or a model
+   call is the marked state, and each is named in text as well as ink. */
+.run-tag {
+	font-family: var(--mono);
+	font-size: 12px;
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+	line-height: 1;
+	padding: 3px 7px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	color: var(--ink-mid);
+	white-space: nowrap;
+}
+
+.run-tag-api {
+	border-color: color-mix(in srgb, var(--yellow) 40%, transparent);
+	background: var(--yellow-light);
+	color: var(--yellow);
+}
+
+.run-tag-model {
+	border-color: rgba(255, 122, 26, 0.4);
+	background: var(--rose-soft);
+	color: var(--ember-text);
+}
+
+.run-input {
+	font-family: var(--mono);
+	font-size: 12px;
+	color: var(--text);
+	background: var(--panel);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	padding: 7px 9px;
+	width: 100%;
+	min-height: 44px;
+	caret-color: var(--accent);
+}
+
+.run-input::placeholder {
+	color: var(--text-muted);
+	opacity: 1;
+}
+
+.run-input:focus-visible {
+	outline: 2px solid var(--gold);
+	outline-offset: 1px;
+}
+
+.run-item-foot {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-top: auto;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
+
+/* Narrow cards: buttons stay tappable side by side and the status
+   drops to its own line instead of squeezing the row. */
+@media (max-width: 400px) {
+	.run-item-foot {
+		gap: 8px;
+		justify-content: center;
+	}
+	.run-item-foot .action-btn {
+		flex: 1 1 auto;
+		min-width: 80px;
+		font-size: 12px;
+		padding: 8px 12px;
+	}
+	.run-status {
+		flex: 1 1 100%;
+		text-align: center;
+	}
+}
+
+.run-item-foot .action-btn {
+	min-height: 44px;
+}
+.run-output-close {
+	min-height: 44px;
+}
+
+.run-item-foot .action-btn[disabled],
+.run-item-foot .action-btn[aria-disabled="true"] {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.run-status {
+	font-family: var(--mono);
+	font-size: 13px;
+	line-height: 1.4;
+	color: var(--text-muted);
+	overflow-wrap: anywhere;
+	min-width: 0;
+}
+
+.run-status.is-running {
+	color: var(--yellow);
+}
+.run-status.is-done {
+	color: var(--green);
+}
+.run-status.is-failed {
+	color: var(--red);
+}
+
+/* Run history rows */
+.run-log-row {
+	display: grid;
+	grid-template-columns: 92px minmax(0, 1fr) 132px 58px minmax(0, 1.2fr);
+	align-items: center;
+	gap: 10px;
+	padding: 7px 2px;
+	border-bottom: 1px solid var(--border-light);
+	font-size: 12.5px;
+}
+
+.run-log-status {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-family: var(--mono);
+	font-size: 12px;
+	letter-spacing: 0.4px;
+	text-transform: uppercase;
+	color: var(--text-mid);
+}
+
+.run-log-row:last-child {
+	border-bottom: none;
+}
+
+.run-log-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--border);
+}
+
+.run-log-dot.is-running {
+	background: var(--gold);
+}
+.run-log-dot.is-done {
+	background: var(--green);
+}
+.run-log-dot.is-failed {
+	background: var(--red);
+}
+
+.run-log-label {
+	font-weight: 600;
+	color: var(--text);
+}
+
+.run-log-time,
+.run-log-dur,
+.run-log-out {
+	font-family: var(--mono);
+	font-size: 12px;
+	color: var(--text-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.run-log-dur {
+	text-align: right;
+}
+
+.run-log-out {
+	overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+	.run-actions .action-btn {
+		min-height: 44px;
+	}
+	.run-log-row {
+		grid-template-columns: 76px minmax(0, 1fr) auto;
+		row-gap: 2px;
+	}
+	.run-log-status {
+		font-size: 12px;
+		letter-spacing: 0.2px;
+	}
+	.run-log-time,
+	.run-log-out {
+		grid-column: 2 / -1;
+	}
+}
+
+/* Run output viewer (native <dialog>: focus trap + Esc for free) */
+.run-output-dialog {
+	width: min(860px, calc(100vw - 24px));
+	max-height: calc(100dvh - 48px);
+	margin: auto;
+	padding: 0;
+	background: var(--panel-hi);
+	color: var(--text);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow-lg);
+}
+
+.run-output-dialog::backdrop {
+	background: rgba(2, 6, 14, 0.7);
+}
+
+.run-output-head {
+	position: sticky;
+	top: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 16px;
+	background: var(--panel-deep);
+	border-bottom: 1px solid var(--border);
+}
+
+.run-output-head h2 {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--ink-strong);
+	overflow-wrap: anywhere;
+}
+
+.run-output {
+	margin: 0;
+	padding: 14px 16px 18px;
+	font-family: var(--mono);
+	font-size: 12.5px;
+	line-height: 1.55;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	max-height: min(62dvh, 720px);
+	overflow: auto;
+}
+
+.run-output-note {
+	padding: 10px 16px 0;
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.run-output-details {
+	border-top: 1px solid var(--border-light);
+}
+
+.run-output-details > summary {
+	display: flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 8px 16px;
+	color: var(--text-mid);
+	font-size: 12.5px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.run-output-details > summary:focus-visible {
+	outline: 2px solid var(--gold);
+	outline-offset: -3px;
+}
+
+.run-output-secondary {
+	max-height: 34dvh;
+	border-top: 1px solid var(--border-light);
+}
+
+@media (max-width: 640px) {
+	/* iOS zooms into any focused field under 16px. */
+	.run-input,
+	.run-select {
+		font-size: 16px;
+	}
+}
+

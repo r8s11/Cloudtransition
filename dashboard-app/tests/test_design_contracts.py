@@ -16,6 +16,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 TOKENS = (ROOT / "static" / "tokens.css").read_text()
 STYLE = (ROOT / "static" / "style.css").read_text()
+RUN_CSS = (ROOT / "static" / "run.css").read_text()
+METRICS_CSS = (ROOT / "static" / "metrics.css").read_text()
+AGENTS_CSS = (ROOT / "static" / "agents.css").read_text()
+# Every stylesheet in load order: the layout checks must cover moved tab rules too.
+ALL_STYLE = "\n".join(
+    (ROOT / "static" / name).read_text()
+    for name in (
+        "style.css", "skills.css", "books.css", "education.css", "run.css",
+        "today.css", "metrics.css", "interviews.css", "agents.css", "career.css",
+    )
+)
 READER = (ROOT / "templates" / "reader.html").read_text()
 INDEX = (ROOT / "templates" / "index.html").read_text()
 
@@ -90,7 +101,7 @@ def test_run_state_colors_pass_wcag_aa_on_every_panel_face():
 
 def test_no_blanket_reduced_motion_wildcard():
     """The `*: 0.01ms` kill removed the crease animation entirely."""
-    assert "0.01ms" not in STYLE, (
+    assert "0.01ms" not in ALL_STYLE, (
         "blanket prefers-reduced-motion wildcard still present"
     )
     assert "prefers-reduced-motion: reduce" in STYLE
@@ -105,7 +116,7 @@ def test_no_layout_property_transitions():
     """width/height/margin/padding transitions thrash layout."""
     bad = re.findall(
         r"transition:\s*(?:[^;]*?\b(?:width|height|margin|padding|top|left|right|bottom)\b)",
-        STYLE,
+        ALL_STYLE,
     )
     assert not bad, f"layout-property transitions: {bad}"
 
@@ -132,13 +143,13 @@ def test_run_history_status_is_visible_text_not_just_a_dot():
     assert 'dot.setAttribute("aria-hidden", "true")' in js
     assert "run-log-status" in js
     assert 'el("span", null, RUN_STATUS_LABELS[r.status]' in js
-    assert ".run-log-status {" in STYLE
+    assert ".run-log-status {" in RUN_CSS
 
 
 def test_run_pickers_cannot_widen_the_card():
     """Long model option names must not force horizontal overflow."""
-    field = re.search(r"\.run-settings-row \.run-field \{([^}]*)\}", STYLE)
-    select = re.search(r"\.run-select \{([^}]*)\}", STYLE)
+    field = re.search(r"\.run-settings-row \.run-field \{([^}]*)\}", RUN_CSS)
+    select = re.search(r"\.run-select \{([^}]*)\}", RUN_CSS)
     assert field and "min-width: 0" in field.group(1)
     assert select and "min-width: 0" in select.group(1)
     assert "width: 100%" in select.group(1)
@@ -203,8 +214,8 @@ def test_mobile_primary_targets_reach_44px():
 
 
 def test_metrics_heading_scale_steps_above_body():
-    body = re.search(r"\.ops-table \{[^}]*font-size: (\d+)px", STYLE)
-    h4 = re.search(r"\.metrics-section-heading h4 \{[^}]*font-size: (\d+)px", STYLE)
+    body = re.search(r"\.ops-table \{[^}]*font-size: (\d+)px", METRICS_CSS)
+    h4 = re.search(r"\.metrics-section-heading h4 \{[^}]*font-size: (\d+)px", METRICS_CSS)
     assert body and h4
     assert int(h4.group(1)) / int(body.group(1)) >= 1.25
 
@@ -247,8 +258,8 @@ def test_agents_tab_renders_roster_and_a_contained_scan_table():
     assert "No Scout scan yet" in page
     assert 'class="ops-table-scroll"' in page
     assert 'class="ops-table agents-scan-table"' in page
-    assert ".agents-scan-table" in STYLE
-    block = re.search(r"\.agents-scan-table \{[^}]*\}", STYLE)
+    assert ".agents-scan-table" in AGENTS_CSS
+    block = re.search(r"\.agents-scan-table \{[^}]*\}", AGENTS_CSS)
     assert block and "min-width" in block.group(0)
 
 
