@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import app as module
 from core import config
+from routes import runs as run_routes
 from core import work_search as ws
 
 CSRF = {"X-Requested-With": "XMLHttpRequest"}
@@ -71,7 +72,7 @@ def test_endpoints_persist_edit_filter_and_reject_unsafe_writes(tmp_path, monkey
     original = "# Keep\nactive_applications: []\n"
     target.write_text(original)
     monkeypatch.setattr(config, "JOBS_FILE", target)
-    monkeypatch.setattr(module, "_warm_skill_catalog", lambda: None)
+    monkeypatch.setattr(run_routes, "_warm_skill_catalog", lambda: None)
     with TestClient(module.app) as client:
         assert client.post("/api/career/work-search", json=ACTIVITY).status_code == 403
         assert target.read_text() == original

@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 import app as module  # noqa: E402
 from core import config  # noqa: E402
+from routes import runs as run_routes  # noqa: E402
 from core import agents, skills  # noqa: E402
 
 
@@ -173,7 +174,7 @@ def test_job_reader_definition_denies_every_skill():
 
 def test_registry_page_renders_read_only(homes, monkeypatch):
     _registry(homes)
-    monkeypatch.setattr(module, "_opencode_resolved_agents", lambda: [{"id": "forge", "permissions": BASE}])
+    monkeypatch.setattr(run_routes, "_opencode_resolved_agents", lambda: [{"id": "forge", "permissions": BASE}])
     monkeypatch.setattr(module.forge_agents, "discover_agents",
                         lambda: {"agents": [{"slug": "forge", "discovered": True}]})
     with TestClient(module.app) as client:

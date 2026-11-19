@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 from core import agents  # noqa: E402
 import app as module  # noqa: E402
 from core import config  # noqa: E402
+from routes import runs as run_routes  # noqa: E402
 from core.interview_view import build_interview_view  # noqa: E402
 from core.store import load_yaml  # noqa: E402
 
@@ -96,7 +97,7 @@ def test_scout_leads_skip_tracked_and_malformed_jobs():
 def test_agent_runners_are_opencode_only(skill, agent):
     cfg = config.SKILL_RUNNERS[skill]
     assert (cfg["kind"], cfg["agent"], cfg["providers"]) == ("opencode-agent", agent, ["opencode"])
-    assert module._card_allows_provider(cfg, "claude")[0] is False
+    assert run_routes._card_allows_provider(cfg, "claude")[0] is False
 
 
 @pytest.mark.parametrize(
@@ -114,9 +115,9 @@ def test_agent_runners_are_opencode_only(skill, agent):
 )
 def test_agent_runner_inputs_are_validated_before_any_launch(skill, value, monkeypatch):
     launched = []
-    monkeypatch.setattr(module, "_resolve_run", lambda *a, **k: launched.append(a) or ({"kind": "error", "error": "x"}, ""))
-    monkeypatch.setattr(module, "_parse_model", lambda m: ("opencode", "free"))
-    monkeypatch.setattr(module, "_load_opencode_models", lambda: ([{"id": "free", "efforts": ["default"]}], True, None))
+    monkeypatch.setattr(run_routes, "_resolve_run", lambda *a, **k: launched.append(a) or ({"kind": "error", "error": "x"}, ""))
+    monkeypatch.setattr(run_routes, "_parse_model", lambda m: ("opencode", "free"))
+    monkeypatch.setattr(run_routes, "_load_opencode_models", lambda: ([{"id": "free", "efforts": ["default"]}], True, None))
     r = TestClient(module.app).post(
         "/api/skills/run", json={"skill": skill, "model": "opencode:free", "input": value}, headers=CSRF
     )
@@ -125,10 +126,10 @@ def test_agent_runner_inputs_are_validated_before_any_launch(skill, value, monke
 
 
 def test_job_reader_prompt_carries_the_validated_input(monkeypatch):
-    monkeypatch.setattr(module, "_resolve_opencode_exe", lambda: "/fake/opencode")
-    monkeypatch.setattr(module, "_parse_model", lambda m: ("opencode", "free"))
-    req = module.RunRequest(skill="job-reader", model="opencode:free", input="acme-admin https://a.example/{x}")
-    spec, _ = module._resolve_run(config.SKILL_RUNNERS["job-reader"], req)
+    monkeypatch.setattr(run_routes, "_resolve_opencode_exe", lambda: "/fake/opencode")
+    monkeypatch.setattr(run_routes, "_parse_model", lambda m: ("opencode", "free"))
+    req = run_routes.RunRequest(skill="job-reader", model="opencode:free", input="acme-admin https://a.example/{x}")
+    spec, _ = run_routes._resolve_run(config.SKILL_RUNNERS["job-reader"], req)
     assert spec["argv"][:5] == ["/fake/opencode", "run", "--standalone", "--agent", "job-reader"]
     assert "acme-admin https://a.example/{x}" in spec["argv"][-1]
 

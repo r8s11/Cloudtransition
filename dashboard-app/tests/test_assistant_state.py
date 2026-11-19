@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app as module  # noqa: E402
 from core import config  # noqa: E402
+from routes import runs as run_routes  # noqa: E402
 from routes import calendar  # noqa: E402
 
 SECRET = "sk-test-DO-NOT-LEAK-1234567890"
@@ -126,8 +127,8 @@ def test_missions_section(workspace, monkeypatch):
 
 def test_runs_section(workspace, monkeypatch):
     fake_upstream(monkeypatch, payload=[])
-    with module._RUNS_LOCK:
-        module._RUNS["live1"] = {
+    with run_routes._RUNS_LOCK:
+        run_routes._RUNS["live1"] = {
             "id": "live1",
             "skill": "job-reader",
             "status": "running",
@@ -143,8 +144,8 @@ def test_runs_section(workspace, monkeypatch):
         assert live[0]["id"] == "live1" and live[0]["status"] == "running"
         assert "command" not in live[0]
     finally:
-        with module._RUNS_LOCK:
-            module._RUNS.pop("live1", None)
+        with run_routes._RUNS_LOCK:
+            run_routes._RUNS.pop("live1", None)
 
 
 def test_unknown_include(workspace, monkeypatch):

@@ -18,8 +18,8 @@ import pytest
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-import app as module  # noqa: E402
 from core import config  # noqa: E402
+from routes import runs as run_routes  # noqa: E402
 from core import agents  # noqa: E402
 
 DEFINITION = config.WORKSPACE / ".opencode" / "agents" / "job-reader.md"
@@ -78,14 +78,14 @@ def test_old_definition_would_have_been_refused():
     assert any(p.startswith("shell true resolves to allow") for p in problems)
 
 
-OPENCODE = module._resolve_opencode_exe()
+OPENCODE = run_routes._resolve_opencode_exe()
 
 
 @pytest.mark.skipif(OPENCODE is None, reason="opencode is not installed")
 def test_opencode_resolves_the_hardened_rules_for_job_reader():
     proc = subprocess.run(
         [OPENCODE, "debug", "agents", "--standalone"],
-        cwd=config.WORKSPACE, env=module._run_env(), capture_output=True, text=True, timeout=60, check=True,
+        cwd=config.WORKSPACE, env=run_routes._run_env(), capture_output=True, text=True, timeout=60, check=True,
     )
     import json
 

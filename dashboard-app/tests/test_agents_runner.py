@@ -11,17 +11,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from fastapi.testclient import TestClient  # noqa: E402
 import app as module  # noqa: E402
 from core import config  # noqa: E402
+from routes import runs as run_routes  # noqa: E402
 
 CSRF = {"X-Requested-With": "XMLHttpRequest"}
 
 
 @pytest.fixture(autouse=True)
 def _clear_runs():
-    with module._RUNS_LOCK:
-        module._RUNS.clear()
+    with run_routes._RUNS_LOCK:
+        run_routes._RUNS.clear()
     yield
-    with module._RUNS_LOCK:
-        module._RUNS.clear()
+    with run_routes._RUNS_LOCK:
+        run_routes._RUNS.clear()
 
 
 def test_scout_scan_catalog_entry_is_opencode_only():
@@ -30,21 +31,21 @@ def test_scout_scan_catalog_entry_is_opencode_only():
     assert cfg["agent"] == "scout"
     assert cfg["providers"] == ["opencode"]
     assert cfg["options"] is True
-    assert module._card_allows_provider(cfg, "claude") == (
+    assert run_routes._card_allows_provider(cfg, "claude") == (
         False,
         "Run Scout scan only supports opencode models.",
     )
-    assert module._card_allows_provider(cfg, "opencode") == (True, None)
+    assert run_routes._card_allows_provider(cfg, "opencode") == (True, None)
 
 
 def test_scout_scan_resolves_agent_and_model(monkeypatch):
-    monkeypatch.setattr(module, "_resolve_opencode_exe", lambda: "/fake/opencode")
+    monkeypatch.setattr(run_routes, "_resolve_opencode_exe", lambda: "/fake/opencode")
     cfg = config.SKILL_RUNNERS["scout-scan"]
-    req = module.RunRequest(
+    req = run_routes.RunRequest(
         skill="scout-scan", model="opencode:opencode/beam-free", effort="default"
     )
 
-    spec, shown = module._resolve_run(cfg, req)
+    spec, shown = run_routes._resolve_run(cfg, req)
 
     assert spec["kind"] == "opencode"
     assert spec["argv"][:7] == [
@@ -62,13 +63,13 @@ def test_scout_scan_resolves_agent_and_model(monkeypatch):
 
 
 def test_scout_scan_missing_opencode_is_an_error_spec(monkeypatch):
-    monkeypatch.setattr(module, "_resolve_opencode_exe", lambda: None)
+    monkeypatch.setattr(run_routes, "_resolve_opencode_exe", lambda: None)
     cfg = config.SKILL_RUNNERS["scout-scan"]
-    req = module.RunRequest(
+    req = run_routes.RunRequest(
         skill="scout-scan", model="opencode:opencode/beam-free", effort="default"
     )
 
-    spec, _ = module._resolve_run(cfg, req)
+    spec, _ = run_routes._resolve_run(cfg, req)
 
     assert spec["kind"] == "error"
     assert "opencode" in spec["error"]
@@ -99,10 +100,10 @@ def test_scout_scan_rejects_a_non_opencode_model_and_missing_csrf():
 
 
 def test_scout_scan_is_single_flight(monkeypatch):
-    monkeypatch.setattr(module, "_resolve_opencode_exe", lambda: "/fake/opencode")
-    monkeypatch.setattr(module, "_load_opencode_models", lambda: ([{"id": "opencode/beam-free", "efforts": ["default"]}], True, None))
-    monkeypatch.setattr(module, "_execute_run", lambda *args: None)
-    monkeypatch.setattr(module, "_log_run", lambda entry: None)
+    monkeypatch.setattr(run_routes, "_resolve_opencode_exe", lambda: "/fake/opencode")
+    monkeypatch.setattr(run_routes, "_load_opencode_models", lambda: ([{"id": "opencode/beam-free", "efforts": ["default"]}], True, None))
+    monkeypatch.setattr(run_routes, "_execute_run", lambda *args: None)
+    monkeypatch.setattr(run_routes, "_log_run", lambda entry: None)
     with TestClient(module.app) as client:
         body = {
             "skill": "scout-scan",
@@ -123,28 +124,24 @@ def test_scout_scan_is_single_flight(monkeypatch):
 
 
 def test_scout_scan_catalog_payload_carries_provider_limit(monkeypatch):
-    monkeypatch.setattr(
-        module,
-        "_fetch_skill_catalog",
-        lambda: {"provider_models": {}, "provider_available": {}, "effort": []},
-    )
-    payload = module._skill_catalog_payload()
+    monkeypatch.setattr(run_routes, "_fetch_skill_catalog", lambda: {"provider_models": {}, "provider_available": {}, "effort": []},)
+    payload = run_routes._skill_catalog_payload()
     skill = next(s for s in payload["skills"] if s["id"] == "scout-scan")
     assert skill["providers"] == ["opencode"]
 
 
 def test_opencode_agent_card_without_agent_is_an_error_spec(monkeypatch):
-    monkeypatch.setattr(module, "_resolve_opencode_exe", lambda: "/fake/opencode")
+    monkeypatch.setattr(run_routes, "_resolve_opencode_exe", lambda: "/fake/opencode")
     cfg = {
         "kind": "opencode-agent",
         "prompt": "scan",
         "providers": ["opencode"],
     }
-    req = module.RunRequest(
+    req = run_routes.RunRequest(
         skill="malformed", model="opencode:opencode/beam-free", effort="default"
     )
 
-    spec, _ = module._resolve_run(cfg, req)
+    spec, _ = run_routes._resolve_run(cfg, req)
 
     assert spec["kind"] == "error"
     assert "agent" in spec["error"].lower()
@@ -170,9 +167,9 @@ def agent_home(tmp_path, monkeypatch):
 
 
 def _start_job_reader(monkeypatch, client, skill="job-reader"):
-    monkeypatch.setattr(module, "_resolve_opencode_exe", lambda: "/fake/opencode")
-    monkeypatch.setattr(module, "_load_opencode_models", lambda: ([{"id": "opencode/beam-free", "efforts": ["default"]}], True, None))
-    monkeypatch.setattr(module, "_log_run", lambda entry: None)
+    monkeypatch.setattr(run_routes, "_resolve_opencode_exe", lambda: "/fake/opencode")
+    monkeypatch.setattr(run_routes, "_load_opencode_models", lambda: ([{"id": "opencode/beam-free", "efforts": ["default"]}], True, None))
+    monkeypatch.setattr(run_routes, "_log_run", lambda entry: None)
     body = {"skill": skill, "model": "opencode:opencode/beam-free", "effort": "default", "input": JOB_INPUT}
     return client.post("/api/skills/run", headers=CSRF, json=body)
 
@@ -188,10 +185,10 @@ def _fake_debug(monkeypatch, stdout, returncode=0):
     proc = Proc()
     proc.stdout, proc.returncode = stdout, returncode
     calls = []
-    monkeypatch.setattr(module, "_resolve_opencode_exe", lambda: "/fake/opencode")
+    monkeypatch.setattr(run_routes, "_resolve_opencode_exe", lambda: "/fake/opencode")
     # Only OpenCode calls count: other app threads (calendar) may call subprocess too.
     monkeypatch.setattr(
-        module.subprocess, "run",
+        run_routes.subprocess, "run",
         lambda argv, **kw: (calls.append(argv) if argv and argv[0] == "/fake/opencode" else None) or proc,
     )
     return calls
@@ -201,7 +198,7 @@ def test_job_reader_run_records_its_definition_and_launch_facts(monkeypatch, age
     import hashlib
 
     started = []
-    monkeypatch.setattr(module, "_execute_run", lambda run_id, spec: started.append(spec))
+    monkeypatch.setattr(run_routes, "_execute_run", lambda run_id, spec: started.append(spec))
     with TestClient(module.app) as client:
         response = _start_job_reader(monkeypatch, client)
 
@@ -221,7 +218,7 @@ def test_job_reader_run_records_its_definition_and_launch_facts(monkeypatch, age
 
 def test_job_reader_refuses_when_its_definition_is_missing(monkeypatch, agent_home):
     agent_home.unlink()
-    monkeypatch.setattr(module, "_execute_run", lambda *a: pytest.fail("must not start"))
+    monkeypatch.setattr(run_routes, "_execute_run", lambda *a: pytest.fail("must not start"))
     with TestClient(module.app) as client:
         response = _start_job_reader(monkeypatch, client)
     assert response.status_code == 400
@@ -231,7 +228,7 @@ def test_job_reader_refuses_when_its_definition_is_missing(monkeypatch, agent_ho
 def test_one_agent_runs_one_task_at_a_time(monkeypatch, agent_home):
     second_card = {**config.SKILL_RUNNERS["job-reader"], "label": "Second job-reader card"}
     monkeypatch.setitem(config.SKILL_RUNNERS, "job-reader-again", second_card)
-    monkeypatch.setattr(module, "_execute_run", lambda *a: None)
+    monkeypatch.setattr(run_routes, "_execute_run", lambda *a: None)
     with TestClient(module.app) as client:
         assert _start_job_reader(monkeypatch, client).status_code == 200
         other = _start_job_reader(monkeypatch, client, skill="job-reader-again")
@@ -243,7 +240,7 @@ def _pending_run(agent_home):
     from core import agents
 
     expected = agents.launch_definition("job-reader")
-    module._RUNS["r1"] = {"id": "r1", "status": "running", "definition": {**expected, "check": "pending"}}
+    run_routes._RUNS["r1"] = {"id": "r1", "status": "running", "definition": {**expected, "check": "pending"}}
     return {"agent": "job-reader", "expected": expected}
 
 
@@ -254,8 +251,8 @@ def test_verification_matches_opencode_resolved_instructions(monkeypatch, agent_
         json.dumps(_resolved("Your name is Job Reader.\n  Extract only.", [{"effect": "deny", "action": "edit", "resource": "*"}])),
     )
 
-    assert module._verify_opencode_agent("r1", verify) is None
-    definition = module._RUNS["r1"]["definition"]
+    assert run_routes._verify_opencode_agent("r1", verify) is None
+    definition = run_routes._RUNS["r1"]["definition"]
     assert definition["check"] == "matched"
     assert definition["permissions"] == ["deny edit *"]
     assert calls[0][1:] == ["debug", "agents", "--standalone"]
@@ -264,23 +261,23 @@ def test_verification_matches_opencode_resolved_instructions(monkeypatch, agent_
 def test_verification_refuses_other_instructions_or_a_changed_file(monkeypatch, agent_home):
     verify = _pending_run(agent_home)
     _fake_debug(monkeypatch, json.dumps(_resolved("Something else entirely.")))
-    refused = module._verify_opencode_agent("r1", verify)
+    refused = run_routes._verify_opencode_agent("r1", verify)
     assert refused["status"] == "failed" and refused["body"].startswith("Not started:")
-    assert module._RUNS["r1"]["definition"]["check"] == "mismatch"
+    assert run_routes._RUNS["r1"]["definition"]["check"] == "mismatch"
 
     verify = _pending_run(agent_home)
     agent_home.write_text(DEFINITION + "Edited after the request.\n")
-    refused = module._verify_opencode_agent("r1", verify)
+    refused = run_routes._verify_opencode_agent("r1", verify)
     assert refused["status"] == "failed"
-    assert "changed or vanished" in module._RUNS["r1"]["definition"]["detail"]
+    assert "changed or vanished" in run_routes._RUNS["r1"]["definition"]["detail"]
 
 
 def test_verification_fails_closed_when_opencode_gives_no_answer(monkeypatch, agent_home):
     verify = _pending_run(agent_home)
     _fake_debug(monkeypatch, "not json", returncode=0)
-    refused = module._verify_opencode_agent("r1", verify)
+    refused = run_routes._verify_opencode_agent("r1", verify)
     assert refused["status"] == "failed" and refused["body"].startswith("Not started:")
-    assert module._RUNS["r1"]["definition"]["check"] == "unverified"
+    assert run_routes._RUNS["r1"]["definition"]["check"] == "unverified"
 
 
 def test_verification_refuses_a_loosened_permission_policy(monkeypatch, agent_home):
@@ -293,10 +290,10 @@ def test_verification_refuses_a_loosened_permission_policy(monkeypatch, agent_ho
     ]
     _fake_debug(monkeypatch, json.dumps(_resolved("Your name is Job Reader.\nExtract only.", loose)))
 
-    refused = module._verify_opencode_agent("r1", verify)
+    refused = run_routes._verify_opencode_agent("r1", verify)
 
     assert refused["status"] == "failed"
-    definition = module._RUNS["r1"]["definition"]
+    definition = run_routes._RUNS["r1"]["definition"]
     assert definition["check"] == "policy"
     assert "shell true resolves to allow, not deny" in definition["detail"]
     assert "edit workspace/agents/job-reader/memory/log.jsonl resolves to allow" in definition["detail"]
@@ -306,12 +303,12 @@ def test_refused_run_is_a_visible_failure_and_never_launches(monkeypatch, agent_
     verify = _pending_run(agent_home)
     monkeypatch.setattr(config, "RUNS_DIR", tmp_path / "runs")
     monkeypatch.setattr(config, "WORKSPACE", tmp_path)
-    monkeypatch.setattr(module, "_log_run", lambda entry: None)
+    monkeypatch.setattr(run_routes, "_log_run", lambda entry: None)
     calls = _fake_debug(monkeypatch, json.dumps([]))
 
-    module._execute_run("r1", {"kind": "opencode", "argv": ["/fake/opencode", "run"], "verify_agent": verify})
+    run_routes._execute_run("r1", {"kind": "opencode", "argv": ["/fake/opencode", "run"], "verify_agent": verify})
 
-    run = module._RUNS["r1"]
+    run = run_routes._RUNS["r1"]
     assert run["status"] == "failed"
     assert run["definition"]["check"] == "missing"
     assert run["finished"]
@@ -329,8 +326,8 @@ def test_last_finished_run_reads_runs_log_and_skips_running(monkeypatch, tmp_pat
         + json.dumps({"skill": "scout-scan", "status": "done", "id": "other"}) + "\n"
     )
     monkeypatch.setattr(config, "RUNS_LOG", log)
-    assert module._last_finished_run("job-reader")["id"] == "new"
-    assert module._last_finished_run("cv-base") is None
+    assert run_routes._last_finished_run("job-reader")["id"] == "new"
+    assert run_routes._last_finished_run("cv-base") is None
 
 
 # ── Staging, publishing and the runner-owned memory write ──
@@ -351,11 +348,11 @@ def reader_state(tmp_path, monkeypatch):
     (state / "job-reader" / "outputs").mkdir(parents=True)
     monkeypatch.setattr(agents, "WORKSPACE", tmp_path)
     monkeypatch.setattr(agents, "AGENT_STATE", state)
-    module._RUNS["r2"] = {
+    run_routes._RUNS["r2"] = {
         "id": "r2", "status": "running", "provider": "opencode", "model": "opencode/beam-free",
         "definition": {"version": "abcd1234"},
     }
-    assert module._stage_job_reading(JOB) is None
+    assert run_routes._stage_job_reading(JOB) is None
     return state / "job-reader"
 
 
@@ -375,7 +372,7 @@ def _stage(reader, text, name="acme-it.json"):
 
 def _finish(done=None):
     done = done or {"status": "done", "exit_code": 0, "body": "agent said ok"}
-    return module._finish_job_reading("r2", JOB, done, LAUNCHED, EXITED)
+    return run_routes._finish_job_reading("r2", JOB, done, LAUNCHED, EXITED)
 
 
 def _events(reader):
@@ -466,20 +463,20 @@ def test_missing_memory_folder_is_reported_and_never_created(reader_state):
 def test_staging_is_per_run_and_never_created_without_the_agent_folder(reader_state, tmp_path, monkeypatch):
     from core import agents
 
-    assert module._stage_job_reading(JOB) is not None, "a reused run id must not share a folder"
+    assert run_routes._stage_job_reading(JOB) is not None, "a reused run id must not share a folder"
     other = {**JOB, "run_id": "r3"}
-    assert module._stage_job_reading(other) is None
-    module._discard_staging(other)
+    assert run_routes._stage_job_reading(other) is None
+    run_routes._discard_staging(other)
     assert (reader_state / "staging" / "r2").is_dir(), "discarding one run leaves others alone"
 
     monkeypatch.setattr(agents, "AGENT_STATE", tmp_path / "unmounted")
-    assert "nothing was created" in module._stage_job_reading({**JOB, "run_id": "r4"})
+    assert "nothing was created" in run_routes._stage_job_reading({**JOB, "run_id": "r4"})
     assert not (tmp_path / "unmounted").exists()
 
 
 def test_job_reader_run_spec_carries_the_job_staging_and_policy(monkeypatch, agent_home):
     started = []
-    monkeypatch.setattr(module, "_execute_run", lambda run_id, spec: started.append((run_id, spec)))
+    monkeypatch.setattr(run_routes, "_execute_run", lambda run_id, spec: started.append((run_id, spec)))
     with TestClient(module.app) as client:
         assert _start_job_reader(monkeypatch, client).status_code == 200
     run_id, spec = started[0]
@@ -494,12 +491,12 @@ def test_launch_fails_cleanly_when_staging_cannot_be_created(monkeypatch, agent_
     monkeypatch.setattr(agents, "AGENT_STATE", tmp_path / "gone")
     monkeypatch.setattr(config, "RUNS_DIR", tmp_path / "runs")
     monkeypatch.setattr(config, "WORKSPACE", tmp_path)
-    monkeypatch.setattr(module, "_log_run", lambda entry: None)
-    monkeypatch.setattr(module, "_verify_opencode_agent", lambda *a: None)
-    monkeypatch.setattr(module.subprocess, "run", lambda *a, **k: pytest.fail("must not launch"))
-    module._RUNS["r5"] = {"id": "r5", "status": "running"}
+    monkeypatch.setattr(run_routes, "_log_run", lambda entry: None)
+    monkeypatch.setattr(run_routes, "_verify_opencode_agent", lambda *a: None)
+    monkeypatch.setattr(run_routes.subprocess, "run", lambda *a, **k: pytest.fail("must not launch"))
+    run_routes._RUNS["r5"] = {"id": "r5", "status": "running"}
 
-    module._execute_run("r5", {"kind": "opencode", "argv": ["x"], "verify_agent": {}, "job_reading": {**JOB, "run_id": "r5"}})
+    run_routes._execute_run("r5", {"kind": "opencode", "argv": ["x"], "verify_agent": {}, "job_reading": {**JOB, "run_id": "r5"}})
 
-    assert module._RUNS["r5"]["status"] == "failed"
+    assert run_routes._RUNS["r5"]["status"] == "failed"
     assert "Not started" in (tmp_path / "runs" / "r5.txt").read_text()
