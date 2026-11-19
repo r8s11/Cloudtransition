@@ -271,7 +271,7 @@ SKILL_RUNNERS = {
         "kind": "claude",
         "prompt": (
             "/ui-ux-pro-max Review the dashboard-app Run tab "
-            "(templates/pages/run.html, static/app.js and static/style.css). "
+            "(templates/pages/run.html, static/run.js and static/run.css). "
             "Read the skill's applicable reference files. Report at most five "
             "concrete findings with file:line citations; do not edit any file."
         ),
@@ -280,8 +280,8 @@ SKILL_RUNNERS = {
         "read_only": True,
         "context_files": [
             "dashboard-app/templates/pages/run.html",
-            "dashboard-app/static/app.js",
-            "dashboard-app/static/style.css",
+            "dashboard-app/static/run.js",
+            "dashboard-app/static/run.css",
         ],
     },
     "update-sheet": {

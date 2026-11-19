@@ -51,14 +51,16 @@ Read configuration as `config.NAME` at call time, never `from core.config import
 | `templates/_macros.html` | Shared Jinja macros (`metric_table`, `task_check`) | Rarely |
 | `templates/reader.html` | Standalone markdown file browser | Rarely |
 | Workspace `lessons/`, `assets/course.css`, `reference/` | Read-only Pydantic AI course at `/learn/pydantic-ai/` | Change course publishing |
-| `static/app.js` | Tab navigation, local project forms, runner grids + output dialog, Today capture/brain forms, `data-map-query` Workspace map deep links | Change shared interactivity |
+| `static/app.js` | Shared shell: tab navigation, fold map, task-checkbox globals (`bindTaskCheck`, `paintTaskCheck`, …), copy-prompt and `data-map-query`/`data-focus` delegates. Loads before the tab scripts | Change shared interactivity |
+| `static/tasks.js`, `run.js`, `today.js`, `interviews.js` | Per-tab IIFEs: realm pills + Future Prompts; runner grids, polling and output dialog (Run, Today quick tools, agent cards); capture + second brain; Interviews tracker edits + Interview mode | Change that tab's interactivity |
 | `core/workspace_content.py` | Read-only file access for `/workspace-file/…` and live artifact rows; imports scope/privacy rules from `visual-second-brain/refresh-index.py` | Change what may be opened |
 | `static/fonts/` | Self-hosted Inter variable + JetBrains Mono (OFL); `@font-face` at the top of `style.css` | Rarely |
 | `static/metrics.js` | Read-only server operations controller: polling, host selection, history, workload filters, logs | Change Metrics interactivity |
 | `collectors/metrics.py` | Local project checks, Linux/Windows host normalization, bounded historical queries | Change performance collection |
 | `collectors/server_activity.py` | Container/process/service workloads, actual target probes, Loki activity and coverage | Change operational collection |
 | `collectors/metric_charts.py` | Bounded rate, probe and log-volume chart history for the Metrics tab | Change Metrics graphs |
-| `static/style.css` | All styles; design tokens are CSS vars in `:root` (`--accent`, `--green`, …) | Change appearance |
+| `static/style.css` | Shared styles: reset, shell, nav, fold column, HUD grammar, cards, badges, task rows, global responsive blocks, 44px touch floor. Tokens live in `tokens.css` | Change shared appearance |
+| `static/{skills,books,education,run,today,metrics,interviews,agents,career}.css` | One sheet per tab, loaded after style.css and before deck.css (career.css last: its `.work-search` overrides must win). Tab-only responsive overrides live with their tab | Change a tab's appearance |
 | `static/manifest.webmanifest`, `static/icon-*.png` | Home-screen install; opens `/#today` | Rarely |
 | `launchd/com.cloudtransition.dashboard.plist` | Always-on loopback server for phone access | Rarely |
 | `DESIGN.md` | Visual design rationale and conventions | Read before styling work |

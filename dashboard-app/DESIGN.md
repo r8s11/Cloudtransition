@@ -64,11 +64,13 @@ layer: an inline SVG with HTML callout pills positioned in the same box.
 | File | Owns |
 |---|---|
 | `static/tokens.css` | Every colour, type and shape token (section 3). Single source for the dashboard, the reader and the skill registry |
-| `static/style.css` | Shell, navigation, fold column, HUD layout grammar, base components |
+| `static/style.css` | Shell, navigation, fold column, HUD layout grammar, base components, global responsive blocks and the touch floor |
+| `static/<tab>.css` (skills, books, education, run, today, metrics, interviews, agents, career) | One tab's rules and its tab-only responsive overrides; loaded after style.css, career.css last |
 | `static/deck.css` | Component scope `.deck`: list–detail, segmented filters, runner cards, hint dock. Its `--deck-*` tokens are aliases of the base tokens |
 | `static/deck-interviews.*`, `deck-run.*`, `deck-agents.*` | Per-tab components and behaviour (selection, j/k, stage flow, runners) |
 | `static/spatial.css`, `spatial.js` | Today's reticle hero and its live arcs |
 | `static/app.js` | Tabs, View Transition, task toggle, weekly-step focus, copy actions |
+| `static/tasks.js`, `run.js`, `today.js`, `interviews.js` | Per-tab controllers: realm pills/prompts, runner cards, capture/brain, Interviews edits and Interview mode |
 | `static/metrics.js`, `calendar.js`, `work-search.js` | Metrics charts, calendar export, work-search report |
 
 **Cache-busting.** Assets load as `/static/<file>?v=<key>` from
