@@ -139,7 +139,7 @@ def test_project_card_uses_token_not_inline_color():
 
 def test_run_history_status_is_visible_text_not_just_a_dot():
     """The dot is aria-hidden and colour-only; the row must carry the words."""
-    js = (ROOT / "static" / "app.js").read_text()
+    js = (ROOT / "static" / "run.js").read_text()
     assert 'dot.setAttribute("aria-hidden", "true")' in js
     assert "run-log-status" in js
     assert 'el("span", null, RUN_STATUS_LABELS[r.status]' in js
@@ -157,7 +157,7 @@ def test_run_pickers_cannot_widen_the_card():
 
 def test_refresh_models_announces_success_and_failure():
     """The refresh button needs a live region; silent failures hide the cause."""
-    js = (ROOT / "static" / "app.js").read_text()
+    js = (ROOT / "static" / "run.js").read_text()
     run_page = (ROOT / "templates" / "pages" / "run.html").read_text()
     assert 'id="refreshModelsStatus"' in run_page
     assert 'aria-live="polite"' in run_page
@@ -171,7 +171,7 @@ def test_refresh_models_announces_success_and_failure():
 
 def test_run_model_picker_preselects_the_configured_model():
     """Bare Claude option values never matched the `claude:<model>` default."""
-    js = (ROOT / "static" / "app.js").read_text()
+    js = (ROOT / "static" / "run.js").read_text()
     assert "option.value = `${provider}:${m.id}`;" in js
     assert 'let defaultValue = `claude:${s.model || "sonnet"}`;' in js
     assert "option.selected = option.value === defaultValue;" in js

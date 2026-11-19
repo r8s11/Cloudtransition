@@ -133,7 +133,7 @@ def test_interviews_tab_is_wired_into_the_shell():
 def test_interview_mode_dialog_is_wired():
     index = (ROOT / "templates" / "index.html").read_text()
     page = (ROOT / "templates" / "pages" / "interviews.html").read_text()
-    script = (ROOT / "static" / "app.js").read_text()
+    script = (ROOT / "static" / "interviews.js").read_text()
     # The dialog lives outside the tab panels, next to the run-output dialog.
     assert 'id="interviewMode"' in index
     for target in (
@@ -286,7 +286,7 @@ def test_today_daily_list_starts_with_the_interview_action():
 
 def test_today_page_and_script_wire_the_quick_action():
     today = (ROOT / "templates" / "pages" / "today.html").read_text()
-    script = (ROOT / "static" / "app.js").read_text()
+    script = (ROOT / "static" / "interviews.js").read_text()
     assert "data-interview-open" in today
     assert "data-interview-open" in script
     assert "/api/interviews/detail" in script
@@ -380,7 +380,7 @@ def test_closed_threads_sort_newest_signal_first():
 
 def test_interviews_page_renders_a_collapsed_closed_card():
     page = (ROOT / "templates" / "pages" / "interviews.html").read_text()
-    script = (ROOT / "static" / "app.js").read_text()
+    script = (ROOT / "static" / "interviews.js").read_text()
     assert "Closed threads" in page
     assert 'data-interview-list-closed' in page
     assert 'data-interview-closed="rejected,withdrawn"' in page
