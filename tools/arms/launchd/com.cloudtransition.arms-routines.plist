@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+	<key>Label</key>
+	<string>com.cloudtransition.arms-routines</string>
+	<key>LowPriorityIO</key>
+	<true/>
+	<key>Nice</key>
+	<integer>10</integer>
+	<key>ProcessType</key>
+	<string>Background</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Library/Frameworks/Python.framework/Versions/3.14/bin/python3</string>
+		<string>/Volumes/SANDISK USB/work/Cloudtransition/tools/arms/routines.py</string>
+		<string>--root</string>
+		<string>/Volumes/SANDISK USB/work/Cloudtransition</string>
+		<string>run</string>
+	</array>
+	<key>StandardErrorPath</key>
+	<string>/Users/roosevelt/.local-routines/arms-report/routines.launchd.err.log</string>
+	<key>StandardOutPath</key>
+	<string>/Users/roosevelt/.local-routines/arms-report/routines.launchd.out.log</string>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>9</integer>
+		<key>Minute</key>
+		<integer>0</integer>
+		<key>Weekday</key>
+		<integer>5</integer>
+	</dict>
+	<key>WorkingDirectory</key>
+	<string>/Users/roosevelt</string>
+</dict>
+</plist>

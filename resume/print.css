@@ -1,0 +1,40 @@
+/* Modern Professional — single column, one navy accent, selectable text, no images. */
+:root { --accent: #1f3a5f; --muted: #5a6573; --rule: #c9d3df; }
+@page { size: Letter; margin: 0.5in 0.55in; }
+body { font-family: "Helvetica Neue", Arial, sans-serif; font-size: 10.25pt; line-height: 1.3; color: #1a1a1a; max-width: none; margin: 0; padding: 0; }
+a { color: inherit; text-decoration: none; }
+hr { display: none; }
+
+/* Header: name, target-role headline, contact, availability */
+h1 { font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif; font-size: 25pt; font-weight: 700; color: var(--accent); letter-spacing: 0.3px; margin: 0; line-height: 1.05; }
+h1 + p { margin: 2pt 0 3pt; font-size: 10.5pt; color: var(--accent); font-weight: 600; letter-spacing: 0.2px; }
+h1 + p strong { font-weight: 600; }
+h1 + p + p, h1 + p + p + p { margin: 0; font-size: 9pt; color: var(--muted); }
+h1 + p + p + p { padding-bottom: 5pt; border-bottom: 2pt solid var(--accent); }
+
+/* Sections */
+h2 { font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif; font-size: 10.5pt; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1.4px; border-bottom: 0.75pt solid var(--rule); padding-bottom: 1.5pt; margin: 9pt 0 3pt; break-after: avoid; }
+p { margin: 2pt 0; }
+
+/* Roles */
+h3 { font-size: 10.8pt; font-weight: 700; color: #111; margin: 7pt 0 0; break-after: avoid; }
+.role-meta { display: flex; justify-content: space-between; gap: 12pt; font-size: 9.5pt; margin: 0 0 2pt; break-before: avoid; break-after: avoid; }
+.role-meta .where { color: #333; }
+.role-meta .where strong { color: var(--accent); }
+.role-meta .when { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+ul { margin: 1pt 0 3pt; padding-left: 14pt; }
+li { margin: 0 0 1.5pt; break-inside: avoid; }
+li:nth-last-child(2) { break-after: avoid; }
+li::marker { color: var(--accent); }
+li strong { color: #111; }
+
+/* Skills table */
+table { border-collapse: collapse; width: 100%; font-size: 9.25pt; line-height: 1.25; margin-top: 1pt; }
+th { display: none; }
+td { padding: 1.4pt 5pt 1.4pt 0; vertical-align: top; border-bottom: 0.5pt solid #e3e8ee; }
+td:first-child { width: 27%; color: var(--accent); }
+td:first-child strong { font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+
+/* Version footer */
+body > p:last-of-type em { color: #8a94a1; font-size: 8pt; }

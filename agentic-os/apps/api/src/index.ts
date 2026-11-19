@@ -1,10 +1,14 @@
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 import { Hono } from "hono";
 import { MissionStatusSchema, type MissionStatus, type Priority } from "@agentic-os/core";
 import type { Database } from "@agentic-os/storage";
-
+import type { AgentRuntime } from "@agentic-os/runtime";
+import type { Hub } from "@agentic-os/hub";
 import { openMissionService, type MissionService } from "./mission-service.js";
+import { runtimeRoutes } from "./runtime-routes.js";
+import { hubRoutes } from "./hub-routes.js";
 
 const DASHBOARD_HTML = readFileSync(
   new URL("../www/index.html", import.meta.url),
@@ -17,6 +21,11 @@ export interface CreateAppOptions {
   clock?: () => Date;
   /** Test seam — lets callers inject a MissionService bound to the same db. */
   service?: MissionService;
+  runtime?: AgentRuntime;
+  /** Folder whose files the dashboard lists as artifacts. Default: this workspace's `artifacts/`. */
+  artifactsDir?: string;
+  /** Mission Control Hub; when present its routes mount at /api/hub. */
+  hub?: Hub;
 }
 
 export function createApp(db: Database, options: CreateAppOptions = {}): Hono {
@@ -153,6 +162,18 @@ export function createApp(db: Database, options: CreateAppOptions = {}): Hono {
 
   // ── Transition matrix (for the dashboard's transition dropdown) ────────
   app.get("/api/transitions", (c) => c.json(service.transitionMatrix()));
+
+  if (options.runtime)
+    app.route(
+      "/api",
+      runtimeRoutes(
+        options.runtime,
+        options.artifactsDir ??
+          fileURLToPath(new URL("../../../artifacts", import.meta.url)),
+      ),
+    );
+
+  if (options.hub) app.route("/api/hub", hubRoutes(options.hub));
 
   return app;
 }

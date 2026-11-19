@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 7 — Test Agents Safely</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<a class="skip-link" href="#lesson-content">Skip to lesson</a>
+<header>
+  <h1>Test without live accounts</h1>
+  <p class="dek">Separate deterministic tool tests from variable model behavior.</p>
+  <nav class="course-nav" aria-label="Course contents">
+    <details>
+      <summary><span>Course map</span><span class="course-progress">Lesson 7 of 8</span></summary>
+      <ol class="course-links">
+        <li><a href="0001-first-agent.html">01 First agent</a></li>
+        <li><a href="0002-tools-and-dependencies.html">02 Tools</a></li>
+        <li><a href="0003-gmail-reader.html">03 Gmail</a></li>
+        <li><a href="0004-smart-home.html">04 Smart home</a></li>
+        <li><a href="0005-nyc-specialist.html">05 NYC</a></li>
+        <li><a href="0006-specialists-together.html">06 Specialists</a></li>
+        <li><a aria-current="step" href="0007-testing-agents.html">07 Tests</a></li>
+        <li><a href="0008-operating-your-agents.html">08 Operate</a></li>
+        <li><a href="../reference/personal-agents.html">Field reference</a></li>
+      </ol>
+    </details>
+  </nav>
+</header>
+<main id="lesson-content">
+  <p class="meta">Time: 6 minutes · Win: make a test fail if an agent unexpectedly requests a live model</p>
+
+  <h2>Three layers to verify</h2>
+  <ol>
+    <li><strong>Tool test:</strong> give the function fake data or a fake HTTP client. Check the real permission rule.
+      <ul>
+        <li>Gmail: fake <code>subprocess.run</code> so it receives a separate argument list; assert no write tool is registered.</li>
+        <li>Smart home: fake the HTTP client; assert an unapproved entity or action is rejected before any request is sent.</li>
+        <li>NYC: fake the HTTP response; assert <code>source_url</code> and <code>retrieved_at</code> are present and missing evidence yields an explicit limitation.</li>
+      </ul>
+    </li>
+    <li><strong>Agent test:</strong> replace the model with <code>TestModel</code> or <code>FunctionModel</code>. Use <code>FunctionModel</code> when a test must force a particular tool call or multi-step path deterministically. Never let a test point at a real mailbox or device.</li>
+    <li><strong>Live evaluation:</strong> only later, with explicit account access, data scope, and budget approval.</li>
+  </ol>
+  <p>Pydantic AI documents agent overrides and local test models for avoiding real model cost, latency, and variability. <a href="https://pydantic.dev/docs/ai/testing/">Unit testing</a></p>
+
+  <h2>Offline smoke test</h2>
+  <pre><code>import pytest
+from pydantic_ai import models
+from pydantic_ai.models.test import TestModel
+
+models.ALLOW_MODEL_REQUESTS = False
+pytestmark = pytest.mark.anyio
+
+async def test_greeting_agent_runs_offline():
+    with greeting_agent.override(model=TestModel()):
+        result = await greeting_agent.run("Say hello.")
+    assert isinstance(result.output, str)</code></pre>
+  <p>This checks execution and output type, not answer quality. If the agent has tools, use fake dependencies. The test model can exercise tools; never let a test point at a real mailbox or device.</p>
+
+  <h2>Test the security contract</h2>
+  <ul>
+    <li>Gmail: only archive search is registered; subprocess receives separate arguments; no write tool exists.</li>
+    <li>Home Assistant: an unapproved entity or action is rejected before the HTTP request.</li>
+    <li>NYC: results include the actual source and retrieval date; missing evidence produces an explicit limitation.</li>
+    <li>All agents: errors stay visible; empty results are not mislabeled as complete coverage.</li>
+  </ul>
+  <p>Use a <code>FunctionModel</code> when a test must force a particular tool call or multi-step path. It lets the test define the model response deterministically.</p>
+
+  <h2>Never in tests</h2>
+  <ul>
+    <li>Real keys, API credentials, or device tokens.</li>
+    <li>A real mailbox, live Gmail, or real email content.</li>
+    <li>A real smart-home device or physical action.</li>
+    <li>A live model endpoint or provider network call.</li>
+  </ul>
+  <p>Offline tests first. Live tests require a separate, explicit decision.</p>
+
+  <h2>Self-check</h2>
+  <details>
+    <summary>Why is a passing TestModel run not proof the Gmail agent is safe?</summary>
+    <p>The test model does not prove real prompt resistance, provider data handling, archive freshness, OAuth scope, or access-control behavior. Test each boundary with fake services, then review live access separately.</p>
+  </details>
+
+  <nav class="lesson-nav" aria-label="Lesson navigation">
+    <a href="0006-specialists-together.html"><span>Previous lesson</span><strong>Compose specialists</strong></a>
+    <a href="0008-operating-your-agents.html"><span>Next lesson</span><strong>Operate your agents</strong></a>
+  </nav>
+  <p>Ask your teacher about any unclear step. Keep real keys, mail, and device tokens out of tests.</p>
+  <ul class="source-list">
+    <li><a href="https://pydantic.dev/docs/ai/testing/">Pydantic AI testing guide</a></li>
+    <li><a href="https://pydantic.dev/docs/ai/api/models/test/">TestModel API</a></li>
+  </ul>
+</main>
+<footer><p>Offline tests first. Live tests require a separate, explicit decision.</p></footer>
+</body>
+</html>

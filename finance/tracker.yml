@@ -1,0 +1,45 @@
+# Money Tracker
+# The weekend fold — debts, payments, savings. Source of truth: this file.
+# Do not enter balances/APRs/minimums until the inventory in TASKS.md is complete.
+# Helper: pull the master checklist from TASKS.md — "List all debts: balance, APR, minimum payment".
+
+as_of: "2026-11-09 (Week 46 review)"
+
+weekly_check:
+  day: Sunday          # routine.md: weekend (~30 min) — Money + review
+  cadence: "Weekly check: payments on track, TASKS.md tidy, work-log skim; Week 46 (2026-11-09 → 11-15) is the B slot, but the Bogatyr project does not exist; Week 47 (2026-11-16 → 11-22) is A (Playbook)."
+  rule: "Debt payments are part of the routine, not a someday project. Automated payments."
+
+income:
+  status: "Ross contract ended 2026-10-16 (organization layoffs); job search re-ignited per TASKS.md. No current income amount is recorded."
+  tax_set_aside_rate: 0.30          # 30% of every consulting payment -> dedicated tax savings account (docs/plans/2026-03-19-consulting-capex-opex.md)
+  hourly_lanes: []            # hourly/flat-rate freelance income, filled per month
+  notes:
+    - "Ross contract ended 2026-10-16 due to organization layoffs; job search is active. No current income amount is recorded (DASHBOARD.md, 2026-11-09)."
+    - "The 2026-08-10 sprint target was $3,000 received in 2–4 weeks. Its ledger shows $0 received / $3,000 target; TASKS.md and DASHBOARD.md say the window elapsed and the outcome is unverified. The target means received, not spendable; reserve 25–30% for taxes (freelance/profiles-2026-08.md)."
+    - "Rate references, not earned income: Upwork $45–50/hr starting, then $60–70/hr after 3+ five-star jobs; TaskRabbit $50–65/hr with a one-hour minimum; local flat-rate $50–75/basic visit (freelance/profiles-2026-08.md)."
+    - "Lane A package pricing: P1 $1,500–2,500; P2 $3,500–5,000; P3 $1,000–2,000/month. These are planning prices, not received income (freelance/lane-a-services.md)."
+    - "Consulting tax rule: set aside 30% of every consulting payment in a dedicated savings account (docs/plans/2026-03-19-consulting-capex-opex.md). The amount held is not recorded."
+
+# Fill from the debt inventory. One item per debt.
+# Method: avalanche (highest APR first) or snowball (smallest balance first).
+# Inventory still open as of 2026-11-09 — TASKS.md records no balances, APRs or minimums.
+debts: []
+
+# Standing payments & automations (fill after the inventory)
+payments:
+  method: ""                  # avalanche | snowball
+  extra_payment_per_month:   # unknown until inventory
+  payday: ""                  # e.g. "1st & 15th" or "biweekly Friday"
+  automated_since: ""
+
+# Savings beyond the tax set-aside
+savings:
+  tax_set_aside:              # legal requirement, funded first from every consulting payment
+    rate: 0.30
+    held_in: ""               # dedicated savings account name
+    balance:                  # not recorded
+  emergency_fund:
+    target:                   # not recorded
+    balance:                  # not recorded
+  other: []

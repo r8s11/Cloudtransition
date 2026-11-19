@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 1 — Your First Pydantic AI Agent</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<a class="skip-link" href="#lesson-content">Skip to lesson</a>
+<header>
+  <h1>Your first agent</h1>
+  <p class="dek">Build one tiny Python agent and learn which part Pydantic AI provides.</p>
+  <nav class="course-nav" aria-label="Course contents">
+    <details>
+      <summary><span>Course map</span><span class="course-progress">Lesson 1 of 8</span></summary>
+      <ol class="course-links">
+        <li><a aria-current="step" href="0001-first-agent.html">01 First agent</a></li>
+        <li><a href="0002-tools-and-dependencies.html">02 Tools</a></li>
+        <li><a href="0003-gmail-reader.html">03 Gmail</a></li>
+        <li><a href="0004-smart-home.html">04 Smart home</a></li>
+        <li><a href="0005-nyc-specialist.html">05 NYC</a></li>
+        <li><a href="0006-specialists-together.html">06 Specialists</a></li>
+        <li><a href="0007-testing-agents.html">07 Tests</a></li>
+        <li><a href="0008-operating-your-agents.html">08 Operate</a></li>
+        <li><a href="../reference/personal-agents.html">Field reference</a></li>
+      </ol>
+    </details>
+  </nav>
+</header>
+<main id="lesson-content">
+  <p class="meta">Time: 5 minutes · Win: distinguish the agent loop from the model provider</p>
+
+  <h2>The model</h2>
+  <p>A Pydantic AI <code>Agent</code> is the typed boundary between your Python app and a model. It can hold instructions, tools, dependency types, and an output type. Your Python app still owns data access and permissions. <a href="https://pydantic.dev/docs/ai/core-concepts/agent/">Pydantic's agent guide</a></p>
+
+  <p>Start without a network call. The built-in test model lets you exercise an agent offline. <a href="https://pydantic.dev/docs/ai/api/models/test/">TestModel reference</a></p>
+  <pre><code>from pydantic_ai import Agent
+from pydantic_ai.models.test import TestModel
+
+helper = Agent(
+    "test",
+    instructions="You are a private-work assistant. Be concise.",
+)
+
+result = helper.run_sync(
+    "What can this agent do?",
+    model=TestModel(),
+)
+print(result.output)</code></pre>
+  <p>This verifies the framework can run; it does not prove a real model understands the instruction. A live provider is a separate step.</p>
+
+  <h2>What Pydantic AI actually adds</h2>
+  <table>
+    <thead>
+      <tr><th>Plain model client</th><th>Pydantic AI Agent</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>You write the prompt, parse the reply, and hope the shape is right.</td>
+        <td>A typed boundary: instructions, tools, dependency types, and an output type, all validated by the framework.</td>
+      </tr>
+      <tr>
+        <td>The model can suggest anything; your code must guess what it meant.</td>
+        <td>The model proposes a tool call with typed arguments; your application decides whether the tool exists, validates arguments, and enforces permission.</td>
+      </tr>
+      <tr>
+        <td>No built-in structure for running tools or handing results back.</td>
+        <td>A run loop: model → tool call → tool result → model → answer, owned by your Python app.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Install when ready</h2>
+  <pre><code>uv init personal-agents
+cd personal-agents
+uv add pydantic-ai</code></pre>
+  <p>Then configure a supported provider and model using the current <a href="https://pydantic.dev/docs/ai/">Pydantic AI provider documentation</a>. Never paste a key into source, a lesson, or chat. A hosted model also means the prompt and tool results are sent to that provider.</p>
+
+  <div class="callout">
+    <p><strong>Keep the first job small.</strong> “Search my local Gmail archive for a phrase and summarize matching snippets” is a better first target than “manage my life.”</p>
+    <p>First-job checklist:</p>
+    <ul>
+      <li>One data source you already control and can read.</li>
+      <li>One action the model may request, nothing more.</li>
+      <li>Read-only by default; no send, delete, or modify until a separate approval step exists.</li>
+      <li>A fake dependency for testing before any live model or API call.</li>
+    </ul>
+  </div>
+
+  <h2>Self-check</h2>
+  <div class="exercise">
+    <p>Which parts belong to your Python application, not the model: Gmail permission, tool code, and deciding whether a source is trustworthy?</p>
+    <details>
+      <summary>Check your answer</summary>
+      <p>All three. The model can suggest a tool call. Your code decides whether the tool exists, validates its arguments, enforces permission, and judges the returned evidence.</p>
+    </details>
+  </div>
+
+  <nav class="lesson-nav" aria-label="Lesson navigation">
+    <a href="../reference/personal-agents.html"><span>Course reference</span><strong>Build pattern</strong></a>
+    <a href="0002-tools-and-dependencies.html"><span>Next lesson</span><strong>Tools and dependencies</strong></a>
+  </nav>
+  <p>Ask your teacher about anything unclear; no live API call is needed for this lesson.</p>
+  <ul class="source-list">
+    <li><a href="https://pydantic.dev/docs/ai/overview/">Pydantic AI overview</a></li>
+    <li><a href="https://pydantic.dev/docs/ai/core-concepts/agent/">Agents and runs</a></li>
+    <li><a href="https://pydantic.dev/docs/ai/api/models/test/">Offline test model</a></li>
+  </ul>
+</main>
+<footer><p>Course mission: create safe personal agents for Gmail search, supported smart-home control, NYC questions, and future specialists.</p></footer>
+</body>
+</html>

@@ -1,306 +1,306 @@
 {
   "feature": "Job application autofill extension",
-  "evalHash": "fc9e82275e2cc34c",
+  "evalHash": "2a9fe03ff642d2b2",
   "cases": {
     "U1": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:01:59.976Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/popup.spec.mjs:43:1 › U1: first run — pair the extension with the helper (2.4s)\n\n  1 passed (2.6s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:60541) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:09.348Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/popup.spec.mjs:43:1 › U1: first run — pair the extension with the helper (2.5s)\n\n  1 passed (2.7s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:36223) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U2": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:00.080Z",
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:09.444Z",
       "output": ".......\n----------------------------------------------------------------------\nRan 7 tests in 0.004s\n\nOK\n"
     },
     "U3": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:02.650Z",
-      "output": "\nRunning 2 tests using 1 worker\n\n  ✓  1 tests/e2e/popup.spec.mjs:77:1 › U3: edit manual profile fields in the popup (1.0s)\n  ✓  2 tests/e2e/popup.spec.mjs:119:1 › U3: resume PDF path is set in Profile and its bytes are cached (960ms)\n\n  2 passed (2.2s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:60714) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:12.091Z",
+      "output": "\nRunning 2 tests using 1 worker\n\n  ✓  1 tests/e2e/popup.spec.mjs:77:1 › U3: edit manual profile fields in the popup (1.0s)\n  ✓  2 tests/e2e/popup.spec.mjs:119:1 › U3: resume PDF path is set in Profile and its bytes are cached (1.0s)\n\n  2 passed (2.3s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:36445) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U4": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:04.325Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/fill.spec.mjs:38:1 › U4: fill a Greenhouse form (1.1s)\n\n  1 passed (1.3s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:60895) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:14.100Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/fill.spec.mjs:38:1 › U4: fill a Greenhouse form (1.4s)\n\n  1 passed (1.6s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:36692) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U5": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:06.021Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/fill.spec.mjs:79:1 › U5: fill a Lever form (1.1s)\n\n  1 passed (1.3s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:60986) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:16.282Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/fill.spec.mjs:79:1 › U5: fill a Lever form (1.5s)\n\n  1 passed (1.8s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:36892) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U6": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:07.742Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/adapters.spec.mjs:7:1 › U6: Ashby portaled options, shadow field and sponsorship (1.2s)\n\n  1 passed (1.4s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:61075) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:18.069Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/adapters.spec.mjs:7:1 › U6: Ashby portaled options, shadow field and sponsorship (1.2s)\n\n  1 passed (1.4s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:37115) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U7": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:12.098Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/adapters.spec.mjs:10:1 › U7: Workday fills each manual step including drop-only resume (3.8s)\n\n  1 passed (4.0s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:61185) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:22.554Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/adapters.spec.mjs:10:1 › U7: Workday fills each manual step including drop-only resume (3.8s)\n\n  1 passed (4.1s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:37205) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U8": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:13.900Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/adapters.spec.mjs:13:1 › U8: cross-origin iCIMS frame totals survive either report order (1.2s)\n\n  1 passed (1.5s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:61287) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:24.442Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/adapters.spec.mjs:13:1 › U8: cross-origin iCIMS frame totals survive either report order (1.3s)\n\n  1 passed (1.5s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:37494) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U9": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:17.872Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/adapters.spec.mjs:16:1 › U9: Indeed fills manual arrivals and review preserves answers (3.4s)\n\n  1 passed (3.6s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:61433) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:28.516Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/adapters.spec.mjs:16:1 › U9: Indeed fills manual arrivals and review preserves answers (3.5s)\n\n  1 passed (3.7s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:37601) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U10": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:19.531Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/fill.spec.mjs:109:1 › U10: fill an unknown site by labels (1.1s)\n\n  1 passed (1.3s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:61537) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:30.246Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/fill.spec.mjs:109:1 › U10: fill an unknown site by labels (1.1s)\n\n  1 passed (1.4s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:37891) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U11": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:21.477Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:27:1 › U11: AI draft fills the question, stays yellow, and sends no profile values (1.4s)\n\n  1 passed (1.6s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:61650) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:32.208Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:27:1 › U11: AI draft fills the question, stays yellow, and sends no profile values (1.4s)\n\n  1 passed (1.6s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:37980) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U12": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:21.549Z",
-      "output": "✔ U12: select reply \"5+\" is filled as \"5+\" (0.517541ms)\n✔ U12: select reply \"five or more\" is not filled (0.081333ms)\n✔ U12: select reply must be one of the options, whatever the case or padding (0.061625ms)\n✔ U12: number reply \"About 7 years\" is filled as \"7\" (0.093458ms)\n✔ U12: text reply of 90 characters with max 40 is cut at a word boundary, no trailing space (0.090417ms)\n✔ U12: a reply that already fits is returned whole, a max of 0 or none means no limit (0.038125ms)\n✔ U12: a cut that lands exactly on a word end keeps the whole word (0.058292ms)\n✔ F11: a reply longer than max with no spaces is hard-cut at max (0.035666ms)\n✔ F11: a hard cut never splits a surrogate pair (0.10775ms)\n✔ F11: an empty or blank reply means not filled (0.095959ms)\n✔ F11: \"none\" for a number field means not filled (0.038209ms)\n✔ F11: markdown fences around the text are stripped (0.039834ms)\nℹ tests 12\nℹ suites 0\nℹ pass 12\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 46.1145\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:32.279Z",
+      "output": "✔ U12: select reply \"5+\" is filled as \"5+\" (0.520667ms)\n✔ U12: select reply \"five or more\" is not filled (0.085208ms)\n✔ U12: select reply must be one of the options, whatever the case or padding (0.053125ms)\n✔ U12: number reply \"About 7 years\" is filled as \"7\" (0.088084ms)\n✔ U12: text reply of 90 characters with max 40 is cut at a word boundary, no trailing space (0.091709ms)\n✔ U12: a reply that already fits is returned whole, a max of 0 or none means no limit (0.039709ms)\n✔ U12: a cut that lands exactly on a word end keeps the whole word (0.062125ms)\n✔ F11: a reply longer than max with no spaces is hard-cut at max (0.034125ms)\n✔ F11: a hard cut never splits a surrogate pair (0.102958ms)\n✔ F11: an empty or blank reply means not filled (0.108375ms)\n✔ F11: \"none\" for a number field means not filled (0.045375ms)\n✔ F11: markdown fences around the text are stripped (0.04575ms)\nℹ tests 12\nℹ suites 0\nℹ pass 12\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 42.249167\n"
     },
     "U13": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:24.503Z",
-      "output": "\nRunning 2 tests using 1 worker\n\n  ✓  1 tests/e2e/popup.spec.mjs:155:1 › U13: pick provider and model from the provider's list (1.4s)\n  ✓  2 tests/e2e/popup.spec.mjs:216:1 › U13: provider switch cannot save previous provider's model (1.0s)\n\n  2 passed (2.6s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:61757) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:35.335Z",
+      "output": "\nRunning 2 tests using 1 worker\n\n  ✓  1 tests/e2e/popup.spec.mjs:155:1 › U13: pick provider and model from the provider's list (1.4s)\n  ✓  2 tests/e2e/popup.spec.mjs:216:1 › U13: provider switch cannot save previous provider's model (1.1s)\n\n  2 passed (2.7s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:38214) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U15": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:29.713Z",
-      "output": "\nRunning 3 tests using 1 worker\n\n  ✓  1 tests/e2e/safety.spec.mjs:67:1 › U15: safe submit navigates once and confirms (1.3s)\n  ✓  2 tests/e2e/safety.spec.mjs:77:1 › U21: exactly one value-free record per filled and submitted run (1.4s)\n  ✓  3 tests/e2e/safety.spec.mjs:169:1 › U15: confirmation rendered after navigation is detected (1.9s)\n\n  3 passed (4.9s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:61956) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:40.748Z",
+      "output": "\nRunning 3 tests using 1 worker\n\n  ✓  1 tests/e2e/safety.spec.mjs:67:1 › U15: safe submit navigates once and confirms (1.3s)\n  ✓  2 tests/e2e/safety.spec.mjs:77:1 › U21: exactly one value-free record per filled and submitted run (1.5s)\n  ✓  3 tests/e2e/safety.spec.mjs:169:1 › U15: confirmation rendered after navigation is detected (2.0s)\n\n  3 passed (5.0s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:38486) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U16": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:34.404Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/wizard.spec.mjs:11:1 › U16: safe wizard advances four steps and logs only final totals (4.1s)\n\n  1 passed (4.3s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:62154) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:45.486Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/wizard.spec.mjs:11:1 › U16: safe wizard advances four steps and logs only final totals (4.2s)\n\n  1 passed (4.4s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:38871) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U17": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:36.217Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/popup.spec.mjs:282:1 › U17: the submit switch is off at the start of every run (1.2s)\n\n  1 passed (1.5s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:62269) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:47.400Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/popup.spec.mjs:282:1 › U17: the submit switch is off at the start of every run (1.3s)\n\n  1 passed (1.5s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:39084) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U18": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:42.630Z",
-      "output": "\nRunning 2 tests using 1 worker\n\n  ✓  1 tests/e2e/wizard.spec.mjs:56:1 › U18: clear restores styles and Stop prevents next arrival filling (2.5s)\n  ✓  2 tests/e2e/wizard.spec.mjs:81:1 › U18: Stop cancels pending AI fill before writing response (3.3s)\n\n  2 passed (6.1s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:62361) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:53.190Z",
+      "output": "\nRunning 2 tests using 1 worker\n\n  ✓  1 tests/e2e/wizard.spec.mjs:56:1 › U18: clear restores styles and Stop prevents next arrival filling (2.5s)\n  ✓  2 tests/e2e/wizard.spec.mjs:81:1 › U18: Stop cancels pending AI fill before writing response (2.7s)\n\n  2 passed (5.4s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:39271) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U19": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:44.826Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:61:1 › U19: trusted-input fallback attaches and detaches; disabled fallback leaves yellow (1.6s)\n\n  1 passed (1.8s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:62522) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:55.451Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:61:1 › U19: trusted-input fallback attaches and detaches; disabled fallback leaves yellow (1.7s)\n\n  1 passed (1.9s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:39677) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U20": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:47.956Z",
-      "output": "\nRunning 3 tests using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:118:1 › U20: offline fills cached profile and resume but leaves AI unavailable (1.1s)\n  ✓  2 tests/e2e/popup.spec.mjs:314:1 › U20: offline popup says so, and a run still uses the last sync (968ms)\n  ✓  3 tests/e2e/popup.spec.mjs:343:1 › U20: never-synced offline popup keeps Autofill disabled (489ms)\n\n  3 passed (2.8s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:62632) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:47:58.738Z",
+      "output": "\nRunning 3 tests using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:118:1 › U20: offline fills cached profile and resume but leaves AI unavailable (1.1s)\n  ✓  2 tests/e2e/popup.spec.mjs:314:1 › U20: offline popup says so, and a run still uses the last sync (982ms)\n  ✓  3 tests/e2e/popup.spec.mjs:343:1 › U20: never-synced offline popup keeps Autofill disabled (576ms)\n\n  3 passed (2.9s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:39871) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "U25": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:50.360Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:181:1 › U25: cached answer uses no second provider call and reports zero calls (1.8s)\n\n  1 passed (2.0s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:62794) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:48:01.188Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:181:1 › U25: cached answer uses no second provider call and reports zero calls (1.9s)\n\n  1 passed (2.1s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:40127) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "F1": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:53.227Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/safety.spec.mjs:27:1 › F1: CAPTCHA in an embedded frame blocks all submit variants (2.3s)\n\n  1 passed (2.5s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:62934) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:48:04.079Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/safety.spec.mjs:27:1 › F1: CAPTCHA in an embedded frame blocks all submit variants (2.3s)\n\n  1 passed (2.5s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:40335) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "F2": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:02:54.916Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/safety.spec.mjs:36:1 › F2: yellow field blocks submit (1.1s)\n\n  1 passed (1.3s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:63035) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:48:05.855Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/safety.spec.mjs:36:1 › F2: yellow field blocks submit (1.2s)\n\n  1 passed (1.4s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:40532) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "F4": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:03:00.039Z",
-      "output": "\nRunning 4 tests using 1 worker\n\n  ✓  1 tests/e2e/safety.spec.mjs:40:1 › F4: unanswered required sponsorship blocks submit without guessing (1.2s)\n  ✓  2 tests/e2e/safety.spec.mjs:141:3 › F4: required field inserted after fill blocks submit (1.1s)\n  ✓  3 tests/e2e/safety.spec.mjs:141:3 › F4: prefilled required field cleared after fill blocks submit (1.1s)\n  ✓  4 tests/e2e/safety.spec.mjs:141:3 › F4: required file input inserted after fill blocks submit (1.1s)\n\n  4 passed (4.8s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:63138) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:48:11.299Z",
+      "output": "\nRunning 4 tests using 1 worker\n\n  ✓  1 tests/e2e/safety.spec.mjs:40:1 › F4: unanswered required sponsorship blocks submit without guessing (1.2s)\n  ✓  2 tests/e2e/safety.spec.mjs:141:3 › F4: required field inserted after fill blocks submit (1.2s)\n  ✓  3 tests/e2e/safety.spec.mjs:141:3 › F4: prefilled required field cleared after fill blocks submit (1.2s)\n  ✓  4 tests/e2e/safety.spec.mjs:141:3 › F4: required file input inserted after fill blocks submit (1.2s)\n\n  4 passed (5.1s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:40628) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "F6": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:03:48.846Z",
-      "output": "\nRunning 2 tests using 1 worker\n\n  ✓  1 tests/e2e/safety.spec.mjs:48:1 › F6: unconfirmed submit clicks once and later runs never retry (16.6s)\n  ✓  2 tests/e2e/safety.spec.mjs:58:1 › F6: second tab independent (31.7s)\n\n  2 passed (48.4s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:63387) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:49:00.262Z",
+      "output": "\nRunning 2 tests using 1 worker\n\n  ✓  1 tests/e2e/safety.spec.mjs:48:1 › F6: unconfirmed submit clicks once and later runs never retry (16.6s)\n  ✓  2 tests/e2e/safety.spec.mjs:58:1 › F6: second tab independent (31.8s)\n\n  2 passed (48.6s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:41129) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "F7": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:03:52.584Z",
-      "output": ".......\n----------------------------------------------------------------------\nRan 7 tests in 3.600s\n\nOK\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:49:03.993Z",
+      "output": ".......\n----------------------------------------------------------------------\nRan 7 tests in 3.578s\n\nOK\n"
     },
     "F8": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:03:52.736Z",
-      "output": ".....\n----------------------------------------------------------------------\nRan 5 tests in 0.060s\n\nOK\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:49:04.147Z",
+      "output": ".....\n----------------------------------------------------------------------\nRan 5 tests in 0.061s\n\nOK\n"
     },
     "F9": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:04:41.658Z",
-      "output": "\nRunning 5 tests using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:147:3 › F9: provider 401 surfaces errors and retries instead of caching (1.6s)\n  ✓  2 tests/e2e/drafts.spec.mjs:147:3 › F9: provider 429 surfaces errors and retries instead of caching (1.4s)\n  ✓  3 tests/e2e/drafts.spec.mjs:147:3 › F9: provider 500 surfaces errors and retries instead of caching (1.4s)\n  ✓  4 tests/e2e/drafts.spec.mjs:147:3 › F9: provider slow surfaces errors and retries instead of caching (41.4s)\n  ✓  5 tests/e2e/drafts.spec.mjs:147:3 › F9: provider malformed surfaces errors and retries instead of caching (1.6s)\n\n  5 passed (47.6s)\n.......\n----------------------------------------------------------------------\nRan 7 tests in 0.625s\n\nOK\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:63942) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:49:53.442Z",
+      "output": "\nRunning 5 tests using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:147:3 › F9: provider 401 surfaces errors and retries instead of caching (1.7s)\n  ✓  2 tests/e2e/drafts.spec.mjs:147:3 › F9: provider 429 surfaces errors and retries instead of caching (1.4s)\n  ✓  3 tests/e2e/drafts.spec.mjs:147:3 › F9: provider 500 surfaces errors and retries instead of caching (1.4s)\n  ✓  4 tests/e2e/drafts.spec.mjs:147:3 › F9: provider slow surfaces errors and retries instead of caching (41.6s)\n  ✓  5 tests/e2e/drafts.spec.mjs:147:3 › F9: provider malformed surfaces errors and retries instead of caching (1.6s)\n\n  5 passed (47.9s)\n.......\n----------------------------------------------------------------------\nRan 7 tests in 0.633s\n\nOK\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:43465) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "F10": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:04:41.910Z",
-      "output": ".....\n----------------------------------------------------------------------\nRan 5 tests in 0.148s\n\nOK\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:49:53.679Z",
+      "output": ".....\n----------------------------------------------------------------------\nRan 5 tests in 0.139s\n\nOK\n"
     },
     "F12": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:04:44.581Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:84:1 › F12: sign-in and account pages stay untouched (1.8s)\n\n  1 passed (2.1s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:64526) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:49:56.308Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:84:1 › F12: sign-in and account pages stay untouched (1.8s)\n\n  1 passed (2.0s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:45671) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "F13": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:04:46.598Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:106:1 › F13: resume fills only resume slots and a single unlabeled upload needs review (1.4s)\n\n  1 passed (1.7s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:64636) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:49:58.354Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:106:1 › F13: resume fills only resume slots and a single unlabeled upload needs review (1.5s)\n\n  1 passed (1.7s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:45864) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "F14": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:04:46.675Z",
-      "output": "✔ F14: \"Male\" picks Male from [Female, Male] and Female scores 0 (0.823916ms)\n✔ F14: \"Female\" picks Female and Male scores 0 (0.07075ms)\n✔ F14: \"CA\" picks California from [Africa, California, Canada] (0.167708ms)\n✔ F14: \"No\" picks No from [None of the above, No, North Carolina] (0.090417ms)\n✔ F14: \"NC\" picks North Carolina, not South Carolina (0.109834ms)\n✔ F14: \"Virginia\" does not pick West Virginia; \"Washington\" does not pick DC (0.274416ms)\n✔ F14: score tiers 100 / 90 / 85 / 70 / 0 (0.270459ms)\n✔ F14: the option value attribute can carry the match (0.055375ms)\n✔ F14: placeholders score 0 (0.067792ms)\n✔ F14: country aliases (0.203542ms)\n✔ F14: all 50 states and DC map between name and two-letter code (3.781ms)\n✔ F14: yes/no phrasings, including sentences and the opposite answer (0.080375ms)\n✔ F14: EEO gender, race, veteran, disability and decline phrasings (0.707833ms)\n✔ F14: empty target scores 0 (0.034917ms)\n✔ F14: label \"Country (United States only)\" does not match state (0.808ms)\n✔ F14: label \"Email address\" matches email, not address (0.28025ms)\n✔ F14: a real street-address label still matches address; line 2 does not (0.424208ms)\n✔ F14: \"State\" and \"State / Province\" match state (0.042542ms)\n✔ F14: specific keys win over generic ones (0.069875ms)\n✔ F14: name fields and EEO fields (0.087ms)\n✔ F14: autocomplete tokens, then name/id/placeholder/automationId when the label is empty (0.051958ms)\nℹ tests 21\nℹ suites 0\nℹ pass 21\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 49.188958\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:49:58.431Z",
+      "output": "✔ F14: \"Male\" picks Male from [Female, Male] and Female scores 0 (0.816084ms)\n✔ F14: \"Female\" picks Female and Male scores 0 (0.071208ms)\n✔ F14: \"CA\" picks California from [Africa, California, Canada] (0.166666ms)\n✔ F14: \"No\" picks No from [None of the above, No, North Carolina] (0.090083ms)\n✔ F14: \"NC\" picks North Carolina, not South Carolina (0.114541ms)\n✔ F14: \"Virginia\" does not pick West Virginia; \"Washington\" does not pick DC (0.296708ms)\n✔ F14: score tiers 100 / 90 / 85 / 70 / 0 (0.27175ms)\n✔ F14: the option value attribute can carry the match (0.06325ms)\n✔ F14: placeholders score 0 (0.070542ms)\n✔ F14: country aliases (0.204458ms)\n✔ F14: all 50 states and DC map between name and two-letter code (3.730833ms)\n✔ F14: yes/no phrasings, including sentences and the opposite answer (0.063333ms)\n✔ F14: EEO gender, race, veteran, disability and decline phrasings (0.697625ms)\n✔ F14: empty target scores 0 (0.040959ms)\n✔ F14: label \"Country (United States only)\" does not match state (0.79975ms)\n✔ F14: label \"Email address\" matches email, not address (0.29ms)\n✔ F14: a real street-address label still matches address; line 2 does not (0.414083ms)\n✔ F14: \"State\" and \"State / Province\" match state (0.045ms)\n✔ F14: specific keys win over generic ones (0.071584ms)\n✔ F14: name fields and EEO fields (0.101459ms)\n✔ F14: autocomplete tokens, then name/id/placeholder/automationId when the label is empty (0.050958ms)\nℹ tests 21\nℹ suites 0\nℹ pass 21\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 49.9495\n"
     },
     "F15": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:05:00.670Z",
-      "output": "\nRunning 3 tests using 1 worker\n\n  ✓  1 tests/e2e/wizard.spec.mjs:45:1 › F15: validation rerender stops after one Next (2.0s)\n  ✓  2 tests/e2e/wizard.spec.mjs:51:1 › F15: twelve-step wizard stops at ten (10.2s)\n  ✓  3 tests/e2e/wizard.spec.mjs:94:1 › F15: idle wizard ends after five minutes without a new step (1.2s)\n\n  3 passed (13.6s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:64745) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:50:12.448Z",
+      "output": "\nRunning 3 tests using 1 worker\n\n  ✓  1 tests/e2e/wizard.spec.mjs:45:1 › F15: validation rerender stops after one Next (2.0s)\n  ✓  2 tests/e2e/wizard.spec.mjs:51:1 › F15: twelve-step wizard stops at ten (10.2s)\n  ✓  3 tests/e2e/wizard.spec.mjs:94:1 › F15: idle wizard ends after five minutes without a new step (1.2s)\n\n  3 passed (13.7s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:46101) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "F16": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:05:03.976Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/wizard.spec.mjs:68:1 › F16: stopped service worker wakes and keeps cumulative steps (2.5s)\n\n  1 passed (2.7s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:65031) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:50:15.829Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/wizard.spec.mjs:68:1 › F16: stopped service worker wakes and keeps cumulative steps (2.5s)\n\n  1 passed (2.8s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:46755) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "F18": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:05:04.615Z",
-      "output": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.531s\n\nOK\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:50:16.457Z",
+      "output": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.520s\n\nOK\n"
     },
     "F19": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:05:07.167Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:130:1 › F19: missing resume remains yellow while other fields fill (2.0s)\n\n  1 passed (2.2s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:65161) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:50:18.385Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:130:1 › F19: missing resume remains yellow while other fields fill (1.3s)\n\n  1 passed (1.5s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:47094) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "F20": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:05:09.335Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:163:1 › F20: hidden injection cannot change system rules and the echo remains yellow (1.4s)\n\n  1 passed (1.6s)\n.....\n----------------------------------------------------------------------\nRan 5 tests in 0.131s\n\nOK\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:65265) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:50:20.618Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/drafts.spec.mjs:163:1 › F20: hidden injection cannot change system rules and the echo remains yellow (1.4s)\n\n  1 passed (1.6s)\n.....\n----------------------------------------------------------------------\nRan 5 tests in 0.126s\n\nOK\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:47190) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "F22": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:05:11.025Z",
-      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/fill.spec.mjs:132:1 › F22: fields that already have a value are left alone (1.1s)\n\n  1 passed (1.3s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:65356) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:50:22.415Z",
+      "output": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/e2e/fill.spec.mjs:132:1 › F22: fields that already have a value are left alone (1.2s)\n\n  1 passed (1.4s)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:47375) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "R1": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:09:18.363Z",
-      "output": "spec.mjs:68:1 › F16: stopped service worker wakes and keeps cumulative steps (2.4s)\n  ✓  74 tests/e2e/wizard.spec.mjs:81:1 › U18: Stop cancels pending AI fill before writing response (2.7s)\n  ✓  75 tests/e2e/wizard.spec.mjs:94:1 › F15: idle wizard ends after five minutes without a new step (1.1s)\n  ✓  76 tests/e2e/wizard.spec.mjs:108:1 › 7b: queued old-document REPORT and LOG_RUN cannot revive reloaded run (891ms)\n  ✓  77 tests/e2e/wizard.spec.mjs:122:1 › 7b: SAFE_CLICK rechecks live page safety before clicking (1.0s)\n  ✓  78 tests/e2e/wizard.spec.mjs:134:1 › 7b: Stop cancels queued real-input fill (3.2s)\n  ✓  79 tests/e2e/wizard.spec.mjs:145:1 › 7b: passive run ends and logs at step 10 (13.0s)\n  ✓  80 tests/e2e/wizard.spec.mjs:154:1 › 7b: new run logs the active previous run (1.4s)\n  ✓  81 tests/e2e/wizard.spec.mjs:160:1 › 7b: Stop during filling logs fields already filled (947ms)\n\n  81 passed (3.9m)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\nnpm warn Unknown env config \"allow-scripts\". This will stop working in the next major version of npm.\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\nnpm warn Unknown env config \"allow-scripts\". This will stop working in the next major version of npm.\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n......................................................................................................\n----------------------------------------------------------------------\nRan 102 tests in 13.313s\n\nOK\nnpm warn Unknown env config \"allow-scripts\". This will stop working in the next major version of npm.\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:65647) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:54:33.344Z",
+      "output": "spec.mjs:68:1 › F16: stopped service worker wakes and keeps cumulative steps (2.5s)\n  ✓  74 tests/e2e/wizard.spec.mjs:81:1 › U18: Stop cancels pending AI fill before writing response (2.8s)\n  ✓  75 tests/e2e/wizard.spec.mjs:94:1 › F15: idle wizard ends after five minutes without a new step (1.1s)\n  ✓  76 tests/e2e/wizard.spec.mjs:108:1 › 7b: queued old-document REPORT and LOG_RUN cannot revive reloaded run (918ms)\n  ✓  77 tests/e2e/wizard.spec.mjs:122:1 › 7b: SAFE_CLICK rechecks live page safety before clicking (1.1s)\n  ✓  78 tests/e2e/wizard.spec.mjs:134:1 › 7b: Stop cancels queued real-input fill (3.2s)\n  ✓  79 tests/e2e/wizard.spec.mjs:145:1 › 7b: passive run ends and logs at step 10 (13.0s)\n  ✓  80 tests/e2e/wizard.spec.mjs:154:1 › 7b: new run logs the active previous run (1.4s)\n  ✓  81 tests/e2e/wizard.spec.mjs:160:1 › 7b: Stop during filling logs fields already filled (995ms)\n\n  81 passed (3.9m)\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\nnpm warn Unknown env config \"allow-scripts\". This will stop working in the next major version of npm.\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\nnpm warn Unknown env config \"allow-scripts\". This will stop working in the next major version of npm.\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n......................................................................................................\n----------------------------------------------------------------------\nRan 102 tests in 13.295s\n\nOK\nnpm warn Unknown env config \"allow-scripts\". This will stop working in the next major version of npm.\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n(node:48181) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
     },
     "R2": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:09:18.761Z",
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:54:33.777Z",
       "output": "\n> job-autofill@0.1.0 check\n> node scripts/check.mjs\n\ncheck ok: 12 js files, manifest, 5 helper files\nnpm warn Unknown user config \"allow-scripts\". This will stop working in the next major version of npm.\n"
     },
     "R3": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:09:21.516Z",
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:54:39.246Z",
       "output": ""
     },
     "R4": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:09:21.798Z",
-      "output": "{\n  \"status\": \"ok\",\n  \"problems\": [],\n  \"counts\": {\n    \"sources\": 200,\n    \"memories\": 63,\n    \"catalogue_bytes\": 146543\n  },\n  \"elapsed_ms\": 214.89\n}\n"
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:54:39.575Z",
+      "output": "{\n  \"status\": \"ok\",\n  \"problems\": [],\n  \"counts\": {\n    \"sources\": 249,\n    \"memories\": 64,\n    \"catalogue_bytes\": 174851\n  },\n  \"elapsed_ms\": 255.28\n}\n"
     },
     "R5": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:09:21.831Z",
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:54:39.611Z",
       "output": ""
     },
     "R6": {
       "status": "pass",
       "kind": "auto",
-      "workspace": "30e24b62f71d51ec",
-      "at": "2026-11-12T03:09:21.858Z",
+      "workspace": "ae40ec66edc11ca1",
+      "at": "2026-11-17T06:54:39.643Z",
       "output": ""
     }
   }

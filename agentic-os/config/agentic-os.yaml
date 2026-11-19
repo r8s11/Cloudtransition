@@ -29,3 +29,65 @@ policy:
 
     database.destructive:
       decision: deny
+
+hub:
+  budget: 10
+  maxDepth: 3
+  freeModels: opencode/beam-free
+  agents:
+    specialized-chief-of-staff:
+      name: Chief of Staff
+      coordinator: null
+      memoryDir: workspace/agents/chief-of-staff/memory
+      outputDirs: workspace/agents/chief-of-staff/outputs
+      costClass: free
+      installed: true
+    forge:
+      name: Forge
+      coordinator: specialized-chief-of-staff
+      memoryDir: workspace/agents/forge/memory
+      outputDirs: workspace/agents/forge/outputs
+      costClass: free
+      installed: true
+    scout:
+      name: Scout
+      coordinator: forge
+      memoryDir: workspace/agents/scout/memory
+      outputDirs: workspace/agents/scout/outputs
+      costClass: free
+      installed: true
+    job-reader:
+      name: Job Reader
+      coordinator: forge
+      memoryDir: workspace/agents/job-reader/memory
+      outputDirs: workspace/agents/job-reader/outputs
+      costClass: free
+      installed: true
+    cv-adapter:
+      name: CV Adapter
+      coordinator: forge
+      memoryDir: workspace/agents/cv-adapter/memory
+      outputDirs: workspace/agents/cv-adapter/outputs
+      costClass: free
+      installed: true
+    personal-growth-mentor:
+      name: Personal Growth Mentor
+      coordinator: specialized-chief-of-staff
+      memoryDir: workspace/agents/personal-growth-mentor/memory
+      outputDirs: workspace/agents/personal-growth-mentor/outputs
+      costClass: free
+      installed: true
+    resume-tailor:
+      name: Resume Tailor
+      coordinator: specialized-chief-of-staff
+      memoryDir: workspace/agents/resume-tailor/memory
+      outputDirs: workspace/agents/resume-tailor/outputs
+      costClass: free
+      installed: false
+    organizational-psychologist:
+      name: Organizational Psychologist
+      coordinator: specialized-chief-of-staff
+      memoryDir: workspace/agents/organizational-psychologist/memory
+      outputDirs: workspace/agents/organizational-psychologist/outputs
+      costClass: free
+      installed: false

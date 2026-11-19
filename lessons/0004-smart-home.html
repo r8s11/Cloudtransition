@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 4 — Smart-Home Agent</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script src="../assets/sandbox.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#lesson-content">Skip to lesson</a>
+<header>
+  <h1>Control one smart-home device</h1>
+  <p class="dek">Use a supported device API and hard-code the first target. Do not let the model choose an arbitrary device.</p>
+  <nav class="course-nav" aria-label="Course contents">
+    <details>
+      <summary><span>Course map</span><span class="course-progress">Lesson 4 of 8</span></summary>
+      <ol class="course-links">
+        <li><a href="0001-first-agent.html">01 First agent</a></li>
+        <li><a href="0002-tools-and-dependencies.html">02 Tools</a></li>
+        <li><a href="0003-gmail-reader.html">03 Gmail</a></li>
+        <li><a aria-current="step" href="0004-smart-home.html">04 Smart home</a></li>
+        <li><a href="0005-nyc-specialist.html">05 NYC</a></li>
+        <li><a href="0006-specialists-together.html">06 Specialists</a></li>
+        <li><a href="0007-testing-agents.html">07 Tests</a></li>
+        <li><a href="0008-operating-your-agents.html">08 Operate</a></li>
+        <li><a href="../reference/personal-agents.html">Field reference</a></li>
+      </ol>
+    </details>
+  </nav>
+</header>
+<main id="lesson-content">
+  <p class="meta">Time: 8 minutes · Win: understand the control boundary before connecting a device</p>
+
+  <h2>First verify the path</h2>
+  <p>Amazon's Smart Home Skill API lets Alexa call a device provider's skill to control devices that provider exposes. The docs do not establish a general API for an agent to command every device already linked to your Alexa account. <a href="https://developer.amazon.com/en-US/alexa/alexa-skills-kit/get-deeper/smart-home-skills">Amazon's Smart Home Skills overview</a></p>
+  <p>A direct agent path can use a vendor API or a bridge such as Home Assistant—but only if it already controls the target. Home Assistant documents its REST service-call API and its Alexa integration separately. <a href="https://developers.home-assistant.io/docs/api/rest">REST API</a> · <a href="https://www.home-assistant.io/integrations/alexa/">Alexa integration</a></p>
+
+  <div class="warning">
+    <p><strong>Stop condition:</strong> if the device is Alexa-only and no supported API or bridge controls it, do not invent an integration. Identify the exact device and the supported API first. Amazon's Smart Home Skill API lets Alexa call a provider's skill — it is not a general API for an agent to command every device already linked to your Alexa account.</p>
+  </div>
+
+  <h2>Small lab: one light, two actions</h2>
+  <p>This example assumes Home Assistant already controls <code>light.study_light</code>. Keep the entity fixed in code. The model may choose only <code>on</code> or <code>off</code>.</p>
+  <pre><code>from dataclasses import dataclass
+from typing import Literal
+
+import httpx
+from pydantic_ai import Agent, RunContext
+
+@dataclass
+class HomeServices:
+    client: httpx.AsyncClient
+    base_url: str
+    token: str
+
+home_agent = Agent(
+    "openai:gpt-6.1-sol",
+    deps_type=HomeServices,
+    instructions="Control only the study light when explicitly asked.",
+)
+
+@home_agent.tool
+async def set_study_light(
+    ctx: RunContext[HomeServices],
+    action: Literal["on", "off"],
+) -&gt; str:
+    """Turn the pre-approved study light on or off."""
+    service = "turn_on" if action == "on" else "turn_off"
+    response = await ctx.deps.client.post(
+        f"{ctx.deps.base_url}/api/services/light/{service}",
+        headers={"Authorization": f"Bearer {ctx.deps.token}"},
+        json={"entity_id": "light.study_light"},
+    )
+    response.raise_for_status()
+    return f"Home Assistant accepted the {action} request ({response.status_code})."</code></pre>
+  <p>Read the token from a protected environment or secret store, not source control. Keep the configured Home Assistant URL outside model input. After the call, verify reported state if the user needs confirmation; an accepted service call is not proof the physical light changed.</p>
+  <p>The tool allow-list narrows what the model can request; it does not narrow the Home Assistant token's own authority. Protect that token like a powerful credential.</p>
+
+  <h2>Approval boundary</h2>
+  <p>Start with a lamp. Add an application-level confirmation before any higher-impact action. A model saying “confirmed” is not user approval — only the user can approve. Do not expose locks, alarms, garage doors, or arbitrary entity IDs in the first version. An accepted service call is also not proof the physical device changed; verify reported state if the user needs confirmation.</p>
+
+  <div class="sandbox smarthome-sandbox">
+    <h3>Sandbox: control the study light (approval required)</h3>
+    <p class="sandbox-note">Fixed entity: <code>light.study_light</code>. Actions: <code>on</code> / <code>off</code> only. The model may choose the action, but it cannot pick an arbitrary entity — and it cannot approve the action itself.</p>
+    <div class="sandbox-entity"><code>light.study_light</code> · state: <span class="sandbox-state" id="sh-state">off</span></div>
+    <div class="sandbox-controls">
+      <button id="sh-on">Turn on</button>
+      <button id="sh-off">Turn off</button>
+    </div>
+    <div id="sh-dialog" class="sandbox-dialog" hidden>
+      <p id="sh-dialog-msg"></p>
+      <div class="sandbox-dialog-actions">
+        <button id="sh-deny">Deny</button>
+        <button id="sh-accept">Accept</button>
+      </div>
+    </div>
+    <div id="sh-log" class="sandbox-log"></div>
+  </div>
+
+  <h2>Self-check</h2>
+  <details>
+    <summary>Why is the entity ID fixed in the function?</summary>
+    <p>It turns the function into an allow-listed capability. The model can select a bounded action, but it cannot redirect the credential to another entity by inventing an ID.</p>
+  </details>
+
+  <nav class="lesson-nav" aria-label="Lesson navigation">
+    <a href="0003-gmail-reader.html"><span>Previous lesson</span><strong>Read-only Gmail</strong></a>
+    <a href="0005-nyc-specialist.html"><span>Next lesson</span><strong>NYC specialist</strong></a>
+  </nav>
+  <p>Ask your teacher about any unclear step. Do not run this against a real device until you verify the entity, endpoint, credential scope, and confirmation policy.</p>
+  <ul class="source-list">
+    <li><a href="https://developers.home-assistant.io/docs/api/rest">Home Assistant REST API</a></li>
+    <li><a href="https://www.home-assistant.io/integrations/alexa/">Home Assistant and Alexa</a></li>
+    <li><a href="https://developer.amazon.com/en-US/alexa/alexa-skills-kit/get-deeper/smart-home-skills">Amazon Smart Home Skills</a></li>
+  </ul>
+</main>
+<footer><p>Device control needs a real allow-list and a supported API—not a more persuasive prompt.</p></footer>
+</body>
+</html>

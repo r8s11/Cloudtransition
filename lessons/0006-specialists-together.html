@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 6 — Compose Specialists</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<a class="skip-link" href="#lesson-content">Skip to lesson</a>
+<header>
+  <h1>Keep specialists separate</h1>
+  <p class="dek">Separate capabilities first. Add an orchestrator only when a real workflow needs one.</p>
+  <nav class="course-nav" aria-label="Course contents">
+    <details>
+      <summary><span>Course map</span><span class="course-progress">Lesson 6 of 8</span></summary>
+      <ol class="course-links">
+        <li><a href="0001-first-agent.html">01 First agent</a></li>
+        <li><a href="0002-tools-and-dependencies.html">02 Tools</a></li>
+        <li><a href="0003-gmail-reader.html">03 Gmail</a></li>
+        <li><a href="0004-smart-home.html">04 Smart home</a></li>
+        <li><a href="0005-nyc-specialist.html">05 NYC</a></li>
+        <li><a aria-current="step" href="0006-specialists-together.html">06 Specialists</a></li>
+        <li><a href="0007-testing-agents.html">07 Tests</a></li>
+        <li><a href="0008-operating-your-agents.html">08 Operate</a></li>
+        <li><a href="../reference/personal-agents.html">Field reference</a></li>
+      </ol>
+    </details>
+  </nav>
+</header>
+<main id="lesson-content">
+  <p class="meta">Time: 5 minutes · Win: choose a simple, least-privilege architecture</p>
+
+  <h2>Do not start with a mega-agent</h2>
+  <p>Build and test the Gmail reader, home controller, and NYC specialist independently. A deterministic app route can select among them. This keeps private email, physical controls, and public data from sharing unnecessary tools.</p>
+  <p>Pydantic AI documents several levels of multi-agent complexity, from a single agent to delegation and graphs. Its delegation example passes usage to the child and applies request limits. <a href="https://pydantic.dev/docs/ai/guides/multi-agent-applications/">Multi-agent applications</a></p>
+
+  <h2>When delegation earns its cost</h2>
+  <ul>
+    <li>One request genuinely needs two specialist outputs.</li>
+    <li>The orchestrator has a fixed list of allowed specialists.</li>
+    <li>Each child receives only the data and tools needed for its task.</li>
+    <li>The whole workflow has request and token limits.</li>
+    <li>Tests prove the correct specialist ran and no extra tool ran.</li>
+  </ul>
+  <p>If those conditions are absent, call the chosen agent directly from Python. More agents mean more model calls, more latency, and more chances to expose data.</p>
+
+  <h2>Basic delegation shape</h2>
+  <pre><code>from pydantic_ai import Agent, RunContext, UsageLimits
+
+nyc_agent = Agent("provider:model", output_type=str)
+router = Agent(
+    "provider:model",
+    instructions="Delegate NYC questions only to the NYC specialist.",
+)
+
+@router.tool
+async def ask_nyc(ctx: RunContext[None], question: str) -&gt; str:
+    """Ask the NYC specialist one focused question."""
+    result = await nyc_agent.run(question, usage=ctx.usage)
+    return result.output
+
+result = await router.run(
+    "What do these NYC 311 records say?",
+    usage_limits=UsageLimits(request_limit=4),
+)</code></pre>
+  <p>This is a structural example, not a complete router. Replace <code>"provider:model"</code> with a supported model and pass only the dependencies the child needs.</p>
+
+  <h2>Direct call or delegation?</h2>
+  <table>
+    <thead>
+      <tr><th>Call the agent directly</th><th>Use delegation</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>One request needs one specialist's output.</td>
+        <td>One request genuinely needs two or more specialist outputs.</td>
+      </tr>
+      <tr>
+        <td>Permissions are simple and fixed.</td>
+        <td>The orchestrator has a fixed list of allowed specialists.</td>
+      </tr>
+      <tr>
+        <td>No cross-agent data flow to audit.</td>
+        <td>Each child receives only the data and tools needed for its task.</td>
+      </tr>
+      <tr>
+        <td>Low latency and cost matter most.</td>
+        <td>The whole workflow has request and token limits, and tests prove the correct specialist ran.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>More agents mean more model calls, more latency, and more chances to expose data. Start with one agent; add delegation only when a real workflow needs it.</p>
+
+  <h2>Specialist blueprint</h2>
+  <ol>
+    <li><strong>Job:</strong> one sentence naming the user task. Good: "Answer NYC 311 questions from official city data." Bad: "help the user with anything."</li>
+    <li><strong>Sources:</strong> official or owner-approved inputs. Name the exact dataset, endpoint, or archive, and who approved it.</li>
+    <li><strong>Tools:</strong> only operations needed for that job. One read-only search tool, not a grab bag of capabilities.</li>
+    <li><strong>Output:</strong> answer plus evidence, date, and uncertainty. Cite source_url and retrieved_at; say what the data cannot show.</li>
+    <li><strong>Denied abilities:</strong> explicit list, enforced in Python. If it's not on the allow-list, the model cannot call it — no matter what the prompt says.</li>
+    <li><strong>Tests:</strong> one normal case, one missing-source case, one boundary case. All run with fake services; no live mailbox, device, or endpoint.</li>
+  </ol>
+
+  <h2>Self-check</h2>
+  <details>
+    <summary>Should one default agent receive Gmail search and smart-home tools?</summary>
+    <p>No. Keep those permissions in separate agents. Route to a capability only when the user's request requires it.</p>
+  </details>
+
+  <nav class="lesson-nav" aria-label="Lesson navigation">
+    <a href="0005-nyc-specialist.html"><span>Previous lesson</span><strong>NYC specialist</strong></a>
+    <a href="0007-testing-agents.html"><span>Next lesson</span><strong>Test agents safely</strong></a>
+  </nav>
+  <p>Ask your teacher about any unclear step. Start with one agent; do not add delegation just to make the architecture look advanced.</p>
+  <ul class="source-list">
+    <li><a href="https://pydantic.dev/docs/ai/guides/multi-agent-applications/">Pydantic AI delegation and usage limits</a></li>
+  </ul>
+</main>
+<footer><p>Independent specialists are easier to test and safer to authorize.</p></footer>
+</body>
+</html>

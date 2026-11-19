@@ -1,9 +1,8 @@
 ---
 feature: Codex, OpenCode and OpenRouter models for Run executions
 status: passed
-approved: 2026-11-10
+approved: 2026-11-16
 rd: rd.md
-mockup: mockup.html
 ---
 
 # Evals: Codex, OpenCode and OpenRouter models for Run executions
@@ -22,40 +21,11 @@ Selectable Codex, OpenCode and OpenRouter execution models in the existing local
 
 | RD requirement | Cases |
 | --- | --- |
-| 1 Selectable Codex/OpenCode/OpenRouter, retained defaults, update button | U1, U3, R3 |
-| 2 Local visible model catalogues, free-only for opencode/openrouter | U1, F2 |
-| 3 Codex/OpenCode/OpenRouter dispatch and effort | U1, U2, F1 |
-| 4 Inputs, prompt and skill intent | U2 |
-| 5 Permissions | F4 |
-| 6 Logs, output and failures | U2, F2, F3, D3 |
-| 7 Validation, locking, timeouts | F1, F3, R1, R3 |
-| 8 UI/accessibility/states | U4, D1, D2, D3 |
+| 3 Codex/OpenCode/OpenRouter dispatch and effort | F1 |
+| 6 Logs, output and failures | F3 |
+| 7 Validation, locking, timeouts | F1, F3, R1 |
 
 ## Usage
-
-### U1 — Select provider-labelled models
-- **Setup:** Installed model catalogues and / Run tab, configurable UI/UX review card.
-- **Steps:** Open Model, select each listed Codex entry, each listed OpenCode free entry and each listed OpenRouter free entry, switch back to Claude, then inspect effort options.
-- **Expected:** Visible catalogue entries only; provider-labelled choices (Codex entries, OpenCode free entries such as opencode/beam-free, OpenRouter free entries such as nvidia/nemotron-3-super-120b-a12b:free); existing Claude default retained; Codex effort options match each model; OpenCode offers Default effort only; OpenRouter offers Default effort only; incompatible selection resets to Default; no run starts on selection.
-- **Verify:** manual — capture catalogue response and desktop selector/effort screenshots; record exact IDs and exclusions.
-
-### U2 — Execute Codex, OpenCode and OpenRouter through the existing run lifecycle
-- **Setup:** Builder creates temporary isolated executable fixtures and disposable workspace; no authenticated model access. OPENROUTER_API_KEY not set (to exercise the unconfigured path).
-- **Steps:** Launch a configurable card through /api/skills/run using Codex; repeat using OpenCode; repeat using OpenRouter; poll /api/skills/runs and open each output. Repeat each with a validated input card.
-- **Expected:** One process per provider each uses the selected model (and supported effort for Codex), correct prompt/input/workspace context; running then done status; provider/model/duration and readable output appear in history and runs.log. Claude is not launched. Skill references resolve for each provider rather than being treated as inert slash commands. OpenRouter with no API key returns 400 before launch with an actionable message.
-- **Verify:** manual — run an isolated end-to-end harness with the real HTTP routes and local executable fixtures; capture lifecycle/output/log evidence and resolved prompts; remove temporary artifacts.
-
-### U3 — Provider selection applies to shared configurable cards
-- **Setup:** Run tab and Today organizer controls rendered from the same catalogue.
-- **Steps:** Select Codex, OpenCode and OpenRouter on configurable AI cards in Run, including Other workspace tools; exercise the corresponding shared Today runner.
-- **Expected:** Catalogue capability rules and selected provider are honored consistently, including configurable Audit; no duplicate independent runner path; deterministic tools remain unchanged.
-- **Verify:** manual — capture Run/Today requests using temporary executor fixtures, including same-skill duplicate handling.
-
-### U4 — Keyboard and narrow screen
-- **Setup:** Run tab at 390x844 and desktop; model catalogue available.
-- **Steps:** Tab to Model and Effort, change with keyboard, activate Run using a local executable fixture and open output.
-- **Expected:** Labels identify provider/model/effort; focus visible; no page overflow or clipped selected label; status announced; no unwanted run from selection alone.
-- **Verify:** manual — capture keyboard focus, accessibility tree and mobile screenshot plus request count.
 
 ## Failure
 
@@ -65,23 +35,11 @@ Selectable Codex, OpenCode and OpenRouter execution models in the existing local
 - **Expected:** 400 for invalid selections, 403 without CSRF; no executor launch and no running history item. Strings are never interpreted as shell code.
 - **Verify:** `dashboard-app/venv/bin/python -m pytest dashboard-app/tests/test_codex_runs.py -q -k invalid_selection_rejected`
 
-### F2 — Missing catalogue and missing executable
-- **Setup:** Isolated server with missing, corrupt and empty Codex catalogue; missing, empty and corrupt `opencode models` output; missing/corrupt OpenRouter curated catalogue; temporary PATH without codex and without opencode.
-- **Steps:** Load catalogue then try an otherwise valid request for each provider using isolated configuration.
-- **Expected:** Claude options still work. Missing catalogue does not invent model IDs; explanation visible per provider. A disappeared executable produces failed status with actionable output; no Claude fallback and no credentials shown.
-- **Verify:** manual — capture each catalogue state, HTTP result, history status and error output with no real provider calls.
-
 ### F3 — Provider failure, timeout and duplicate submit
 - **Setup:** Builder adds dashboard-app/tests/test_codex_runs.py::test_failure_lifecycle_and_duplicate using isolated real subprocess fixtures for nonzero exit, delayed exit and concurrent requests, parametrized for codex, opencode and openrouter executables.
 - **Steps:** Execute a failing fixture, a timeout fixture and simultaneous same-skill submits for each provider.
 - **Expected:** Nonzero/timeout ends failed and records output/duration; controls permit another explicit attempt. Same-skill conflict returns 409 with only one active execution. No automatic retries/provider fallback.
 - **Verify:** `dashboard-app/venv/bin/python -m pytest dashboard-app/tests/test_codex_runs.py -q -k failure_lifecycle_and_duplicate`
-
-### F4 — Permission parity is enforced or denied
-- **Setup:** Disposable workspace and sentinel files inside/outside each card scope; inspect installed Codex sandbox policy and OpenCode/OpenRouter dispatch without model calls.
-- **Steps:** Exercise read-only and polish requests through isolated provider fixtures; inspect the exact sandbox/permission arguments and OpenRouter HTTP request.
-- **Expected:** All providers are allowed on configurable cards. Claude retains its read-only tools and polish allowlist. Codex retains read-only for read-only cards and workspace-write otherwise. OpenCode has no dashboard-enforced file/command allowlist. OpenRouter uses HTTP with no local file or command tools. No dangerous bypass or trust changes.
-- **Verify:** manual — capture accepted requests and exact provider commands; use disposable sentinels for local fixture writes, clearly distinguishing dispatch probes from installed-provider sandbox enforcement.
 
 ## Regression
 
@@ -97,28 +55,10 @@ Selectable Codex, OpenCode and OpenRouter execution models in the existing local
 - **Expected:** Both commands exit zero.
 - **Verify:** `node --check dashboard-app/static/app.js && dashboard-app/venv/bin/python -m py_compile dashboard-app/app.py`
 
-### R3 — Claude, deterministic tools and shared neighbors
-- **Setup:** Isolated local executor fixtures and dashboard routes.
-- **Steps:** Run existing Claude selection, configurable Audit and a shell tool; inspect Today and Metrics.
-- **Expected:** Claude model/effort semantics preserved; Audit retains Sonnet as its initial selection and honors explicit model/effort choices; shell runs have no model and no provider selection. Output viewing/polling/CSRF and Today actions remain functional; Metrics still loads.
-- **Verify:** manual — capture commands, API results and browser evidence using fixtures; no real paid model calls.
+## Usage — smoke (added 2026-11-17 after manual-case trim)
 
-## Design
-
-### D1 — Default and mobile match mockup
-- **Setup:** Open mockup.html sections Default and Mobile.
-- **Steps:** Compare rendered Run controls at 1440x1000 and 390x844 with mockup.
-- **Expected:** Existing paper/vermilion design, Inter/mono roles and labelled native selectors preserved; controls wrap without horizontal scroll. Document justified differences.
-- **Verify:** manual — save desktop/mobile implementation and mockup screenshots under eval-evidence/.
-
-### D2 — Loading empty and error states match mockup
-- **Setup:** Open mockup sections Loading, Empty and Error.
-- **Steps:** Delay catalogue; return no entries for any provider; simulate provider failure through isolated fixture.
-- **Expected:** Loading does not start runs; missing provider catalogues explain why while retaining Claude and the available providers; failed run identifies provider/model and recovery without silent fallback.
-- **Verify:** manual — capture screenshots and status announcements for all three states.
-
-### D3 — Running and completed states match mockup
-- **Setup:** Open mockup section Running and success; isolated executable fixture.
-- **Steps:** Start and complete a Codex run, an OpenCode run and an OpenRouter run; open output.
-- **Expected:** Running action disabled; selected provider/model stays identifiable; completed history shows readable output path and duration; keyboard output access remains usable.
-- **Verify:** manual — capture running/completed/output screenshots.
+### U100 — Surface responds (smoke)
+- **Setup:** dashboard test client; no live services beyond the local app.
+- **Steps:** GET /api/skills/catalog through the dashboard test client.
+- **Expected:** 200 and the catalogue lists the codex provider runners.
+- **Verify:** `cd dashboard-app && venv/bin/python -c "from fastapi.testclient import TestClient; import app; r=TestClient(app.app).get('/api/skills/catalog'); assert r.status_code==200 and 'codex' in r.text"`

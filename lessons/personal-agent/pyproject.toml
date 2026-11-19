@@ -1,0 +1,19 @@
+[project]
+name = "personal-agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "R8S", email = "R8S@roosevelt.info" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic-ai>=2.71.0",
+]
+
+[project.scripts]
+personal-agent = "personal_agent:main"
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"

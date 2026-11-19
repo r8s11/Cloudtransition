@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 2 — Tools and Dependencies</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<a class="skip-link" href="#lesson-content">Skip to lesson</a>
+<header>
+  <h1>Give it one safe tool</h1>
+  <p class="dek">Tools are ordinary functions. Dependencies carry the services those functions need.</p>
+  <nav class="course-nav" aria-label="Course contents">
+    <details>
+      <summary><span>Course map</span><span class="course-progress">Lesson 2 of 8</span></summary>
+      <ol class="course-links">
+        <li><a href="0001-first-agent.html">01 First agent</a></li>
+        <li><a aria-current="step" href="0002-tools-and-dependencies.html">02 Tools</a></li>
+        <li><a href="0003-gmail-reader.html">03 Gmail</a></li>
+        <li><a href="0004-smart-home.html">04 Smart home</a></li>
+        <li><a href="0005-nyc-specialist.html">05 NYC</a></li>
+        <li><a href="0006-specialists-together.html">06 Specialists</a></li>
+        <li><a href="0007-testing-agents.html">07 Tests</a></li>
+        <li><a href="0008-operating-your-agents.html">08 Operate</a></li>
+        <li><a href="../reference/personal-agents.html">Field reference</a></li>
+      </ol>
+    </details>
+  </nav>
+</header>
+<main id="lesson-content">
+  <p class="meta">Time: 6 minutes · Win: expose a read-only lookup without handing the model a database</p>
+
+  <h2>Two different things</h2>
+  <table>
+    <thead>
+      <tr><th>Tool</th><th>Dependency</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>A function the model <em>may request</em>. Its annotations and docstring describe the callable interface. The framework validates arguments and passes the returned value back to the model.</td>
+        <td>A Python object your application <em>passes into a run</em>. It can hold a database adapter, HTTP client, or configuration — including credentials. The model never receives the dependency object itself.</td>
+      </tr>
+      <tr>
+        <td>Owned by the model's proposal layer.</td>
+        <td>Owned by your application's permission and credential layer.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>Pydantic AI validates tool arguments and passes dependencies through <code>RunContext</code>. <a href="https://pydantic.dev/docs/ai/tools-toolsets/tools/">Tools</a> · <a href="https://pydantic.dev/docs/ai/core-concepts/dependencies/">Dependencies</a></p>
+
+  <pre><code>from dataclasses import dataclass
+from pydantic_ai import Agent, RunContext
+
+@dataclass
+class Notes:
+    by_topic: dict[str, str]
+
+agent = Agent(
+    "test",
+    deps_type=Notes,
+    instructions="Find a note only when the user asks for one.",
+)
+
+@agent.tool
+def find_note(ctx: RunContext[Notes], topic: str) -&gt; str:
+    """Find a note by its exact topic name."""
+    if topic not in ctx.deps.by_topic:
+        return "No note matches that topic."
+    return ctx.deps.by_topic[topic]
+
+result = agent.run_sync(
+    "Find the note named 'NYC'.",
+    deps=Notes({"NYC": "Use official city sources."}),
+)</code></pre>
+  <p>The model sees the tool name, description, argument schema, and returned value. It does not receive the <code>Notes</code> object itself.</p>
+
+  <h2>Design the seam</h2>
+  <ol>
+    <li><strong>One read or one action.</strong> Write a normal function that does a single, bounded thing. Do: fetch one note by topic. Don't: "search my whole life and decide what to do."</li>
+    <li><strong>Bounded inputs.</strong> Give it typed inputs with bounded choices where possible. Do: <code>Literal["on","off"]</code>. Don't: a free-text entity ID the model can redirect to any device.</li>
+    <li><strong>Dependencies for clients and config.</strong> Put HTTP clients, configuration, and credentials in a dependency object passed by the app. Do: pass an <code>httpx.AsyncClient</code> and token through <code>RunContext</code>. Don't: hardcode secrets in tool code or prompt wording.</li>
+    <li><strong>Return only the evidence needed.</strong> Return the smallest result that answers the question. Do: a snippet with a source pointer. Don't: the full mailbox or raw device state the model doesn't need.</li>
+    <li><strong>Raise real failures.</strong> Don't disguise errors as successful empty results. Let the surface show an explicit limitation so the answer is honest.</li>
+    <li><strong>Read-only by default.</strong> The first version of any tool reads; write actions need a separate application-level approval step.</li>
+    <li><strong>Test with fakes first.</strong> Exercise the tool with fake data or a fake HTTP client before any live model or API call.</li>
+  </ol>
+  <p>Use <code>@agent.tool_plain</code> when the function needs no run context. Use <code>@agent.tool</code> when it needs typed dependencies passed through <code>RunContext</code>.</p>
+
+  <div class="warning">
+    <p><strong>Tool output is not trusted instruction.</strong> Email and web text can contain malicious directions. Keep permissions in code, not in prompt wording.</p>
+  </div>
+
+  <h2>Self-check</h2>
+  <details>
+    <summary>Why pass a client through dependencies?</summary>
+    <p>It makes the resource explicit, replaceable in tests, and controlled by the app. It keeps secrets and connection setup out of model-facing instructions.</p>
+  </details>
+
+  <nav class="lesson-nav" aria-label="Lesson navigation">
+    <a href="0001-first-agent.html"><span>Previous lesson</span><strong>Your first agent</strong></a>
+    <a href="0003-gmail-reader.html"><span>Next lesson</span><strong>Read-only Gmail</strong></a>
+  </nav>
+  <p>Ask your teacher about any unclear step. Do not pass real mail into a hosted model yet.</p>
+  <ul class="source-list">
+    <li><a href="https://pydantic.dev/docs/ai/tools-toolsets/tools/">Function tools</a></li>
+    <li><a href="https://pydantic.dev/docs/ai/core-concepts/dependencies/">Typed dependencies</a></li>
+  </ul>
+</main>
+<footer><p>One agent, one job, one narrow toolset. Expand only after the boundary is tested.</p></footer>
+</body>
+</html>

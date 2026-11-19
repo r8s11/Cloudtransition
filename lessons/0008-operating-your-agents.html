@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 8 — Operate Your Agents</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<a class="skip-link" href="#lesson-content">Skip to lesson</a>
+<header>
+  <h1>Make the agents maintainable</h1>
+  <p class="dek">Ship a small, inspectable Python app—not a pile of prompts.</p>
+  <nav class="course-nav" aria-label="Course contents">
+    <details>
+      <summary><span>Course map</span><span class="course-progress">Lesson 8 of 8</span></summary>
+      <ol class="course-links">
+        <li><a href="0001-first-agent.html">01 First agent</a></li>
+        <li><a href="0002-tools-and-dependencies.html">02 Tools</a></li>
+        <li><a href="0003-gmail-reader.html">03 Gmail</a></li>
+        <li><a href="0004-smart-home.html">04 Smart home</a></li>
+        <li><a href="0005-nyc-specialist.html">05 NYC</a></li>
+        <li><a href="0006-specialists-together.html">06 Specialists</a></li>
+        <li><a href="0007-testing-agents.html">07 Tests</a></li>
+        <li><a aria-current="step" href="0008-operating-your-agents.html">08 Operate</a></li>
+        <li><a href="../reference/personal-agents.html">Field reference</a></li>
+      </ol>
+    </details>
+  </nav>
+</header>
+<main id="lesson-content">
+  <p class="meta">Time: 6 minutes · Win: leave with a staged plan for your first useful agent</p>
+
+  <h2>Start as a local CLI</h2>
+  <p>Keep the first version easy to inspect and stop. A small project can separate one agent, its adapters, and its tests:</p>
+  <pre><code>personal-agents/
+  src/personal_agents/
+    gmail_reader.py
+    home_control.py
+    nyc_specialist.py
+    services.py
+  tests/
+    test_gmail_reader.py
+    test_home_control.py
+    test_nyc_specialist.py
+  pyproject.toml</code></pre>
+  <p>Your existing CLI agent definitions are instructions consumed by other coding tools. A Pydantic AI agent is Python application code with a model, typed tools, and runtime dependencies. Reuse the useful job descriptions and safety rules; do not assume the definitions become executable Pydantic AI agents automatically.</p>
+
+  <h2>Bound every run</h2>
+  <p>Set request or token limits for runs, especially when one agent can delegate to another. Pydantic AI's <a href="https://pydantic.dev/docs/ai/guides/multi-agent-applications/">multi-agent guide</a> documents usage limits for avoiding runaway requests and costs.</p>
+  <p>Log timestamps, tool names, outcome, and safe error categories. Keep model/provider choice and secrets in configuration, not prompts.</p>
+  <table>
+    <thead>
+      <tr><th>Log</th><th>Never log by default</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Timestamps, tool names, outcome, safe error categories.</td>
+        <td>Full email bodies, tokens, device data, home data, credentials.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Stage the rollout</h2>
+  <ol>
+    <li><strong>Build the test-model skeleton.</strong> Entry criterion: the agent runs offline with <code>TestModel</code> and no live requests are allowed.</li>
+    <li><strong>Use synthetic Gmail, device, and city fixtures.</strong> Entry criterion: every tool returns bounded, fake evidence; nothing touches a real source.</li>
+    <li><strong>Test permissions and failure behavior.</strong> Entry criterion: tests fail if an unapproved tool, entity, or query is requested.</li>
+    <li><strong>Review model-provider data handling and cost.</strong> Entry criterion: you can state exactly what leaves the computer and what it costs.</li>
+    <li><strong>Only then request access to a real source or device.</strong> Entry criterion: explicit account access, data scope, and budget approval are on record.</li>
+    <li><strong>Add one specialist at a time; measure whether it answers with traceable evidence.</strong> Entry criterion: each new specialist passes its normal, missing-source, and boundary tests.</li>
+  </ol>
+
+  <h2>Your first build target</h2>
+  <p>Start with the Gmail archive reader: its access is already read-only, local search is available, and it has no physical side effects. Begin with synthetic snippets, then decide separately whether a hosted model may receive actual snippets. Keep smart-home control disabled until you identify the exact device API or bridge.</p>
+
+  <h2>Self-check</h2>
+  <details>
+    <summary>What must be true before adding a new specialist?</summary>
+    <p>Its job, trusted sources, narrow tools, denied abilities, structured result, and failure cases are explicit. Tests prove those boundaries with fake services.</p>
+  </details>
+
+  <p>The source list is curated in <a href="../RESOURCES.md">RESOURCES.md</a>.</p>
+  <p>Ask your teacher any follow-up question. Do not authorize live credentials, device actions, or data transfers until you choose that step explicitly.</p>
+  <nav class="lesson-nav" aria-label="Lesson navigation">
+    <a href="0007-testing-agents.html"><span>Previous lesson</span><strong>Test agents safely</strong></a>
+    <a href="../reference/personal-agents.html"><span>Course reference</span><strong>Personal agents field guide</strong></a>
+  </nav>
+  <ul class="source-list">
+    <li><a href="https://pydantic.dev/docs/ai/core-concepts/agent/">Agent runs and limits</a></li>
+    <li><a href="https://pydantic.dev/docs/ai/guides/multi-agent-applications/">Delegation and usage limits</a></li>
+    <li><a href="../MISSION.md">Course mission</a></li>
+  </ul>
+</main>
+<footer><p>One proven capability at a time. Permissions stay in code.</p></footer>
+</body>
+</html>

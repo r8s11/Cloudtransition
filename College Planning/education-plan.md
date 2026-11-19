@@ -265,8 +265,8 @@ _At 1 course per term (part-time), add ~12 months to each phase._
 - [ ] Verify with advisor: Do Saylor CS101+CS102+CS302 count toward major elective slots?
 - [ ] Verify with advisor: Study.com CS 307 → CS-250 and CS 302 → CS-255 still current?
 - [ ] Verify with advisor: Can you transfer Sophia/Study.com credits while actively enrolled?
-- [x] Verify with advisor: What are the specific AS requirements vs BS? (to plan the AS milestone)
-- [x] File FAFSA at studentaid.gov (if not already done)
+- [ ] Verify with advisor: What are the specific AS requirements vs BS? (to plan the AS milestone)
+- [ ] File FAFSA at studentaid.gov (if not already done)
 - [ ] Check employer tuition reimbursement eligibility
 - [ ] Ask advisor about Culmination Experience — what transfer course satisfies this?
 

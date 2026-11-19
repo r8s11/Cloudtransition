@@ -112,6 +112,10 @@ export const PlanTaskSchema = z.object({
   steps: z.array(PlanStepSchema),
   expectedResult: z.string().min(1),
   verificationCriteria: z.array(z.string().min(1)).min(1, "At least one verification criterion is required"),
+  /** Hub routing: the agent that owns this task. Optional for pre-hub plans. */
+  owner: z.string().min(1).optional(),
+  /** Hub routing: task ids that must complete before this one may start. */
+  dependsOn: z.array(z.string().min(1)).optional(),
 });
 
 // ── Plan schema ──────────────────────────────────────────────────────────

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Personal Agents — Field Reference</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<a class="skip-link" href="#reference-content">Skip to reference</a>
+<header>
+  <h1>Personal agents</h1>
+  <p class="dek">A compact build pattern for typed Pydantic AI agents with small, controlled capabilities.</p>
+  <nav class="course-nav" aria-label="Course contents">
+    <details>
+      <summary><span>Course map</span><span class="course-progress">Field reference</span></summary>
+      <ol class="course-links">
+        <li><a href="../lessons/0001-first-agent.html">Start course</a></li>
+        <li><a href="../lessons/0003-gmail-reader.html">Gmail</a></li>
+        <li><a href="../lessons/0004-smart-home.html">Smart home</a></li>
+        <li><a href="../lessons/0005-nyc-specialist.html">NYC</a></li>
+        <li><a aria-current="page" href="personal-agents.html">Field reference</a></li>
+      </ol>
+    </details>
+  </nav>
+</header>
+<main id="reference-content">
+  <h2>Build order</h2>
+  <ol>
+    <li>Write one job and one observable success condition.</li>
+    <li>Choose the narrowest authoritative data source.</li>
+    <li>Write a normal Python function that reads or acts safely.</li>
+    <li>Expose that function as a typed agent tool.</li>
+    <li>Pass clients and settings through typed dependencies.</li>
+    <li>Return a structured result when another program must use the answer.</li>
+    <li>Test with fake dependencies before any live model or API call.</li>
+    <li>Add approvals and usage limits before expanding permissions.</li>
+  </ol>
+
+  <h2>Agent anatomy</h2>
+  <pre><code>user request
+    ↓
+typed Pydantic AI agent
+    ↓ selects a tool and arguments
+application-owned tool function
+    ↓ validates scope, calls one adapter
+Gmail archive | Home Assistant | official NYC source
+    ↓ returns bounded evidence
+agent answer + source / uncertainty</code></pre>
+  <p>The Python application owns credentials, permissions, validation, and side effects. The model proposes tool calls; it does not become the authorization layer.</p>
+
+  <h2>Permission map</h2>
+  <table>
+    <thead><tr><th>Agent</th><th>Allow</th><th>Never add by default</th></tr></thead>
+    <tbody>
+      <tr><td>Gmail reader</td><td>Bounded search of the existing local archive</td><td>Send, delete, modify, or read the live mailbox without separate approval</td></tr>
+      <tr><td>Smart-home helper</td><td>Fixed list of low-risk entities and actions</td><td>Arbitrary entity IDs, locks, alarms, garage doors, or unconfirmed actions</td></tr>
+      <tr><td>NYC specialist</td><td>Read selected official pages and datasets</td><td>Invented citations or treating 311 records as legal or emergency guidance</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Core API shape</h2>
+  <pre><code>agent = Agent(
+    "provider:model",
+    deps_type=Services,
+    output_type=Answer,
+    instructions="One job. State limits. Cite evidence.",
+)
+
+@agent.tool
+async def lookup(ctx: RunContext[Services], query: str) -&gt; Evidence:
+    """Fetch bounded, trusted evidence for the request."""
+    ...</code></pre>
+  <ul>
+    <li><code>Agent</code> defines one behavior and the types it needs.</li>
+    <li><code>RunContext[Services]</code> gives a tool application-owned dependencies.</li>
+    <li>A tool docstring and type annotations define the model-facing tool contract.</li>
+    <li><code>output_type</code> validates shape, not truth. Validate sources and behavior separately.</li>
+  </ul>
+
+  <h2>Alexa boundary</h2>
+  <p>Amazon's Smart Home Skill API describes Alexa calling a device provider's skill so Alexa can control devices that provider exposes. It is not evidence of a general API for commanding any device already linked to a consumer's Alexa account. An agent needs a supported device API or a bridge such as Home Assistant that already controls that entity.</p>
+
+  <h2>Source anchors</h2>
+  <ul class="source-list">
+    <li><a href="https://pydantic.dev/docs/ai/core-concepts/agent/">Pydantic AI agents</a></li>
+    <li><a href="https://pydantic.dev/docs/ai/core-concepts/dependencies/">Pydantic AI dependencies</a></li>
+    <li><a href="https://pydantic.dev/docs/ai/testing/">Pydantic AI testing</a></li>
+    <li><a href="https://developer.amazon.com/en-US/alexa/alexa-skills-kit/get-deeper/smart-home-skills">Amazon Alexa Smart Home Skills</a></li>
+    <li><a href="https://developers.home-assistant.io/docs/api/rest">Home Assistant REST API</a></li>
+    <li><a href="../RESOURCES.md">Curated course resources</a></li>
+  </ul>
+  <p>Use this reference after the lessons; it compresses the design, not the reasoning.</p>
+</main>
+<footer><p>Ask your teacher about any unclear step. Do not connect real accounts or devices until permissions and data flow are explicit.</p></footer>
+</body>
+</html>

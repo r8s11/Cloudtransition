@@ -1,0 +1,11 @@
+Real Omp RPC process, extension loaded via explicit -e, local fake Jev endpoint and local fake Anthropic/OpenAI-compatible helper endpoint, no paid calls.
+Observed (bun tools/jev-routing/runtime-smoke.mjs, exit 0):
+- /jev status (off) -> "Jev: off ..."
+- /jev on -> two cap prompts + one transmission confirm -> "Jev on."
+- message "Describe the local smoke test." -> classifier called first; "medium -> openai/jev-fixture; skill None"
+- helper requested read tool -> parent received "Jev helper tool approval" confirm; parent declined; helper saw tool result "Parent declined helper tool" (file content NOT returned)
+- helper request system messages contained "Parent session instructions (remain binding)"
+- helper answer shown; /jev off -> "Jev routing off." then /jev status made 0 further network requests
+- pick log outcomes: received, skill, picked, success (no message text, no key)
+- extension_error frames: none
+Earlier defect found and fixed: with restrictToolNames the helper's approval hook did not load and a read tool ran unapproved; fixed by not restricting tool names (MCP/LSP off, discovery off); regression assertion added to the smoke.

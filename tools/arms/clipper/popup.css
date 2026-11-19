@@ -1,0 +1,21 @@
+/* Orizuru tokens from dashboard-app/DESIGN.md: washi face, sumi ink, vermilion action. */
+:root { --vermilion: #b3212e; --vermilion-deep: #8e1a24; --paper: #f8f1e3; --paper-deep: #efe3cd; --paper-hi: #fdf9ef; --sumi: #171512; --ink-muted: #554d41; --border: #d8c9ab; --gold: #c9a227; --red: #a8322c; --green: #1d4a2e; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { width: 380px; background: var(--paper); color: var(--sumi); font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Inter", sans-serif; }
+main { padding: 14px 16px 16px; display: grid; gap: 8px; }
+h1 { font-size: 17px; font-weight: 600; border-bottom: 3px solid var(--vermilion); padding-bottom: 6px; }
+.hint { color: var(--ink-muted); font-size: 12.5px; }
+dl { display: grid; grid-template-columns: 44px 1fr; gap: 2px 8px; font-size: 13px; }
+dt { color: var(--ink-muted); }
+dd { overflow-wrap: anywhere; }
+.mono { font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 12px; }
+button { font: inherit; font-weight: 600; min-height: 36px; padding: 4px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--paper-deep); color: var(--sumi); cursor: pointer; }
+button.primary { background: var(--vermilion); color: #f4ead8; border-color: var(--vermilion-deep); }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+button:focus-visible, textarea:focus-visible { outline: 2px solid var(--vermilion-deep); box-shadow: 0 0 0 4px var(--gold); }
+.label { font-size: 12.5px; font-weight: 600; margin-top: 4px; }
+textarea { width: 100%; font: 12px/1.4 ui-monospace, monospace; background: var(--paper-deep); border: 1px solid var(--border); border-radius: 6px; padding: 8px; resize: vertical; color: var(--sumi); }
+#msg { min-height: 1.4em; font-size: 13px; }
+#msg.error { color: var(--red); }
+#msg.ok { color: var(--green); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

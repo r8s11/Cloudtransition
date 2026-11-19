@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Interviews Waiting status and Update application layout</title>
+<link rel="stylesheet" href="../../../dashboard-app/static/tokens.css">
+<link rel="stylesheet" href="../../../dashboard-app/static/style.css">
+<style>
+	/* Mockup frame only */
+	.mock-wrap { max-width: 1034px; margin: 0 auto; padding: 32px 20px 64px; }
+	.mock-label { color: var(--fold-white); font: 600 13px/1.4 var(--sans); margin: 40px 0 10px; }
+	.mock-phone { max-width: 390px; }
+
+	/* ── Proposed: Update application panel (port to style.css) ─────── */
+	.interview-tools[open] > summary { margin-bottom: 4px; }
+	.interview-group {
+		border: 0;
+		margin: 0;
+		padding: 16px 0 0;
+		min-width: 0;
+		display: grid;
+		gap: 8px 12px;
+		align-items: end;
+	}
+	.interview-group + .interview-group {
+		margin-top: 16px;
+		border-top: 1px dashed var(--border-light);
+	}
+	.interview-group > legend {
+		float: left; /* lets the legend sit inside the grid flow */
+		grid-column: 1 / -1;
+		padding: 0;
+		margin-bottom: 2px;
+		font: 600 13px/1.3 var(--sans);
+		color: var(--sumi);
+	}
+	.interview-group-status { grid-template-columns: repeat(2, minmax(0, 13rem)) minmax(0, 1fr); }
+	.interview-group-next { grid-template-columns: minmax(0, 1fr) 11rem auto; }
+	.interview-group-signal { grid-template-columns: 11rem 12rem minmax(0, 1fr) auto; }
+	.interview-group-notes { grid-template-columns: minmax(0, 1fr); }
+	.interview-group .run-input,
+	.interview-group .run-select { width: 100%; min-height: 36px; }
+	.interview-group textarea.run-input { font-family: var(--sans); font-size: 13px; line-height: 1.5; resize: vertical; }
+	.interview-group-next textarea { min-height: 84px; field-sizing: content; }
+	.interview-group .run-status { align-self: center; font-size: 12.5px; }
+	.interview-group-notes .interview-form-actions { display: flex; gap: 10px; align-items: center; }
+
+	/* ── Proposed: Waiting status ─────── */
+	.badge-status-waiting {
+		background: transparent;
+		color: var(--ink-muted);
+		border: 1px dashed var(--border);
+	}
+	.interview-waiting .interview-entry { opacity: 1; }
+
+	@media (max-width: 640px) {
+		.interview-group-status,
+		.interview-group-next,
+		.interview-group-signal { grid-template-columns: minmax(0, 1fr); }
+		.interview-group .run-input,
+		.interview-group .run-select,
+		.interview-group .action-btn { min-height: 44px; }
+		.job-stats.grid-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	}
+	.mock-phone .interview-group-status,
+	.mock-phone .interview-group-next,
+	.mock-phone .interview-group-signal { grid-template-columns: minmax(0, 1fr); }
+	.mock-phone .interview-group .run-input,
+	.mock-phone .interview-group .run-select,
+	.mock-phone .interview-group .action-btn,
+	.mock-phone .interview-actions > .action-btn { min-height: 44px; }
+	.mock-phone .job-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.mock-phone .interview-row { flex-direction: column; }
+	.mock-phone .interview-actions { flex-direction: row; flex-wrap: wrap; min-width: 0; }
+</style>
+</head>
+<body>
+<div class="mock-wrap">
+
+<p class="mock-label">Pipeline — desktop (five counts, Waiting added)</p>
+<div class="card">
+	<div class="card-title">Pipeline</div>
+	<div class="grid-5 mb-12 job-stats">
+		<div class="stat-box stat-sm"><div class="stat-value color-blue">30</div><div class="stat-label">Tracked</div></div>
+		<div class="stat-box stat-sm"><div class="stat-value color-purple">3</div><div class="stat-label">In conversation</div></div>
+		<div class="stat-box stat-sm"><div class="stat-value color-yellow">26</div><div class="stat-label">New leads</div></div>
+		<div class="stat-box stat-sm"><div class="stat-value">1</div><div class="stat-label">Waiting</div></div>
+		<div class="stat-box stat-sm"><div class="stat-value color-accent">9</div><div class="stat-label">High priority</div></div>
+	</div>
+	<p class="interview-note">Counts come from the tracker's status field and cover live threads only. Waiting threads count as tracked but not as active work; rejected and withdrawn applications sit under Closed threads.</p>
+</div>
+
+<p class="mock-label">Update application — desktop (open on an In conversation row)</p>
+<div class="card">
+	<div class="interview-entry">
+		<article class="interview-row">
+			<div class="interview-main">
+				<div class="interview-heading"><h3>BlackRock</h3><span class="badge badge-status-upcoming">Applied</span><span class="badge badge-p1">High priority</span></div>
+				<p class="interview-role">Technical Support, Associate</p>
+				<p class="interview-meta">New York, NY (in-office support; posting describes at least 4 days on-site) · $110-140K base + discretionary bonus</p>
+				<p class="interview-meta">Last signal: <strong>2026-11-16</strong> — applied</p>
+				<p class="interview-next"><strong>Next:</strong> Review and apply. Main gap: dedicated financial-sector C-suite/board support is not represented because Two Sigma remains excluded by prior decision. <span class="interview-date">2026-11-09</span> <span class="interview-overdue">past target date</span></p>
+			</div>
+			<div class="interview-actions" style="flex:none;display:flex;flex-direction:column;gap:8px;min-width:132px">
+				<button class="action-btn" type="button">Interview mode</button>
+				<a class="action-btn action-btn-ghost" href="#" style="display:inline-flex;justify-content:center">Posting</a>
+				<button class="action-btn action-btn-ghost" type="button">Read posting</button>
+			</div>
+		</article>
+		<details class="interview-tools" open>
+			<summary>Update application</summary>
+			<fieldset class="interview-group interview-group-status">
+				<legend>Status and priority</legend>
+				<label class="interview-field"><span>Status</span>
+					<select class="run-select"><option>Applied</option><option>Waiting</option></select></label>
+				<label class="interview-field"><span>Priority</span>
+					<select class="run-select"><option>High</option></select></label>
+				<span class="run-status is-done" role="status">Saved.</span>
+			</fieldset>
+			<fieldset class="interview-group interview-group-next">
+				<legend>Next action</legend>
+				<label class="interview-field"><span>What to do</span>
+					<textarea class="run-input" rows="3">Review and apply. Main gap: dedicated financial-sector C-suite/board support is not represented because Two Sigma remains excluded by prior decision. Confirm willingness for on-call/weekends and travel.</textarea></label>
+				<label class="interview-field"><span>Date</span><input class="run-input interview-field-date" type="date" value="2026-11-09"></label>
+				<button class="action-btn action-btn-ghost" type="button">Save next action</button>
+			</fieldset>
+			<fieldset class="interview-group interview-group-signal">
+				<legend>Log a signal</legend>
+				<label class="interview-field"><span>Date</span><input class="run-input interview-field-date" type="date" value="2026-11-16"></label>
+				<label class="interview-field"><span>Stage</span><input class="run-input" placeholder="phone_screen"></label>
+				<label class="interview-field"><span>What happened</span><input class="run-input" placeholder="Interviewer, questions to revisit, next round"></label>
+				<button class="action-btn action-btn-ghost" type="button">Log signal</button>
+			</fieldset>
+			<fieldset class="interview-group interview-group-notes">
+				<legend>Interview notes</legend>
+				<textarea class="run-input" rows="4" aria-label="Interview notes" placeholder="Questions asked, answers to sharpen, follow-ups"></textarea>
+				<div class="interview-form-actions"><button class="action-btn action-btn-ghost" type="button">Save notes</button></div>
+			</fieldset>
+		</details>
+	</div>
+</div>
+
+<p class="mock-label">Waiting card — sits after New leads and Agents, directly above Closed threads</p>
+<div class="card interview-waiting" data-interview-section="waiting">
+	<div class="card-title">Waiting <span class="badge badge-count">1</span></div>
+	<p class="interview-note">Applied or interviewed; waiting to hear back. Not counted as active work. Change the status in the row to bring it back.</p>
+	<div class="interview-entry">
+		<article class="interview-row">
+			<div class="interview-main">
+				<div class="interview-heading"><h3>Compass Pathways</h3><span class="badge badge-status-waiting">Waiting</span><span class="badge badge-p2">Medium priority</span></div>
+				<p class="interview-role">IT Support Engineer</p>
+				<p class="interview-meta">Last signal: <strong>2026-11-11</strong> — headcount on hold</p>
+				<p class="interview-next"><strong>Next:</strong> Check in with Jeff if nothing by early December. <span class="interview-date">2026-12-01</span></p>
+				<details class="interview-tools"><summary>Update application</summary></details>
+			</div>
+			<div class="interview-actions" style="flex:none;display:flex;flex-direction:column;gap:8px;min-width:132px">
+				<button class="action-btn" type="button">Interview mode</button>
+			</div>
+		</article>
+	</div>
+</div>
+<div class="card">
+	<div class="card-title">Closed threads <span class="badge badge-count">4</span></div>
+</div>
+
+<p class="mock-label">Phone — 390px</p>
+<div class="mock-phone">
+	<div class="card">
+		<div class="card-title">Pipeline</div>
+		<div class="grid-5 mb-12 job-stats">
+			<div class="stat-box stat-sm"><div class="stat-value color-blue">30</div><div class="stat-label">Tracked</div></div>
+			<div class="stat-box stat-sm"><div class="stat-value color-purple">3</div><div class="stat-label">In conversation</div></div>
+			<div class="stat-box stat-sm"><div class="stat-value color-yellow">26</div><div class="stat-label">New leads</div></div>
+			<div class="stat-box stat-sm"><div class="stat-value">1</div><div class="stat-label">Waiting</div></div>
+			<div class="stat-box stat-sm"><div class="stat-value color-accent">9</div><div class="stat-label">High priority</div></div>
+		</div>
+	</div>
+	<div class="card">
+		<div class="interview-entry">
+			<details class="interview-tools" open>
+				<summary>Update application</summary>
+				<fieldset class="interview-group interview-group-status">
+					<legend>Status and priority</legend>
+					<label class="interview-field"><span>Status</span><select class="run-select"><option>Waiting</option></select></label>
+					<label class="interview-field"><span>Priority</span><select class="run-select"><option>Medium</option></select></label>
+				</fieldset>
+				<fieldset class="interview-group interview-group-next">
+					<legend>Next action</legend>
+					<label class="interview-field"><span>What to do</span><textarea class="run-input" rows="3">Check in with Jeff if nothing by early December.</textarea></label>
+					<label class="interview-field"><span>Date</span><input class="run-input interview-field-date" type="date" value="2026-12-01"></label>
+					<button class="action-btn action-btn-ghost" type="button">Save next action</button>
+				</fieldset>
+				<fieldset class="interview-group interview-group-signal">
+					<legend>Log a signal</legend>
+					<label class="interview-field"><span>Date</span><input class="run-input interview-field-date" type="date" value="2026-11-16"></label>
+					<label class="interview-field"><span>Stage</span><input class="run-input" placeholder="phone_screen"></label>
+					<label class="interview-field"><span>What happened</span><input class="run-input" placeholder="Interviewer, questions to revisit"></label>
+					<button class="action-btn action-btn-ghost" type="button">Log signal</button>
+				</fieldset>
+			</details>
+		</div>
+	</div>
+</div>
+
+</div>
+</body>
+</html>

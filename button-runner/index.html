@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Buttons</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #0a0a0a; color: #e0e0e0; padding: 2rem; max-width: 800px; margin: 0 auto; }
+  h1 { font-size: 1.2rem; color: #888; margin-bottom: 1.5rem; }
+  .skill { background: #161616; border: 1px solid #222; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+  .skill-header { display: flex; align-items: center; gap: 0.75rem; }
+  .skill-name { font-weight: 600; font-size: 1rem; }
+  .skill-desc { color: #666; font-size: 0.8rem; }
+  .btn { padding: 0.5rem 1.2rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.15s; }
+  .btn-run { background: #2563eb; color: white; }
+  .btn-run:hover { background: #1d4ed8; }
+  .btn-run:disabled { background: #333; color: #666; cursor: not-allowed; }
+  .btn-opt { background: #222; color: #888; border: 1px solid #333; padding: 0.4rem 0.6rem; font-size: 0.75rem; }
+  .btn-opt:hover { border-color: #555; color: #aaa; }
+  .btn-opt.active { border-color: #2563eb; color: #2563eb; }
+  .status { font-size: 0.75rem; margin-left: auto; color: #666; }
+  .status.running { color: #f59e0b; }
+  .status.done { color: #10b981; }
+  .status.failed { color: #ef4444; }
+  .options { display: none; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #222; }
+  .options.open { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+  .options label { font-size: 0.75rem; color: #666; }
+  .options select, .options input { background: #111; border: 1px solid #333; color: #ccc; padding: 0.3rem 0.5rem; border-radius: 4px; font-size: 0.8rem; }
+  .output { display: none; margin-top: 0.75rem; padding: 0.75rem; background: #111; border-radius: 6px; font-family: monospace; font-size: 0.75rem; color: #aaa; white-space: pre-wrap; max-height: 300px; overflow-y: auto; border: 1px solid #222; }
+  .output.open { display: block; }
+  #runs { margin-top: 2rem; }
+  #runs h2 { font-size: 0.9rem; color: #555; margin-bottom: 0.5rem; }
+  .run-entry { font-family: monospace; font-size: 0.7rem; color: #444; padding: 0.2rem 0; border-bottom: 1px solid #161616; }
+  .question { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.75rem; font-size: 0.8rem; color: #888; }
+  .question input { flex: 1; background: #111; border: 1px solid #333; color: #ddd; padding: 0.45rem 0.6rem; border-radius: 4px; font-size: 0.85rem; }
+  .hint { font-size: 0.75rem; color: #777; }
+  .btn:focus-visible, .question input:focus-visible, .options select:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<h1>Claude Headless Buttons</h1>
+
+<div class="skill" id="skill-research">
+  <div class="skill-header">
+    <span class="skill-name">Research</span>
+    <span class="skill-desc">Answers from this workspace first, then the web; cites files and verified URLs</span>
+    <button class="btn btn-opt" onclick="toggleOpts('research')" aria-label="Model and effort options">⚙</button>
+    <button class="btn btn-run" onclick="fire('research')">Run</button>
+    <span class="status" id="status-research" role="status"></span>
+  </div>
+  <label class="question">Question: <input id="question-research" maxlength="2000" placeholder="What is graft in this repo? Two sentences."></label>
+  <div class="options" id="opts-research">
+    <label>Model: <select id="model-research">
+      <option value="">default</option>
+      <option value="haiku">haiku</option>
+      <option value="sonnet">sonnet</option>
+      <option value="opus">opus</option>
+    </select></label>
+    <label>Effort: <select id="effort-research">
+      <option value="">default</option>
+      <option value="low">low</option>
+      <option value="medium">medium</option>
+      <option value="high">high</option>
+    </select></label>
+    <span class="hint">Runs <code>claude -p</code> in the background with read-only and web tools, capped at $1 per run.</span>
+  </div>
+  <div class="output" id="output-research"></div>
+</div>
+
+<div id="runs"><h2>Recent Runs</h2><div id="runs-list"></div></div>
+
+<script>
+function toggleOpts(id) {
+  document.getElementById('opts-' + id).classList.toggle('open');
+}
+
+async function fire(id) {
+  const btn = document.querySelector(`#skill-${id} .btn-run`);
+  const status = document.getElementById('status-' + id);
+  const output = document.getElementById('output-' + id);
+  const question = document.getElementById('question-' + id).value.trim();
+  const model = document.getElementById('model-' + id)?.value || '';
+  const effort = document.getElementById('effort-' + id)?.value || '';
+
+  if (!question) {
+    status.className = 'status failed';
+    status.textContent = 'enter a question first';
+    return;
+  }
+  btn.disabled = true;
+  status.className = 'status running';
+  status.textContent = 'running…';
+  output.className = 'output';
+  output.textContent = '';
+
+  try {
+    const res = await fetch('/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ skill: id, question, model, effort }),
+    });
+    const data = await res.json();
+    const ok = res.ok && data.ok;
+    status.className = ok ? 'status done' : 'status failed';
+    status.textContent = ok ? `done (${(data.duration_ms / 1000).toFixed(1)}s)` : 'failed';
+    output.className = 'output open';
+    output.textContent = ok ? (data.output || '(no output)') : (data.error || 'unknown error');
+  } catch (e) {
+    status.className = 'status failed';
+    status.textContent = 'connection failed';
+    output.className = 'output open';
+    output.textContent = 'Is the server running? Start it with: node button-runner/server.js';
+  }
+
+  btn.disabled = false;
+  loadRuns();
+}
+
+async function loadRuns() {
+  try {
+    const res = await fetch('/runs');
+    const runs = await res.json();
+    const list = document.getElementById('runs-list');
+    list.replaceChildren(...runs.reverse().map((r) => {
+      const row = document.createElement('div');
+      row.className = 'run-entry';
+      const secs = ((r.duration_ms || 0) / 1000).toFixed(1);
+      row.textContent = `${String(r.ts).slice(0, 19)} | ${r.ok ? '✓' : '✗'} | ${String(r.prompt || '').slice(0, 40)} | ${r.model || ''} | ${secs}s`;
+      return row;
+    }));
+  } catch {}
+}
+
+loadRuns();
+</script>
+</body>
+</html>

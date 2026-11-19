@@ -14,6 +14,9 @@
     "@agentic-os/core": "*",
     "@agentic-os/storage": "*",
     "@agentic-os/config": "*",
+    "@agentic-os/runtime": "*",
+    "@agentic-os/hub": "*",
+    "zod": "^3.24.0",
     "hono": "^4.7.0",
     "@hono/node-server": "^1.14.0"
   },

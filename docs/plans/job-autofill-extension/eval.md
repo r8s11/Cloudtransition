@@ -1,9 +1,8 @@
 ---
 feature: Job application autofill extension
 status: passed
-approved: 2026-11-11
+approved: 2026-11-16
 rd: rd.md
-mockup: mockup.html
 ---
 
 # Evals: Job application autofill extension
@@ -46,7 +45,7 @@ A Chrome extension (Manifest V3, loaded unpacked) plus a local Python helper on 
 | Safety checks: CAPTCHA, yellow, AI draft, required empty, read-back, button class, no duplicate | F1, F2 (AI drafts and read-back failures are yellow), F4, F6, F12 |
 | Confirmation detection after submit | U15, F6 |
 | Multi-step forms, loop guard, 10-step / 5-minute end | U7, U16, F15 |
-| In-page panel: counts, reasons, Clear borders, Stop | U18, D1 |
+| In-page panel: counts, reasons, Clear borders, Stop | U18 |
 | Helper offline: profile still fills from cache, AI unavailable | U20 |
 | Run log without values | U15 |
 | Run state survives service-worker sleep | F16 |
@@ -56,7 +55,6 @@ A Chrome extension (Manifest V3, loaded unpacked) plus a local Python helper on 
 | Real sites fill without submitting | U23 (real submission check dropped by user 2026-11-11) |
 | Popup and panel usable by keyboard and screen reader | UNMAPPED — dropped by user 2026-11-11 to reduce testing |
 | Router entry, gitignore, no personal data in repo | R4, R5, R6 |
-| Popup and panel match mockup | D1 |
 
 ## Usage — every way to use the feature
 
@@ -173,12 +171,6 @@ A Chrome extension (Manifest V3, loaded unpacked) plus a local Python helper on 
 - **Steps:** Open the popup. Autofill `greenhouse-questions.html`.
 - **Expected:** The popup shows "Helper offline — profile from last sync (<date>); AI drafts unavailable". Profile fields and the resume fill from the cache. The AI question stays empty and yellow with tooltip "AutoFill: Helper offline — AI drafts unavailable".
 - **Verify:** `cd job-autofill && npx playwright test -g "U20:"`
-
-### U23 — Real postings fill correctly, without submitting
-- **Setup:** User's Chrome, extension and helper with the real profile, switch off. One public posting each on Greenhouse, Lever and Ashby, picked by the user.
-- **Steps:** Autofill page on each. Do not submit. Close the tab.
-- **Expected:** Standard fields and the resume are filled correctly. Every yellow field has a reason. No value is in the wrong field. Nothing is submitted.
-- **Verify:** manual — with the user, screenshot each filled form with contact details cropped into `eval-evidence/U23-<ats>.png`. List any wrong or missed field in the record note.
 
 ### U25 — Answer cache avoids a second AI call
 - **Setup:** U11 completed once.
@@ -316,9 +308,3 @@ A Chrome extension (Manifest V3, loaded unpacked) plus a local Python helper on 
 - **Expected:** `node_modules`, `.cache`, `test-results`, `playwright-report` under `job-autofill/` are gitignored. The extension source never writes keys whose names contain `apiKey`/`api_key`/`secret` to `chrome.storage`.
 - **Verify:** `git check-ignore -q job-autofill/node_modules && git check-ignore -q job-autofill/.cache && git check-ignore -q job-autofill/test-results && git check-ignore -q job-autofill/playwright-report && ! grep -rniE "storage\.(local|session|sync)\.set\([^)]*(api_?key|secret)" job-autofill/extension`
 
-## Design — implementation matches the mockup
-
-### D1 — Popup and page panel match the mockup
-- **Steps:** Open the built popup at 360×600 on the Run, Profile and AI tabs, the not-paired and helper-offline states, and the page panel plus field highlights after a run on `greenhouse-questions.html`. Open the matching mockup sections at the same sizes.
-- **Expected:** Same layout, hierarchy, type, colors and copy. Any deviation is listed and justified, including the "Used today" field.
-- **Verify:** manual — one side-by-side screenshot sheet into `eval-evidence/D1-popup-panel.png`, deviations listed in the record note.

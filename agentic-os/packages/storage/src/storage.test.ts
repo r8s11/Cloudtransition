@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { Database, SqliteMissionRepository, SqlitePlanRepository, SqliteTransitionRepository, SqliteApprovalRepository } from "./index.js";
+import { Database, MIGRATIONS, SqliteMissionRepository, SqlitePlanRepository, SqliteTransitionRepository, SqliteApprovalRepository } from "./index.js";
 import { createMission, transitionMission, parsePlan } from "@agentic-os/core";
 
 const T0 = new Date("2026-08-29T12:00:00.000Z");
@@ -43,7 +43,7 @@ describe("Database initialization + migration tracking", () => {
       fileDb.prepare("SELECT COUNT(*) AS c FROM migrations").get() as { c: number }
     ).c;
     expect(count2).toBe(count1);
-    expect(count2).toBe(1);
+    expect(count2).toBe(MIGRATIONS.length);
     fileDb.close();
   });
 
@@ -57,7 +57,7 @@ describe("Database initialization + migration tracking", () => {
       const c = (
         b.prepare("SELECT COUNT(*) AS c FROM migrations").get() as { c: number }
       ).c;
-      expect(c).toBe(1);
+      expect(c).toBe(MIGRATIONS.length);
       a.close();
       b.close();
     } finally {

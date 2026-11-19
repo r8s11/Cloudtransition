@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>ARMS weekly review</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to review</a>
+
+<header class="masthead">
+  <div class="masthead-bar">
+    <div class="masthead-brand">
+      <span class="brand-name">ARMS review</span>
+      <span class="brand-issue">Weekly workspace review</span>
+    </div>
+    <div class="masthead-actions">
+      <a class="btn btn-on-ground" id="artifacts-link" href="/artifacts/index.html" hidden>Artifacts</a>
+      <span class="masthead-date" id="today"></span>
+    </div>
+  </div>
+  <p class="masthead-note">Local only (127.0.0.1). No model calls. Feedback is parked here and never edits a skill.</p>
+</header>
+
+<div id="live" class="sr-only" role="status" aria-live="polite"></div>
+
+<div class="sheet-layout">
+  <nav class="fold-column" aria-label="Review steps">
+    <div class="fold-column-header">
+      <p class="fold-column-kicker">The week, in folds</p>
+    </div>
+    <ol class="fold-steps">
+      <li><a href="#report" data-step="report"><span class="step-num">1</span><span class="step-label">Routine report</span></a></li>
+      <li><a href="#suggestions" data-step="suggestions"><span class="step-num">2</span><span class="step-label">Suggestions &amp; cart</span><span class="step-count" id="cart-count" aria-label="items in cart">0</span></a></li>
+      <li><a href="#memory" data-step="memory"><span class="step-num">3</span><span class="step-label">Memory</span></a></li>
+      <li><a href="#feedback" data-step="feedback"><span class="step-num">4</span><span class="step-label">Feedback</span><span class="step-count" id="parked-count" aria-label="parked feedback">0</span></a></li>
+    </ol>
+    <details class="fold-keys">
+      <summary>Keyboard</summary>
+      <dl>
+        <dt><kbd>/</kbd></dt><dd>Focus memory search</dd>
+        <dt><kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Enter</kbd></dt><dd>Submit the focused form</dd>
+        <dt><kbd>Tab</kbd></dt><dd>Move between controls</dd>
+      </dl>
+    </details>
+  </nav>
+
+  <main id="main" class="sheet-faces" tabindex="-1">
+
+    <!-- 1. report -->
+    <section class="face" id="report" aria-labelledby="report-h">
+      <header class="face-head">
+        <span class="face-num" aria-hidden="true">1</span>
+        <div>
+          <h1 id="report-h">Routine report</h1>
+          <p class="face-sub" id="report-meta">Loading report…</p>
+        </div>
+        <div class="face-actions">
+          <button type="button" class="btn btn-primary" id="refresh-btn" aria-describedby="refresh-help">Refresh report</button>
+        </div>
+      </header>
+      <p class="hint" id="refresh-help">Runs <code>routines.py run</code> locally with fixed arguments: deterministic checks only, no paid agents.</p>
+      <div id="report-body" aria-live="polite" aria-busy="true"><p class="state">Loading…</p></div>
+    </section>
+
+    <!-- 2. suggestions + cart -->
+    <section class="face" id="suggestions" aria-labelledby="sugg-h">
+      <header class="face-head">
+        <span class="face-num" aria-hidden="true">2</span>
+        <div>
+          <h2 id="sugg-h">Suggestions &amp; cart</h2>
+          <p class="face-sub" id="sugg-meta">Loading suggestions…</p>
+        </div>
+      </header>
+      <p class="hint">Suggestions are proposals derived from repeated local sessions. Selecting one only adds it to the cart; nothing is executed.</p>
+      <div class="two-col">
+        <div>
+          <h3>Repeated work</h3>
+          <div id="sugg-list" aria-live="polite"><p class="state">Loading…</p></div>
+        </div>
+        <div class="cart" aria-labelledby="cart-h">
+          <h3 id="cart-h">Cart <span class="save-state" id="cart-state" role="status"></span></h3>
+          <div id="cart-list"><p class="state">Loading…</p></div>
+          <label class="check"><input type="checkbox" id="cart-with-feedback"> Include parked feedback</label>
+          <div class="row">
+            <button type="button" class="btn btn-primary" id="copy-btn" disabled>Copy selection as Markdown</button>
+            <button type="button" class="btn" id="clear-cart-btn" disabled>Clear cart</button>
+          </div>
+          <label class="field" for="cart-preview">Preview (read-only)</label>
+          <textarea id="cart-preview" readonly rows="8" placeholder="Copy a selection to preview the Markdown here."></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. memory -->
+    <section class="face" id="memory" aria-labelledby="mem-h">
+      <header class="face-head">
+        <span class="face-num" aria-hidden="true">3</span>
+        <div>
+          <h2 id="mem-h">Memory</h2>
+          <p class="face-sub">Query or save through <code>second-brain/brain.py</code>.</p>
+        </div>
+      </header>
+      <div class="two-col">
+        <form id="query-form" novalidate>
+          <h3>Search</h3>
+          <label class="field" for="q">Question <kbd aria-hidden="true">/</kbd></label>
+          <div class="row row-nowrap">
+            <input id="q" name="question" type="search" maxlength="500" autocomplete="off" aria-keyshortcuts="/" required>
+            <button type="submit" class="btn btn-primary" id="q-btn">Search</button>
+          </div>
+          <div id="q-result" aria-live="polite"><p class="state state-idle">Ask a question to read the memory catalogue. Nothing is searched until you submit.</p></div>
+        </form>
+        <form id="remember-form" novalidate>
+          <h3>Save a memory</h3>
+          <label class="field" for="m-title">Title <span class="limit" id="m-title-n"></span></label>
+          <input id="m-title" name="title" maxlength="120" autocomplete="off" required>
+          <label class="field" for="m-summary">One-line summary <span class="limit" id="m-summary-n"></span></label>
+          <input id="m-summary" name="summary" maxlength="500" autocomplete="off" required>
+          <label class="field" for="m-body">Body <span class="limit" id="m-body-n"></span></label>
+          <textarea id="m-body" name="body" rows="6" maxlength="8000" required></textarea>
+          <div class="row">
+            <button type="submit" class="btn btn-primary" id="m-btn">Save memory</button>
+          </div>
+          <div id="m-result" aria-live="polite"></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- 4. feedback -->
+    <section class="face" id="feedback" aria-labelledby="fb-h">
+      <header class="face-head">
+        <span class="face-num" aria-hidden="true">4</span>
+        <div>
+          <h2 id="fb-h">Feedback parking</h2>
+          <p class="face-sub">Saved durably in <code>feedback.json</code>. Skill files are never changed from here.</p>
+        </div>
+      </header>
+      <div class="two-col">
+        <form id="fb-form" novalidate>
+          <h3>Park feedback</h3>
+          <label class="field" for="fb-target">Target skill</label>
+          <input id="fb-target" name="target_skill" list="skill-list" maxlength="80" autocomplete="off" required>
+          <datalist id="skill-list"></datalist>
+          <label class="field" for="fb-principle">Principle <span class="limit">(optional, one line)</span></label>
+          <input id="fb-principle" name="principle" maxlength="300" autocomplete="off">
+          <label class="field" for="fb-comments">Comments</label>
+          <textarea id="fb-comments" name="comments" rows="5" maxlength="4000"></textarea>
+          <div class="row"><button type="submit" class="btn btn-primary" id="fb-btn">Park feedback</button></div>
+          <div id="fb-result" aria-live="polite"></div>
+        </form>
+        <div>
+          <h3>Parked items</h3>
+          <label class="field" for="fb-filter">Show</label>
+          <select id="fb-filter">
+            <option value="parked" selected>Parked</option>
+            <option value="reviewed">Reviewed</option>
+            <option value="dismissed">Dismissed</option>
+            <option value="resolved">Resolved</option>
+            <option value="all">All</option>
+          </select>
+          <div id="fb-list" aria-live="polite"><p class="state">Loading…</p></div>
+          <p class="hint">Applying a principle is a separate, explicit step by the assistant after you approve it. It is then recorded with <code>python3 tools/arms/app.py resolve ID --resolution … --user-approved</code>.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+</body>
+</html>

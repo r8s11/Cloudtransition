@@ -65,6 +65,6 @@ When editing resumes, follow these patterns already established across all varia
 
 ## Current Status
 
-As of June 2026, the user is **employed**: full-time contractor at Ross (computer refresh project, Intune-heavy). **Job search is closed** — no active tailoring needed. The job-search-era tier targeting is preserved in [../plans/job-search-plan-2026-05.md](../plans/job-search-plan-2026-05.md) for re-ignition at contract end.
+As of 2026-11-18, the user is **job searching full-time** (10 applications/week). The Ross contract (computer refresh, NY Ross Buying Office) ended 2026-10-30; `master.md` lists it as "Jun 2026 – Oct 2026". Current standard variants are in `2026-10/` (`devops-cloud`, `it-support-tech`, `service-desk`, `systems-infra`); posting-specific résumés go in `tailored/YYYY-MM/`. Leads and the tracker live in `../interviews/`.
 
-Pending resume work (low urgency): (1) **address update across all variants after the mid-June 2026 move** — note the contact-line convention above may carry a stale address; (2) add the Ross contractor role + Intune/device-management bullets once there's ~a month of material; (3) the next active variants at contract end will likely be `it-engineer` / `service-desk` / `systems-infra`, strengthened by the Ross Intune work.
+Pending resume work: **address update across all variants after the mid-June 2026 move** — the contact-line convention above may carry a stale address.
