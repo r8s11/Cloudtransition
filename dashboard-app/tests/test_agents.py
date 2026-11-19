@@ -344,7 +344,7 @@ def test_build_agents_view_contract(workspace):
 
 
 def test_build_context_includes_agents_view(monkeypatch):
-    import app as dashboard
+    from routes import pages
 
     marker = {
         "agents": [{"slug": "forge"}],
@@ -353,9 +353,9 @@ def test_build_context_includes_agents_view(monkeypatch):
         "agent_scan_files": {},
         "agent_scan_error": "No Scout scan yet.",
     }
-    monkeypatch.setattr(dashboard, "build_agents_view", lambda: marker)
+    monkeypatch.setattr(pages, "build_agents_view", lambda: marker)
 
-    ctx = dashboard.build_context()
+    ctx = pages.build_context()
 
     for key, value in marker.items():
         assert ctx[key] == value

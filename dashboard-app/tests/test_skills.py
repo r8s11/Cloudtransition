@@ -175,7 +175,7 @@ def test_job_reader_definition_denies_every_skill():
 def test_registry_page_renders_read_only(homes, monkeypatch):
     _registry(homes)
     monkeypatch.setattr(run_routes, "_opencode_resolved_agents", lambda: [{"id": "forge", "permissions": BASE}])
-    monkeypatch.setattr(module.forge_agents, "discover_agents",
+    monkeypatch.setattr(agents, "discover_agents",
                         lambda: {"agents": [{"slug": "forge", "discovered": True}]})
     with TestClient(module.app) as client:
         page = client.get("/agents/skills")

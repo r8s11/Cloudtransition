@@ -6,6 +6,7 @@ import io
 import json
 import sys
 import urllib.error
+import urllib.request
 from pathlib import Path
 
 import pytest  # noqa: E402

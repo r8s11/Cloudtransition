@@ -2,9 +2,9 @@
 
 import io
 import json
+import urllib.request
 from datetime import date
 
-import app
 from core import config
 from core.today import brain_summary, live_projects, mission_control_summary
 
