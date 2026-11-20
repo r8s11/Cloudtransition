@@ -18,6 +18,8 @@ spec.loader.exec_module(agent_run)
 
 CSRF = {"X-Requested-With": "XMLHttpRequest"}
 FREE = [{"id": "opencode/some-model-free", "label": "x", "efforts": ["default"]}]
+# The live catalogue can list account-billed models first; they must never be picked.
+CATALOG = [{"id": "openai/gpt-6-sol", "label": "x", "efforts": ["default"]}, *FREE]
 
 
 @pytest.fixture
@@ -28,7 +30,7 @@ def calls(monkeypatch):
     def fake_call(method, path, body=None):
         seen.append((method, path, body))
         if path == "/api/skills/catalog":
-            return {"provider_available": {"opencode": True}, "provider_models": {"opencode": FREE}}
+            return {"provider_available": {"opencode": True}, "provider_models": {"opencode": CATALOG}}
         if method == "POST":
             return {"run": {"id": "r1", "label": "L", "status": "running", "model": "m", "output": None}}
         return {}
@@ -44,6 +46,12 @@ def _posted(calls):
 def test_scout_posts_scout_scan_on_a_free_model(calls, capsys):
     assert agent_run.main(["scout"]) == 0
     assert _posted(calls) == {"skill": "scout-scan", "model": "opencode:opencode/some-model-free"}
+
+
+def test_account_billed_model_is_refused_before_any_run(calls):
+    with pytest.raises(SystemExit, match="not a free model"):
+        agent_run.main(["scout", "--model", "openai/gpt-6-sol"])
+    assert not [c for c in calls if c[0] == "POST"]
 
 
 def test_job_reader_sends_job_id_and_url(calls):

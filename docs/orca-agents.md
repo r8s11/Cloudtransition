@@ -19,7 +19,9 @@ DASH="/Volumes/SANDISK USB/work/Cloudtransition/dashboard-app"
 "$DASH/venv/bin/python" "$DASH/scripts/agent_run.py" <agent> [args] [--wait]
 ```
 
-`scripts/agent_run.py` runs nothing itself. It reads the dashboard's OpenCode catalogue (free models only), picks the first model, and posts the card id and input to `POST /api/skills/run` on `127.0.0.1:8000` with the CSRF header. The dashboard then applies every gate it applies to a button press. The command prints the run id and returns. Add `--wait` to poll every 10 s until the run ends; the command then exits 1 if the run failed. If the dashboard is down or refuses, the command prints the reason and exits non-zero, and nothing runs.
+`scripts/agent_run.py` runs nothing itself. It reads the dashboard's OpenCode catalogue and keeps only free models (id ending `-free` or `:free`). The live catalogue can also list `openai/*` models billed to the ChatGPT account; the script never selects them. It then picks `--model` if that is free, else the first free model, and posts the card id and input to `POST /api/skills/run` on `127.0.0.1:8000` with the CSRF header. The dashboard then applies every gate it applies to a button press. The command prints the run id and returns. Add `--wait` to poll every 10 s until the run ends; the command then exits 1 if the run failed. If the dashboard is down or refuses, the command prints the reason and exits non-zero, and nothing runs.
+
+**Model choice.** On 2026-11-19 every `opencode-go/*` model failed with `ECONNREFUSED` from this Mac, even outside the dashboard, while `opencode/*` models worked. The first free model is `opencode-go/beam-free`, so pass a working model until that changes: `--model opencode/deepseek-v4.1-flash-free`. `opencode/big-pickle` is refused because its id has no free suffix; whether to allow it is the owner's billing decision.
 
 Raw HTTP equivalent (for example `<model>` = `opencode-go/beam-free`, from `GET /api/skills/catalog` → `provider_models.opencode`):
 
@@ -33,7 +35,7 @@ curl -s -X POST http://127.0.0.1:8000/api/skills/run \
 
 | Agent | Command | Card | Input | Results land in | Unattended? |
 | --- | --- | --- | --- | --- | --- |
-| Scout | `agent_run.py scout` | `scout-scan` | none | `workspace/agents/scout/outputs/scan-<today>.{json,md}`; Scout updates its own `memory/index.md` and `log.jsonl` | Yes. Free search-and-rank, reads no full postings |
+| Scout | `agent_run.py scout --model opencode/deepseek-v4.1-flash-free` | `scout-scan` | none | `workspace/agents/scout/outputs/scan-<today>.{json,md}`; Scout updates its own `memory/index.md` and `log.jsonl` | Yes. Free search-and-rank, reads no full postings |
 | Job Reader | `agent_run.py job-reader <job-id> <url>` | `job-reader` | job id (`^[a-z0-9][a-z0-9-]{0,79}$`) and one http(s) URL | The agent writes only `staging/<run id>/`. The dashboard validates it, publishes `workspace/agents/job-reader/outputs/<job id>.json` atomically, appends `jd_read` or `jd_read_failed` to `memory/log.jsonl`, and deletes the staging folder | **No.** Only for one job Roosevelt picked |
 | CV Adapter (base) | `agent_run.py cv-adapter base` | `cv-base` | none | `workspace/agents/cv-adapter/outputs/base-cv.json`, memory event | **No.** Rebuilds the base CV that every tailoring depends on. Run only when `resume/master.md` changed |
 | CV Adapter (tailor) | `agent_run.py cv-adapter tailor <job-id>` | `cv-tailor` | job id; needs `base-cv.json` and that job's Job Reader output | `workspace/agents/cv-adapter/outputs/tailored-<job id>.{json,md}`, memory event | **No.** Only for one job Roosevelt picked |
@@ -55,4 +57,12 @@ curl -s -X POST http://127.0.0.1:8000/api/skills/run \
 
 ## Verified
 
-2026-11-19: `agent_run.py job-reader` with no arguments exited 2 and made no call; with a bad URL, the dashboard returned 400 and recorded no run. `agent_run.py scout` started run `bcabea63b9f342d0b39c68f70a176f09` (`opencode-go/beam-free`), which appeared in `/api/skills/runs` and on the Run tab. `dashboard-app/tests/test_agent_run.py` covers the mapping and both refusals without a model call.
+2026-11-19:
+
+- `agent_run.py job-reader` with no arguments exited 2 and made no call.
+- With a bad URL, the dashboard returned 400 and recorded no run.
+- `--model openai/gpt-6-sol` was refused before any run started.
+- `agent_run.py scout --model opencode/deepseek-v4.1-flash-free --wait` ran `79de17e696c646ca9152526683c8b34a`. The definition check was `matched`, it exited 0 after 478 s, and it appeared in `/api/skills/runs` and on the Run tab.
+- Two earlier attempts on `opencode-go/*` models failed with `ECONNREFUSED` from that provider.
+
+`dashboard-app/tests/test_agent_run.py` covers the mapping, both refusals and the account-model refusal without a model call.

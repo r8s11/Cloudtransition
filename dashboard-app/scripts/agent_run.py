@@ -13,6 +13,9 @@ this process, and the dashboard must be running on 127.0.0.1:8000.
   forge                        refused: Forge has no dashboard runner
 
 Add --wait to block until the run finishes and exit 1 if it failed.
+Only free models (id ending -free or :free) are ever sent: the dashboard's
+OpenCode catalogue may also list openai/* models billed to the ChatGPT
+account, and this script never selects them. --model picks another free one.
 """
 
 from __future__ import annotations
@@ -50,14 +53,22 @@ def _call(method: str, path: str, body: dict | None = None):
         raise SystemExit(f"Dashboard not reachable at {DASHBOARD} ({exc}). Nothing ran.")
 
 
-def _free_opencode_model() -> str:
-    """First model in the dashboard's OpenCode catalogue; the catalogue is free-only."""
+def _is_free(model_id: str) -> bool:
+    return model_id.endswith("-free") or model_id.endswith(":free")
+
+
+def _free_opencode_model(wanted: str | None) -> str:
+    """A free model from the dashboard's OpenCode catalogue: `wanted`, else the first."""
     catalog = _call("GET", "/api/skills/catalog")
     if not catalog.get("provider_available", {}).get("opencode"):
         reason = catalog.get("provider_unavailable_reason", {}).get("opencode")
         raise SystemExit(f"OpenCode unavailable on the dashboard: {reason}. Nothing ran.")
-    models = catalog["provider_models"]["opencode"]
-    return f"opencode:{models[0]['id']}"
+    free = [m["id"] for m in catalog["provider_models"]["opencode"] if _is_free(m["id"])]
+    if wanted is not None and wanted not in free:
+        raise SystemExit(f"{wanted} is not a free model in the dashboard catalogue. Nothing ran.")
+    if not free:
+        raise SystemExit("The dashboard lists no free OpenCode model. Nothing ran.")
+    return f"opencode:{wanted or free[0]}"
 
 
 def _build(args: argparse.Namespace) -> tuple[str, str | None]:
@@ -85,23 +96,26 @@ def _wait(run_id: str) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # --wait/--model are accepted after the agent arguments, where callers put them.
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--wait", action="store_true", help="wait for the run to finish")
+    common.add_argument("--model", help="free OpenCode model id, e.g. opencode-go/hy4-flash-free")
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="agent", required=True)
-    sub.add_parser("scout")
-    jr = sub.add_parser("job-reader")
+    sub.add_parser("scout", parents=[common])
+    jr = sub.add_parser("job-reader", parents=[common])
     jr.add_argument("job_id", help="job id, e.g. acme-support-1")
     jr.add_argument("url", help="one posting URL")
     cv = sub.add_parser("cv-adapter")
     steps = cv.add_subparsers(dest="step", required=True)
-    steps.add_parser("base")
-    tailor = steps.add_parser("tailor")
+    steps.add_parser("base", parents=[common])
+    tailor = steps.add_parser("tailor", parents=[common])
     tailor.add_argument("job_id", help="job id whose Job Reader output exists")
-    sub.add_parser("forge")
-    parser.add_argument("--wait", action="store_true", help="wait for the run to finish")
+    sub.add_parser("forge", parents=[common])
     args = parser.parse_args(argv)
 
     card, card_input = _build(args)
-    body: dict = {"skill": card, "model": _free_opencode_model()}
+    body: dict = {"skill": card, "model": _free_opencode_model(args.model)}
     if card_input is not None:
         body["input"] = card_input
     started = _call("POST", "/api/skills/run", body)["run"]
