@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mockup — Metrics graphs and charts (Orizuru)</title>
+<style>
+@font-face { font-family: "Inter"; src: local("Inter"), local("Inter Variable"), url("../../../dashboard-app/static/fonts/InterVariable.woff2") format("woff2"); font-weight: 100 900; }
+@font-face { font-family: "JetBrains Mono"; src: local("JetBrains Mono"), url("../../../dashboard-app/static/fonts/JetBrainsMono.woff2") format("woff2"); font-weight: 100 800; }
+:root {
+	--vermilion: #b3212e; --vermilion-deep: #8e1a24; --fold-white: #f4ead8;
+	--paper: #f8f1e3; --paper-deep: #efe3cd; --paper-hi: #fdf9ef; --gold: #c9a227;
+	--sumi: #171512; --ink: #211d18; --ink-mid: #4f483c; --ink-muted: #554d41;
+	--border: #d8c9ab; --border-light: #e4dac4;
+	--accent: var(--vermilion); --blue: #38618c; --red: #a8322c; --yellow: #a97e14;
+	--success-ink: #2d613e; --text: var(--ink); --text-mid: var(--ink-mid); --text-muted: var(--ink-muted);
+	--sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; --mono: "JetBrains Mono", "Fira Code", monospace;
+	--radius-sm: 6px; --radius: 10px;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--vermilion-deep); color: var(--text); font: 14px/1.45 var(--sans); }
+.mock-index { background: var(--vermilion); color: var(--fold-white); padding: 16px 24px; }
+.mock-index h1 { margin: 0 0 4px; font-size: 20px; }
+.mock-index p { margin: 0 0 8px; font-size: 13px; max-width: 80ch; }
+.mock-index a { color: var(--fold-white); margin-right: 14px; font-size: 13px; }
+.state { padding: 24px; }
+.state-label { color: var(--fold-white); font: 600 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; margin: 0 0 10px; }
+.state-label span { font-family: var(--sans); text-transform: none; letter-spacing: 0; font-weight: 400; opacity: .85; margin-left: 8px; }
+.face { background: var(--paper); border-radius: var(--radius); padding: 16px; max-width: 1180px; margin: 0 auto; box-shadow: 0 1px 0 var(--border); }
+.face.mobile { max-width: 390px; padding: 12px; }
+h2 { font-size: 20px; margin: 0; } h3 { font-size: 15px; margin: 0; } h4 { font-size: 14px; margin: 0; }
+.page-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px; }
+.page-header p { margin: 2px 0 0; font-size: 12px; color: var(--text-muted); }
+.btn { font: 600 12px var(--sans); color: var(--text); background: var(--paper-hi); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 5px 10px; }
+.muted { color: var(--text-muted); font-size: 12px; }
+.host-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 8px 0 12px; }
+.mobile .host-grid { grid-template-columns: 1fr; }
+.host { background: var(--paper-hi); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 12px; }
+.host[aria-current="true"] { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.host-head { display: flex; justify-content: space-between; align-items: baseline; }
+.host-head h3 { text-transform: capitalize; }
+.badge { font: 600 11px var(--sans); padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; }
+.badge.up { color: var(--success-ink); } .badge.pending { color: var(--yellow); } .badge.down { color: var(--red); }
+.host-sub { font-size: 11px; color: var(--text-muted); margin: 2px 0 8px; }
+.stat { display: grid; grid-template-columns: 92px 1fr 128px; gap: 4px 10px; align-items: center; padding: 6px 0; border-top: 1px dashed var(--border-light); }
+.mobile .stat { grid-template-columns: 80px 1fr; }
+.mobile .stat .spark { grid-column: 1 / -1; }
+.stat dt { font-size: 12px; color: var(--text-mid); } .stat dt small { display: block; color: var(--text-muted); font-size: 10.5px; }
+.stat dd { margin: 0; }
+.value { font: 700 18px/1 var(--mono); font-variant-numeric: tabular-nums; }
+.value small { font: 500 11px var(--mono); color: var(--text-muted); margin-left: 6px; }
+.cbar { position: relative; height: 8px; background: var(--paper-deep); border-radius: 4px; margin-top: 6px; overflow: hidden; }
+.cbar i { position: absolute; inset: 0 auto 0 0; border-radius: 4px; }
+.cbar b { position: absolute; top: -2px; bottom: -2px; width: 1px; background: var(--ink-muted); opacity: .55; }
+.cbar.nodata { background: repeating-linear-gradient(135deg, var(--paper-deep) 0 6px, var(--paper-hi) 6px 12px); }
+.spark { display: block; }
+.spark svg { display: block; width: 100%; height: 30px; }
+.spark span { display: block; font: 10.5px var(--mono); color: var(--text-muted); }
+.fill-cpu { background: var(--accent); } .fill-mem { background: var(--blue); } .fill-disk { background: var(--success-ink); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; padding: 8px 0; border-top: 1px solid var(--border); }
+.toolbar label { font-size: 12px; color: var(--text-mid); }
+.toolbar select { font: 12px var(--sans); background: var(--paper-hi); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3px 6px; color: var(--text); }
+.section { border-top: 1px solid var(--border); padding: 12px 0; }
+.sec-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.sec-head p, .sec-head span { margin: 0; font-size: 11.5px; color: var(--text-muted); }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.mobile .grid2 { grid-template-columns: 1fr; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11px; color: var(--text-muted); margin: 4px 0; }
+.legend .k::before { content: ""; display: inline-block; width: 16px; border-top: 2px solid; margin-right: 5px; vertical-align: middle; }
+.k.cpu { color: var(--accent); } .k.mem { color: var(--blue); } .k.mem::before { border-top-style: dashed; } .k.disk { color: var(--success-ink); } .k.disk::before { border-top-style: dotted; }
+.k.rx { color: var(--blue); } .k.tx { color: var(--accent); } .k.tx::before { border-top-style: dashed; }
+.k.rd { color: var(--success-ink); } .k.wr { color: var(--yellow); } .k.wr::before { border-top-style: dashed; }
+.sw::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; border: 1px solid var(--ink-muted); }
+.sw.err::before { background: var(--red); } .sw.warn::before { background: var(--yellow); } .sw.info::before { background: var(--blue); }
+.sw.unk::before { background: repeating-linear-gradient(135deg, var(--ink-muted) 0 2px, var(--paper-hi) 2px 5px); }
+.sw.up::before { background: var(--success-ink); } .sw.down::before { background: var(--red); background-image: linear-gradient(45deg, transparent 45%, var(--paper-hi) 45% 55%, transparent 55%); } .sw.gap::before { background: transparent; border-style: dashed; }
+figure.chart { margin: 4px 0 0; }
+figure.chart svg { display: block; width: 100%; }
+figcaption { font-size: 12px; color: var(--text-mid); margin-bottom: 2px; }
+.grid-line { stroke: var(--border); stroke-width: 1; }
+.axis { fill: var(--text-muted); font: 10.5px var(--sans); }
+.axis-mono { fill: var(--text-muted); font: 10.5px var(--mono); }
+details.alt { margin-top: 4px; font-size: 12px; }
+details.alt summary { cursor: pointer; color: var(--blue); }
+details.alt table { border-collapse: collapse; margin-top: 4px; font: 11.5px var(--mono); }
+details.alt td, details.alt th { border-bottom: 1px solid var(--border-light); padding: 2px 8px; text-align: right; }
+details.alt th:first-child, details.alt td:first-child { text-align: left; }
+.vol { display: grid; grid-template-columns: minmax(90px, 160px) 1fr minmax(150px, auto); gap: 4px 12px; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--border-light); }
+.mobile .vol { grid-template-columns: 1fr; }
+.vol .name { font: 600 12.5px var(--mono); } .vol .name small { display: block; font: 400 10.5px var(--mono); color: var(--text-muted); }
+.vol .nums { font: 12px var(--mono); text-align: right; } .mobile .vol .nums { text-align: left; }
+.vbar { position: relative; height: 14px; background: var(--paper-deep); border: 1px solid var(--border-light); border-radius: 3px; overflow: hidden; }
+.vbar i { position: absolute; inset: 0 auto 0 0; background: var(--success-ink); }
+.vbar i.high { background: var(--yellow); } .vbar i.crit { background: var(--red); }
+.vbar b { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px dashed var(--ink-muted); }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.seg button { font: 600 11.5px var(--sans); background: var(--paper-hi); color: var(--text-mid); border: 0; padding: 4px 10px; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper-hi); }
+.rank { display: flex; flex-direction: column; gap: 3px; font-size: 12px; margin: 0; padding: 0; list-style: none; }
+.ritem { display: grid; grid-template-columns: minmax(120px, 230px) 1fr 84px; gap: 2px 10px; align-items: center; }
+.mobile .ritem { grid-template-columns: minmax(0, 1fr) 84px; grid-template-areas: "name val" "bar bar"; }
+.mobile .ritem .rname { grid-area: name; } .mobile .ritem .rval { grid-area: val; } .mobile .ritem .rbar { grid-area: bar; }
+.rank .rname { font: 12px var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank .rval { font: 600 12px var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.rbar { height: 10px; background: var(--paper-deep); border-radius: 2px; position: relative; }
+.rbar i { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 2px; }
+.empty { font-size: 12.5px; color: var(--text-muted); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 10px 12px; background: var(--paper-hi); margin: 6px 0; }
+.empty strong { color: var(--text-mid); }
+.error { border-color: var(--red); color: var(--red); }
+.tl { display: grid; grid-template-columns: 120px 1fr 70px; gap: 3px 10px; align-items: center; font-size: 12px; }
+.mobile .tl { grid-template-columns: 84px 1fr 56px; }
+.tl .svc { font: 12px var(--mono); } .tl .lat { font: 12px var(--mono); text-align: right; }
+.tl svg { display: block; width: 100%; height: 12px; }
+.skeleton { background: var(--paper-deep); border-radius: 4px; }
+.sk-line { height: 10px; margin: 6px 0; } .sk-block { height: 120px; margin: 6px 0; }
+.foot { font-size: 11px; color: var(--text-muted); margin: 6px 0 0; }
+@media (prefers-reduced-motion: no-preference) { .cbar i, .vbar i, .rbar i { transition: width .4s ease; } }
+</style>
+</head>
+<body>
+<header class="mock-index">
+	<h1>Metrics graphs and charts — mockup</h1>
+	<p>Design bar for <code>docs/plans/metrics-charts/eval.md</code>. Orizuru washi faces, existing series colors, hand-drawn SVG. Data is real Parrot/Flatbush telemetry captured from Prometheus and Loki for 2026-11-05 20:50 → 2026-11-06 02:50 local (6 h window, 7.5-min buckets); failure states are simulated.</p>
+	<nav aria-label="Mockup states"><a href="#state-default">A · Default (desktop, Parrot, 6 h)</a><a href="#state-loading">B · Loading</a><a href="#state-partial">C · Partial / not exported (Flatbush)</a><a href="#state-error">D · Source errors</a><a href="#state-mobile">E · Mobile 390 px</a></nav>
+</header>
+
+<section class="state" id="state-default"><p class="state-label">A · Default<span>Desktop ≥ 1100 px · Parrot selected · 6 h history</span></p><div class="face" data-render="full" data-host="parrot"></div></section>
+<section class="state" id="state-loading"><p class="state-label">B · Loading<span>First load: snapshot and history requests in flight</span></p><div class="face" data-render="loading"></div></section>
+<section class="state" id="state-partial"><p class="state-label">C · Partial / not exported<span>Flatbush selected · host exporter pending · only Loki data present</span></p><div class="face" data-render="full" data-host="flatbush"></div></section>
+<section class="state" id="state-error"><p class="state-label">D · Source errors<span>Prometheus range query failed, Loki unreachable · current snapshot still renders</span></p><div class="face" data-render="error" data-host="parrot"></div></section>
+<section class="state" id="state-mobile"><p class="state-label">E · Mobile<span>390 px · same content stacked · Parrot · 6 h</span></p><div class="face mobile" data-render="full" data-host="parrot"></div></section>
+
+<script>
+/* Real captured telemetry (2026-11-05 20:50 → 2026-11-06 02:50 local, Parrot Prometheus/Loki). */
+const DATA = {"window":{"label":"6h","step":450,"times":[1793929800,1793930250,1793930700,1793931150,1793931600,1793932050,1793932500,1793932950,1793933400,1793933850,1793934300,1793934750,1793935200,1793935650,1793936100,1793936550,1793937000,1793937450,1793937900,1793938350,1793938800,1793939250,1793939700,1793940150,1793940600,1793941050,1793941500,1793941950,1793942400,1793942850,1793943300,1793943750,1793944200,1793944650,1793945100,1793945550,1793946000,1793946450,1793946900,1793947350,1793947800,1793948250,1793948700,1793949150,1793949600,1793950050,1793950500,1793950950,1793951400]},"hosts":{"parrot":{"status":"up","address":"100.105.235.49","os":"Parrot Security 7.4 (echo)","uptime":"26 d 11 h","cpu":{"percent":28.5,"capacity":"4 threads"},"memory":{"percent":56.5,"capacity":"4.3 / 7.6 GB"},"disk":{"percent":84.5,"capacity":"386 / 457 GB"}},"flatbush":{"status":"pending","address":"100.67.14.72"}},"history":{"cpu":[27.8,27.1,28.2,27.3,28.2,27.9,28.2,27.9,28.1,27.9,28.8,28.2,28.4,28.1,28.5,28.0,28.6,27.6,29.8,27.5,27.7,28.2,28.6,28.5,28.6,27.6,28.3,28.3,28.1,28.2,29.2,28.4,27.9,28.3,29.0,28.0,28.2,27.9,29.2,28.2,28.8,27.6,29.1,28.2,28.4,27.9,28.7,27.6,28.3],"memory":[60.7,60.3,60.5,60.8,61.1,60.6,60.2,60.2,61.1,60.5,59.9,59.6,59.3,59.1,58.3,57.2,57.5,57.3,54.2,54.6,55.2,55.1,55.2,55.2,54.7,54.9,54.6,54.8,57.7,54.8,55.6,54.9,54.8,54.8,55.5,55.3,55.6,54.8,56.6,55.9,56.5,56.5,56.9,56.0,55.9,55.8,56.0,55.8,56.9],"disk":[84.6,84.6,84.6,84.6,84.6,84.6,84.6,84.6,84.6,84.6,84.7,84.7,84.7,84.7,84.7,84.7,84.7,84.7,84.7,84.7,84.7,84.7,84.7,84.7,84.7,84.7,84.4,84.4,84.4,84.4,84.4,84.4,84.4,84.4,84.4,84.4,84.4,84.4,84.4,84.5,84.5,84.5,84.5,84.5,84.5,84.5,84.5,84.5,84.5]},"network":{"phys_rx":[22220,21376,23644,20034,20098,26401,20761,19848,21060,22026,24656,20533,20873,27079,20556,20535,20486,21740,926001,20505,21292,26719,20252,19862,21290,22428,25290,20297,21064,26445,21260,21529,21179,20825,26622,22034,22262,25831,22291,20645,26174,22686,25352,20446,22604,28116,21766,21446,21663],"phys_tx":[2463,2561,2485,2178,2079,2868,2294,2365,3090,3283,3071,2504,2915,3529,2711,3178,2858,2712,12438,2394,2450,3128,2816,2918,2997,3094,3268,2849,3038,3640,3014,3067,2883,3327,28787,13010,6327,3229,6159,15916,60122,6623,3190,6084,3051,3771,3150,3133,3094],"ts_rx":[17512,16068,15844,16479,16004,16449,16424,15984,16898,16643,16768,17114,16520,17170,16145,16664,16128,16524,16152,16515,16593,16515,15643,15664,16500,17049,17187,16644,16261,16159,16566,17088,16952,15657,17942,17842,17556,15963,17661,16657,19172,16942,17223,16521,17843,17840,16982,17413,16885],"ts_tx":[484,469,494,484,463,489,483,478,1221,1005,1033,757,1000,937,722,1083,948,583,589,561,554,581,861,899,974,981,1130,962,994,1018,1033,976,911,976,24292,9992,3750,593,3767,12771,52795,4044,992,3855,975,1054,1089,1015,964],"sda_r":[2232092,2295665,2745807,2058232,3438913,2668134,2273098,3023607,1899300,3513744,3047951,4163705,2067282,2834538,3013917,2137930,2966009,2466666,2679967,1994092,1723891,3108352,3189707,3739739,3138128,1665167,2394637,3327712,2222201,2657354,2873121,2665282,1931719,3569423,3109558,3024938,1417019,2616853,4363697,3975730,1981622,1937681,3707274,4198643,3267880,2309750,2726404,1890009,2442612],"sda_w":[659866,630331,794897,643919,917546,837723,791423,903047,658151,884299,858054,812631,798629,782017,1087438,583847,823809,654574,4429627,584588,527870,869213,802437,1014412,922571,529797,793884,663249,716208,849219,804633,791302,674186,902436,870798,783279,491763,719928,1089874,1053305,665218,603326,895204,760127,812980,682636,716466,700353,662141]},"volumes":[{"name":"/","device":"/dev/sda2","total":490512158720.0,"avail":75979730944.0,"used":84.5,"readonly":false},{"name":"/boot/efi","device":"/dev/sda1","total":313929728.0,"avail":313597952.0,"used":0.1,"readonly":false}],"containers":[{"name":"observability-cadvisor-1","cpu":0.1319,"mem":225255424.0},{"name":"supabase_pg_meta_Salsa","cpu":0.0211,"mem":14270464.0},{"name":"observability-grafana-1","cpu":0.0158,"mem":364089344.0},{"name":"observability-loki-1","cpu":0.0157,"mem":146231296.0},{"name":"supabase_studio_Salsa","cpu":0.0148,"mem":166379520.0},{"name":"supabase_kong_Salsa","cpu":0.0126,"mem":5029888.0},{"name":"observability-prometheus-1","cpu":0.0113,"mem":202866688.0},{"name":"hindsight","cpu":0.0101,"mem":92221440.0},{"name":"open-webui","cpu":0.0084,"mem":32718848.0},{"name":"observability-alloy-1","cpu":0.0079,"mem":84656128.0},{"name":"devdb","cpu":0.0079,"mem":5988352.0},{"name":"uptime-kuma-uptime-kuma-1","cpu":0.0071,"mem":45121536.0},{"name":"supabase_db_Salsa","cpu":0.0047,"mem":21356544.0},{"name":"supabase_auth_Salsa","cpu":0.004,"mem":9715712.0},{"name":"piggy-api","cpu":0.0038,"mem":9465856.0},{"name":"observability-node-exporter-1","cpu":0.0035,"mem":12734464.0},{"name":"dockhand","cpu":0.0035,"mem":64004096.0},{"name":"observability-docker-proxy-1","cpu":0.0016,"mem":4898816.0},{"name":"piggy","cpu":0.0013,"mem":1945600.0},{"name":"supabase_rest_Salsa","cpu":0.0012,"mem":9351168.0},{"name":"observability-blackbox-1","cpu":0.0011,"mem":19595264.0},{"name":"beszel","cpu":0.0005,"mem":21917696.0},{"name":"beszel-agent","cpu":0.0003,"mem":14159872.0}],"probes":[{"service":"beszel","kind":"http","latency_ms":2.8,"history":"1111111111111111111111111111111111111111111111111"},{"service":"beszel","kind":"tcp","latency_ms":0.8,"history":"1111111111111111111111111111111111111111111111111"},{"service":"cockpit","kind":"tcp","latency_ms":1.6,"history":"1111111111111111111111111111111111111111111111111"},{"service":"dockhand","kind":"tcp","latency_ms":3.0,"history":"1111111111111111111111111111111111111111111111111"},{"service":"grafana","kind":"http","latency_ms":3.2,"history":"1111111111111111111111111111111111111111111111111"},{"service":"hindsight","kind":"tcp","latency_ms":0.5,"history":"1111111111111111111111111111111111111111111111111"},{"service":"loki","kind":"http","latency_ms":4.2,"history":"1111111111111111111111111111111111111111111111111"},{"service":"ovis","kind":"tcp","latency_ms":1.4,"history":"1111111111111111111111111111111111111111111111111"},{"service":"prometheus","kind":"http","latency_ms":1.7,"history":"1111111111111111111111111111111111111111111111111"},{"service":"ssh","kind":"tcp","latency_ms":1.4,"history":"1111111111111111111111111111111111111111111111111"}],"logs":{"parrot":{"unknown":[951,918,903,954,918,971,939,924,946,925,928,942,932,919,957,963,980,932,921,944,933,931,934,922,935,944,978,937,946,918,945,948,957,937,992,950,930,909,920,912,918,925,946,926,943,924,936,953,954]},"flatbush":{"Error":[2,0,0,0,0,0,2,2,0,3,4,3,0,2,1,0,0,3,1,1,0,1,2,0,0,5,4,1,2,0,4,1,3,2,2,0,5,0,2,0,1,0,5,2,6,4,6,6,41],"Information":[936,970,879,949,952,942,934,958,937,973,956,1008,1498,942,934,955,937,960,969,950,960,941,935,947,934,960,954,941,957,938,934,946,937,958,1008,1164,933,936,981,1011,950,989,967,1018,1037,1019,1015,990,2399],"Warning":[130,138,126,152,126,136,125,146,118,133,123,149,121,126,129,142,121,144,125,143,130,125,126,145,108,127,133,113,136,132,130,138,121,144,131,144,145,123,138,128,133,127,137,145,140,132,133,134,94],"unknown":[1447,1311,1324,1338,1398,1342,1412,1352,1397,1346,1402,1350,1323,1416,1319,1435,1320,1408,1346,1400,1346,1313,1430,1311,1426,1346,1462,1322,1442,1309,1325,1433,1324,1420,1320,1403,1326,1396,1408,1295,1404,1313,1429,1324,1359,1387,1414,1439,866]}}};
+
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, text) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); if (text !== undefined) n.textContent = text; return n; };
+const sv = (tag, attrs = {}, text) => { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v)); if (text !== undefined) n.textContent = text; return n; };
+const html = (s) => { const t = document.createElement("template"); t.innerHTML = s.trim(); return t.content; };
+const t2s = (t) => new Date(t * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+const bytes = (v, rate) => { if (!Number.isFinite(v)) return "—"; const u = ["B", "KB", "MB", "GB", "TB"]; let i = 0; while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; } return (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + " " + u[i] + (rate ? "/s" : ""); };
+const times = () => DATA.window.times;
+const DRAW = new WeakMap();
+function deferred(fig, fn) { DRAW.set(fig, fn); fig.dataset.draw = "1"; return fig; }
+
+function sparkline(values, cls, label) {
+	/* Auto-scaled, but never tighter than a 10-point band so small jitter is not exaggerated. */
+	const w = 160, h = 30, mn = Math.min(...values), mx = Math.max(...values), c = (mn + mx) / 2, span = Math.max(10, mx - mn), lo = Math.max(0, c - span / 2), hi = Math.min(100, lo + span), pad = 0;
+	const y = (v) => h - 3 - (v - (lo - pad)) / ((hi + pad) - (lo - pad)) * (h - 6);
+	const d = values.map((v, i) => (i ? "L" : "M") + (i / (values.length - 1) * w).toFixed(1) + "," + y(v).toFixed(1)).join("");
+	const svg = sv("svg", { viewBox: `0 0 ${w} ${h}`, preserveAspectRatio: "none", role: "img", "aria-label": `${label}: ${mn}–${mx}% over 6 hours` });
+	svg.append(sv("path", { d, fill: "none", stroke: `var(${cls})`, "stroke-width": 1.5, "vector-effect": "non-scaling-stroke" }));
+	return svg;
+}
+
+function hostCard(name, current, historyOk = true) {
+	const h = DATA.hosts[name];
+	const card = el("article", { class: "host", "aria-current": String(name === current) });
+	const head = el("div", { class: "host-head" });
+	head.append(el("h3", {}, name), el("span", { class: "badge " + (h.status === "up" ? "up" : "pending") }, h.status === "up" ? "Up" : "Pending"));
+	card.append(head, el("p", { class: "host-sub" }, h.status === "up" ? `${h.address} · ${h.os} · uptime ${h.uptime}` : `${h.address} · exporter not reporting yet`));
+	const dl = el("dl");
+	for (const [key, label, sub, cls, fill] of [["cpu", "CPU", "5 min average", "--accent", "fill-cpu"], ["memory", "Memory", "used / total", "--blue", "fill-mem"], ["disk", "System volume", "/ · used / total", "--success-ink", "fill-disk"]]) {
+		const row = el("div", { class: "stat" });
+		const dt = el("dt", {}, label); dt.append(el("small", {}, sub)); row.append(dt);
+		const dd = el("dd");
+		if (h.status !== "up") {
+			dd.append(html(`<span class="value">—</span><div class="cbar nodata" role="img" aria-label="${label}: no telemetry"></div>`));
+			row.append(dd, el("dd", { class: "spark" })); row.lastChild.append(el("span", {}, "No samples yet"));
+		} else {
+			const s = h[key];
+			dd.append(html(`<span class="value">${s.percent.toFixed(1)}%<small>${s.capacity}</small></span>`));
+			const bar = el("div", { class: "cbar", role: "img", "aria-label": `${label} ${s.percent.toFixed(1)} percent used` });
+			bar.append(el("i", { class: fill, style: `width:${s.percent}%` }), el("b", { style: "left:80%" }), el("b", { style: "left:90%" }));
+			dd.append(bar);
+			const sp = el("dd", { class: "spark" });
+			if (historyOk) { sp.append(sparkline(DATA.history[key], cls, label)); const vals = DATA.history[key]; sp.append(el("span", {}, `6 h · ${Math.min(...vals)}–${Math.max(...vals)}%`)); }
+			else sp.append(el("span", {}, "History unavailable"));
+			row.append(dd, sp);
+		}
+		dl.append(row);
+	}
+	card.append(dl);
+	return card;
+}
+
+function timeAxis(svg, x0, x1, y) {
+	const ts = times();
+	for (const [i, anchor] of [[0, "start"], [Math.floor(ts.length / 2), "middle"], [ts.length - 1, "end"]]) {
+		const x = x0 + i / (ts.length - 1) * (x1 - x0);
+		svg.append(sv("text", { x, y, "text-anchor": anchor, class: "axis" }, t2s(ts[i])));
+	}
+}
+
+/* Mirrored rate chart: one direction above the baseline, the other below; own scale per chart. */
+function mirrored(title, up, down, upCls, downCls, upLabel, downLabel) {
+	const fig = el("figure", { class: "chart" });
+	fig.append(el("figcaption", {}, title));
+	return deferred(fig, (W) => {
+	const H = 150, x0 = 64, x1 = W - 6, mid = 66, half = 52;
+	const max = Math.max(...up, ...down) || 1;
+	const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${title}: ${upLabel} peak ${bytes(Math.max(...up), true)}, ${downLabel} peak ${bytes(Math.max(...down), true)}` });
+	svg.append(sv("line", { x1: x0, x2: x1, y1: mid, y2: mid, class: "grid-line" }), sv("line", { x1: x0, x2: x1, y1: mid - half, y2: mid - half, class: "grid-line", "stroke-dasharray": "2 3" }), sv("line", { x1: x0, x2: x1, y1: mid + half, y2: mid + half, class: "grid-line", "stroke-dasharray": "2 3" }));
+	svg.append(sv("text", { x: x0 - 6, y: mid - half + 4, "text-anchor": "end", class: "axis-mono" }, bytes(max, true)), sv("text", { x: x0 - 6, y: mid + 4, "text-anchor": "end", class: "axis-mono" }, "0"), sv("text", { x: x0 - 6, y: mid + half + 4, "text-anchor": "end", class: "axis-mono" }, bytes(max, true)));
+	const path = (vals, sign) => vals.map((v, i) => (i ? "L" : "M") + (x0 + i / (vals.length - 1) * (x1 - x0)).toFixed(1) + "," + (mid - sign * v / max * half).toFixed(1)).join("");
+	const area = (vals, sign) => path(vals, sign) + `L${x1},${mid}L${x0},${mid}Z`;
+	svg.append(sv("path", { d: area(up, 1), fill: `var(${upCls})`, opacity: 0.12 }), sv("path", { d: path(up, 1), fill: "none", stroke: `var(${upCls})`, "stroke-width": 1.6 }));
+	svg.append(sv("path", { d: area(down, -1), fill: `var(${downCls})`, opacity: 0.10 }), sv("path", { d: path(down, -1), fill: "none", stroke: `var(${downCls})`, "stroke-width": 1.6, "stroke-dasharray": "5 3" }));
+	svg.append(sv("text", { x: x0 + 4, y: 12, class: "axis" }, "↑ " + upLabel), sv("text", { x: x0 + 4, y: mid + half - 2, class: "axis" }, "↓ " + downLabel));
+	timeAxis(svg, x0, x1, H - 4);
+	fig.insertBefore(svg, fig.querySelector("details"));
+	}, mirroredTable(fig, up, down, upLabel, downLabel));
+}
+function mirroredTable(fig, up, down, upLabel, downLabel) {
+	const det = el("details", { class: "alt" }); det.append(el("summary", {}, "Data table"));
+	const tb = el("table"); tb.append(html(`<tr><th>Time</th><th>${upLabel}</th><th>${downLabel}</th></tr>`));
+	times().forEach((t, i) => { if (i % 8 === 0) tb.append(html(`<tr><td>${t2s(t)}</td><td>${bytes(up[i], true)}</td><td>${bytes(down[i], true)}</td></tr>`)); });
+	det.append(tb); fig.append(det);
+}
+
+function storage(vols) {
+	const wrap = el("div");
+	for (const v of vols) {
+		const row = el("div", { class: "vol" });
+		const cls = v.used >= 90 ? "crit" : v.used >= 80 ? "high" : "";
+		row.append(html(`<div class="name">${v.name}<small>${v.device}${v.readonly ? " · read-only" : ""}</small></div>`));
+		const bar = el("div", { class: "vbar", role: "img", "aria-label": `${v.name} ${v.used} percent used, ${bytes(v.avail)} available of ${bytes(v.total)}` });
+		bar.append(el("i", { class: cls, style: `width:${Math.max(v.used, 0.6)}%` }), el("b", { style: "left:80%" }), el("b", { style: "left:90%" }));
+		row.append(bar, html(`<div class="nums"><strong>${v.used.toFixed(1)}%</strong> used · ${bytes(v.avail)} free of ${bytes(v.total)}</div>`));
+		wrap.append(row);
+	}
+	wrap.append(el("p", { class: "foot" }, "Dashed ticks mark 80 % and 90 %. Bar turns yellow at ≥ 80 %, red at ≥ 90 %; the percentage text carries the same information."));
+	return wrap;
+}
+
+function ranked(items, metric) {
+	const wrap = el("ol", { class: "rank" });
+	const key = metric === "cpu" ? "cpu" : "mem";
+	const sorted = [...items].sort((a, b) => b[key] - a[key]).slice(0, 10), max = sorted[0][key];
+	for (const it of sorted) {
+		const v = it[key], txt = metric === "cpu" ? v.toFixed(3) + " cores" : bytes(v);
+		const li = el("li", { class: "ritem" });
+		li.append(el("span", { class: "rname", title: it.name }, it.name));
+		const bar = el("div", { class: "rbar", "aria-hidden": "true" }); bar.append(el("i", { style: `width:${(v / max * 100).toFixed(1)}%;${metric === "mem" ? "background:var(--blue)" : ""}` }));
+		li.append(bar, el("span", { class: "rval" }, txt)); wrap.append(li);
+	}
+	return wrap;
+}
+
+function timeline(probes, currentOnly = false) {
+	const wrap = el("div", { class: "tl" });
+	for (const p of probes) {
+		wrap.append(el("span", { class: "svc" }, `${p.service} · ${p.kind}`));
+		if (currentOnly) { const up = p.history.endsWith("1"); const b = el("span", {}); b.append(el("span", { class: "badge " + (up ? "up" : "down") }, up ? "Up now" : "Down now")); wrap.append(b, el("span", { class: "lat" }, p.latency_ms.toFixed(1) + " ms")); continue; }
+		const svg = sv("svg", { viewBox: `0 0 ${p.history.length * 4} 12`, preserveAspectRatio: "none", role: "img", "aria-label": `${p.service} ${p.kind}: ${p.history.split("").filter((c) => c === "1").length} of ${p.history.length} intervals up, 0 down` });
+		[...p.history].forEach((c, i) => svg.append(sv("rect", { x: i * 4 + 0.4, y: 1, width: 3.2, height: 10, fill: c === "1" ? "var(--success-ink)" : c === "0" ? "var(--red)" : "none", stroke: c === "-" ? "var(--border)" : "none", "stroke-dasharray": c === "-" ? "1 1" : "" })));
+		wrap.append(svg, el("span", { class: "lat" }, p.latency_ms.toFixed(1) + " ms"));
+	}
+	return wrap;
+}
+
+function logBars(levels) {
+	const order = [["Error", "var(--red)", "err"], ["Warning", "var(--yellow)", "warn"], ["Information", "var(--blue)", "info"], ["unknown", "url(#hatch)", "unk"]];
+	const fig = el("figure", { class: "chart" });
+	fig.append(el("figcaption", {}, "Log lines per 7.5-min interval, by source severity"));
+	return deferred(fig, (W) => {
+	const n = times().length, H = 150, x0 = 52, x1 = W - 6, base = H - 20, top = 10;
+	const totals = Array.from({ length: n }, (_, i) => order.reduce((s, [k]) => s + (levels[k]?.[i] || 0), 0)), max = Math.max(...totals) || 1;
+	const sum = (k) => (levels[k] || []).reduce((a, b) => a + b, 0);
+	const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `Log volume over 6 hours: ${order.map(([k]) => `${k} ${sum(k)}`).join(", ")}` });
+	const defs = sv("defs"); const pat = sv("pattern", { id: "hatch", width: 4, height: 4, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
+	pat.append(sv("rect", { width: 4, height: 4, fill: "var(--paper-deep)" }), sv("line", { x1: 0, y1: 0, x2: 0, y2: 4, stroke: "var(--ink-muted)", "stroke-width": 1.4 })); defs.append(pat); svg.append(defs);
+	svg.append(sv("line", { x1: x0, x2: x1, y1: base, y2: base, class: "grid-line" }), sv("text", { x: x0 - 6, y: top + 4, "text-anchor": "end", class: "axis-mono" }, max.toLocaleString()), sv("text", { x: x0 - 6, y: base + 4, "text-anchor": "end", class: "axis-mono" }, "0"));
+	const bw = (x1 - x0) / n;
+	for (let i = 0; i < n; i++) {
+		let y = base;
+		for (const [k, fill] of order) {
+			const v = levels[k]?.[i] || 0; if (!v) continue;
+			const h = v / max * (base - top); y -= h;
+			svg.append(sv("rect", { x: x0 + i * bw + 0.6, y, width: bw - 1.2, height: h, fill }));
+		}
+	}
+	timeAxis(svg, x0, x1, H - 4);
+	fig.append(svg);
+	});
+}
+
+function section(title, note, ...children) {
+	const s = el("section", { class: "section" });
+	const head = el("div", { class: "sec-head" }); head.append(el("h4", {}, title), el("p", {}, note)); s.append(head, ...children); return s;
+}
+
+function header(face) {
+	face.append(html(`<header class="page-header"><div><h2>Server operations</h2><p>Parrot and Flatbush · performance, workloads, and observed activity.</p></div><div><button class="btn" type="button">Refresh now</button> <span class="muted">Auto-refresh · 15 s</span></div></header><p class="muted">Last collection <time>02:50:12</time></p>`));
+}
+function toolbar(host) {
+	return html(`<div class="toolbar"><h3>Inspect server</h3><label>Server <select><option ${host === "parrot" ? "selected" : ""}>Parrot</option><option ${host === "flatbush" ? "selected" : ""}>Flatbush</option></select></label><label>History <select><option>Last hour</option><option selected>Last 6 hours</option><option>Last 24 hours</option></select></label><label><input type="checkbox" checked /> Live</label></div>`);
+}
+function perfHistory(available) {
+	if (!available) return section("Performance history", "", el("p", { class: "empty error" }, "History source unavailable (Prometheus range query failed). Current readings above remain live; no values are filled in."));
+	const fig = deferred(el("figure", { class: "chart" }), (W) => {
+	const H = 170, x0 = 36, x1 = W - 6, y = (v) => 140 - v * 1.25;
+	const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Parrot CPU, memory and system volume utilization, last 6 hours" });
+	for (const t of [0, 50, 100]) svg.append(sv("line", { x1: x0, x2: x1, y1: y(t), y2: y(t), class: "grid-line" }), sv("text", { x: x0 - 6, y: y(t) + 4, "text-anchor": "end", class: "axis" }, t + "%"));
+	for (const [k, color, dash] of [["cpu", "--accent", ""], ["memory", "--blue", "6 4"], ["disk", "--success-ink", "2 3"]]) {
+		const v = DATA.history[k];
+		svg.append(sv("path", { d: v.map((p, i) => (i ? "L" : "M") + (x0 + i / (v.length - 1) * (x1 - x0)).toFixed(1) + "," + y(p).toFixed(1)).join(""), fill: "none", stroke: `var(${color})`, "stroke-width": 2, "stroke-dasharray": dash }));
+	}
+	timeAxis(svg, x0, x1, H - 4); fig.append(svg);
+	});
+	return section("Performance history", "Existing chart · unchanged", html(`<div class="legend"><span class="k cpu">CPU busy</span><span class="k mem">Memory used</span><span class="k disk">System volume used</span><span>Percent · real Prometheus samples</span></div>`), fig);
+}
+
+function render(face) {
+	const mode = face.dataset.render, host = face.dataset.host || "parrot", h = DATA.hosts[host];
+	header(face);
+	if (mode === "loading") {
+		const grid = el("div", { class: "host-grid" });
+		for (const name of ["parrot", "flatbush"]) grid.append(html(`<article class="host"><div class="host-head"><h3 style="text-transform:capitalize">${name}</h3><span class="badge pending">Checking</span></div><div class="skeleton sk-line" style="width:60%"></div>${"<div class='skeleton sk-line'></div>".repeat(3)}</article>`));
+		face.append(grid, toolbar("parrot"));
+		for (const t of ["Performance history", "Network throughput", "Disk I/O", "Storage capacity", "Workloads", "Service reachability", "Log volume"]) face.append(section(t, "Loading retained samples…", el("div", { class: "skeleton sk-block", role: "status", "aria-label": t + " loading" })));
+		return;
+	}
+	const grid = el("div", { class: "host-grid" }); const live = h.status === "up", historyOk = mode !== "error";
+	grid.append(hostCard("parrot", host, historyOk), hostCard("flatbush", host, historyOk)); face.append(grid, toolbar(host));
+	face.append(live ? perfHistory(historyOk) : section("Performance history", "", el("p", { class: "empty" }, "No retained host samples for Flatbush in this window. Its node/Windows exporter has not reported yet; nothing is drawn as zero.")));
+
+	// Network & disk I/O
+	if (!live) face.append(section("Network & disk I/O", "", el("p", { class: "empty" }, "No interface or disk metrics exported by Flatbush yet.")));
+	else if (!historyOk) face.append(section("Network & disk I/O", "Current 5-min rates only", el("p", { class: "empty error" }, "Rate history unavailable. Current: physical ↓ 10.4 KB/s ↑ 8.3 KB/s · Tailscale ↓ 7.5 KB/s ↑ 5.9 KB/s · sda read 3.6 MB/s write 910 KB/s.")));
+	else {
+		const n = DATA.network, g = el("div", { class: "grid2" });
+		g.append(mirrored("Physical uplinks (en*/eth*/wl*)", n.phys_rx, n.phys_tx, "--blue", "--accent", "Receive", "Send"), mirrored("Tailscale", n.ts_rx, n.ts_tx, "--blue", "--accent", "Receive", "Send"));
+		face.append(section("Network throughput", "5-min rates · interface groups have separate scales and are not added together", html(`<div class="legend"><span class="k rx">Receive (above line)</span><span class="k tx">Send (below line, dashed)</span></div>`), g));
+		const d = el("div", { class: "grid2" }); d.append(mirrored("sda — read / write", n.sda_r, n.sda_w, "--success-ink", "--yellow", "Read", "Write"));
+		d.append(html(`<div><p class="muted" style="margin-top:22px">Idle in this window (no reads or writes recorded): <code>mmcblk0</code>, <code>sdb</code>. Busy time for sda: current 1.7 %.</p></div>`));
+		face.append(section("Disk I/O", "Per physical device · bytes per second", html(`<div class="legend"><span class="k rd">Read (above)</span><span class="k wr">Write (below, dashed)</span></div>`), d));
+	}
+
+	// Storage
+	face.append(live ? section("Storage capacity", "Current reading · real mounted volumes", storage(DATA.volumes)) : section("Storage capacity", "", el("p", { class: "empty" }, "No mounted volumes reported by Flatbush yet.")));
+
+	// Workloads
+	if (live) {
+		const s = section("Workloads", "Top 10 by selected measure · respects Filter and Service state");
+		s.querySelector(".sec-head").append(html(`<div class="seg" role="group" aria-label="Rank workloads by"><button type="button" aria-pressed="true">CPU cores</button><button type="button" aria-pressed="false">Memory</button></div>`));
+		s.append(el("h5", { class: "muted", style: "margin:4px 0" }, `Containers · ${DATA.containers.length} running`), ranked(DATA.containers, "cpu"));
+		s.append(el("p", { class: "empty" }, "Processes: not exported on Parrot (no process exporter). Ranked bars appear when the exporter is added."));
+		face.append(s);
+	} else face.append(section("Workloads", "", el("p", { class: "empty" }, "Containers, processes and services are not exported by Flatbush.")));
+
+	// Reachability & logs
+	if (live && !historyOk) face.append(section("Service reachability", "Current probe results only · history unavailable", timeline(DATA.probes, true)));
+	else if (live) face.append(section("Service reachability", "Blackbox probe result per 7.5-min interval · last 6 h", html(`<div class="legend"><span class="sw up">Up</span><span class="sw down">Down</span><span class="sw gap">No sample</span><span>Right column: current probe duration</span></div>`), timeline(DATA.probes)));
+	else face.append(section("Service reachability", "", el("p", { class: "empty" }, "No blackbox probes target Flatbush.")));
+	const lg = DATA.logs[host], legend = html(`<div class="legend"><span class="sw err">Error</span><span class="sw warn">Warning</span><span class="sw info">Information</span><span class="sw unk">Severity not exported</span></div>`);
+	if (!historyOk) face.append(section("Log volume", "", el("p", { class: "empty error" }, "Loki unreachable. Log volume and recent entries cannot be shown; other charts are unaffected.")));
+	else {
+		const s = section("Log volume", "Loki line counts · severity as reported by the source, never inferred", legend, logBars(lg));
+		if (!lg.Error && !lg.Warning && !lg.Information) s.append(el("p", { class: "foot" }, "All Parrot log sources omit a severity label, so every line is counted as “severity not exported”."));
+		face.append(s);
+	}
+	face.append(el("p", { class: "foot" }, "Gaps mean no retained samples. Charts add to the existing tables, which stay available below each section."));
+}
+
+document.querySelectorAll(".face").forEach(render);
+for (const fig of document.querySelectorAll("[data-draw]")) DRAW.get(fig)(Math.max(240, Math.round(fig.clientWidth)));
+</script>
+</body>
+</html>

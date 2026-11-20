@@ -1,14 +1,22 @@
+{% from "_macros.html" import readout %}
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- MONEY PAGE                                                  -->
 <!-- ════════════════════════════════════════════════════════════ -->
 <div class="page" id="page-money" role="tabpanel" aria-labelledby="tab-money">
-  <div class="page-header">
-    <h2>Money</h2>
-    <p>The weekend fold &mdash; debt, savings, and the plan behind the paycheck</p>
+  <div class="page-header hud-header">
+    <div class="hud-title">
+      <h2>Money</h2>
+      <p>The weekend fold &mdash; debt, savings, and the plan behind the paycheck</p>
+    </div>
+    {{ readout([
+      ("Tracker", "Ready" if money_available else "Not set", "color-green" if money_available else "color-muted"),
+      ("Check", "Weekly", none),
+    ]) }}
   </div>
 
-  <div class="card">
-    <div class="card-title">Debt tracker</div>
+  <div class="hud-stage">
+  <section class="card span-8" aria-labelledby="debtTitle">
+    <h3 class="card-title" id="debtTitle">Debt tracker</h3>
     {% if money_available %}
     <div class="empty-state">
       <div class="empty-icon">&#x1F4B0;</div>
@@ -28,7 +36,7 @@
       </button>
       <span class="action-status" data-copy-status role="status" aria-live="polite"></span>
     </div>
-  </div>
+  </section>
 
   <template id="actualize-money-prompt">Scan the Cloudtransition workspace for real, current money facts and update finance/tracker.yml so the Money page reflects reality.
 
@@ -48,8 +56,9 @@ Rules:
 4. Keep every existing key and comment; fill fields you can source, leave the rest unchanged.
 5. No code blocks, no YAML dump back - just a short bullet summary: what you filled in, and which fields you deliberately left empty and why.</template>
 
-  <div class="card card-dark">
-    <div class="card-title">&#x1F4B8; Weekly check</div>
+  <section class="card card-dark span-4" aria-labelledby="weeklyCheckTitle">
+    <h3 class="card-title" id="weeklyCheckTitle">&#x1F4B8; Weekly check</h3>
     <p>The routine holds one money fold a week: debt payments on track, TASKS.md tidy, note the next A/B project week. Automated payments are part of the routine, not a someday project.</p>
+  </section>
   </div>
 </div>

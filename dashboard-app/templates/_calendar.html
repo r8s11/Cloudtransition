@@ -1,0 +1,42 @@
+<section class="card calendar-card" id="calendarCard" aria-labelledby="calendarTitle">
+  <div class="calendar-heading">
+    <div><h3 class="card-title" id="calendarTitle">Upcoming calendar</h3><p class="calendar-note">Next seven days · <span id="calendarTimezone">Choose a timezone in Settings</span></p></div>
+    <div class="calendar-actions">
+      <button class="action-btn action-btn-ghost" type="button" id="calendarRefresh">Refresh</button>
+      <button class="action-btn action-btn-ghost" type="button" id="calendarPause" hidden>Pause automation</button>
+    </div>
+  </div>
+  <p class="run-status" id="calendarStatus" role="status" aria-live="polite">Loading calendar status…</p>
+  <p class="calendar-note" id="calendarUpdated"></p>
+  <ul class="calendar-agenda" id="calendarAgenda" aria-label="Upcoming events and tracked Google Tasks"></ul>
+  <details id="calendarOutcomes"><summary>Publication outcomes</summary><ul class="calendar-agenda" id="calendarOutcomeList"></ul></details>
+  <details class="calendar-settings" id="calendarSettings">
+    <summary>Settings and connection</summary>
+    <p id="calendarConnection">Connect Google Calendar on the Mac; no consent opens from this page.</p>
+    <p class="calendar-note">Run <code>.kb-venv/bin/python calendar_bridge.py calendar-login</code> from the workspace on the Mac after enabling Google Calendar API. Keep the existing Tasks grant. See <code>CALENDAR-README.md</code> for scopes and setup.</p>
+    <form id="calendarConfigForm">
+      <fieldset><legend>Read calendars</legend><div id="calendarReadChoices"></div></fieldset>
+      <div class="calendar-fields">
+        <label>Event destination (owned calendar)<select class="run-input" name="event_calendar"><option value="">Connect to choose</option></select></label>
+        <label>Google Tasks destination<select class="run-input" name="tasklist"><option value="">Connect to choose</option></select></label>
+        <label>Display timezone (IANA)<input class="run-input" name="timezone" type="text" required placeholder="America/New_York" autocomplete="off"></label>
+      </div>
+      <fieldset><legend>Allowed local sources</legend><div id="calendarSourceChoices"></div></fieldset>
+      <p class="calendar-note">Only selected, explicitly scheduled titles leave this Mac. Dated work becomes a Google Task; explicit start/end/timezone becomes an event. Undated work stays local. Private sources are unavailable.</p>
+      <p class="calendar-note">Tailnet dashboard viewers can see this agenda. Calendar write permission also allows modifying/deleting owned-calendar events; this feature only creates. No invitations, remote updates, deletions or completion sync.</p>
+      <div class="calendar-actions">
+        <button class="action-btn action-btn-ghost" type="button" id="calendarSaveView">Save view (automation off)</button>
+        <button class="action-btn" type="submit">Review backlog and automation</button>
+      </div>
+    </form>
+    <div id="calendarReview" hidden>
+      <h4>Review outgoing backlog</h4>
+      <p id="calendarReviewDestinations"></p>
+      <ul class="calendar-agenda" id="calendarBacklog"></ul>
+      <label class="calendar-consent"><input type="checkbox" id="calendarConsent"> I approve this backlog and future create-only publishing from these exact sources to these destinations.</label>
+      <button class="action-btn" type="button" id="calendarEnable" disabled>Enable automation</button>
+    </div>
+    <p class="run-status" id="calendarSettingsStatus" role="status" aria-live="polite"></p>
+    <p class="calendar-note">Automation starts off. Pause persists after restart; a request already in progress may finish. Source edits after publication show Needs review rather than changing Google.</p>
+  </details>
+</section>

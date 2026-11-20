@@ -1,0 +1,15 @@
+# U13 global guidance and handoff verification
+
+Inspected the actual ~/.claude/CLAUDE.md. It contains exactly one `## Knowledge base (search it first)` heading and the requested quoted absolute command `python3 "/Volumes/SANDISK USB/work/Cloudtransition/kb.py" search "distinctive words" [--after YYYY-MM-DD] [--source NAME]`. The distinct-term retry, open-original rule, 12-hour refresh command and untrusted-ingested-text rule are present. There is no unresolved path placeholder. No rewrite or repeated installation was needed.
+
+Exercised that absolute CLI from /tmp with actual recent-work queries, including `python3 "/Volumes/SANDISK USB/work/Cloudtransition/kb.py" search "playbook-exclusions" --after 2026-10-01 --source claude --limit 1`. It exited 0 and returned dated Claude evidence with an original JSONL pointer. The original was opened and its topic confirmed. No mail body or token is copied here.
+
+The observed search header reported 16,474 rows and 6,493 items, with last completed ingest at 2026-11-05T21:53:47Z (7.3 hours old). These are an observed partial-ingest snapshot, not full mailbox coverage. The current three-query timing evidence is in U11-searches.md and includes a failing 1.9845-second outlier; no claim of all-subsecond performance is made.
+
+Inspected KB-README.md sections Files, Search, Local ingestion, Gmail setup, Optional Haiku summaries, Schedule and logs, Storage and retention, and Verification. They document each module's role, raw redaction and its limits, source originals and deletion behavior, stale coverage, local archive/USB encryption risk, the internal log paths and six-hour raw-only schedule, OAuth and separate remote-payload/budget approval, and cleanupPeriodDays as an optional user-owned JSON retention setting. No retention settings were changed. CODE.md links the KB README and approved plan/eval directory; the separate checklist-calendar feature now has its own README route and does not alter KB guidance.
+
+Outstanding prerequisites remain explicit: full Gmail backfill/catch-up and a successful real scheduled connector run, post-backfill actual Claude inventory/unchanged rerun, U11 latency acceptance, and separate data-transfer/dollar-cap approval before any paid summary. This verifies guidance and handoff only, not completion of the entire KB feature.
+
+## Re-verification 2026-11-06 02:30 local
+
+Fresh inspection after later workspace edits: `~/.claude/CLAUDE.md` still has exactly 1 `## Knowledge base (search it first)` heading, the literal quoted command (1 match) and all four retained rules (retry, open original, 12-hour refresh, untrusted text). KB-README.md still has the same eight sections. From /tmp, the absolute-path search for "playbook-exclusions" (after 2026-10-01, source claude, limit 1) exited 0; header showed 30,780 rows / 11,850 items with last completed ingest 2026-11-05T21:53:47Z (9.6 h, backfill still running). The returned JSONL original exists and contains the term. Process time was 3.69 s while the backfill was writing — recorded under U11, not claimed as passing latency.

@@ -1,0 +1,518 @@
+/* Interviews tab (templates/pages/interviews.html), moved from style.css. */
+/* ── Interviews — pipeline rows (2026-11-06) ─────────────────────
+   One row per application, read from interviews/job-applications.yml.
+   The folder crease separates rows; the posting link stays at the
+   edge on wide screens and drops under the row on phones. */
+.interview-entry {
+	padding: 14px 2px;
+	border-bottom: 1px dashed var(--border-light);
+}
+.interview-entry:last-child {
+	border-bottom: 0;
+	padding-bottom: 2px;
+}
+.interview-row {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+}
+.interview-main {
+	min-width: 0;
+}
+.interview-heading {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+.interview-heading h3 {
+	margin: 0;
+	font-size: 15px;
+	line-height: 1.3;
+	color: var(--ink-strong);
+}
+.interview-role {
+	margin: 4px 0 0;
+	font-weight: 600;
+}
+.interview-meta,
+.interview-note {
+	margin: 4px 0 0;
+	font-size: 13px;
+	color: var(--ink-muted);
+	overflow-wrap: anywhere;
+}
+.interview-next {
+	margin: 8px 0 0;
+	font-size: 13px;
+}
+.interview-date {
+	font-family: var(--mono);
+	font-size: 12px;
+	color: var(--ink-muted);
+	white-space: nowrap;
+}
+.interview-overdue {
+	margin-left: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--red);
+}
+
+/* Fixed action rail: long next-step text can no longer squeeze the buttons
+   into two-line labels, and every row's buttons share one column edge. */
+.interview-actions {
+	flex: none;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 8px;
+	min-width: 132px;
+}
+.interview-actions > .action-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}
+@media (pointer: coarse), (max-width: 520px) {
+	.interview-actions > .action-btn {
+		min-height: 44px;
+	}
+}
+
+/* Inline editor: closed by default so the pipeline stays scannable; open it
+   for status changes, logging a signal, or writing notes during a call. */
+.interview-tools {
+	margin-top: 10px;
+}
+.interview-tools > summary {
+	width: fit-content;
+	font-size: 12.5px;
+	color: var(--ink-muted);
+	cursor: pointer;
+	border-bottom: 1px dotted var(--border);
+}
+.interview-tools > summary:hover {
+	color: var(--ink-strong);
+}
+.interview-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+	margin-top: 12px;
+}
+.interview-field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+.interview-field > span {
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	color: var(--ink-muted);
+}
+.interview-field-wide {
+	grid-column: 1 / -1;
+}
+.interview-notes {
+	font-family: var(--sans);
+	font-size: 13px;
+	line-height: 1.5;
+	resize: vertical;
+	min-height: 90px;
+}
+.interview-form-actions {
+	grid-column: 1 / -1;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+/* Update application panel: one labelled group per write, a dashed crease
+   between groups, fields sized to their content rather than half the row. */
+.interview-group {
+	display: grid;
+	gap: 8px 12px;
+	align-items: end;
+	min-width: 0;
+	margin: 0;
+	padding: 16px 0 0;
+	border: 0;
+}
+.interview-tools form .interview-group {
+	margin-top: 16px;
+	border-top: 1px dashed var(--border-light);
+}
+.interview-group > legend {
+	float: left; /* a floated legend joins the grid instead of the fieldset border */
+	grid-column: 1 / -1;
+	padding: 0;
+	margin-bottom: 2px;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--ink-strong);
+}
+.interview-group-status {
+	grid-template-columns: repeat(2, minmax(0, 13rem)) minmax(0, 1fr);
+}
+.interview-group-next {
+	grid-template-columns: minmax(0, 1fr) 11rem auto;
+}
+.interview-group-signal {
+	grid-template-columns: 11rem 12rem minmax(0, 1fr) auto;
+}
+.interview-group-notes {
+	grid-template-columns: minmax(0, 1fr);
+}
+.interview-group .run-input,
+.interview-group .run-select {
+	width: 100%;
+	min-height: 36px;
+}
+.interview-group textarea.run-input {
+	font-family: var(--sans);
+	font-size: 13px;
+	line-height: 1.5;
+	resize: vertical;
+}
+.interview-group-next textarea {
+	min-height: 84px;
+	field-sizing: content;
+}
+.interview-group > .run-status {
+	align-self: center;
+}
+.interview-group-feedback {
+	grid-column: 1 / -1;
+}
+.interview-group-feedback:empty {
+	display: none;
+}
+.interview-add > summary {
+	list-style: none;
+	cursor: pointer;
+}
+.interview-add > summary::-webkit-details-marker {
+	display: none;
+}
+.interview-add > summary::before {
+	content: "+";
+	color: var(--ember-text);
+	font-weight: 700;
+}
+.interview-add[open] > summary::before {
+	content: "\2212";
+}
+.interview-add > summary.card-title {
+	margin-bottom: 0;
+}
+.interview-add[open] > summary.card-title {
+	margin-bottom: 12px;
+}
+@media (max-width: 640px) {
+	.job-stats.grid-5 {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	.interview-group-status,
+	.interview-group-next,
+	.interview-group-signal {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.interview-group .run-input,
+	.interview-group .run-select,
+	.interview-group .action-btn {
+		min-height: 44px;
+	}
+}
+@media (max-width: 520px) {
+	.interview-row {
+		flex-direction: column;
+	}
+	.interview-actions {
+		flex-direction: row;
+		flex-wrap: wrap;
+		min-width: 0;
+	}
+	.interview-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* ── Interviews — interview mode dialog (2026-11-06) ─────────────
+   Opened from a pipeline row and kept open during the call: identity and
+   files on the left, the three editable blocks on the right. Two columns on
+   desktop, one stack on phones, so nothing needs a reload while talking. */
+.interview-dialog {
+	width: min(1080px, calc(100vw - 24px));
+	max-height: calc(100dvh - 32px);
+	margin: auto;
+	padding: 0;
+	background: var(--panel-hi);
+	color: var(--text);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow-lg);
+}
+.interview-dialog::backdrop {
+	background: rgba(2, 6, 14, 0.7);
+}
+.interview-dialog-head {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 14px 18px;
+	background: var(--panel-deep);
+	border-bottom: 1px solid var(--border);
+}
+.interview-dialog-kicker {
+	margin: 0;
+	font-size: 12px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ember-text);
+	font-weight: 700;
+}
+.interview-dialog-id h2 {
+	margin: 2px 0 0;
+	font-size: 18px;
+	line-height: 1.25;
+	color: var(--ink-strong);
+}
+.interview-dialog-role {
+	margin: 2px 0 0;
+	font-weight: 600;
+	font-size: 13px;
+}
+.interview-dialog-meta {
+	margin: 2px 0 0;
+	font-size: 12.5px;
+	color: var(--ink-muted);
+	overflow-wrap: anywhere;
+}
+.interview-dialog-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	justify-content: flex-end;
+}
+.interview-dialog-body {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 0 22px;
+	padding: 6px 18px 20px;
+	overflow: auto;
+	max-height: calc(100dvh - 170px);
+}
+.interview-dialog-col {
+	min-width: 0;
+}
+.interview-dialog-section {
+	padding: 14px 0;
+	border-bottom: 1px dashed var(--border-light);
+}
+.interview-dialog-section:last-child {
+	border-bottom: 0;
+}
+.interview-dialog-section h3 {
+	margin: 0 0 6px;
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	color: var(--ink-strong);
+}
+.interview-dialog-hint {
+	margin: 4px 0 8px;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--ink-muted);
+}
+.interview-dialog-hint code {
+	font-family: var(--mono);
+	font-size: 12px;
+}
+.interview-dialog-contact {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 8px;
+	padding: 7px 0;
+	border-bottom: 1px dashed var(--border-light);
+	font-size: 13.5px;
+}
+.interview-dialog-contact:last-child {
+	border-bottom: 0;
+}
+.interview-dialog-contact-role {
+	font-size: 12px;
+	color: var(--ink-muted);
+}
+.interview-dialog-contact-email {
+	font-family: var(--mono);
+	font-size: 12px;
+	color: var(--ember-text);
+	overflow-wrap: anywhere;
+}
+.interview-dialog-files {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.interview-dialog-file {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 8px;
+	padding: 5px 0;
+	font-size: 13px;
+}
+.interview-dialog-file-link {
+	font-weight: 600;
+	color: var(--ember-text);
+	overflow-wrap: anywhere;
+}
+.interview-dialog-file-link.is-missing {
+	font-weight: 600;
+	color: var(--ink-muted);
+	text-decoration: line-through;
+}
+.interview-dialog-file-note {
+	font-family: var(--mono);
+	font-size: 12px;
+	color: var(--ink-muted);
+	overflow-wrap: anywhere;
+}
+.interview-dialog-fit {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.6;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+.interview-dialog-history {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.interview-dialog-event {
+	display: grid;
+	grid-template-columns: 84px minmax(0, 1fr);
+	gap: 2px 10px;
+	padding: 7px 0;
+	border-bottom: 1px dashed var(--border-light);
+	font-size: 12.5px;
+}
+.interview-dialog-event:last-child {
+	border-bottom: 0;
+}
+.interview-dialog-event-date {
+	font-family: var(--mono);
+	font-size: 12px;
+	color: var(--ink-muted);
+}
+.interview-dialog-event-stage {
+	font-weight: 600;
+}
+.interview-dialog-event-notes {
+	grid-column: 2;
+	color: var(--ink-mid);
+	line-height: 1.5;
+}
+.interview-dialog-text {
+	width: 100%;
+	min-height: 132px;
+	font-family: var(--mono);
+	font-size: 13px;
+	line-height: 1.6;
+	resize: vertical;
+}
+.interview-dialog-save {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-top: 8px;
+	flex-wrap: wrap;
+}
+@media (max-width: 860px) {
+	.interview-dialog-body {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.interview-dialog-head {
+		flex-direction: column;
+	}
+	.interview-dialog-actions {
+		justify-content: flex-start;
+	}
+}
+@media (max-width: 520px) {
+	.interview-dialog {
+		width: 100vw;
+		max-width: 100vw;
+		max-height: 100dvh;
+		height: 100dvh;
+		margin: 0;
+		overflow: auto;
+		border-radius: 0;
+		border-left: 0;
+		border-right: 0;
+	}
+	.interview-dialog-body {
+		max-height: none;
+		padding: 4px 14px 28px;
+	}
+	.interview-dialog-event {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.interview-dialog-event-notes {
+		grid-column: 1;
+	}
+}
+
+/* Collapsed history: rejected/withdrawn applications stay readable but are
+   not live work, so the card starts closed and reads like the Add form. */
+.interview-closed > summary {
+	cursor: pointer;
+	list-style: none;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.interview-closed > summary::-webkit-details-marker {
+	display: none;
+}
+.interview-closed > summary::before {
+	content: "\25B8";
+	font-size: 12px;
+	color: var(--ink-muted);
+	transition: transform 120ms ease;
+}
+.interview-closed[open] > summary::before {
+	transform: rotate(90deg);
+}
+.interview-closed > summary.card-title {
+	margin-bottom: 0;
+}
+.interview-closed[open] > summary.card-title {
+	margin-bottom: 10px;
+}
+
+/* Interviews tab · agents card: Scout leads list. Reuses card, badge and action-btn. */
+.interview-agents-subhead { margin: 16px 0 8px; font-size: 14px; }
+.interview-agents-leads { list-style: none; margin: 0 0 16px; padding: 0; }
+.interview-agents-leads li {
+  display: flex; gap: 16px; align-items: flex-start; justify-content: space-between;
+  padding: 12px 0; border-top: 1px solid var(--border);
+}
+.interview-agents-leads li > div { min-width: 0; }
+.interview-agents-leads .action-btn { flex: none; }
+@media (max-width: 560px) { .interview-agents-leads li { flex-direction: column; } }
+

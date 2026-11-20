@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mockup: Command Center shortcuts and numbers on Today</title>
+<style>
+/* Tokens and rules copied from dashboard-app/static/tokens.css and style.css
+   (card, card-title, daily-*, task-category-header, run-input, today-form,
+   action-btn). The only new rule is .shortcut-path. */
+@font-face { font-family: "Inter"; src: local("Inter"), local("Inter Variable"), url("../../../dashboard-app/static/fonts/InterVariable.woff2") format("woff2"); font-weight: 100 900; }
+@font-face { font-family: "Inter"; src: local("Inter Italic"), url("../../../dashboard-app/static/fonts/InterVariable-Italic.woff2") format("woff2"); font-weight: 100 900; font-style: italic; }
+@font-face { font-family: "JetBrains Mono"; src: local("JetBrains Mono"), url("../../../dashboard-app/static/fonts/JetBrainsMono.woff2") format("woff2"); font-weight: 100 800; }
+:root {
+	--vermilion: #b3212e; --vermilion-deep: #8e1a24; --fold-white: #f4ead8;
+	--paper: #f8f1e3; --paper-deep: #efe3cd; --paper-hi: #fdf9ef; --gold: #c9a227;
+	--sumi: #171512; --ink: #211d18; --ink-mid: #4f483c; --ink-muted: #554d41;
+	--text: var(--ink); --text-muted: var(--ink-muted);
+	--border: #d8c9ab; --border-light: #e4dac4;
+	--sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+	--mono: "JetBrains Mono", "Fira Code", monospace;
+	--radius-sm: 6px; --radius: 10px;
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px; font-family: var(--sans); background: var(--vermilion-deep); color: var(--fold-white); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.mock-label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; margin: 28px 0 10px; }
+.mock-label:first-child { margin-top: 0; }
+.mock-note { font-size: 13px; margin: -4px 0 12px; max-width: 70ch; }
+.frame { background: var(--paper); border-radius: 14px; padding: 20px; }
+.frame-desktop { width: 1180px; }
+.frame-phone { width: 390px; padding: 12px; }
+
+.card { background: var(--paper-hi); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin-bottom: 16px; box-shadow: 0 1px 0 rgba(255,255,255,.7) inset; }
+.card:last-child { margin-bottom: 0; }
+.card-title { font-size: 16px; font-weight: 700; color: var(--sumi); margin: 0 0 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); }
+.daily-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
+.daily-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; min-height: 48px; padding: 10px 8px; border-bottom: 1px solid var(--border-light); color: var(--text); text-decoration: none; }
+a.daily-row:hover { background: var(--paper-deep); }
+a.daily-row:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+.daily-label { font-weight: 600; color: var(--sumi); white-space: nowrap; }
+.daily-note { font-family: var(--mono); font-size: 11px; font-weight: 400; color: var(--text-muted); }
+.daily-value { font-size: 13px; color: var(--ink-mid); text-align: right; font-variant-numeric: tabular-nums; min-width: 0; }
+.daily-row.is-warn .daily-value { color: var(--vermilion-deep); font-weight: 600; }
+.daily-row.is-placeholder .daily-value { font-style: italic; color: var(--text-muted); }
+.task-category-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin: 14px 8px 4px; }
+.today-form { display: flex; align-items: flex-end; gap: 10px; }
+.run-field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.run-field-label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); }
+.run-input { font-family: var(--sans); font-size: 14px; color: var(--text); background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 11px; width: 100%; min-height: 44px; }
+.run-input:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+.action-btn { appearance: none; background: var(--vermilion); color: var(--fold-white); border: 1px solid var(--vermilion-deep); padding: 9px 16px; border-radius: 6px; font: 600 12.5px/1.2 var(--sans); letter-spacing: .2px; min-height: 44px; cursor: pointer; }
+
+/* NEW: the path or address on the right of a shortcut row */
+.shortcut-path { font-family: var(--mono); font-size: 11.5px; color: var(--text-muted); text-align: right; overflow-wrap: anywhere; min-width: 0; }
+.daily-row.is-placeholder .shortcut-path { font-family: var(--sans); font-style: italic; }
+
+.frame-phone .daily-list { grid-template-columns: minmax(0, 1fr); }
+.frame-phone .card { padding: 16px 14px; }
+</style>
+</head>
+<body>
+
+<p class="mock-label">Desktop 1280 &middot; default</p>
+<p class="mock-note">Today, cards 1 and 5 of 9. Daily gains two rows (Job search, Money). Shortcuts sits between Inbox and Routine. Other cards are unchanged and not drawn.</p>
+<div class="frame frame-desktop">
+	<section class="card">
+		<h3 class="card-title">Daily</h3>
+		<ul class="daily-list">
+			<li><a class="daily-row" href="#"><span class="daily-label">Interview mode <span class="daily-note">Compass</span></span><span class="daily-value">today &middot; 2026-11-12</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Tasks</span><span class="daily-value">300 open &middot; 1 in inbox</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Job search</span><span class="daily-value">27 live &middot; 6 in conversation &middot; 21 new leads</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Routine <span class="daily-note">routine.md</span></span><span class="daily-value">Workday &mdash; Job search + career portfolio</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Projects</span><span class="daily-value">3 in TASKS.md</span></a></li>
+			<li><a class="daily-row is-placeholder" href="#"><span class="daily-label">Money <span class="daily-note">finance/tracker.yml</span></span><span class="daily-value">No debts entered yet</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Recent artifacts</span><span class="daily-value">3 files in artifacts/</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Workspace map</span><span class="daily-value">689 files &middot; snapshot 12 Nov 2026, 21:01</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Mission Control <span class="daily-note">agentic-os</span></span><span class="daily-value">2 open missions &middot; 0 approvals waiting &middot; 0 runs active</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Second brain</span><span class="daily-value">210 sources &middot; 64 memories &middot; indexed 12 Nov, 21:03</span></a></li>
+			<li><a class="daily-row is-placeholder" href="#"><span class="daily-label">Metrics</span><span class="daily-value">Not read here: open for live server readings</span></a></li>
+		</ul>
+	</section>
+
+	<section class="card" aria-labelledby="m1">
+		<h3 class="card-title" id="m1">Shortcuts</h3>
+		<form class="today-form" onsubmit="return false">
+			<label class="run-field"><span class="run-field-label">Find a file</span><input class="run-input" type="search" value="resume" /></label>
+			<button class="action-btn" type="submit">Open map</button>
+		</form>
+		<div class="task-category-header">Apps</div>
+		<ul class="daily-list">
+			<li><a class="daily-row" href="#"><span class="daily-label">Workspace map</span><span class="shortcut-path">full page</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Reader</span><span class="shortcut-path">full page</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Mission Control</span><span class="shortcut-path">full page</span></a></li>
+			<li><span class="daily-row is-placeholder"><span class="daily-label">ARMS review</span><span class="shortcut-path">Not running</span></span></li>
+		</ul>
+		<div class="task-category-header">Files</div>
+		<ul class="daily-list">
+			<li><a class="daily-row" href="#"><span class="daily-label">Task list</span><span class="shortcut-path">TASKS.md</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Dashboard notes</span><span class="shortcut-path">DASHBOARD.md</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Master resume</span><span class="shortcut-path">resume/master.md</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Application tracker</span><span class="shortcut-path">interviews/job-applications.yml</span></a></li>
+		</ul>
+		<div class="task-category-header">Folders</div>
+		<ul class="daily-list">
+			<li><a class="daily-row" href="#"><span class="daily-label">Resumes</span><span class="shortcut-path">resume/</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Interviews</span><span class="shortcut-path">interviews/</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Artifacts</span><span class="shortcut-path">artifacts/</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Plans</span><span class="shortcut-path">docs/plans/</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">IT playbook</span><span class="shortcut-path">IT Mgmt/</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Memories</span><span class="shortcut-path">second-brain/memories/</span></a></li>
+		</ul>
+	</section>
+</div>
+
+<p class="mock-label">Placeholders &middot; a target that cannot be opened</p>
+<p class="mock-note">A missing, moved, private or unindexed target is plain text with no link. Money with a readable tracker shows its count.</p>
+<div class="frame frame-desktop">
+	<section class="card">
+		<h3 class="card-title">Shortcuts</h3>
+		<div class="task-category-header">Files</div>
+		<ul class="daily-list">
+			<li><a class="daily-row" href="#"><span class="daily-label">Task list</span><span class="shortcut-path">TASKS.md</span></a></li>
+			<li><span class="daily-row is-placeholder"><span class="daily-label">Master resume</span><span class="shortcut-path">Not available</span></span></li>
+		</ul>
+		<div class="task-category-header">Folders</div>
+		<ul class="daily-list">
+			<li><span class="daily-row is-placeholder"><span class="daily-label">Plans</span><span class="shortcut-path">Not available</span></span></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Artifacts</span><span class="shortcut-path">artifacts/</span></a></li>
+		</ul>
+	</section>
+	<section class="card">
+		<h3 class="card-title">Daily (Money rows)</h3>
+		<ul class="daily-list">
+			<li><a class="daily-row" href="#"><span class="daily-label">Money <span class="daily-note">finance/tracker.yml</span></span><span class="daily-value">2 debts on file</span></a></li>
+			<li><a class="daily-row is-placeholder" href="#"><span class="daily-label">Money</span><span class="daily-value">No money tracker yet</span></a></li>
+			<li><a class="daily-row is-placeholder" href="#"><span class="daily-label">Money <span class="daily-note">finance/tracker.yml</span></span><span class="daily-value">Tracker unreadable</span></a></li>
+		</ul>
+	</section>
+</div>
+
+<p class="mock-label">Phone 390</p>
+<div class="frame frame-phone">
+	<section class="card">
+		<h3 class="card-title">Shortcuts</h3>
+		<form class="today-form" onsubmit="return false">
+			<label class="run-field"><span class="run-field-label">Find a file</span><input class="run-input" type="search" /></label>
+			<button class="action-btn" type="submit">Open map</button>
+		</form>
+		<div class="task-category-header">Apps</div>
+		<ul class="daily-list">
+			<li><a class="daily-row" href="#"><span class="daily-label">Workspace map</span><span class="shortcut-path">full page</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Reader</span><span class="shortcut-path">full page</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Mission Control</span><span class="shortcut-path">full page</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">ARMS review</span><span class="shortcut-path">Mac only</span></a></li>
+		</ul>
+		<div class="task-category-header">Files</div>
+		<ul class="daily-list">
+			<li><a class="daily-row" href="#"><span class="daily-label">Task list</span><span class="shortcut-path">TASKS.md</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Dashboard notes</span><span class="shortcut-path">DASHBOARD.md</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Master resume</span><span class="shortcut-path">resume/master.md</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Application tracker</span><span class="shortcut-path">interviews/job-applications.yml</span></a></li>
+		</ul>
+		<div class="task-category-header">Folders</div>
+		<ul class="daily-list">
+			<li><a class="daily-row" href="#"><span class="daily-label">Resumes</span><span class="shortcut-path">resume/</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Interviews</span><span class="shortcut-path">interviews/</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Artifacts</span><span class="shortcut-path">artifacts/</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Plans</span><span class="shortcut-path">docs/plans/</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">IT playbook</span><span class="shortcut-path">IT Mgmt/</span></a></li>
+			<li><a class="daily-row" href="#"><span class="daily-label">Memories</span><span class="shortcut-path">second-brain/memories/</span></a></li>
+		</ul>
+	</section>
+</div>
+
+</body>
+</html>

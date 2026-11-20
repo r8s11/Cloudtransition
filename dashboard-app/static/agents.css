@@ -1,0 +1,93 @@
+/* Agents tab (templates/pages/agents.html), moved from style.css. */
+/* ── Agents tab — roster memory + Scout scan ───────────────── */
+.agent-card .card-title {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 8px;
+}
+.agent-card .muted {
+	color: var(--text-muted);
+}
+.agent-memory {
+	margin: 8px 0 12px;
+	padding: 10px;
+	max-height: 220px;
+	overflow: auto;
+	white-space: pre-wrap;
+	font-family: var(--mono);
+	font-size: 12px;
+	line-height: 1.5;
+	background: var(--panel-deep);
+	border: 1px solid var(--border-light);
+	border-radius: var(--radius);
+}
+.agent-events {
+	list-style: none;
+	margin: 6px 0 0;
+	padding: 0;
+	display: grid;
+	gap: 6px;
+	font-size: 12px;
+}
+.agent-event-when {
+	color: var(--text-muted);
+	font-family: var(--mono);
+	font-size: 12px;
+}
+.agent-badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	justify-content: flex-end;
+}
+.agent-warnings {
+	margin: 8px 0;
+	padding-left: 18px;
+	color: var(--red);
+	font-size: 12px;
+}
+.agent-details {
+	margin-top: 10px;
+}
+.agent-details > summary {
+	cursor: pointer;
+	font-size: 12px;
+}
+.agent-files {
+	list-style: none;
+	margin: 8px 0 0;
+	padding: 0;
+	display: grid;
+	gap: 4px;
+	font-size: 12px;
+}
+.agent-run {
+	margin-top: 10px;
+}
+.agent-last-run {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: 4px 12px;
+	margin: 10px 0 0;
+	font-size: 12px;
+}
+.agent-last-run dt {
+	color: var(--text-muted);
+}
+.agent-last-run dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+.ops-table-scroll > .agents-scan-table {
+	min-width: 900px;
+}
+.agents-scan-table th:first-child,
+.agents-scan-table td:first-child {
+	min-width: 220px;
+}
+.agents-scan-table thead th {
+	white-space: nowrap;
+	overflow-wrap: normal;
+}
+

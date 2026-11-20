@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import metrics  # noqa: E402
+from collectors import metrics  # noqa: E402
 
 
 def test_missing_local_health_is_unavailable_not_production_down(monkeypatch):

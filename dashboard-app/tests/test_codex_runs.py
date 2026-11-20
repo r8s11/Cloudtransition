@@ -13,6 +13,8 @@ from fastapi.testclient import TestClient
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import app as module
+from core import config
+from routes import runs as run_routes
 
 CSRF = {"X-Requested-With": "XMLHttpRequest"}
 
@@ -28,11 +30,11 @@ def isolated(tmp_path, monkeypatch):
         exe.chmod(0o700)
     monkeypatch.setenv("PATH", str(bin_dir) + os.pathsep + os.environ.get("PATH", ""))
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
-    monkeypatch.setattr(module, "WORKSPACE", tmp_path)
-    monkeypatch.setattr(module, "RUNS_DIR", tmp_path / "runs")
-    monkeypatch.setattr(module, "RUNS_LOG", tmp_path / "runs.log")
-    monkeypatch.setattr(module, "_resolve_codex_exe", lambda: str(bin_dir / "codex"))
-    monkeypatch.setattr(module, "_resolve_opencode_exe", lambda: str(bin_dir / "opencode"))
+    monkeypatch.setattr(config, "WORKSPACE", tmp_path)
+    monkeypatch.setattr(config, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(config, "RUNS_LOG", tmp_path / "runs.log")
+    monkeypatch.setattr(run_routes, "_resolve_codex_exe", lambda: str(bin_dir / "codex"))
+    monkeypatch.setattr(run_routes, "_resolve_opencode_exe", lambda: str(bin_dir / "opencode"))
     for attr, data in {
         "CODEX_CACHE": {"models": [{"slug": "fixture-codex", "visibility": "list", "supported_in_api": True, "supported_reasoning_levels": [{"effort": "high"}]}]},
         "OPENROUTER_CATALOG": {"curated": [["vendor/fixture:free", "free"]]},
@@ -40,15 +42,15 @@ def isolated(tmp_path, monkeypatch):
     }.items():
         path = tmp_path / (attr + ".json")
         path.write_text(json.dumps(data))
-        monkeypatch.setattr(module, attr, path)
-    with module._RUNS_LOCK:
-        module._RUNS.clear()
+        monkeypatch.setattr(run_routes, attr, path)
+    with run_routes._RUNS_LOCK:
+        run_routes._RUNS.clear()
     yield bin_dir
     deadline = time.monotonic() + 5
-    while any(r["status"] == "running" for r in module._RUNS.values()) and time.monotonic() < deadline:
+    while any(r["status"] == "running" for r in run_routes._RUNS.values()) and time.monotonic() < deadline:
         time.sleep(0.02)
-    with module._RUNS_LOCK:
-        module._RUNS.clear()
+    with run_routes._RUNS_LOCK:
+        run_routes._RUNS.clear()
 
 
 def finish(client, run_id):
@@ -81,7 +83,7 @@ def test_invalid_selection_rejected(isolated):
         no_key = client.post("/api/skills/run", headers=CSRF, json={"skill": "plan-today", "model": "openrouter:vendor/fixture:free"})
         assert no_key.status_code == 400 and "OPENROUTER_API_KEY" in no_key.json()["error"]
         assert client.get("/api/skills/runs").json()["runs"] == []
-        assert not module.RUNS_LOG.exists()
+        assert not config.RUNS_LOG.exists()
 
 
 @pytest.mark.parametrize("provider,model", [("codex", "fixture-codex"), ("opencode", "vendor/fixture-free"), ("openrouter", "vendor/fixture:free")])
@@ -103,11 +105,11 @@ def test_failure_lifecycle_and_duplicate(isolated, monkeypatch, provider, model,
                     pass
         server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         threading.Thread(target=server.serve_forever, daemon=True).start()
-        monkeypatch.setattr(module, "OPENROUTER_API_URL", f"http://127.0.0.1:{server.server_port}/chat")
+        monkeypatch.setattr(run_routes, "OPENROUTER_API_URL", f"http://127.0.0.1:{server.server_port}/chat")
         monkeypatch.setenv("OPENROUTER_API_KEY", "local-fixture-only")
     else:
         (isolated / provider).write_text("#!/bin/sh\nif [ \"$1\" = models ]; then echo vendor/fixture-free; exit; fi\n/bin/sleep " + ("0.3" if failure == "nonzero" else "1") + "\nexit 7\n")
-    monkeypatch.setattr(module, "RUN_TIMEOUT", 0.15 if failure == "timeout" else 2)
+    monkeypatch.setattr(run_routes, "RUN_TIMEOUT", 0.15 if failure == "timeout" else 2)
     try:
         with TestClient(module.app) as client:
             body = {"skill": "plan-today", "model": f"{provider}:{model}"}
@@ -117,7 +119,7 @@ def test_failure_lifecycle_and_duplicate(isolated, monkeypatch, provider, model,
             run = finish(client, start.json()["run"]["id"])
             assert run["status"] == "failed" and run["exit_code"] != 0
             assert run["duration"] and run["output"]
-            events = [json.loads(line) for line in module.RUNS_LOG.read_text().splitlines()]
+            events = [json.loads(line) for line in config.RUNS_LOG.read_text().splitlines()]
             assert [event["status"] for event in events] == ["running", "failed"]
             assert all(event["provider"] == provider and event["model"] == model for event in events)
             retry = client.post("/api/skills/run", headers=CSRF, json=body)
@@ -130,8 +132,8 @@ def test_failure_lifecycle_and_duplicate(isolated, monkeypatch, provider, model,
 
 
 def test_missing_codex_executable_is_reported(monkeypatch):
-    monkeypatch.setattr(module, "_resolve_codex_exe", lambda: None)
-    models, available, reason = module._load_codex_models()
+    monkeypatch.setattr(run_routes, "_resolve_codex_exe", lambda: None)
+    models, available, reason = run_routes._load_codex_models()
     assert models == [] and not available and "codex executable" in reason
     response = TestClient(module.app).post("/api/skills/run", headers=CSRF, json={"skill": "plan-today", "model": "codex:fixture-codex"})
     assert response.status_code == 400 and "codex executable" in response.json()["error"]
@@ -139,11 +141,11 @@ def test_missing_codex_executable_is_reported(monkeypatch):
 
 @pytest.mark.parametrize("provider,model", [("codex", "fixture-codex"), ("opencode", "vendor/fixture-free"), ("openrouter", "vendor/fixture:free")])
 def test_non_claude_skill_prompt_is_resolved(isolated, provider, model):
-    directory = module.WORKSPACE / ".claude" / "skills" / "youtube-summarizer"
+    directory = config.WORKSPACE / ".claude" / "skills" / "youtube-summarizer"
     directory.mkdir(parents=True)
     (directory / "SKILL.md").write_text("# Summarize\nExtract the transcript before summarizing. Never invent video content.\n")
-    request = module.RunRequest(skill="youtube-summary", model=f"{provider}:{model}", input="https://youtu.be/example")
-    spec, _ = module._resolve_run(module.SKILL_RUNNERS["youtube-summary"], request)
+    request = run_routes.RunRequest(skill="youtube-summary", model=f"{provider}:{model}", input="https://youtu.be/example")
+    spec, _ = run_routes._resolve_run(config.SKILL_RUNNERS["youtube-summary"], request)
     prompt = spec["prompt"] if provider == "openrouter" else spec["argv"][-1]
     assert "Extract the transcript before summarizing." in prompt
     assert "https://youtu.be/example" in prompt
@@ -152,7 +154,7 @@ def test_non_claude_skill_prompt_is_resolved(isolated, provider, model):
 
 def test_shell_run_has_no_model(isolated):
     with pytest.MonkeyPatch.context() as patch:
-        patch.setitem(module.SKILL_RUNNERS, "brain-index", {**module.SKILL_RUNNERS["brain-index"], "argv": ["/bin/echo", "local output"]})
+        patch.setitem(config.SKILL_RUNNERS, "brain-index", {**config.SKILL_RUNNERS["brain-index"], "argv": ["/bin/echo", "local output"]})
         with TestClient(module.app) as client:
             response = client.post("/api/skills/run", headers=CSRF, json={"skill": "brain-index"})
             assert response.status_code == 200
@@ -162,16 +164,16 @@ def test_shell_run_has_no_model(isolated):
 
 
 def test_openrouter_catalogue_requires_explicit_free_pricing(isolated):
-    module.OPENROUTER_CATALOG.write_text(json.dumps({"curated": [
+    run_routes.OPENROUTER_CATALOG.write_text(json.dumps({"curated": [
         ["vendor/free:free", "free"], ["vendor/zero", ""], ["vendor/missing", ""],
         ["vendor/invalid", ""], ["vendor/paid", "free"], [None, "free"],
     ]}))
-    module.OPENROUTER_METADATA.write_text(json.dumps({
+    run_routes.OPENROUTER_METADATA.write_text(json.dumps({
         "vendor/zero": {"pricing": {"prompt": "0", "completion": "0"}},
         "vendor/missing": {"pricing": {}},
         "vendor/invalid": {"pricing": {"prompt": "bad", "completion": "bad"}},
         "vendor/paid": {"pricing": {"prompt": "1", "completion": "1"}},
     }))
-    models, available, _ = module._load_openrouter_models()
+    models, available, _ = run_routes._load_openrouter_models()
     assert available
     assert {model["id"] for model in models} == {"vendor/free:free", "vendor/zero"}

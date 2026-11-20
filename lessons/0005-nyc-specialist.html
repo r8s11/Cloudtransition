@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 5 — NYC Domain Specialist</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script src="../assets/sandbox.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#lesson-content">Skip to lesson</a>
+<header>
+  <h1>Build an NYC specialist</h1>
+  <p class="dek">Expertise comes from a curated source set and honest limits, not a city-themed system prompt.</p>
+  <nav class="course-nav" aria-label="Course contents">
+    <details>
+      <summary><span>Course map</span><span class="course-progress">Lesson 5 of 8</span></summary>
+      <ol class="course-links">
+        <li><a href="0001-first-agent.html">01 First agent</a></li>
+        <li><a href="0002-tools-and-dependencies.html">02 Tools</a></li>
+        <li><a href="0003-gmail-reader.html">03 Gmail</a></li>
+        <li><a href="0004-smart-home.html">04 Smart home</a></li>
+        <li><a aria-current="step" href="0005-nyc-specialist.html">05 NYC</a></li>
+        <li><a href="0006-specialists-together.html">06 Specialists</a></li>
+        <li><a href="0007-testing-agents.html">07 Tests</a></li>
+        <li><a href="0008-operating-your-agents.html">08 Operate</a></li>
+        <li><a href="../reference/personal-agents.html">Field reference</a></li>
+      </ol>
+    </details>
+  </nav>
+</header>
+<main id="lesson-content">
+  <p class="meta">Time: 7 minutes · Win: turn official data into a narrow, sourced specialist</p>
+
+  <h2>Pick one slice first</h2>
+  <p>“NYC specialist” is too broad for one reliable tool. Start with a slice such as recent 311 request records, then add transportation, city services, or neighborhood references as separate vetted sources. NYC publishes an API guide and a 311 dataset with a queryable endpoint. <a href="https://www.nyc.gov/opendata/get-started/user-guides/open-data-apis">NYC Open Data API guide</a> · <a href="https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2020-to-Present/erm2-nwe9">311 dataset</a></p>
+
+  <h2>A narrow, typed query</h2>
+  <p>Use validated choices, a fixed endpoint, a short field list, and a hard row limit. Do not ask the model to write arbitrary query text.</p>
+  <pre><code>from datetime import datetime, timezone
+from typing import Annotated, Literal
+
+import httpx
+from pydantic import BaseModel, Field
+from pydantic_ai import Agent, RunContext
+
+Borough = Literal[
+    "BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND"
+]
+
+class CityEvidence(BaseModel):
+    source_url: str
+    retrieved_at: datetime
+    rows: list[dict[str, str | None]]
+
+nyc_agent = Agent(
+    "openai:gpt-6.1-sol",
+    deps_type=httpx.AsyncClient,
+    instructions=(
+        "Answer only from returned city data. Cite its source_url and "
+        "retrieved_at. Do not infer legal rules or causes from 311 counts."
+    ),
+)
+
+@nyc_agent.tool
+async def recent_311(
+    ctx: RunContext[httpx.AsyncClient],
+    borough: Borough,
+    limit: Annotated[int, Field(ge=1, le=10)] = 5,
+) -&gt; CityEvidence:
+    """Fetch a small sample of recent NYC 311 records for one borough."""
+    dataset_url = (
+        "https://data.cityofnewyork.us/Social-Services/"
+        "311-Service-Requests-from-2020-to-Present/erm2-nwe9"
+    )
+    response = await ctx.deps.get(
+        "https://data.cityofnewyork.us/resource/erm2-nwe9.json",
+        params={
+            "$select": "created_date,complaint_type,status,agency,borough",
+            "$where": f"borough = '{borough}'",
+            "$order": "created_date DESC",
+            "$limit": limit,
+        },
+    )
+    response.raise_for_status()
+    return CityEvidence(
+        source_url=dataset_url,
+        retrieved_at=datetime.now(timezone.utc),
+        rows=response.json(),
+    )</code></pre>
+  <p>The borough is a fixed <code>Literal</code>, so user text cannot become arbitrary query syntax. Confirm field names and dataset update notes before relying on the sample. The city's data API is described by <a href="https://dev.socrata.com/docs/endpoints.html">Socrata's endpoint docs</a>.</p>
+
+  <div class="sandbox nyc-sandbox">
+    <h3>Sandbox: NYC 311 query (typed, read-only)</h3>
+    <p class="sandbox-note">Fixed borough choices, a fixed field list, and a hard row limit. No arbitrary query text — the borough is a <code>Literal</code>, so user text can never become query syntax. This is a read-only preview; no network call is made.</p>
+    <div class="sandbox-controls">
+      <div class="borough-chips" role="radiogroup" aria-label="Borough">
+        <button type="button" role="radio" data-borough="BRONX" aria-checked="true">BRONX</button>
+        <button type="button" role="radio" data-borough="BROOKLYN">BROOKLYN</button>
+        <button type="button" role="radio" data-borough="MANHATTAN">MANHATTAN</button>
+        <button type="button" role="radio" data-borough="QUEENS">QUEENS</button>
+        <button type="button" role="radio" data-borough="STATEN ISLAND">STATEN ISLAND</button>
+      </div>
+      <label>Limit&nbsp;<input type="range" id="nyc-limit" min="1" max="10" value="5">&nbsp;<output id="nyc-limit-val">5</output></label>
+    </div>
+    <pre id="nyc-sql" class="sandbox-sql"></pre>
+    <div id="nyc-results" class="sandbox-results"></div>
+  </div>
+
+  <h2>Make evidence part of the output</h2>
+  <p>For a production specialist, return a Pydantic model with an answer, source URL, retrieval time, and caveats. A validated model guarantees shape—not that a citation is real or supports the claim. Test citation membership and date handling in application code.</p>
+  <p>A 311 record reports a service request. It does not by itself establish city policy, legal rights, or what caused a neighborhood trend. Add the official source that owns each kind of answer.</p>
+
+  <h2>Self-check</h2>
+  <details>
+    <summary>Can the agent claim a building-code rule from 311 complaint counts?</summary>
+    <p>No. Counts are not the authority for legal requirements. Retrieve the relevant official code or city guidance, cite it, and state its date and limits.</p>
+  </details>
+
+  <nav class="lesson-nav" aria-label="Lesson navigation">
+    <a href="0004-smart-home.html"><span>Previous lesson</span><strong>Smart-home control</strong></a>
+    <a href="0006-specialists-together.html"><span>Next lesson</span><strong>Compose specialists</strong></a>
+  </nav>
+  <p>Ask your teacher about any unclear step. Do not send live NYC queries or assume a dataset is complete without checking its metadata.</p>
+  <ul class="source-list">
+    <li><a href="https://www.nyc.gov/opendata/get-started/user-guides/open-data-apis">NYC Open Data API guide</a></li>
+    <li><a href="https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2020-to-Present/erm2-nwe9">NYC 311 data page</a></li>
+    <li><a href="https://dev.socrata.com/docs/endpoints.html">Socrata API endpoints</a></li>
+  </ul>
+</main>
+<footer><p>Specialist quality = trusted sources + narrow tools + explicit uncertainty.</p></footer>
+</body>
+</html>

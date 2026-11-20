@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CloudTransition brand book</title><link rel="stylesheet" href="style.css"></head>
+<body><main><header><h1>One sheet. Clear work.</h1><p>CloudTransition artifact standards, derived from the existing Orizuru dashboard. Build in HTML; export only after review.</p></header>
+<section><h2>Color and material</h2><table><thead><tr><th>Role</th><th>Value</th><th>Use</th></tr></thead><tbody>
+<tr><td>Vermilion</td><td><span class="swatch" style="background:#b3212e"></span>#b3212e</td><td>Outer frame and primary accents</td></tr>
+<tr><td>Undyed paper</td><td><span class="swatch" style="background:#f8f1e3"></span>#f8f1e3</td><td>Readable content faces</td></tr>
+<tr><td>Ink</td><td><span class="swatch" style="background:#211d18"></span>#211d18</td><td>Body copy on paper</td></tr>
+<tr><td>Muted ink</td><td><span class="swatch" style="background:#554d41"></span>#554d41</td><td>Supporting copy</td></tr>
+<tr><td>Gold</td><td><span class="swatch" style="background:#c9a227"></span>#c9a227</td><td>Redundant active-position marker, never small text on paper</td></tr>
+</tbody></table></section>
+<section><h2>Type and spacing</h2><p>Use Inter for headings and body, with native system fallbacks when unavailable. Use JetBrains Mono only for commands and measured values. No font network requests. Body text: 16–18 px, line height 1.6, measure at most 72 characters. Use an 8 px spacing scale, 24–64 px page gutters, and 32 px between sections.</p></section>
+<section><h2>Identity and logo</h2><p>No verified logo asset is registered for these artifacts. Use the text name “CloudTransition”; do not invent a logo or reuse an employer logo. Preserve factual sources and dates. Label examples and assumptions.</p></section>
+<section><h2>Layout and export</h2><p>One continuous sheet, left-aligned text, clear headings, numbered steps only for real sequences. No glass panels, decorative charts, or perpetual motion. State must remain clear without color. Verify keyboard focus, narrow-screen overflow, and the final print layout.</p><p>Use <code>style.css</code> beside this file. Save source HTML and final PDF/images in this inbox, then run <code>python3 artifacts/catalog.py</code>. Print backgrounds are optional; the print stylesheet preserves contrast without them.</p></section>
+<footer>Authority: <a href="../dashboard-app/DESIGN.md">dashboard-app/DESIGN.md</a> and <a href="../dashboard-app/static/style.css">dashboard styles</a>. <a href="index.html">Artifact inbox</a>.</footer></main></body></html>

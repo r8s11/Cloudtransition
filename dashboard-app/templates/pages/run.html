@@ -3,8 +3,9 @@
 <!-- Deterministic first: tools that call no model lead; model   -->
 <!-- and paid-API runs follow, each tagged by runner_engine().   -->
 <!-- ════════════════════════════════════════════════════════════ -->
-<div class="page" id="page-run" role="tabpanel" aria-labelledby="tab-run">
-  <div class="page-header">
+<div class="page deck" id="page-run" role="tabpanel" aria-labelledby="tab-run">
+  <div class="deck-hud run-hud">
+  <div class="page-header deck-header">
     <h2>Run</h2>
     <p>
       Start a skill or workspace tool without leaving the dashboard. Output is
@@ -13,76 +14,116 @@
     </p>
   </div>
 
-  <ul class="run-rules">
-    <li>Local tools call no model. Every other card names the API or model it uses.</li>
-    <li>Claude enforces read-only tools and the Polish allowlist. Codex uses read-only or workspace-write sandboxes.</li>
-    <li>OpenCode has no dashboard-enforced file or command allowlist. OpenRouter has no local tools and can only use supplied context.</li>
-    <li>Runs stop after 30 minutes. No permission or sandbox bypass flags are used.</li>
-  </ul>
-
-  <section class="card" aria-labelledby="local-tools-title">
-    <h3 class="card-title" id="local-tools-title">Local tools</h3>
-    <div
-      class="run-grid"
-      data-run-grid
-      data-skills="trail-build,resume-build,brain-index,arms-report,artifact-catalog"
-      aria-busy="true"
-    >
-      <p class="run-empty">Loading tools&hellip;</p>
-    </div>
-  </section>
-
-  <div class="card">
-    <div class="card-title run-card-title">
-      <h3 class="run-card-heading">Model and API runs</h3>
-      <span class="run-actions">
-        <button
-          id="refreshModels"
-          type="button"
-          class="action-btn action-btn-ghost"
-          title="Re-read the local model catalogues"
-        >
-          Refresh models
-        </button>
-        <span
-          id="refreshModelsStatus"
-          class="refresh-status"
-          role="status"
-          aria-live="polite"
-        ></span>
-      </span>
-    </div>
-    <div
-      class="run-grid"
-      id="runGrid"
-      data-run-grid
-      data-skills="triage-inbox,scout-scan,plan-today,update-sheet,youtube-summary"
-      aria-busy="true"
-    >
-      <p class="run-empty">Reading local model catalogues&hellip;</p>
-    </div>
+  <details class="run-bounds">
+    <summary>How runs are bounded</summary>
+    <ul class="run-rules">
+      <li>Local tools call no model. Every other card names the API or model it uses.</li>
+      <li>Claude enforces read-only tools and the Polish allowlist. Codex uses read-only or workspace-write sandboxes.</li>
+      <li>OpenCode has no dashboard-enforced file or command allowlist. OpenRouter has no local tools and can only use supplied context.</li>
+      <li>Runs stop after 30 minutes. No permission or sandbox bypass flags are used.</li>
+    </ul>
+  </details>
   </div>
 
-  <details class="card">
-    <summary class="card-title">Dashboard design runs</summary>
-    <div
-      class="run-grid"
-      data-run-grid
-      data-skills="impeccable-audit,impeccable-polish,ui-ux-review"
-      aria-busy="true"
-    >
-      <p class="run-empty">Reading local model catalogues&hellip;</p>
-    </div>
-  </details>
+  <div class="deck-toolbar run-toolbar">
+    <label class="deck-search run-filter">
+      <span class="sr-only">Filter tools</span>
+      <svg class="run-filter-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+      <input
+        type="search"
+        id="runFilter"
+        class="deck-input"
+        placeholder="Filter tools"
+        autocomplete="off"
+        aria-describedby="runFilterHint"
+        aria-controls="runTools"
+      />
+      <kbd id="runFilterHint" aria-label="Press slash to focus">/</kbd>
+    </label>
+    <span class="run-actions">
+      <button type="button" class="action-btn action-btn-ghost run-jump" data-run-jump aria-controls="runHistory">
+        Activity <span class="deck-num" data-run-jump-count></span>
+      </button>
+      <button
+        id="refreshModels"
+        type="button"
+        class="action-btn"
+        title="Re-read the local model catalogues"
+      >
+        Refresh models
+      </button>
+      <span
+        id="refreshModelsStatus"
+        class="refresh-status"
+        role="status"
+        aria-live="polite"
+      ></span>
+    </span>
+  </div>
 
-  <!-- Run history -->
-  <section class="card" aria-labelledby="recent-runs-title">
-    <h3 class="card-title" id="recent-runs-title">Recent runs</h3>
-    <div id="runHistory">
-      <div class="empty-state empty-state-pad">
-        <div class="empty-icon" aria-hidden="true">&#x25CB;</div>
-        <p>No runs yet. Start one above.</p>
-      </div>
+  <div class="run-console">
+    <div class="run-tools" id="runTools">
+      <section class="card run-section" aria-labelledby="local-tools-title">
+        <h3 class="card-title run-section-title" id="local-tools-title">
+          Local tools
+          <span class="deck-chip" data-tone="neutral">No model · $0</span>
+          <span class="run-count" data-run-count></span>
+        </h3>
+        <div
+          class="run-grid"
+          data-run-grid
+          data-skills="trail-build,resume-build,brain-index,arms-report,artifact-catalog"
+          aria-busy="true"
+        >
+          <p class="run-empty">Loading tools&hellip;</p>
+        </div>
+      </section>
+
+      <section class="card run-section" aria-labelledby="model-runs-title">
+        <div class="card-title run-card-title run-section-title">
+          <h3 class="run-card-heading" id="model-runs-title">Model and API runs</h3>
+          <span class="run-count" data-run-count></span>
+        </div>
+        <div
+          class="run-grid"
+          id="runGrid"
+          data-run-grid
+          data-skills="triage-inbox,scout-scan,plan-today,update-sheet,youtube-summary"
+          aria-busy="true"
+        >
+          <p class="run-empty">Reading local model catalogues&hellip;</p>
+        </div>
+      </section>
+
+      <details class="card run-section" id="designRuns">
+        <summary class="card-title run-section-title">
+          Dashboard design runs
+          <span class="run-count" data-run-count></span>
+        </summary>
+        <div
+          class="run-grid"
+          data-run-grid
+          data-skills="impeccable-audit,impeccable-polish,ui-ux-review"
+          aria-busy="true"
+        >
+          <p class="run-empty">Reading local model catalogues&hellip;</p>
+        </div>
+      </details>
+
+      <p class="deck-empty" id="runFilterEmpty" role="status" hidden>
+        No tool matches that filter. Press Esc to clear it.
+      </p>
     </div>
-  </section>
+
+    <!-- Run history -->
+    <section class="card run-activity" aria-labelledby="recent-runs-title">
+      <h3 class="card-title" id="recent-runs-title">Activity</h3>
+      <div id="runHistory">
+        <div class="empty-state empty-state-pad">
+          <div class="empty-icon" aria-hidden="true">&#x25CB;</div>
+          <p>No runs yet. Start one above.</p>
+        </div>
+      </div>
+    </section>
+  </div>
 </div>

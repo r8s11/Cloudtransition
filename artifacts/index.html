@@ -1,0 +1,21 @@
+<!doctype html><html lang="en"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>CloudTransition artifact inbox</title>
+<link rel="stylesheet" href="style.css"><main><header><h1>Artifact inbox</h1>
+<p>HTML sources and final exports. Newest first. Everything stays local.</p></header>
+<label for="search">Find an artifact</label><input id="search" type="search" placeholder="Title or filename">
+<p id="count" role="status"></p><ul id="artifacts"><li><a href="2026-10-28-weekly-review.pdf">2026 10 28 weekly review</a><small>2026-10-28-weekly-review.pdf</small></li>
+<li><a href="2026-10-28-weekly-review.html">Weekly workspace review — working checklist</a><small>2026-10-28-weekly-review.html</small></li>
+<li><a href="brand-book.html">CloudTransition brand book</a><small>brand-book.html</small></li></ul>
+<p id="empty" hidden>No matching artifacts.</p><footer>Rebuild after saving: <code>python3 artifacts/catalog.py</code></footer></main>
+<script>
+const search = document.querySelector('#search');
+const rows = [...document.querySelectorAll('#artifacts li')];
+function filter() {
+  const query = search.value.toLocaleLowerCase();
+  let count = 0;
+  rows.forEach(row => { row.hidden = !row.textContent.toLocaleLowerCase().includes(query); if (!row.hidden) count++; });
+  document.querySelector('#count').textContent = `${count} artifact${count === 1 ? '' : 's'}`;
+  document.querySelector('#empty').hidden = count !== 0;
+}
+search.addEventListener('input', filter); filter();
+</script></html>

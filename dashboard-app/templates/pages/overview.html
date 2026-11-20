@@ -1,134 +1,117 @@
-{% from "_macros.html" import metric_table %}
+{% from "_macros.html" import metric_table, project_state, readout %}
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- OVERVIEW PAGE                                               -->
 <!-- ════════════════════════════════════════════════════════════ -->
 <div class="page" id="page-overview" role="tabpanel" aria-labelledby="tab-overview">
-  <div class="page-header">
-    <h2>Overview</h2>
-    <p>Progress across every task file, the year, projects and end-of-2026 goals.</p>
+  <div class="page-header hud-header">
+    <div class="hud-title">
+      <h2>Overview</h2>
+      <p>Progress across every task file, the year, projects and end-of-2026 goals.</p>
+    </div>
+    {{ readout([
+      ("Calendar Week", "W" ~ current_week, "color-accent"),
+      ("Tasks Done", realm_tasks.total_done ~ "/" ~ realm_tasks.total, "color-green"),
+      ("Active Projects", projects|length, "color-blue"),
+      ("Certifications", certifications|length, "color-purple"),
+    ]) }}
   </div>
 
-  <!-- Stats -->
-  <div class="grid-4 mb-16">
-    <div class="stat-box">
-      <div class="stat-value color-accent">W{{ current_week }}</div>
-      <div class="stat-label">Calendar Week</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-value color-green">
-        {{ realm_tasks.total_done }}/{{ realm_tasks.total }}
+  <div class="hud-stage">
+    <!-- Focal: crease map — density of folds per domain -->
+    <section class="card span-8" aria-labelledby="creaseTitle">
+      <h3 class="card-title" id="creaseTitle">Creases across the sheet</h3>
+      {% for r in realm_tasks.realm_stats %} {% if r.total > 0 %}
+      <div class="crease-realm" style="--realm-color: {{ r.color }};">
+        <span class="crease-realm-name">{{ r.icon }}</span>
+        <div
+          class="crease-ticks"
+          role="img"
+          aria-label="{{ r.name }}: {{ r.done_count }} of {{ r.total }} folds made"
+        >
+          {% for i in range(r.total) %}
+          <span
+            class="crease-tick {{ 'folded' if i < r.done_count else '' }}"
+            aria-hidden="true"
+          ></span>
+          {% endfor %}
+        </div>
+        <span class="crease-realm-total">{{ r.done_count }}/{{ r.total }}</span>
       </div>
-      <div class="stat-label">Tasks Done</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-value color-blue">{{ projects|length }}</div>
-      <div class="stat-label">Active Projects</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-value color-purple">{{ certifications|length }}</div>
-      <div class="stat-label">Certifications</div>
-    </div>
-  </div>
+      {% endif %} {% endfor %}
+    </section>
 
-  <!-- Crease map — density of folds per domain -->
-  <div class="card">
-    <div class="card-title">Creases across the sheet</div>
-    {% for r in realm_tasks.realm_stats %} {% if r.total > 0 %}
-    <div class="crease-realm">
-      <span class="crease-realm-name">{{ r.icon }}</span>
-      <div
-        class="crease-ticks"
-        role="img"
-        aria-label="{{ r.name }}: {{ r.done_count }} of {{ r.total }} folds made"
-      >
-        {% for i in range(r.total) %}
-        <span
-          class="crease-tick {{ 'folded' if i < r.done_count else '' }}"
-          aria-hidden="true"
-        ></span>
+    <!-- Wing: year progress rings -->
+    <section class="card span-4" aria-labelledby="yearTitle">
+      <h3 class="card-title" id="yearTitle">Year Progress</h3>
+      <div class="ring-grid">
+        {% for ring in [ {"pct": year_pct, "label": "2026"}, {"pct": q1_pct, "label": "Q1"},
+        {"pct": q2_pct, "label": "Q2"}, {"pct": q3_pct, "label": "Q3"}, {"pct": q4_pct, "label": "Q4"}, ]
+        %}
+        {# Colour is state: complete green, under way the signal, not started muted. #}
+        {% set ring_color = "var(--green)" if ring.pct >= 100 else ("var(--accent)" if ring.pct > 0 else "var(--ink-muted)") %}
+        <div class="ring-container{{ ' ring-lead' if loop.first }}">
+          {% set circ = 99.9 %} {% set offset = circ * (1 - ring.pct / 100) %}
+          <svg
+            class="ring-svg"
+            viewBox="0 0 36 36"
+            role="img"
+            aria-label="{{ ring.label }} progress: {{ ring.pct }}%"
+          >
+            <circle class="ring-bg" cx="18" cy="18" r="15.9" />
+            <circle
+              class="ring-fill"
+              cx="18"
+              cy="18"
+              r="15.9"
+              stroke="{{ ring_color }}"
+              stroke-dasharray="{{ circ }}"
+              stroke-dashoffset="{{ offset }}"
+            />
+            <text class="ring-text" x="18" y="18" aria-hidden="true">
+              {{ ring.pct }}%
+            </text>
+          </svg>
+          <div class="ring-label">{{ ring.label }}</div>
+        </div>
         {% endfor %}
       </div>
-      <span class="crease-realm-total">{{ r.done_count }}/{{ r.total }}</span>
-    </div>
-    {% endif %} {% endfor %}
-  </div>
+    </section>
 
-  <!-- Year Progress Rings -->
-  <div class="card">
-    <div class="card-title">Year Progress</div>
-    <div class="grid-5 justify-center pad-y-8">
-      {% for ring in [ {"pct": year_pct, "label": "2026", "color": "var(--vermilion)"},
-      {"pct": q1_pct, "label": "Q1", "color": "var(--green)"}, {"pct": q2_pct,
-      "label": "Q2", "color": "var(--blue)"}, {"pct": q3_pct, "label": "Q3",
-      "color": "var(--purple)"}, {"pct": q4_pct, "label": "Q4", "color": "var(--yellow)"}, ]
-      %}
-      <div class="ring-container">
-        {% set circ = 99.9 %} {% set offset = circ * (1 - ring.pct / 100) %}
-        <svg
-          class="ring-svg"
-          viewBox="0 0 36 36"
-          role="img"
-          aria-label="{{ ring.label }} progress: {{ ring.pct }}%"
-        >
-          <circle class="ring-bg" cx="18" cy="18" r="15.9" />
-          <circle
-            class="ring-fill"
-            cx="18"
-            cy="18"
-            r="15.9"
-            stroke="{{ ring.color }}"
-            stroke-dasharray="{{ circ }}"
-            stroke-dashoffset="{{ offset }}"
-          />
-          <text class="ring-text" x="18" y="18" aria-hidden="true">
-            {{ ring.pct }}%
-          </text>
-        </svg>
-        <div class="ring-label">{{ ring.label }}</div>
+    <!-- Projects: one row of cells inside one panel -->
+    <section class="card span-12" aria-labelledby="overviewProjectsTitle">
+      <h3 class="card-title" id="overviewProjectsTitle">Projects</h3>
+      <div class="project-strip">
+        {% for p in projects %}
+        <div class="project-card">
+          <div class="project-header">
+            <h4>{{ p.name }}</h4>
+          </div>
+          <div class="project-badge mb-8 {{ project_state(p.status) }}">
+            {{ p.status }}
+          </div>
+          {# No project carries a q1_goal today; an empty label and a 0% bar
+             claimed a goal that does not exist. #}
+          {% if p.q1_goal %}
+          <div class="progress-label">
+            <span class="name">Q1: {{ p.q1_goal }}</span>
+          </div>
+          <div class="progress-track">
+            <div
+              class="progress-fill"
+              style="background: var(--accent); width: 0;"
+              data-width="0%"
+            ></div>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
       </div>
-      {% endfor %}
-    </div>
-  </div>
+    </section>
 
-  <!-- Projects Summary -->
-  <div class="card">
-    <div class="card-title">Projects</div>
-    <div class="grid-3">
-      {% for p in projects %}
-      <div
-        class="project-card"
-        style="
-          border-left: 4px solid var(--accent);
-          border-radius: var(--radius);
-        "
-      >
-        <div class="project-header">
-          <h3>{{ p.name }}</h3>
-        </div>
-        <div
-          class="project-badge mb-8"
-          style="background: {{ p.color }}20; color: {{ p.color }};"
-        >
-          {{ p.status }}
-        </div>
-        <div class="progress-label">
-          <span class="name">Q1: {{ p.q1_goal }}</span>
-        </div>
-        <div class="progress-track">
-          <div
-            class="progress-fill"
-            style="background: {{ p.color }}; width: 0;"
-            data-width="0%"
-          ></div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-
-  <!-- Success Metrics -->
-  <div class="card">
-    <div class="card-title">End of 2026 Goals</div>
-    {{ metric_table(success_metrics) }}
+    <!-- Dock: end-of-year goals as telemetry rows -->
+    <section class="card span-12" aria-labelledby="overviewGoalsTitle">
+      <h3 class="card-title" id="overviewGoalsTitle">End of 2026 Goals</h3>
+      {{ metric_table(success_metrics) }}
+    </section>
   </div>
 </div>

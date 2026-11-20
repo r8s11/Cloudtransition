@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARMS Clipper</title>
+<link rel="stylesheet" href="popup.css">
+<script src="clip.js"></script>
+<script src="popup.js" defer></script>
+</head>
+<body>
+<main>
+  <h1>ARMS Clipper</h1>
+  <p class="hint">Reads this tab only when you press Capture. Nothing is sent anywhere.</p>
+  <dl>
+    <dt>Page</dt><dd id="page-title">Loading…</dd>
+    <dt>URL</dt><dd id="page-url" class="mono"></dd>
+  </dl>
+  <button type="button" id="capture" class="primary">Capture selection</button>
+  <label for="preview" class="label">Markdown preview</label>
+  <textarea id="preview" readonly rows="9" placeholder="Select text on the page, then press Capture."></textarea>
+  <button type="button" id="download" disabled>Download .md</button>
+  <p id="msg" role="status" aria-live="polite"></p>
+</main>
+</body>
+</html>

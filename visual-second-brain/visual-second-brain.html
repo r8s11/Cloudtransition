@@ -1,0 +1,2788 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Workspace map</title>
+    <!--
+      Visual Second Brain: the entire app. Its only runtime input is
+      workspace-index.json beside it (rebuild with refresh-index.py).
+      Libraries are pinned locally; no remote runtime service is required.
+      When the dashboard serves it, the index response carries an
+      X-Workspace-Open header naming the safe file route; standalone it shows
+      paths and copy only.
+    -->
+    <style>
+      /* ── Orizuru tokens (mirrors dashboard-app/static/style.css) ── */
+      @font-face {
+        font-family: "Inter";
+        src: local("Inter"), local("Inter Variable"), url("/static/fonts/InterVariable.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Inter";
+        src: local("Inter Italic"), local("Inter Variable Italic"), url("/static/fonts/InterVariable-Italic.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: italic;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "JetBrains Mono";
+        src: local("JetBrains Mono"), url("/static/fonts/JetBrainsMono.woff2") format("woff2");
+        font-weight: 100 800;
+        font-display: swap;
+      }
+      :root {
+        --vermilion: #b3212e;
+        --vermilion-deep: #8e1a24;
+        --fold-white: #f4ead8;
+        --paper: #f8f1e3;
+        --paper-deep: #efe3cd;
+        --paper-hi: #fdf9ef;
+        --gold: #c9a227;
+        --gold-tint: rgba(201, 162, 39, 0.3);
+        --sumi: #171512;
+        --ink: #211d18;
+        --ink-mid: #4f483c;
+        --ink-muted: #554d41;
+        --border: #d8c9ab;
+        --border-light: #e4dac4;
+        --green: #3f7d54;
+        --warn: #8a5a00;
+        --radius: 10px;
+        --radius-sm: 6px;
+        --shadow: 0 2px 10px rgba(90, 62, 31, 0.14);
+        --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        --tile-min: 216px;
+        --tile-name: 16px;
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --motion-fast: 120ms;
+        --motion-panel: 220ms;
+      }
+      /* Inside the Command Center tab the map takes the dashboard's navy
+         panels and single orange signal (dashboard-app/static/tokens.css).
+         Standalone, it keeps the washi sheet above. */
+      :root.embedded {
+        color-scheme: dark;
+        --vermilion: #ff7a1a;
+        --vermilion-deep: #c95a0a;
+        --fold-white: #1c0e02;
+        --paper: #0e1d33;
+        --paper-deep: #0a1628;
+        --paper-hi: #14294a;
+        --gold: #ffc247;
+        --gold-tint: rgba(255, 194, 71, 0.3);
+        --sumi: #f5f9ff;
+        --ink: #dbe6f5;
+        --ink-mid: #b4c5dc;
+        --ink-muted: #9db1cc;
+        --border: #223b60;
+        --border-light: #182d4c;
+        --green: #5fcf8a;
+        --warn: #f2c14e;
+        --shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+      }
+      .embedded .top { background: var(--paper-deep); color: var(--ink); border-bottom: 1px solid var(--border); }
+      .embedded .brand p { color: var(--ink-mid); }
+      .embedded .brand p.stale { color: var(--warn); }
+      .embedded #q { border-color: var(--border); }
+      .embedded .seg button[aria-pressed="true"] { background: var(--vermilion); color: var(--fold-white); }
+      .embedded .seg button:disabled { color: #5d7598; }
+      .embedded .btn.done { color: var(--fold-white); }
+      .embedded .graph:not(.graph-dark) {
+        --graph-c1: #6aa9ff; --graph-c2: #4fd1c5; --graph-c3: #aa9cff;
+        --graph-c4: #f2c14e; --graph-c5: #86d6a2; --graph-c6: #ff7b72;
+      }
+      :root[data-density="0"] {
+        --tile-min: 168px;
+        --tile-name: 14px;
+      }
+      :root[data-density="2"] {
+        --tile-min: 288px;
+        --tile-name: 19px;
+      }
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        font-family: var(--sans);
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--ink);
+        background: var(--paper);
+        caret-color: var(--vermilion);
+        display: flex;
+        flex-direction: column;
+        height: 100dvh;
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+      ::selection {
+        background: var(--gold-tint);
+        color: var(--sumi);
+      }
+      * {
+        scrollbar-color: var(--border) transparent;
+      }
+      :focus-visible {
+        outline: 2px solid var(--vermilion);
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+      button,
+      select,
+      input,
+      a {
+        font: inherit;
+        color: inherit;
+      }
+      .num {
+        font-family: var(--mono);
+        font-variant-numeric: tabular-nums;
+      }
+      .sr {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+
+      /* ── Masthead: the vermilion sheet ─────────────────────── */
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 8px 16px;
+        background: var(--vermilion);
+        color: var(--fold-white);
+        flex-shrink: 0;
+      }
+      .brand {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        flex-shrink: 0;
+      }
+      .brand h1 {
+        font-size: 16px;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+      }
+      .brand p {
+        font-size: 12px;
+        color: rgba(244, 234, 216, 0.9);
+      }
+      .brand p.stale {
+        color: #fff3c4;
+      }
+      /* Inside the dashboard tab the page header already names the map. */
+      .embedded .brand h1 {
+        display: none;
+      }
+      .searchwrap {
+        position: relative;
+        flex: 1;
+        max-width: 640px;
+      }
+      #q {
+        width: 100%;
+        height: 44px;
+        padding: 0 48px 0 14px;
+        font-size: 15px;
+        color: var(--ink);
+        background: var(--paper-hi);
+        border: 1px solid var(--vermilion-deep);
+        border-radius: var(--radius);
+      }
+      #q::placeholder {
+        color: var(--ink-muted);
+      }
+      #q:focus-visible {
+        outline: 2px solid var(--gold);
+        outline-offset: 1px;
+      }
+      #q::-webkit-search-cancel-button {
+        display: none;
+      }
+      #clear {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 44px;
+        height: 44px;
+        border: 0;
+        background: none;
+        cursor: pointer;
+        color: var(--ink-mid);
+        display: grid;
+        place-items: center;
+      }
+      #clear[hidden] {
+        display: none;
+      }
+      #clear svg {
+        width: 16px;
+        height: 16px;
+      }
+      .count {
+        margin-left: auto;
+        font-size: 12px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      /* ── Toolbar ───────────────────────────────────────────── */
+      .tools {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 16px;
+        padding: 8px 16px;
+        background: var(--paper-deep);
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .seg {
+        display: inline-flex;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        background: var(--paper-hi);
+      }
+      .seg button {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 0 14px;
+        border: 0;
+        background: none;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--ink-mid);
+      }
+      .seg button + button,
+      .seg span + button {
+        border-left: 1px solid var(--border);
+      }
+      .seg button[aria-pressed="true"] {
+        background: var(--ink);
+        color: var(--paper-hi);
+      }
+      .seg button:disabled {
+        color: var(--border);
+        cursor: default;
+      }
+      .seg span {
+        display: grid;
+        place-items: center;
+        min-width: 84px;
+        padding: 0 8px;
+        border-left: 1px solid var(--border);
+        font-size: 12px;
+        color: var(--ink-mid);
+      }
+      .field {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--ink-muted);
+      }
+      .field select {
+        min-height: 44px;
+        max-width: 220px;
+        padding: 0 10px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--paper-hi);
+        color: var(--ink);
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 0 14px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--paper-hi);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background-color 0.15s var(--ease);
+      }
+      .btn:active {
+        background: var(--paper-deep);
+      }
+      .btn.primary {
+        background: var(--vermilion);
+        border-color: var(--vermilion-deep);
+        color: var(--fold-white);
+      }
+      .btn.primary:active {
+        background: var(--vermilion-deep);
+      }
+      .btn.done {
+        background: var(--green);
+        border-color: var(--green);
+        color: #fff;
+      }
+      #filtersToggle {
+        display: none;
+      }
+
+      /* ── Context bar: breadcrumbs + active filters ─────────── */
+      .ctx {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 8px;
+        padding: 12px 16px 0;
+      }
+      .ctx h2 {
+        font-size: 18px;
+        font-weight: 650;
+        letter-spacing: -0.015em;
+        margin-right: 8px;
+        word-break: break-word;
+      }
+      .crumb {
+        min-height: 44px;
+        padding: 0 6px;
+        border: 0;
+        background: none;
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--ink-mid);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        text-decoration-color: var(--border);
+      }
+      .crumb-sep {
+        color: var(--border);
+        font-family: var(--mono);
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 4px 0 12px;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        background: var(--paper-hi);
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .chip svg {
+        width: 12px;
+        height: 12px;
+        margin: 0 10px 0 8px;
+        color: var(--ink-muted);
+      }
+
+      /* ── Shell ─────────────────────────────────────────────── */
+      .shell {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+      }
+      .main {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+        overflow-y: auto;
+        padding: 12px 16px 48px;
+      }
+
+      /* A single optional sculpture; the file index keeps its own scroll geometry. */
+      .atlas {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-height: 80px;
+        margin: 0 0 12px;
+        padding: 0 16px 12px;
+        border-bottom: 1px solid var(--border-light);
+      }
+      .atlas[hidden] { display: none; }
+      .atlas-stage {
+        position: relative;
+        flex-shrink: 0;
+        width: 80px;
+        height: 72px;
+      }
+      .atlas-stage svg,
+      .atlas-stage canvas {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      .atlas-rendered .atlas-stage svg { visibility: hidden; }
+      .atlas-name { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+      .atlas-caption { display: none; }
+      .atlas-motion { margin-top: 14px; }
+      #atlas[hidden] { display: none; }
+      .atlas-motion[hidden] { display: none; }
+      .atlas-list .atlas,
+      .atlas-details .atlas { display: none; }
+      @media (min-width: 1100px) {
+        .main.atlas-space { padding-right: 344px; }
+        .atlas {
+          position: absolute;
+          top: 32px;
+          right: 24px;
+          display: block;
+          width: 288px;
+          padding: 0;
+          margin: 0;
+          border: 0;
+        }
+        .atlas-stage { width: 288px; height: 292px; margin-bottom: 22px; }
+        .atlas-caption { display: block; margin-top: 8px; font-size: 12px; color: var(--ink-mid); }
+        .atlas-list .atlas { display: block; }
+        .main.atlas-details { padding-right: 16px; }
+        .atlas-details .atlas { display: none; }
+      }
+      .atlas-cover .ctx { display: block; padding: 96px 16px 28px; }
+      .atlas-cover .ctx h2 { max-width: 13ch; font-size: clamp(38px, 5.6vw, 84px); line-height: 1.04; letter-spacing: -.03em; text-wrap: balance; }
+      .fold-number { color: var(--vermilion); font-variant-numeric: tabular-nums; }
+      .fold-word { display: inline-block; overflow: hidden; padding: .14em 0; margin: -.14em 0; vertical-align: bottom; }
+      .fold-word > span, .fold-name { display: inline-block; }
+      .fold-facts { margin-top: 18px; max-width: 60ch; color: var(--ink-mid); }
+      .atlas-cover .atlas { position: absolute; top: 16px; left: 16px; margin: 0; padding: 0; border: 0; }
+      .atlas-cover .atlas-name, .atlas-cover .atlas-caption { display: none; }
+      #fold-ghosts { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+      .fold-card { position: absolute; border: 1px solid var(--border-light); border-radius: var(--radius); background: var(--paper-hi); }
+      .fold-fly { position: absolute; font-weight: 650; line-height: 1.25; white-space: nowrap; transform-origin: 0 50%; }
+      @media (min-width: 1100px) {
+        .main.atlas-cover { padding-right: 16px; }
+        .atlas-cover .ctx { min-height: 348px; padding: 0 476px 28px 16px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; }
+        .atlas-cover .atlas { top: 20px; right: 32px; left: auto; width: 420px; }
+        .atlas-cover .atlas-stage { width: 420px; height: 340px; margin-bottom: 0; }
+        .atlas-cover .atlas-motion { position: absolute; right: 0; bottom: 8px; margin: 0; }
+      }
+
+      /* Cluster tiles: one per topic or folder */
+      .tiles {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(var(--tile-min), 100%), 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .tile {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-height: 44px;
+        padding: 14px;
+        text-align: left;
+        background: var(--paper-hi);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: background-color 0.15s var(--ease), border-color 0.15s var(--ease);
+      }
+      .tile:active {
+        background: var(--paper-deep);
+      }
+      .tile-head {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+      }
+      .tile-name {
+        flex: 1;
+        min-width: 0;
+        font-size: var(--tile-name);
+        font-weight: 650;
+        letter-spacing: -0.015em;
+        line-height: 1.25;
+        word-break: break-word;
+      }
+      .tile-n {
+        font-size: 13px;
+        color: var(--vermilion);
+        font-weight: 600;
+      }
+      .tile-meta {
+        font-size: 12px;
+        color: var(--ink-muted);
+        line-height: 1.45;
+      }
+      .tile-meta .num {
+        font-size: 11px;
+      }
+      .tile-plain .tile-name {
+        font-weight: 500;
+        color: var(--ink-mid);
+      }
+
+      /* File rows (virtualized) */
+      .listhead {
+        font-size: 12px;
+        color: var(--ink-muted);
+        margin: 4px 0 8px;
+      }
+      .vp {
+        position: relative;
+      }
+      .rows {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 10px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        height: 56px;
+        padding: 0 12px;
+        border: 0;
+        border-bottom: 1px solid var(--border-light);
+        background: none;
+        text-align: left;
+        cursor: pointer;
+      }
+      .row:active {
+        background: var(--paper-deep);
+      }
+      .row[aria-current="true"] {
+        background: var(--paper-deep);
+      }
+      .row .mark {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+      .row[aria-current="true"] .mark {
+        background: var(--gold);
+      }
+      .row-mid {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .row-n,
+      .row-p {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .row-n {
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .row-p {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-muted);
+      }
+      .row-r {
+        text-align: right;
+        font-size: 11px;
+        color: var(--ink-muted);
+        line-height: 1.4;
+      }
+      mark {
+        background: var(--gold-tint);
+        color: inherit;
+        border-radius: 2px;
+      }
+      .note {
+        max-width: 62ch;
+        margin: 32px auto;
+        padding: 20px;
+        background: var(--paper-hi);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        line-height: 1.6;
+      }
+      .note h2 {
+        font-size: 17px;
+        margin-bottom: 8px;
+      }
+      .note p + p,
+      .note p + pre {
+        margin-top: 10px;
+      }
+      pre,
+      code {
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+      pre {
+        padding: 10px 12px;
+        background: var(--paper-deep);
+        border-radius: var(--radius-sm);
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+
+      /* ── Detail drawer ─────────────────────────────────────── */
+      .det {
+        width: 360px;
+        flex-shrink: 0;
+        overflow-y: auto;
+        padding: 16px;
+        background: var(--paper-hi);
+        border-left: 1px solid var(--border);
+      }
+      .det[hidden] {
+        display: none;
+      }
+      .det-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+      .det h2 {
+        flex: 1;
+        font-size: 17px;
+        font-weight: 650;
+        letter-spacing: -0.015em;
+        line-height: 1.3;
+        word-break: break-word;
+        padding-top: 10px;
+      }
+      .det h2:focus {
+        outline: none;
+      }
+      .icon-btn {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: var(--radius-sm);
+        background: none;
+        cursor: pointer;
+        color: var(--ink-mid);
+      }
+      .icon-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+      .det-sub {
+        font-size: 12px;
+        color: var(--ink-muted);
+        margin-bottom: 16px;
+      }
+      .kv {
+        display: grid;
+        grid-template-columns: 76px 1fr;
+        align-items: center;
+        gap: 4px 12px;
+        font-size: 13px;
+        margin-bottom: 16px;
+      }
+      .kv dt {
+        font-size: 12px;
+        color: var(--ink-muted);
+      }
+      .kv dd {
+        min-width: 0;
+        word-break: break-word;
+      }
+      .link-btn {
+        min-height: 44px;
+        border: 0;
+        background: none;
+        cursor: pointer;
+        text-align: left;
+        text-decoration: underline;
+        text-decoration-color: var(--border);
+        text-underline-offset: 3px;
+      }
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .tags .chip {
+        padding: 0 12px;
+      }
+      .sect {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--ink-mid);
+        margin: 16px 0 6px;
+      }
+      .pv {
+        padding: 10px 12px;
+        background: var(--paper);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-sm);
+        font-size: 12.5px;
+        line-height: 1.55;
+        color: var(--ink-mid);
+        max-height: 200px;
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .pv.none {
+        font-style: italic;
+      }
+      .pth {
+        padding: 8px 10px;
+        background: var(--paper);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-sm);
+        font-family: var(--mono);
+        font-size: 11.5px;
+        word-break: break-all;
+        user-select: all;
+      }
+      .pth + .pth {
+        margin-top: 6px;
+      }
+      .acts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .acts .btn {
+        flex: 1 1 auto;
+      }
+      .status {
+        min-height: 20px;
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--ink-mid);
+      }
+
+      /* ── Footer: snapshot facts ────────────────────────────── */
+      .foot {
+        flex-shrink: 0;
+        padding: 0 16px;
+        border-top: 1px solid var(--border);
+        background: var(--paper-deep);
+        font-size: 12px;
+        color: var(--ink-mid);
+      }
+      .foot summary {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+      }
+      .foot .body {
+        padding-bottom: 12px;
+        max-height: 40vh;
+        overflow: auto;
+      }
+      .foot ul {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 16px;
+        margin: 4px 0 10px;
+      }
+
+      @media (hover: hover) {
+        .tile:hover {
+          border-color: var(--vermilion);
+        }
+        .row:hover {
+          background: var(--paper-deep);
+        }
+        .btn:hover,
+        .icon-btn:hover,
+        .chip:hover,
+        #clear:hover {
+          background: var(--paper-deep);
+        }
+        .btn.primary:hover {
+          background: var(--vermilion-deep);
+        }
+        .crumb:hover,
+        .link-btn:hover {
+          text-decoration-color: currentColor;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .det {
+          position: fixed;
+          inset: 0;
+          width: auto;
+          z-index: 30;
+          box-shadow: var(--shadow);
+        }
+      }
+      @media (max-width: 640px) {
+        .top {
+          flex-wrap: wrap;
+          gap: 8px 12px;
+        }
+        .searchwrap {
+          order: 3;
+          flex-basis: 100%;
+          max-width: none;
+        }
+        #filtersToggle {
+          display: inline-flex;
+        }
+        .tools .opt {
+          display: none;
+        }
+        .tools.open .opt {
+          display: inline-flex;
+        }
+        .field {
+          flex-basis: 100%;
+          justify-content: space-between;
+        }
+        .field select {
+          flex: 1;
+          max-width: none;
+        }
+        .row-r .ty {
+          display: none;
+        }
+      }
+      /* Graph is another view of VIEW, never another source of workspace data. */
+      .main.graph-mode { display: flex; flex-direction: column; gap: 12px; padding-bottom: 16px; }
+      #tileSizing[hidden] { display: none; }
+      .graph-mode #body { display: flex; flex: 1; min-height: 420px; }
+      .graph {
+        --graph-node: var(--ink-mid);
+        --graph-accent: var(--vermilion);
+        --graph-c1: #275e9a; --graph-c2: #237767; --graph-c3: #8b3f8f;
+        --graph-c4: #92621b; --graph-c5: #6351a9; --graph-c6: #a73e48;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--paper-hi);
+        color: var(--ink);
+      }
+      /* Dark Graph follows the spatial FUI reference (hompage/, dashboard Today):
+         optical void, cyan HUD hairlines, frosted glass panels with corner
+         brackets. The 3D scene reads these same variables (constellation.js). */
+      .graph.graph-dark, .graph-dark-details .det {
+        --paper: #04070d;
+        --paper-hi: rgba(6, 18, 30, 0.72);
+        --paper-deep: rgba(92, 225, 230, 0.1);
+        --ink: #e6f6ff;
+        --ink-mid: #b4cbd6;
+        --ink-muted: #8aa9b8;
+        --border: rgba(92, 225, 230, 0.26);
+        --border-light: rgba(92, 225, 230, 0.14);
+        --graph-node: #9bc3d2;
+        --graph-accent: #9efaff;
+        --graph-c1: #3fb8ff; --graph-c2: #38f2af; --graph-c3: #c49bff;
+        --graph-c4: #ffaa2b; --graph-c5: #7d8cff; --graph-c6: #ff6b81;
+      }
+      .graph-dark-details .det { color: var(--ink); background: rgba(5, 14, 24, 0.82); backdrop-filter: blur(18px) saturate(150%); -webkit-backdrop-filter: blur(18px) saturate(150%); }
+      body.graph-dark-details .main.graph-mode {
+        background-color: #04070d;
+        background-image:
+          radial-gradient(circle at 15% 20%, rgba(92, 225, 230, 0.2), transparent 40%),
+          radial-gradient(circle at 85% 55%, rgba(70, 110, 255, 0.18), transparent 42%),
+          radial-gradient(circle at 40% 100%, rgba(56, 242, 175, 0.1), transparent 38%),
+          linear-gradient(rgba(92, 225, 230, 0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(92, 225, 230, 0.035) 1px, transparent 1px);
+        background-size: 100% 100%, 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+        color: #e6f6ff;
+      }
+      body.graph-dark-details .main.graph-mode .ctx h2 { color: #5ce1e6; font: 600 12px/1.3 var(--mono); letter-spacing: .18em; text-transform: uppercase; }
+      .graph.graph-dark {
+        position: relative;
+        border-radius: 3px;
+        background: linear-gradient(145deg, rgba(120, 200, 230, 0.08), rgba(8, 20, 34, 0.5) 55%, rgba(4, 13, 24, 0.62));
+        backdrop-filter: blur(20px) saturate(160%);
+        -webkit-backdrop-filter: blur(20px) saturate(160%);
+        border-color: rgba(160, 230, 245, 0.16);
+        border-top-color: rgba(200, 245, 255, 0.34);
+        box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+      .graph.graph-dark::before, .graph.graph-dark::after { content: ""; position: absolute; z-index: 4; width: 12px; height: 12px; border: 0 solid #5ce1e6; pointer-events: none; }
+      .graph.graph-dark::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+      .graph.graph-dark::after { right: -1px; bottom: -1px; border-width: 0 2px 2px 0; }
+      .graph-dark .graph-head h3 { color: #5ce1e6; font: 600 12px/1.3 var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+      .graph-dark .graph-help, .graph-dark .graph-renderer-status, .graph-dark .graph-legend { font-family: var(--mono); font-size: 12px; letter-spacing: .02em; line-height: 1.55; }
+      .graph-dark .graph-library summary { color: #5ce1e6; font-family: var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+      .graph-dark .graph-library button { border-left: 2px solid transparent; font-family: var(--mono); }
+      .graph-dark .graph-library button:hover, .graph-dark .graph-library button:focus-visible { border-left-color: var(--cluster-color); }
+      .graph-dark .graph-swatch { box-shadow: 0 0 8px var(--cluster-color); }
+      .graph-dark .graph-actions button { border-radius: 2px; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; }
+      .graph-dark .graph-stage { background: #04070d; }
+      .graph-dark .graph-scene { font-family: var(--mono); }
+      .graph-dark .constellation-labels button { letter-spacing: .06em; text-transform: uppercase; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: inset 0 0 12px rgba(92, 225, 230, 0.08); }
+      .graph-dark .graph-focus { background: rgba(5, 15, 27, 0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-color: rgba(92, 225, 230, 0.5); border-radius: 2px; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7), inset 0 0 16px rgba(92, 225, 230, 0.12); }
+      .graph-dark .graph-focus-kind { color: #5ce1e6; letter-spacing: .14em; }
+      .graph-dark .graph-hub rect { rx: 0; }
+      .graph-dark .graph-hub text { font-family: var(--mono); letter-spacing: .06em; }
+      .graph-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+      .graph-head h3 { font-size: 16px; font-weight: 650; }
+      .graph-help { max-width: 70ch; color: var(--ink-mid); font-size: 12px; }
+      .graph-actions { display: flex; flex-wrap: wrap; gap: 8px; max-width: 100%; }
+      .graph .seg { flex-shrink: 0; }
+      .graph .seg span { min-width: 54px; font-family: var(--mono); }
+      .graph-actions button { min-height: 44px; min-width: 44px; }
+      .graph-renderer-status { padding: 8px 16px; border-bottom: 1px solid var(--border-light); color: var(--ink-mid); font-size: 12px; overflow-wrap: anywhere; }
+      .graph :focus-visible { outline-color: var(--graph-accent); }
+      .graph-content { display: flex; flex: 1; min-height: 240px; overflow: hidden; }
+      .graph-library { flex-shrink: 0; width: 190px; overflow-y: auto; border-right: 1px solid var(--border); }
+      .graph-library summary { min-height: 44px; padding: 12px; cursor: pointer; font-weight: 600; font-size: 12px; }
+      .graph-library button { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 8px 12px; border: 0; background: none; color: var(--ink-mid); cursor: pointer; text-align: left; font-size: 12px; }
+      .graph-library button:hover, .graph-library button:focus-visible { background: var(--paper-deep); color: var(--ink); }
+      .graph-library .num { margin-left: auto; font-size: 12px; font-variant-numeric: tabular-nums; }
+      .graph-swatch { width: 8px; height: 8px; flex-shrink: 0; border-radius: 50%; background: var(--cluster-color); }
+      .graph-stage { position: relative; flex: 1; width: 0; min-width: 0; min-height: 240px; overflow: hidden; touch-action: none; user-select: none; }
+      .graph-svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; cursor: grab; }
+      .graph-svg.panning { cursor: grabbing; }
+      .graph-scene { position: absolute; inset: 0; visibility: hidden; pointer-events: none; }
+      .graph-3d .graph-scene { visibility: visible; pointer-events: auto; }
+      .graph.graph-3d { min-height: min-content; }
+      .graph-3d .graph-svg { opacity: 0; pointer-events: none; }
+      .graph-3d .graph-stage.graph-keyboard::after { content: ""; position: absolute; inset: 2px; border: 2px solid var(--graph-accent); pointer-events: none; z-index: 3; }
+      .graph-focus { position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 3; display: grid; grid-template-columns: 2px minmax(0, 1fr); gap: 2px 10px; width: fit-content; max-width: calc(100% - 24px); padding: 9px 12px 10px; border: 1px solid var(--border-light); border-radius: var(--radius-sm); background: var(--paper-hi); color: var(--ink); overflow-wrap: anywhere; pointer-events: none; }
+      .graph-focus[hidden] { display: none; }
+      .graph-focus::before { content: ""; grid-row: 1 / span 3; width: 2px; background: var(--cluster-color, var(--graph-accent)); }
+      .graph-focus-kind { grid-column: 2; color: var(--ink-muted); font: 10px/1.3 var(--mono); letter-spacing: .035em; text-transform: uppercase; }
+      .graph-focus-name { grid-column: 2; font-size: 13px; font-weight: 650; line-height: 1.3; }
+      .graph-focus-path { grid-column: 2; color: var(--ink-mid); font: 11px/1.4 var(--mono); overflow-wrap: anywhere; }
+      .graph-edge { stroke: var(--cluster-color); stroke-width: .7; opacity: .3; vector-effect: non-scaling-stroke; transition: stroke .14s var(--ease), stroke-width .14s var(--ease), opacity .14s var(--ease); }
+      .graph.has-selection .graph-edge { opacity: .1; }
+      .graph.has-relationships .graph-edge:not(.is-related):not(.is-selected) { opacity: .07; }
+      .graph-edge.is-related { stroke: var(--graph-accent); stroke-width: 1.35; opacity: .9 !important; }
+      .graph-edge.is-selected { stroke: var(--graph-accent); stroke-width: 1.5; opacity: 1 !important; }
+      .graph-file, .graph-hub { cursor: pointer; outline: none; transition: opacity .14s var(--ease); }
+      .graph.has-relationships .graph-file:not(.is-related), .graph.has-relationships .graph-hub:not(.is-related) { opacity: .24; }
+      .graph-dot { fill: var(--cluster-color); stroke: var(--cluster-color); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+      .graph-file.is-selected .graph-dot, .graph-file.is-related .graph-dot, .graph-file:focus .graph-dot, .graph-file:hover .graph-dot { fill: var(--graph-accent); stroke: var(--graph-accent); stroke-width: 5; }
+      .graph-hit { fill: transparent; }
+      .graph-label { transform: scale(var(--graph-inverse, 1)); transform-origin: 0 0; }
+      .graph-file-label { visibility: hidden; pointer-events: none; }
+      .graph-file:hover .graph-file-label, .graph-file:focus .graph-file-label, .graph-file.is-selected .graph-file-label { visibility: visible; }
+      .graph-file-label text { fill: var(--ink); stroke: var(--paper-hi); stroke-width: 5; paint-order: stroke; font-size: 12px; font-weight: 600; }
+      .graph-hub rect { fill: var(--paper-hi); stroke: var(--cluster-color); stroke-width: 1; }
+      .graph-hub text { fill: var(--ink); font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+      .graph-hub.is-related rect { fill: var(--paper-deep); stroke: var(--graph-accent); stroke-width: 2; }
+      .graph-hub.is-related .graph-hub-dot { fill: var(--graph-accent); stroke: var(--graph-accent); stroke-width: 6; }
+      .graph-hub:hover rect, .graph-hub:focus rect { fill: var(--paper-deep); stroke-width: 3; }
+      .graph-hub-dot { fill: var(--cluster-color); stroke: var(--cluster-color); stroke-width: 4; vector-effect: non-scaling-stroke; }
+      .graph-overview .graph-hub .graph-label { visibility: hidden; }
+      .graph-overview .graph-hub:hover .graph-label, .graph-overview .graph-hub:focus .graph-label { visibility: visible; }
+      .graph:not(.graph-overview) .graph-label-hint, .graph-3d .graph-label-hint { display: none; }
+      .graph-legend { display: flex; flex-wrap: wrap; gap: 4px 20px; padding: 10px 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--ink-mid); }
+      .graph-empty { padding: 32px 16px; color: var(--ink-mid); }
+      @media (max-width: 640px) {
+        .main.graph-mode { padding: 8px; }
+        .graph-head { padding: 12px; }
+        .graph-actions { width: 100%; justify-content: space-between; }
+        .graph-help { font-size: 11px; }
+        .graph-content { flex-direction: column; flex: none; }
+        .graph-stage { width: 100%; min-height: 320px; flex: none; }
+        .graph-library { width: 100%; max-height: 140px; border-right: 0; border-bottom: 1px solid var(--border); }
+        .graph-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+
+      .motion-press {
+        transition: transform var(--motion-fast) var(--ease), background-color .15s var(--ease);
+      }
+      .motion-press[data-motion-pressed] { transform: scale(.97); }
+      @media (prefers-reduced-motion: reduce) {
+        .motion-press[data-motion-pressed] { transform: none; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <h1>Workspace map</h1>
+        <p id="gen">Loading index…</p>
+      </div>
+      <div class="searchwrap" role="search">
+        <label for="q" class="sr">Search files by topic, name, folder or path</label>
+        <input id="q" type="search" placeholder="Search topics, names, folders  ( / )" autocomplete="off" spellcheck="false" disabled />
+        <button id="clear" type="button" aria-label="Clear search" hidden>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" /></svg>
+        </button>
+      </div>
+      <p class="count num" id="count" aria-live="polite"></p>
+    </header>
+
+    <div class="tools" id="tools" role="group" aria-label="View and filters">
+      <div class="seg" role="group" aria-label="Map view">
+        <button type="button" id="vAtlas" aria-pressed="true">Atlas</button>
+        <button type="button" id="vGraph" aria-pressed="false">Graph</button>
+      </div>
+      <div class="seg" role="group" aria-label="Group by">
+        <button type="button" id="gTopic" aria-pressed="true">Topics</button>
+        <button type="button" id="gFolder" aria-pressed="false">Folders</button>
+      </div>
+      <button type="button" class="btn" id="filtersToggle" aria-expanded="false" aria-controls="tools">Filters</button>
+      <label class="field opt">Type <select id="fType"></select></label>
+      <label class="field opt">Folder <select id="fFolder"></select></label>
+      <label class="field opt">Modified <select id="fDate"></select></label>
+      <div class="seg opt" id="tileSizing" role="group" aria-label="Tile size">
+        <button type="button" id="zOut" aria-label="Smaller tiles">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 8h10" /></svg>
+        </button>
+        <span id="zLabel" aria-live="polite">Standard</span>
+        <button type="button" id="zIn" aria-label="Larger tiles">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 8h10M8 3v10" /></svg>
+        </button>
+        <button type="button" id="zReset">Reset size</button>
+      </div>
+      <button type="button" class="btn opt" id="reset">Reset filters</button>
+    </div>
+
+    <div class="shell">
+      <main class="main" id="main">
+        <aside class="atlas" id="atlas" aria-label="Folded Atlas" hidden>
+          <div class="atlas-stage" id="atlas-stage" aria-hidden="true">
+            <svg viewBox="0 0 300 300" aria-hidden="true">
+              <ellipse cx="153" cy="248" rx="82" ry="10" fill="var(--border-light)" />
+              <path d="M35 160 141 48 154 176Z" fill="var(--paper-hi)" />
+              <path d="M141 48 262 111 154 176Z" fill="var(--fold-white)" />
+              <path d="M35 160 154 176 103 223Z" fill="var(--paper-deep)" />
+              <path d="M154 176 262 111 217 222Z" fill="var(--border)" />
+              <path d="M103 223 154 176 217 222 165 197Z" fill="var(--vermilion)" />
+              <path d="M35 160 141 48 262 111 217 222 165 197 103 223ZM141 48 154 176 35 160M154 176 262 111M154 176 103 223M154 176 217 222" fill="none" stroke="var(--ink-mid)" stroke-opacity=".28" stroke-width=".8" />
+            </svg>
+          </div>
+          <div>
+            <p class="atlas-name" id="atlas-name">All topics</p>
+            <p class="atlas-caption">Same workspace. A different angle.</p>
+            <button class="btn atlas-motion" id="atlas-motion" type="button" aria-pressed="false" hidden>Pause motion</button>
+          </div>
+        </aside>
+        <div class="ctx" id="ctx"><h2 id="title">Topics</h2></div>
+        <div id="body"></div>
+      </main>
+      <aside class="det" id="det" aria-label="File details" hidden></aside>
+    </div>
+
+    <footer class="foot">
+      <details>
+        <summary>About this snapshot and how to refresh it</summary>
+        <div class="body" id="about"></div>
+      </details>
+    </footer>
+
+    <div id="fold-ghosts" aria-hidden="true"></div>
+    <script defer src="assets/vendor/gsap.min.js"></script>
+    <script defer src="assets/vendor/Flip.min.js"></script>
+    <script>
+      "use strict";
+      if (window.top !== window.self) document.documentElement.classList.add("embedded");
+      /* ── State ───────────────────────────────────────────────── */
+      const $ = (id) => document.getElementById(id);
+      const SCHEMA = 2;
+      const ROW = 56;
+      const OVER = 6;
+      const STALE_DAYS = 7;
+      const DENSITY = ["Compact", "Standard", "Large"];
+      const DATES = [
+        ["all", "Any time"],
+        ["1", "Past day"],
+        ["7", "Past 7 days"],
+        ["30", "Past 30 days"],
+        ["365", "Past year"],
+      ];
+      const UNTAGGED = "__untagged";
+      const ROOT = ".";
+      const fmtDate = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
+      const fmtDay = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
+
+      let IDX = null;
+      let FILES = [];
+      let VIEW = [];
+      let SEL = null;
+      let OPEN_BASE = null;
+      const F = { q: "", group: "topic", topic: "", folder: "", type: "", date: "all", view: "atlas", renderer: "3d" };
+      let density = 1;
+      let ATLAS = null;
+      let ATLAS_PENDING = false;
+      let GRAPH = null;
+      let flyFromPose = null;
+      let graphDark = true;
+      let graph3DFailure = "";
+
+      /* Motion belongs to occasional pointer handoffs, never to reading or shortcuts. */
+      const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+      const motionStyle = getComputedStyle(document.documentElement);
+      const motionTiming = {
+        ease: motionStyle.getPropertyValue("--ease").trim(),
+        fast: parseFloat(motionStyle.getPropertyValue("--motion-fast")),
+        panel: parseFloat(motionStyle.getPropertyValue("--motion-panel")),
+      };
+      let motionInput = "initial";
+      let detailAnimation = null;
+      let detailClosing = false, detailRevision = 0, pressedControl = null;
+
+
+      // Opening Fold owns only occasional state handoffs; the map owns every action.
+      let openingContext = null, openingFrame = 0, openingRevision = 0, openingSeen = false;
+      let previousOpening = null, openingWait = null;
+      const foldState = { fold: 1 };
+      const openingKey = () => F.group + ":" + (F.group === "topic" ? F.topic : F.folder);
+      function coverMode() {
+        return Boolean(IDX && VIEW.length && F.view === "atlas" && !SEL && !listMode() && (F.group === "topic" || !F.folder));
+      }
+      function stopOpening() {
+        openingRevision++;
+        cancelAnimationFrame(openingFrame);
+        openingFrame = 0;
+        openingWait = null;
+        if (openingContext) openingContext.revert();
+        openingContext = null;
+        $("fold-ghosts").replaceChildren();
+        foldState.fold = 1;
+        if (ATLAS) ATLAS.update(foldState);
+      }
+      function openingSnapshot() {
+        stopOpening();
+        const old = previousOpening;
+        if (!old || !window.gsap || !window.Flip || reducedMotion.matches || motionInput !== "pointer") return { old };
+        const flip = window.Flip, nextKey = openingKey(), carryKey = old.cover ? nextKey : old.key;
+        const name = [...document.querySelectorAll("[data-fold-key]")].find(node => node.dataset.foldKey === carryKey);
+        const stage = $("atlas-stage");
+        return {
+          old,
+          stage: old.view === "atlas" && F.view === "atlas" && !stage.closest("[hidden]") ? flip.getState(stage) : null,
+          name: old.group === F.group && (old.cover || coverMode()) && name ? flip.getState(name) : null,
+          key: carryKey,
+          tiles: old.cover && F.view === "graph" && old.group === F.group ? [...document.querySelectorAll(".tile")].map(tile => {
+            const label = tile.querySelector(".fold-name");
+            return { key: tile.dataset.foldGroup, text: label.textContent, rect: tile.getBoundingClientRect(), name: label.getBoundingClientRect(), size: getComputedStyle(label).fontSize };
+          }) : null,
+        };
+      }
+      function renderCover() {
+        if (!coverMode()) return;
+        const tiles = [...document.querySelectorAll("#body .tile")], title = $("title");
+        const text = VIEW.length + " files, folded into " + tiles.length + (F.group === "topic" ? " topics." : " folders.");
+        title.replaceChildren();
+        title.setAttribute("aria-label", text);
+        text.split(" ").forEach((word, index) => {
+          if (index) title.append(" ");
+          const clip = el("span", "fold-word"), label = el("span", /^\d/.test(word) ? "fold-number" : "", word);
+          clip.setAttribute("aria-hidden", "true");
+          clip.appendChild(label);
+          title.appendChild(clip);
+        });
+        const largest = tiles.sort((a, b) => Number(b.dataset.foldCount) - Number(a.dataset.foldCount)).slice(0, 3).map(tile => tile.querySelector(".fold-name").textContent);
+        $("ctx").appendChild(el("p", "fold-facts", "Largest: " + largest.join(", ") + ". Latest change " + ago(newest(VIEW)) + "."));
+      }
+      function gatherOpening(tiles, revision, gsap) {
+        const layer = $("fold-ghosts"), copies = [];
+        const colors = new Map([...document.querySelectorAll(".graph-hub")].map(node => [node.dataset.graphGroup, getComputedStyle(node.querySelector(".graph-hub-dot")).fill]));
+        for (const tile of tiles) {
+          const card = el("div", "fold-card"), name = el("span", "fold-fly", tile.text);
+          Object.assign(card.style, { left: tile.rect.left + "px", top: tile.rect.top + "px", width: tile.rect.width + "px", height: tile.rect.height + "px" });
+          Object.assign(name.style, { left: tile.name.left + "px", top: tile.name.top + "px", fontSize: tile.size });
+          name.style.color = colors.get(tile.key) || getComputedStyle($("body")).color;
+          layer.append(card, name);
+          copies.push({ tile, name });
+          gsap.to(card, { opacity: 0, duration: .22, onComplete: () => card.remove() });
+        }
+        const started = performance.now();
+        const land = () => {
+          if (revision !== openingRevision) return;
+          const ready = copies.map(({ tile }) => GRAPH?.hubPoint(tile.key));
+          if (ready.some(point => !point) && performance.now() - started < 400) {
+            openingFrame = requestAnimationFrame(land);
+            return;
+          }
+          openingFrame = 0;
+          openingContext.add(() => {
+            const timeline = gsap.timeline({ onComplete: () => layer.replaceChildren() });
+            copies.forEach(({ tile, name }, index) => {
+              const point = ready[index], rect = tile.name, at = index * .016;
+              if (point) {
+                timeline.to(name, { color: point.color, duration: .14 }, at);
+                timeline.to(name, { x: point.x - rect.left, y: point.y - rect.top - rect.height / 2, scale: .75, duration: .62, ease: "expo.inOut" }, at);
+              }
+              timeline.to(name, { opacity: 0, duration: .12 }, at + (point ? .55 : 0));
+            });
+          });
+        };
+        openingFrame = requestAnimationFrame(land);
+      }
+      function animateOpening(snapshot) {
+        const now = { view: F.view, group: F.group, key: openingKey(), cover: coverMode() };
+        previousOpening = now;
+        const first = !openingSeen;
+        openingSeen = true;
+        const gsap = window.gsap, flip = window.Flip;
+        if (!gsap || !flip) return;
+        gsap.registerPlugin(flip);
+        const intro = first && now.cover && motionInput === "initial" && !reducedMotion.matches;
+        const pointer = motionInput === "pointer" && snapshot.old;
+        if (!intro && !pointer) return;
+        const revision = openingRevision;
+        const start = () => { openingFrame = requestAnimationFrame(() => {
+          openingFrame = 0;
+          if (revision !== openingRevision) return;
+          openingContext = gsap.context(() => {
+            if (reducedMotion.matches) {
+              gsap.fromTo($("body"), { opacity: .85 }, { opacity: 1, duration: .12, clearProps: "opacity" });
+              return;
+            }
+            if (intro) {
+              gsap.from(".fold-word > span", { yPercent: 105, duration: .8, stagger: .05, ease: "expo.out", clearProps: "transform" });
+              gsap.from(".fold-facts", { opacity: 0, y: 8, duration: .5, delay: .3, clearProps: "opacity,transform" });
+              gsap.from("#body .tile", { opacity: 0, y: 16, duration: .5, delay: .22, stagger: .028, ease: "expo.out", clearProps: "opacity,transform" });
+              gsap.fromTo(foldState, { fold: 0 }, { fold: 1, duration: 1.15, ease: "expo.inOut", onUpdate: () => { if (ATLAS) ATLAS.update(foldState); } });
+              return;
+            }
+            if (now.view !== snapshot.old.view) {
+              if (now.view === "graph" && snapshot.tiles?.length) gatherOpening(snapshot.tiles, revision, gsap);
+              else gsap.from("#body", { opacity: .85, duration: .22, clearProps: "opacity" });
+            }
+            if (now.view === "atlas") {
+              const name = snapshot.name && [...document.querySelectorAll("[data-fold-key]")].find(node => node.dataset.foldKey === snapshot.key);
+              if (snapshot.stage && !SEL) flip.from(snapshot.stage, { targets: $("atlas-stage"), duration: .6, scale: true, ease: "expo.out" });
+              if (name) flip.from(snapshot.name, { targets: name, duration: .55, scale: true, ease: "expo.out" });
+              if (snapshot.old.key !== now.key || snapshot.old.view !== now.view) {
+                gsap.from("#body .tile, #body .row", { opacity: 0, y: 12, duration: .4, stagger: .018, ease: "expo.out", clearProps: "opacity,transform" });
+              }
+            }
+          });
+        }); };
+        // GPU initialization can compile shaders; finish it before the authored motion.
+        if (intro) foldState.fold = 0;
+        if (intro && innerWidth >= 1100 && !$("atlas").classList.contains("atlas-rendered")) openingWait = start;
+        else start();
+      }
+
+      function transitionDetail(open, pointer) {
+        const drawer = $("det");
+        const previous = detailAnimation ? getComputedStyle(drawer) : null;
+        const from = previous ? { opacity: previous.opacity, transform: previous.transform } : null;
+        const own = ++detailRevision;
+        if (detailAnimation) detailAnimation.cancel();
+        detailAnimation = null;
+        detailClosing = !open;
+        drawer.inert = !open;
+        const finish = () => {
+          if (own !== detailRevision) return;
+          detailAnimation = null;
+          detailClosing = false;
+          drawer.hidden = !open;
+          drawer.inert = false;
+          if (!open) { paint(); syncAtlas(); }
+        };
+        if (!pointer || typeof drawer.animate !== "function") {
+          finish();
+          return;
+        }
+        const start = from || (open ? { opacity: .75, transform: "translateX(3%)" } : { opacity: 1, transform: "translateX(0)" });
+        const end = open ? { opacity: 1, transform: "translateX(0)" } : { opacity: 0, transform: "translateX(3%)" };
+        if (reducedMotion.matches) {
+          delete start.transform;
+          delete end.transform;
+          if (open && !from) start.opacity = .85;
+        }
+        detailAnimation = drawer.animate([start, end], {
+          duration: reducedMotion.matches ? motionTiming.fast : motionTiming.panel,
+          easing: motionTiming.ease,
+        });
+        detailAnimation.finished.then(finish).catch(() => {});
+      }
+
+      function releasePress(instant = false) {
+        if (pressedControl) {
+          if (instant) pressedControl.classList.remove("motion-press");
+          pressedControl.removeAttribute("data-motion-pressed");
+          pressedControl = null;
+        }
+        if (instant) document.querySelectorAll(".motion-press").forEach((node) => node.classList.remove("motion-press"));
+      }
+
+      function stopVisualMotion() {
+        stopOpening();
+        if (detailAnimation || detailClosing) transitionDetail(!detailClosing, false);
+        releasePress(true);
+      }
+
+      function syncAtlas() {
+        const available = Boolean(IDX && VIEW.length && F.view === "atlas");
+        const host = $("atlas");
+        host.hidden = !available;
+        $("main").classList.toggle("atlas-space", available);
+        $("main").classList.toggle("atlas-list", listMode());
+        $("main").classList.toggle("atlas-details", Boolean(SEL));
+        const cover = coverMode(), wasCover = $("main").classList.contains("atlas-cover");
+        $("main").classList.toggle("atlas-cover", cover);
+        if (cover !== wasCover) {
+          renderContext();
+          if (cover) renderCover();
+        }
+        const topic = F.group === "topic" ? F.topic : "";
+        $("atlas-name").textContent = topic === UNTAGGED ? "Untagged" : topic || "All topics";
+        if (ATLAS) {
+          ATLAS.update({ topic, available, working: Boolean(SEL || listMode() || document.activeElement === $("q")), fold: foldState.fold, instant: motionInput === "keyboard" });
+        } else if (available && !ATLAS_PENDING) {
+          ATLAS_PENDING = true;
+          // Let useful map content paint before loading the optional scene.
+          requestAnimationFrame(() => setTimeout(() => {
+            import("./assets/atlas.js?v=opening-fold-4").then(({ createAtlas }) => {
+              ATLAS = createAtlas(host, $("atlas-motion"));
+              syncAtlas();
+            }).catch(() => {
+              // A static fold is the complete fallback; search remains independent.
+              host.dispatchEvent(new Event("atlas-ready"));
+            });
+          }, 0));
+        }
+      }
+
+      /* ── DOM helpers: text only, never innerHTML ─────────────── */
+      function el(tag, cls, text) {
+        const e = document.createElement(tag);
+        if (cls) e.className = cls;
+        if (text != null) e.textContent = text;
+        return e;
+      }
+      function icon(path) {
+        const ns = "http://www.w3.org/2000/svg";
+        const s = document.createElementNS(ns, "svg");
+        s.setAttribute("viewBox", "0 0 16 16");
+        s.setAttribute("fill", "none");
+        s.setAttribute("stroke", "currentColor");
+        s.setAttribute("stroke-width", "1.8");
+        s.setAttribute("stroke-linecap", "round");
+        s.setAttribute("aria-hidden", "true");
+        const p = document.createElementNS(ns, "path");
+        p.setAttribute("d", path);
+        s.appendChild(p);
+        return s;
+      }
+      const X_ICON = "M3.5 3.5l9 9M12.5 3.5l-9 9";
+      function kb(n) {
+        return n < 1024 ? n + " B" : n < 1048576 ? Math.round(n / 1024) + " KB" : (n / 1048576).toFixed(1) + " MB";
+      }
+      function ago(ms) {
+        const d = (Date.now() - ms) / 864e5;
+        if (d < 1) return "today";
+        if (d < 2) return "yesterday";
+        if (d < 30) return Math.floor(d) + " days ago";
+        return fmtDay.format(ms);
+      }
+      function refreshCommand() {
+        if (IDX && IDX.workspace) return 'python3 "' + IDX.workspace + '/visual-second-brain/refresh-index.py"';
+        return "# from the Cloudtransition workspace folder\npython3 visual-second-brain/refresh-index.py";
+      }
+
+      /* ── Load and validate the index ─────────────────────────── */
+      function showProblem(title, lines, command) {
+        $("gen").textContent = title;
+        $("title").textContent = title;
+        const box = el("div", "note");
+        box.setAttribute("role", "alert");
+        lines.forEach((l) => box.appendChild(el("p", "", l)));
+        if (command) box.appendChild(el("pre", "", command));
+        $("body").replaceChildren(box);
+      }
+
+      if (location.protocol === "file:") {
+        showProblem(
+          "Open this page over HTTP",
+          [
+            "Browsers block reading workspace-index.json from a file:// page.",
+            "Use the dashboard (Workspace map tab), or serve this folder and open http://127.0.0.1:8765/visual-second-brain.html:",
+          ],
+          "cd visual-second-brain && python3 -m http.server 8765 --bind 127.0.0.1",
+        );
+      } else {
+        fetch("workspace-index.json", { cache: "no-store" })
+          .then((r) => {
+            if (!r.ok) throw Object.assign(new Error("HTTP " + r.status), { kind: "unavailable" });
+            OPEN_BASE = r.headers.get("X-Workspace-Open");
+            return r.text();
+          })
+          .then((text) => {
+            let d;
+            try {
+              d = JSON.parse(text);
+            } catch (e) {
+              throw Object.assign(new Error("not valid JSON"), { kind: "malformed" });
+            }
+            if (!d || typeof d !== "object" || !Array.isArray(d.files)) throw Object.assign(new Error("missing file list"), { kind: "malformed" });
+            if (d.schemaVersion !== SCHEMA) throw Object.assign(new Error("schema " + d.schemaVersion), { kind: "schema" });
+            if (Number.isNaN(Date.parse(d.generated))) throw Object.assign(new Error("missing snapshot time"), { kind: "malformed" });
+            IDX = d;
+            if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot, { once: true });
+            else boot();
+          })
+          .catch((e) => {
+            const kind = e.kind || "unavailable";
+            if (kind === "schema")
+              showProblem("Index format is out of date", ["This snapshot was written by an older refresh script (" + e.message + "). Rebuild it:"], refreshCommand());
+            else if (kind === "malformed")
+              showProblem("Index file is damaged", ["workspace-index.json could not be read (" + e.message + "). Rebuild it; the refresh script replaces it atomically:"], refreshCommand());
+            else
+              showProblem("Index unavailable", ["workspace-index.json could not be loaded (" + e.message + "). If the USB drive was unplugged, reconnect it. Otherwise rebuild the index:"], refreshCommand());
+          });
+      }
+
+      function boot() {
+        FILES = IDX.files.map((f) => {
+          const ms = Date.parse(f.modified);
+          const name = String(f.name);
+          return Object.assign(f, {
+            _n: name.toLowerCase(),
+            _stem: name.toLowerCase().replace(/\.[^.]+$/, ""),
+            _p: String(f.relativePath).toLowerCase(),
+            _fo: String(f.folder).toLowerCase(),
+            _pr: String(f.project).toLowerCase(),
+            _pv: String(f.preview || "").toLowerCase(),
+            _ms: Number.isNaN(ms) ? 0 : ms,
+            topics: Array.isArray(f.topics) ? f.topics : [],
+          });
+        });
+        const genMs = Date.parse(IDX.generated);
+        const stale = (Date.now() - genMs) / 864e5 > STALE_DAYS;
+        $("gen").textContent = "Snapshot " + fmtDate.format(genMs) + (stale ? " · older than " + STALE_DAYS + " days, refresh to update" : "");
+        $("gen").classList.toggle("stale", stale);
+        renderAbout();
+        readParams();
+        buildSelects();
+        wire();
+        $("q").disabled = false;
+        $("q").value = F.q;
+        if (!FILES.length) {
+          showProblem("This snapshot has no files", ["The index exists but lists nothing. Check the include list in refresh-index.py, then rebuild:"], refreshCommand());
+          return;
+        }
+        apply();
+      }
+
+      function renderAbout() {
+        const b = $("about");
+        b.replaceChildren();
+        const cov = IDX.coverage || {};
+        b.appendChild(
+          el("p", "", "Snapshot of " + FILES.length + " files from " + (cov.roots || []).length + " approved folders plus root documents. It is not live: new or moved files appear after a refresh."),
+        );
+        const ex = IDX.excluded || {};
+        const total = Object.values(ex).reduce((a, n) => a + n, 0);
+        b.appendChild(el("p", "sect", "Excluded entries: " + total + " (never named in the index)"));
+        const ul = el("ul");
+        Object.keys(ex).forEach((k) => ul.appendChild(el("li", "num", k.replace(/_/g, " ") + " " + ex[k])));
+        b.appendChild(ul);
+        b.appendChild(el("p", "", "Read errors: " + (IDX.readErrors || 0) + (cov.missingRoots && cov.missingRoots.length ? " · missing folders: " + cov.missingRoots.join(", ") : "")));
+        b.appendChild(el("p", "sect", "Refresh"));
+        b.appendChild(el("pre", "", refreshCommand()));
+      }
+
+      /* ── URL state: ?q=&topic=&folder=&type=&group= ──────────── */
+      function readParams() {
+        const p = new URLSearchParams(location.search);
+        F.q = p.get("q") || "";
+        F.topic = p.get("topic") || "";
+        F.folder = p.get("folder") || "";
+        F.type = p.get("type") || "";
+        F.group = p.get("group") === "folder" || (F.folder && !F.topic && p.get("group") !== "topic") ? "folder" : "topic";
+        const d = p.get("date");
+        F.date = DATES.some((x) => x[0] === d) ? d : "all";
+        F.view = p.get("view") === "graph" ? "graph" : "atlas";
+        F.renderer = p.get("renderer") === "2d" ? "2d" : "3d";
+      }
+      function writeParams() {
+        const p = new URLSearchParams(location.search);
+        for (const key of ["q", "topic", "folder", "type", "date", "group", "view", "renderer"]) p.delete(key);
+        if (F.q) p.set("q", F.q);
+        if (F.topic) p.set("topic", F.topic);
+        if (F.folder) p.set("folder", F.folder);
+        if (F.type) p.set("type", F.type);
+        if (F.date !== "all") p.set("date", F.date);
+        if (F.group === "folder") p.set("group", "folder");
+        if (F.view === "graph") p.set("view", "graph");
+        if (F.renderer === "2d") p.set("renderer", "2d");
+        const s = p.toString();
+        history.replaceState(null, "", location.pathname + (s ? "?" + s : "") + location.hash);
+      }
+
+      /* ── Filters ─────────────────────────────────────────────── */
+      function option(sel, value, label) {
+        const o = el("option", "", label);
+        o.value = value;
+        sel.appendChild(o);
+      }
+      function buildSelects() {
+        const types = {};
+        const tops = {};
+        let rootN = 0;
+        FILES.forEach((f) => {
+          types[f.type] = (types[f.type] || 0) + 1;
+          if (!f.folder) rootN++;
+          else {
+            const t = f.folder.split("/")[0];
+            tops[t] = (tops[t] || 0) + 1;
+          }
+        });
+        const st = $("fType");
+        st.replaceChildren();
+        option(st, "", "All types");
+        Object.keys(types)
+          .sort((a, b) => types[b] - types[a])
+          .forEach((t) => option(st, t, t + " (" + types[t] + ")"));
+        st.value = types[F.type] ? F.type : "";
+        F.type = st.value;
+        syncFolderSelect(tops, rootN);
+        const sd = $("fDate");
+        sd.replaceChildren();
+        DATES.forEach(([v, l]) => option(sd, v, l));
+        sd.value = F.date;
+      }
+      let FOLDER_TOPS = null;
+      function syncFolderSelect(tops, rootN) {
+        if (tops) FOLDER_TOPS = { tops, rootN };
+        const sf = $("fFolder");
+        sf.replaceChildren();
+        option(sf, "", "All folders");
+        option(sf, ROOT, "Workspace root (" + FOLDER_TOPS.rootN + ")");
+        Object.keys(FOLDER_TOPS.tops)
+          .sort((a, b) => a.localeCompare(b))
+          .forEach((t) => option(sf, t, t + " (" + FOLDER_TOPS.tops[t] + ")"));
+        if (F.folder && F.folder !== ROOT && !FOLDER_TOPS.tops[F.folder]) option(sf, F.folder, F.folder);
+        sf.value = F.folder;
+      }
+      function inFolder(f) {
+        if (!F.folder) return true;
+        if (F.folder === ROOT) return f.folder === "";
+        return f.folder === F.folder || f.folder.startsWith(F.folder + "/");
+      }
+
+      /* ── Search: topic hits outrank preview-only hits ────────── */
+      function score(f, terms) {
+        let s = 0;
+        for (const t of terms) {
+          let hit = 0;
+          if (f._stem === t || f._n === t) hit = 120;
+          else if (f._n.startsWith(t)) hit = 100;
+          else if (f._n.includes(t)) hit = 60;
+          for (const tp of f.topics) {
+            if (tp === t) hit = Math.max(hit, 80);
+            else if (tp.startsWith(t)) hit = Math.max(hit, 55);
+          }
+          if (hit < 45 && (f._fo.includes(t) || f._pr.includes(t))) hit = 45;
+          if (hit < 30 && f._p.includes(t)) hit = 30;
+          if (hit < 20 && f.type.startsWith(t)) hit = 20;
+          if (!hit && f._pv.includes(t)) hit = 10;
+          if (!hit) return 0;
+          s += hit;
+        }
+        return s + (f.weight || 0) * 2;
+      }
+      function terms() {
+        return F.q.toLowerCase().split(/\s+/).filter(Boolean);
+      }
+      function apply() {
+        const ts = terms();
+        const cut = F.date === "all" ? 0 : Date.now() - Number(F.date) * 864e5;
+        const out = [];
+        for (const f of FILES) {
+          if (F.type && f.type !== F.type) continue;
+          if (!inFolder(f)) continue;
+          if (F.topic === UNTAGGED ? f.topics.length : F.topic && !f.topics.includes(F.topic)) continue;
+          if (cut && f._ms < cut) continue;
+          const s = ts.length ? score(f, ts) : 1;
+          if (s) out.push([s, f]);
+        }
+        out.sort((a, b) => b[0] - a[0] || b[1]._ms - a[1]._ms);
+        VIEW = out.map((x) => x[1]);
+        writeParams();
+        render();
+      }
+
+      /* ── Render ──────────────────────────────────────────────── */
+      function listMode() {
+        return Boolean(F.q || F.type || F.date !== "all" || (F.group === "topic" && F.topic));
+      }
+      function render() {
+        const opening = openingSnapshot();
+        $("main").classList.toggle("atlas-cover", coverMode());
+        $("clear").hidden = !F.q;
+        $("vAtlas").setAttribute("aria-pressed", String(F.view === "atlas"));
+        $("vGraph").setAttribute("aria-pressed", String(F.view === "graph"));
+        $("tileSizing").hidden = F.view === "graph";
+        document.body.classList.toggle("graph-dark-details", F.view === "graph" && graphDark);
+        $("main").classList.toggle("graph-mode", F.view === "graph");
+        $("gTopic").setAttribute("aria-pressed", String(F.group === "topic"));
+        $("gFolder").setAttribute("aria-pressed", String(F.group === "folder"));
+        $("fType").value = F.type;
+        syncFolderSelect();
+        $("fDate").value = F.date;
+        $("count").textContent = VIEW.length + " of " + FILES.length + " files";
+        renderContext();
+        const body = $("body");
+        flyFromPose = GRAPH ? GRAPH.pose() : null;
+        if (GRAPH) GRAPH.destroy();
+        GRAPH = null;
+        body.replaceChildren();
+        if (F.view === "graph") {
+          renderGraph(body);
+        } else if (listMode()) {
+          renderList(body, VIEW, VIEW.length ? null : "No files match. Remove a filter or try a different word.");
+        } else if (F.group === "topic") {
+          renderTopicTiles(body);
+        } else {
+          renderFolderLevel(body);
+        }
+        if (SEL && !VIEW.includes(SEL)) closeDetail(false);
+        syncAtlas();
+        renderCover();
+        animateOpening(opening);
+      }
+
+      function renderContext() {
+        const ctx = $("ctx");
+        ctx.replaceChildren();
+        const title = el("h2");
+        title.id = "title";
+        if (F.q) title.textContent = "Results for “" + F.q + "”";
+        else if (F.group === "topic") title.textContent = F.topic ? (F.topic === UNTAGGED ? "Untagged files" : "Topic: " + F.topic) : "Topics";
+        else title.textContent = F.folder ? (F.folder === ROOT ? "Workspace root" : F.folder.split("/").pop()) : "Folders";
+        if ((F.group === "topic" && F.topic) || (F.group === "folder" && F.folder)) {
+          const name = el("span", "fold-name", F.group === "topic" ? (F.topic === UNTAGGED ? "Untagged files" : F.topic) : title.textContent);
+          name.dataset.foldKey = openingKey();
+          name.dataset.flipId = openingKey();
+          title.replaceChildren();
+          if (F.group === "topic" && F.topic !== UNTAGGED) title.append("Topic: ");
+          title.appendChild(name);
+        }
+        ctx.appendChild(title);
+        if (F.folder && F.folder !== ROOT) {
+          const nav = el("nav");
+          nav.setAttribute("aria-label", "Folder path");
+          const all = el("button", "crumb", "All folders");
+          all.type = "button";
+          all.addEventListener("click", () => setFolder(""));
+          nav.appendChild(all);
+          const parts = F.folder.split("/");
+          parts.forEach((part, i) => {
+            nav.appendChild(el("span", "crumb-sep", "/"));
+            const path = parts.slice(0, i + 1).join("/");
+            const b = el("button", "crumb", part);
+            b.type = "button";
+            if (i === parts.length - 1) b.setAttribute("aria-current", "page");
+            b.addEventListener("click", () => setFolder(path));
+            nav.appendChild(b);
+          });
+          ctx.appendChild(nav);
+        }
+        const chips = [];
+        if (F.topic && (F.group === "folder" || F.q)) chips.push(["Topic: " + (F.topic === UNTAGGED ? "untagged" : F.topic), () => (F.topic = "")]);
+        if (F.folder && F.group === "topic") chips.push(["Folder: " + (F.folder === ROOT ? "workspace root" : F.folder), () => (F.folder = "")]);
+        if (F.folder === ROOT && F.group === "folder") chips.push(["Folder: workspace root", () => (F.folder = "")]);
+        if (F.type) chips.push(["Type: " + F.type, () => (F.type = "")]);
+        if (F.date !== "all") chips.push([DATES.find((d) => d[0] === F.date)[1], () => (F.date = "all")]);
+        chips.forEach(([label, clear]) => {
+          const c = el("button", "chip", label);
+          c.type = "button";
+          c.setAttribute("aria-label", "Remove filter " + label);
+          c.appendChild(icon(X_ICON));
+          c.addEventListener("click", () => {
+            clear();
+            apply();
+          });
+          ctx.appendChild(c);
+        });
+      }
+
+      function tile(name, n, meta, onClick, plain) {
+        const b = el("button", "tile" + (plain ? " tile-plain" : ""));
+        b.type = "button";
+        const head = el("span", "tile-head");
+        const label = el("span", "tile-name"), carry = el("span", "fold-name", name);
+        const key = F.group === "topic" ? (plain ? UNTAGGED : name) : (F.folder ? F.folder + "/" : "") + name;
+        b.dataset.foldGroup = key;
+        b.dataset.foldCount = String(n);
+        carry.dataset.foldKey = F.group + ":" + key;
+        carry.dataset.flipId = carry.dataset.foldKey;
+        label.appendChild(carry);
+        head.append(label, el("span", "tile-n num", String(n)));
+        b.appendChild(head);
+        meta.forEach((m) => b.appendChild(el("span", "tile-meta", m)));
+        b.addEventListener("click", (event) => {
+          onClick();
+          if (event.detail === 0) document.querySelector("#body .row, #body .tile")?.focus({ preventScroll: true });
+        });
+        return b;
+      }
+      function topFolders(files, k) {
+        const c = {};
+        files.forEach((f) => {
+          const t = f.folder ? f.folder.split("/")[0] : "workspace root";
+          c[t] = (c[t] || 0) + 1;
+        });
+        return Object.keys(c)
+          .sort((a, b) => c[b] - c[a])
+          .slice(0, k);
+      }
+      function newest(files) {
+        return files.reduce((m, f) => Math.max(m, f._ms), 0);
+      }
+
+      function renderTopicTiles(body) {
+        const groups = {};
+        const untagged = [];
+        VIEW.forEach((f) => {
+          if (!f.topics.length) untagged.push(f);
+          f.topics.forEach((t) => (groups[t] = groups[t] || []).push(f));
+        });
+        const names = Object.keys(groups).sort((a, b) => groups[b].length - groups[a].length);
+        if (!names.length && !untagged.length) {
+          body.appendChild(el("p", "note", "No files in this folder. Choose another folder or reset the filters."));
+          return;
+        }
+        const grid = el("div", "tiles");
+        names.forEach((t) => {
+          const fs = groups[t];
+          grid.appendChild(
+            tile(t, fs.length, ["In " + topFolders(fs, 3).join(", "), "Latest " + ago(newest(fs))], () => {
+              F.topic = t;
+              apply();
+              $("main").scrollTop = 0;
+            }),
+          );
+        });
+        if (untagged.length)
+          grid.appendChild(
+            tile("Untagged", untagged.length, ["No topic matched the name or path"], () => {
+              F.topic = UNTAGGED;
+              apply();
+            }, true),
+          );
+        body.appendChild(grid);
+      }
+
+      function renderFolderLevel(body) {
+        const base = F.folder === ROOT ? null : F.folder;
+        const direct = [];
+        const subs = {};
+        VIEW.forEach((f) => {
+          if (F.folder === ROOT || f.folder === (base || "")) return direct.push(f);
+          const rest = base ? f.folder.slice(base.length + 1) : f.folder;
+          const key = rest.split("/")[0];
+          (subs[key] = subs[key] || []).push(f);
+        });
+        const keys = Object.keys(subs).sort((a, b) => a.localeCompare(b));
+        if (keys.length) {
+          const grid = el("div", "tiles");
+          keys.forEach((k) => {
+            const fs = subs[k];
+            const tops = {};
+            fs.forEach((f) => f.topics.forEach((t) => (tops[t] = (tops[t] || 0) + 1)));
+            const topicLine = Object.keys(tops)
+              .sort((a, b) => tops[b] - tops[a])
+              .slice(0, 3)
+              .join(", ");
+            grid.appendChild(
+              tile(k, fs.length, [topicLine ? "Topics: " + topicLine : "No topics", "Latest " + ago(newest(fs))], () => setFolder(base ? base + "/" + k : k)),
+            );
+          });
+          body.appendChild(grid);
+        }
+        if (direct.length || !keys.length) {
+          renderList(body, direct, "No files directly in this folder.", keys.length ? direct.length + " files directly in this folder" : null);
+        }
+      }
+
+      function setFolder(path) {
+        F.folder = path;
+        F.group = "folder";
+        closeDetail(false);
+        apply();
+        $("main").scrollTop = 0;
+      }
+
+      /* Virtualized rows keep the DOM bounded for any result size. */
+      let LIST = [];
+      function renderList(body, files, emptyText, heading) {
+        LIST = files;
+        if (!files.length) {
+          body.appendChild(el("p", "note", emptyText));
+          return;
+        }
+        if (heading) body.appendChild(el("p", "listhead", heading));
+        const vp = el("div", "vp");
+        vp.id = "vp";
+        vp.style.height = files.length * ROW + "px";
+        const rows = el("div", "rows");
+        rows.id = "rows";
+        vp.appendChild(rows);
+        body.appendChild(vp);
+        paint();
+      }
+      function paint() {
+        const vp = $("vp");
+        if (!vp) return;
+        const main = $("main");
+        const top = Math.max(0, main.scrollTop - vp.offsetTop);
+        const first = Math.max(0, Math.floor(top / ROW) - OVER);
+        const n = Math.ceil(main.clientHeight / ROW) + OVER * 2;
+        const ts = terms();
+        const rows = $("rows");
+        rows.style.transform = "translateY(" + first * ROW + "px)";
+        // Rebuilding rows destroys the focused button; carry keyboard focus across.
+        const active = document.activeElement;
+        const keep = active && active.classList.contains("row") ? active.dataset.i : null;
+        rows.replaceChildren();
+        LIST.slice(first, first + n).forEach((f, i) => {
+          const b = el("button", "row");
+          b.type = "button";
+          b.dataset.i = String(first + i);
+          if (SEL === f) b.setAttribute("aria-current", "true");
+          const mid = el("span", "row-mid");
+          const nm = el("span", "row-n");
+          nm.appendChild(highlight(f.name, ts));
+          mid.append(nm, el("span", "row-p", f.folder || "workspace root"));
+          const r = el("span", "row-r");
+          r.append(el("span", "ty", f.type), el("br"), el("span", "num", fmtDay.format(f._ms)));
+          b.append(el("span", "mark"), mid, r);
+          b.addEventListener("click", (e) => openDetail(f, b, e.detail > 0));
+          rows.appendChild(b);
+        });
+        const again = keep != null && rows.querySelector('.row[data-i="' + keep + '"]');
+        if (again) again.focus({ preventScroll: true });
+      }
+      function highlight(text, ts) {
+        const frag = document.createDocumentFragment();
+        const low = text.toLowerCase();
+        const spans = [];
+        ts.forEach((t) => {
+          for (let i = low.indexOf(t); i > -1; i = low.indexOf(t, i + 1)) spans.push([i, i + t.length]);
+        });
+        spans.sort((a, b) => a[0] - b[0]);
+        let cur = 0;
+        spans.forEach(([a, b]) => {
+          if (b <= cur) return;
+          a = Math.max(a, cur);
+          if (a > cur) frag.appendChild(document.createTextNode(text.slice(cur, a)));
+          frag.appendChild(el("mark", "", text.slice(a, b)));
+          cur = b;
+        });
+        frag.appendChild(document.createTextNode(text.slice(cur)));
+        return frag;
+      }
+
+      /* Stable membership layout: distance is spacing, not semantic similarity. */
+      function graphLayout(files, grouping) {
+        const groups = new Map();
+        const points = [...files].sort((a, b) => a.relativePath.localeCompare(b.relativePath)).map((f) => {
+          const keys = grouping === "folder" ? [f.folder.split("/")[0] || ROOT] : [...new Set(f.topics.length ? f.topics : [UNTAGGED])];
+          const memberships = keys.map((key) => {
+            if (!groups.has(key)) groups.set(key, { key, count: 0, owned: [] });
+            const g = groups.get(key);
+            g.count++;
+            return g;
+          });
+          const point = { f, groups: memberships, x: 0, y: 0 };
+          memberships[0].owned.push(point);
+          return point;
+        });
+        const hubs = [...groups.values()].sort((a, b) => b.owned.length - a.owned.length || a.key.localeCompare(b.key));
+        const placed = [];
+        for (const g of hubs) {
+          g.label = g.key === ROOT ? "Workspace root" : g.key === UNTAGGED ? "Untagged" : g.key;
+          g.radius = Math.max(76, 58 + Math.sqrt(g.owned.length) * 14, g.label.length * 4);
+          let step = 0;
+          do {
+            const angle = step * 2.3999632297;
+            const distance = Math.sqrt(step) * 14;
+            g.x = Math.cos(angle) * distance;
+            g.y = Math.sin(angle) * distance;
+            step++;
+          } while (placed.some((p) => Math.hypot(g.x - p.x, g.y - p.y) < g.radius + p.radius + 48));
+          placed.push(g);
+          g.owned.forEach((point, i) => {
+            const angle = i * 2.3999632297;
+            const radius = 40 + Math.sqrt(i) * 14;
+            point.x = g.x + Math.cos(angle) * radius;
+            point.y = g.y + Math.sin(angle) * radius;
+          });
+        }
+        return { groups: hubs, files: points };
+      }
+
+      function renderGraph(body) {
+        const allowSceneIntro = motionInput === "initial" && !previousOpening;
+        const flyFrom = flyFromPose;
+        flyFromPose = null;
+        const graph = el("section", "graph" + (graphDark ? " graph-dark" : ""));
+        graph.setAttribute("aria-label", "Workspace connections");
+        let scene = null;
+        const head = el("div", "graph-head");
+        const intro = el("div");
+        intro.appendChild(el("h3", "", "Workspace connections"));
+        const help = el("p", "graph-help", "Drag to pan · scroll or pinch to zoom · arrows to browse · Enter to open");
+        help.id = "graphHelp";
+        intro.appendChild(help);
+        const actions = el("div", "graph-actions");
+        const zoom = el("div", "seg");
+        zoom.setAttribute("role", "group");
+        zoom.setAttribute("aria-label", "Graph zoom");
+        const button = (parent, text, label, fn) => {
+          const b = el("button", "", text);
+          b.type = "button";
+          if (label) b.setAttribute("aria-label", label);
+          b.addEventListener("click", fn);
+          parent.appendChild(b);
+          return b;
+        };
+        const theme = button(actions, graphDark ? "Paper background" : "Dark background", null, () => {
+          graphDark = !graphDark;
+          graph.classList.toggle("graph-dark", graphDark);
+          document.body.classList.toggle("graph-dark-details", graphDark);
+          theme.textContent = graphDark ? "Paper background" : "Dark background";
+          if (scene) scene.theme(graphDark);
+        });
+        theme.id = "graphTheme";
+        theme.className = "btn";
+        const renderer = el("div", "seg");
+        renderer.setAttribute("role", "group");
+        renderer.setAttribute("aria-label", "Graph renderer");
+        const chooseRenderer = (value) => {
+          if (F.renderer === value) return;
+          F.renderer = value;
+          apply();
+        };
+        const use3D = button(renderer, "3D", "Use 3D graph", () => chooseRenderer("3d"));
+        const use2D = button(renderer, "2D", "Use 2D graph", () => chooseRenderer("2d"));
+        use3D.setAttribute("aria-pressed", "false");
+        use2D.setAttribute("aria-pressed", "true");
+        actions.appendChild(renderer);
+        actions.appendChild(zoom);
+        head.append(intro, actions);
+        graph.appendChild(head);
+        body.appendChild(graph);
+        const rendererStatus = el("p", "graph-renderer-status", "2D · SVG renderer.");
+        rendererStatus.setAttribute("role", "status");
+        graph.appendChild(rendererStatus);
+        if (!VIEW.length) {
+          use3D.disabled = true;
+          graph.appendChild(el("p", "graph-empty", "No files match. Remove a filter or try a different word."));
+          return;
+        }
+
+        const layout = graphLayout(VIEW, F.group);
+        const svgEl = (tag, attrs = {}, text) => {
+          const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+          for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, String(value));
+          if (text != null) node.textContent = text;
+          return node;
+        };
+        const stage = el("div", "graph-stage");
+        const svg = svgEl("svg", { class: "graph-svg", role: "group", "aria-label": "Interactive file graph", "aria-describedby": help.id });
+        const sceneHost = el("div", "graph-scene");
+        sceneHost.setAttribute("aria-hidden", "true");
+        const focusLabel = el("div", "graph-focus");
+        focusLabel.hidden = true;
+        focusLabel.setAttribute("aria-hidden", "true");
+        stage.append(svg, sceneHost, focusLabel);
+        const content = el("div", "graph-content");
+        const library = el("details", "graph-library");
+        library.open = innerWidth > 640;
+        library.appendChild(el("summary", "", (F.group === "topic" ? "Topics" : "Folders") + " · " + layout.groups.length));
+        const groupList = el("div", "graph-groups");
+        library.appendChild(groupList);
+        content.appendChild(library);
+        graph.appendChild(content);
+        const world = svgEl("g", { class: "graph-world" });
+        const lines = svgEl("g", { "aria-hidden": "true" });
+        const dots = svgEl("g");
+        const hubs = svgEl("g");
+        world.append(lines, dots, hubs);
+        svg.appendChild(world);
+        content.appendChild(stage);
+        const legend = el("div", "graph-legend");
+        legend.append(el("span", "", F.group === "topic" ? "Lines: indexed topic membership" : "Lines: top-level folder membership"),
+          el("span", "", "Positions do not imply semantic similarity"));
+        legend.appendChild(el("span", "graph-label-hint", "Zoom in for labels; expand the group list to filter"));
+        graph.appendChild(legend);
+        const edges = [];
+        const nodes = [];
+        const fileNodes = new Map();
+        const groupNodes = new Map();
+        const fileGroups = new Map();
+        const groupFiles = new Map(layout.groups.map((group) => [group.key, new Set()]));
+        const camera = { x: 0, y: 0, k: 1 };
+        let width = 0, height = 0;
+        const minX = Math.min(...layout.groups.map((g) => g.x - g.radius));
+        const maxX = Math.max(...layout.groups.map((g) => g.x + g.radius));
+        const minY = Math.min(...layout.groups.map((g) => g.y - g.radius));
+        const maxY = Math.max(...layout.groups.map((g) => g.y + g.radius));
+
+        const activate = (entry, pointer = false) => {
+          if (entry.file) openDetail(entry.file, entry.node, pointer);
+          else if (F.group === "folder") setFolder(entry.key);
+          else {
+            F.topic = entry.key;
+            closeDetail(false);
+            apply();
+          }
+        };
+        for (const g of layout.groups) {
+          let color = 0;
+          for (const char of g.key) color = (color + char.codePointAt(0)) % 6;
+          g.color = "var(--graph-c" + (color + 1) + ")";
+          const b = button(groupList, "", "Filter " + g.label, () => activate({ key: g.key }));
+          b.style.setProperty("--cluster-color", g.color);
+          const swatch = el("span", "graph-swatch");
+          swatch.setAttribute("aria-hidden", "true");
+          b.append(swatch, el("span", "", g.label), el("span", "num", g.count));
+        }
+        const addNode = (node, entry) => {
+          node.setAttribute("role", "button");
+          node.setAttribute("tabindex", nodes.length ? "-1" : "0");
+          node.dataset.graphAction = String(nodes.length);
+          entry.node = node;
+          nodes.push(entry);
+          // Assistive technology can activate a role=button without pointer events.
+          node.addEventListener("click", (e) => { if (e.detail === 0) activate(entry); });
+          return node;
+        };
+        layout.files.forEach((point) => {
+          const f = point.f;
+          const memberships = new Set(point.groups.map((group) => group.key));
+          fileGroups.set(f.relativePath, memberships);
+          for (const key of memberships) groupFiles.get(key)?.add(f.relativePath);
+          for (const g of point.groups) {
+            const line = svgEl("line", { class: "graph-edge", x1: point.x, y1: point.y, x2: g.x, y2: g.y, "data-file": f.relativePath, "data-group": g.key });
+            line.style.setProperty("--cluster-color", g.color);
+            lines.appendChild(line);
+            edges.push({ node: line, path: f.relativePath, group: g.key });
+          }
+          const node = addNode(svgEl("g", { class: "graph-file", transform: "translate(" + point.x + " " + point.y + ")", "aria-label": f.relativePath, "data-graph-file": f.relativePath }), { file: f, x: point.x, y: point.y });
+          node.style.setProperty("--cluster-color", point.groups[0].color);
+          node.append(svgEl("title", {}, f.relativePath), svgEl("circle", { class: "graph-hit", r: 10 }), svgEl("circle", { class: "graph-dot", r: 2.5 }));
+          const label = svgEl("g", { class: "graph-label graph-file-label" });
+          label.appendChild(svgEl("text", { x: 12, y: -10 }, f.name));
+          node.appendChild(label);
+          dots.appendChild(node);
+          fileNodes.set(f.relativePath, node);
+        });
+        layout.groups.forEach((g) => {
+          const node = addNode(svgEl("g", { class: "graph-hub", transform: "translate(" + g.x + " " + g.y + ")", "aria-label": "Filter " + (F.group === "topic" ? "topic " : "folder ") + g.label + ", " + g.count + " files", "data-graph-group": g.key }), { key: g.key, x: g.x, y: g.y });
+          node.style.setProperty("--cluster-color", g.color);
+          node.appendChild(svgEl("circle", { class: "graph-hub-dot", r: 5 }));
+          const label = svgEl("g", { class: "graph-label" });
+          const text = g.label + " · " + g.count;
+          const half = Math.max(48, text.length * 3.7 + 14);
+          label.append(svgEl("rect", { x: -half, y: -22, width: half * 2, height: 44, rx: 22 }), svgEl("text", { y: 0 }, text));
+          node.appendChild(label);
+          hubs.appendChild(node);
+          groupNodes.set(g.key, node);
+        });
+        let alive = true, sceneLoading = false, failed = false;
+        let intersecting = !("IntersectionObserver" in window), visibility = null;
+        let sceneZoom = null, selectedPath = null, keyboardEntry = null;
+        let hoveredEntry = null, focusedEntry = null;
+        let focusKey = "", focusContext = null;
+        const sceneTarget = (entry) => entry.file ? { type: "file", path: entry.file.relativePath } : { type: "group", key: entry.key };
+        function settleFocusMotion() {
+          if (focusContext) focusContext.revert();
+          focusContext = null;
+        }
+        function showZoom(scale) {
+          zoomLabel.textContent = Math.round(scale * 100) + "%";
+          zoomLabel.title = scene ? "3D camera zoom" : "2D graph zoom";
+          smaller.disabled = !scene && scale <= .08;
+          larger.disabled = !scene && scale >= 6;
+        }
+        function showFocus() {
+          const entry = keyboardEntry || (selectedPath && nodes.find((item) => item.file && item.file.relativePath === selectedPath));
+          const visible = Boolean(scene && entry);
+          focusLabel.hidden = !visible;
+          stage.classList.toggle("graph-keyboard", Boolean(scene && keyboardEntry));
+          if (!visible) {
+            focusKey = "";
+            settleFocusMotion();
+            focusLabel.replaceChildren();
+            return;
+          }
+          const key = entry.file ? "file:" + entry.file.relativePath : "group:" + entry.key;
+          if (key === focusKey) return;
+          focusKey = key;
+          settleFocusMotion();
+          const group = entry.file ? null : layout.groups.find((g) => g.key === entry.key);
+          const kind = entry.file ? entry.file.type + " file" : (F.group === "topic" ? "Topic filter" : "Folder filter");
+          const name = entry.file ? entry.file.name : group?.label || entry.key;
+          const detail = entry.file ? entry.file.relativePath : (group?.count || 0) + " files";
+          focusLabel.style.setProperty("--cluster-color", entry.node.style.getPropertyValue("--cluster-color") || "var(--graph-accent)");
+          focusLabel.replaceChildren(
+            el("span", "graph-focus-kind", kind),
+            el("strong", "graph-focus-name", name),
+            el("span", "graph-focus-path", detail),
+          );
+          if (window.gsap && !reducedMotion.matches && motionInput === "pointer") {
+            focusContext = window.gsap.context(() => {
+              window.gsap.fromTo(focusLabel, { autoAlpha: 0, y: 4 }, {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.14,
+                ease: "power2.out",
+                clearProps: "opacity,transform,visibility",
+              });
+            }, focusLabel);
+          }
+        }
+        function syncRelationships() {
+          let active = focusedEntry || (selectedPath ? { type: "file", path: selectedPath } : hoveredEntry);
+          if (active?.type === "file" && !fileGroups.has(active.path)) active = null;
+          if (active?.type === "group" && !groupFiles.has(active.key)) active = null;
+          const relatedFiles = active?.type === "file"
+            ? new Set([active.path])
+            : active?.type === "group" ? groupFiles.get(active.key) : null;
+          const relatedGroups = active?.type === "file"
+            ? fileGroups.get(active.path)
+            : active?.type === "group" ? new Set([active.key]) : null;
+          graph.classList.toggle("has-relationships", Boolean(active));
+          for (const edge of edges) {
+            const related = active?.type === "file" ? edge.path === active.path
+              : active?.type === "group" && edge.group === active.key;
+            edge.node.classList.toggle("is-related", Boolean(related));
+          }
+          for (const [path, node] of fileNodes) node.classList.toggle("is-related", Boolean(relatedFiles?.has(path)));
+          for (const [key, node] of groupNodes) node.classList.toggle("is-related", Boolean(relatedGroups?.has(key)));
+        }
+        function rendererState() {
+          use3D.setAttribute("aria-pressed", String(Boolean(scene)));
+          use2D.setAttribute("aria-pressed", String(!scene));
+          use3D.disabled = sceneLoading || Boolean(graph3DFailure);
+          use3D.title = graph3DFailure || "";
+          help.textContent = scene
+            ? "Drag to orbit · right-drag or two fingers to pan · scroll or pinch to zoom · arrows to browse · Enter to open"
+            : "Drag to pan · scroll or pinch to zoom · arrows to browse · Enter to open";
+          rendererStatus.textContent = scene ? "3D · Depth is placement, not semantic similarity."
+            : graph3DFailure || (sceneLoading ? "Loading 3D. 2D remains available."
+              : F.renderer === "2d" ? "2D · SVG renderer." : "2D active. 3D loads when the graph is visible.");
+        }
+        function draw() {
+          world.setAttribute("transform", "translate(" + camera.x + " " + camera.y + ") scale(" + camera.k + ")");
+          svg.style.setProperty("--graph-inverse", String(1 / camera.k));
+          graph.classList.toggle("graph-overview", camera.k < .3);
+          if (!scene) showZoom(camera.k);
+        }
+        function fit() {
+          if (!width || !height) return;
+          camera.k = Math.max(.08, Math.min(2, (width - 40) / (maxX - minX), (height - 64) / (maxY - minY)));
+          camera.x = width / 2 - (minX + maxX) / 2 * camera.k;
+          camera.y = height / 2 - (minY + maxY) / 2 * camera.k;
+          draw();
+        }
+        function zoomAt(x, y, factor) {
+          const next = Math.max(.08, Math.min(6, camera.k * factor));
+          const ratio = next / camera.k;
+          camera.x = x - (x - camera.x) * ratio;
+          camera.y = y - (y - camera.y) * ratio;
+          camera.k = next;
+          draw();
+        }
+        const zoomBy = (factor) => scene ? scene.zoom(factor) : zoomAt(width / 2, height / 2, factor);
+        const smaller = button(zoom, "−", "Zoom out graph", () => zoomBy(1 / 1.4));
+        const zoomLabel = el("span", "num");
+        zoomLabel.setAttribute("aria-live", "polite");
+        zoom.appendChild(zoomLabel);
+        const larger = button(zoom, "+", "Zoom in graph", () => zoomBy(1.4));
+        button(zoom, "Fit", "Fit graph", () => scene ? scene.fit() : fit());
+        const observe = new ResizeObserver(() => {
+          const rect = stage.getBoundingClientRect();
+          if (!rect.width || !rect.height || (rect.width === width && rect.height === height)) return;
+          const first = !width || !height;
+          camera.x += (rect.width - width) / 2;
+          camera.y += (rect.height - height) / 2;
+          width = rect.width;
+          height = rect.height;
+          svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+          if (first) fit(); else draw();
+          mountScene();
+        });
+        observe.observe(stage);
+
+        function focusNode(entry) {
+          for (const item of nodes) item.node.setAttribute("tabindex", item === entry ? "0" : "-1");
+          camera.x = width / 2 - entry.x * camera.k;
+          camera.y = height / 2 - entry.y * camera.k;
+          draw();
+          entry.node.focus({ preventScroll: true });
+        }
+        function select(path) {
+          selectedPath = path;
+          graph.classList.toggle("has-selection", Boolean(path));
+          for (const [key, node] of fileNodes) {
+            node.classList.toggle("is-selected", key === path);
+            node.setAttribute("aria-pressed", String(key === path));
+          }
+          for (const edge of edges) edge.node.classList.toggle("is-selected", edge.path === path);
+          syncRelationships();
+          if (scene) scene.select(path);
+          showFocus();
+        }
+        const events = new AbortController();
+        const opts = { signal: events.signal };
+        document.addEventListener("keydown", settleFocusMotion, { ...opts, capture: true });
+        document.addEventListener("pointerdown", settleFocusMotion, { ...opts, capture: true });
+        reducedMotion.addEventListener("change", () => {
+          settleFocusMotion();
+          showFocus();
+        }, opts);
+        events.signal.addEventListener("abort", settleFocusMotion, { once: true });
+        function failScene(reason) {
+          if (!alive || failed) return;
+          failed = true;
+          sceneLoading = false;
+          const message = reason instanceof Error ? reason.message : String(reason || "The 3D renderer stopped.");
+          graph3DFailure = "3D unavailable: " + message + " Showing 2D. Reload the page to try 3D again.";
+          const previous = scene;
+          scene = null;
+          if (previous) previous.destroy();
+          graph.classList.remove("graph-3d");
+          rendererState();
+          showFocus();
+          draw();
+        }
+        function stageVisible() {
+          const rect = stage.getBoundingClientRect();
+          return stage.isConnected && intersecting && !document.hidden && rect.width > 0 && rect.height > 0
+            && rect.bottom > 0 && rect.top < innerHeight && rect.right > 0 && rect.left < innerWidth;
+        }
+        async function mountScene() {
+          if (!alive || F.renderer !== "3d" || graph3DFailure || scene || sceneLoading || !width || !height || !stageVisible()) return;
+          if (typeof WebGL2RenderingContext === "undefined") {
+            failScene("WebGL2 is not available in this browser.");
+            return;
+          }
+          sceneLoading = true;
+          rendererState();
+          try {
+            const { createConstellation } = await import("./assets/constellation.js?v=observatory-5");
+            if (!alive) return;
+            if (!stageVisible()) {
+              sceneLoading = false;
+              rendererState();
+              return;
+            }
+            const controller = await createConstellation(sceneHost, {
+              layout, dark: graphDark, intro: allowSceneIntro && motionInput === "initial", fromPose: flyFrom,
+              onPick: (target) => {
+                if (!alive || !scene || failed) return;
+                const entry = nodes.find((item) => target.type === "file" ? item.file && item.file.relativePath === target.path : !item.file && item.key === target.key);
+                if (entry) activate(entry, true);
+              },
+              onZoom: (scale) => {
+                if (!alive || failed) return;
+                sceneZoom = scale;
+                if (scene) showZoom(scale);
+              },
+              onFailure: failScene,
+            });
+            if (!alive || failed || F.renderer !== "3d") {
+              controller.destroy();
+              return;
+            }
+            scene = controller;
+            sceneLoading = false;
+            graph.classList.add("graph-3d");
+            scene.theme(graphDark);
+            scene.select(selectedPath);
+            if (keyboardEntry) scene.focus(sceneTarget(keyboardEntry));
+            rendererState();
+            if (sceneZoom !== null) showZoom(sceneZoom); else zoomLabel.textContent = "—";
+            showFocus();
+          } catch (error) {
+            failScene(error);
+          }
+        }
+        svg.addEventListener("focusin", (e) => {
+          const entry = nodes.find((item) => item.node === e.target);
+          if (!entry) return;
+          keyboardEntry = entry;
+          focusedEntry = entry.file
+            ? { type: "file", path: entry.file.relativePath }
+            : { type: "group", key: entry.key };
+          syncRelationships();
+          for (const item of nodes) item.node.setAttribute("tabindex", item === entry ? "0" : "-1");
+          if (scene) scene.focus(sceneTarget(entry));
+          showFocus();
+        }, opts);
+        svg.addEventListener("focusout", (e) => {
+          if (svg.contains(e.relatedTarget)) return;
+          keyboardEntry = null;
+          focusedEntry = null;
+          syncRelationships();
+          showFocus();
+        }, opts);
+        const relationshipEntry = (target) => {
+          if (!(target instanceof Element)) return null;
+          const node = target.closest(".graph-file, .graph-hub");
+          if (!node || !svg.contains(node)) return null;
+          return node.dataset.graphFile ? { type: "file", path: node.dataset.graphFile }
+            : node.dataset.graphGroup ? { type: "group", key: node.dataset.graphGroup } : null;
+        };
+        const sameRelationship = (a, b) => a === b || Boolean(a && b && a.type === b.type
+          && (a.type === "file" ? a.path === b.path : a.key === b.key));
+        svg.addEventListener("pointerover", (e) => {
+          if (e.pointerType === "touch") return;
+          const next = relationshipEntry(e.target);
+          if (sameRelationship(next, hoveredEntry)) return;
+          hoveredEntry = next;
+          syncRelationships();
+        }, opts);
+        svg.addEventListener("pointerout", (e) => {
+          if (e.pointerType === "touch") return;
+          const next = relationshipEntry(e.relatedTarget);
+          if (sameRelationship(next, hoveredEntry)) return;
+          hoveredEntry = next;
+          syncRelationships();
+        }, opts);
+        svg.addEventListener("pointerleave", () => {
+          if (!hoveredEntry) return;
+          hoveredEntry = null;
+          syncRelationships();
+        }, opts);
+        if ("IntersectionObserver" in window) {
+          visibility = new IntersectionObserver((entries) => {
+            intersecting = entries[0].isIntersecting;
+            if (intersecting) mountScene();
+          });
+          visibility.observe(stage);
+        } else {
+          $("main").addEventListener("scroll", mountScene, { ...opts, passive: true });
+        }
+        document.addEventListener("visibilitychange", mountScene, opts);
+        svg.addEventListener("keydown", (e) => {
+          const current = nodes.findIndex((entry) => entry.node === e.target);
+          if (current < 0) return;
+          if (["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "Home", "End"].includes(e.key)) {
+            e.preventDefault();
+            e.stopPropagation();
+            const forward = e.key === "ArrowRight" || e.key === "ArrowDown";
+            const index = e.key === "Home" ? 0 : e.key === "End" ? nodes.length - 1 : (current + (forward ? 1 : -1) + nodes.length) % nodes.length;
+            focusNode(nodes[index]);
+          } else if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            activate(nodes[current]);
+          }
+        }, opts);
+        svg.addEventListener("wheel", (e) => {
+          e.preventDefault();
+          stopVisualMotion();
+          const rect = svg.getBoundingClientRect();
+          zoomAt(e.clientX - rect.left, e.clientY - rect.top, Math.exp(-Math.max(-150, Math.min(150, e.deltaY)) * .003));
+        }, { ...opts, passive: false });
+        const pointers = new Map();
+        let moved = false;
+        svg.addEventListener("pointerdown", (e) => {
+          if (e.button !== 0) return;
+          const action = e.target.closest("[data-graph-action]");
+          pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, startX: e.clientX, startY: e.clientY, action });
+          if (pointers.size === 1) moved = false;
+          else moved = true;
+          svg.setPointerCapture(e.pointerId);
+          svg.classList.add("panning");
+        }, opts);
+        svg.addEventListener("pointermove", (e) => {
+          const old = pointers.get(e.pointerId);
+          if (!old) return;
+          const pair = [...pointers.values()];
+          const oldDistance = pair.length === 2 ? Math.hypot(pair[0].x - pair[1].x, pair[0].y - pair[1].y) : 0;
+          const oldMid = pair.length === 2 ? [(pair[0].x + pair[1].x) / 2, (pair[0].y + pair[1].y) / 2] : null;
+          const dx = e.clientX - old.x, dy = e.clientY - old.y;
+          if (Math.hypot(e.clientX - old.startX, e.clientY - old.startY) > 6) moved = true;
+          old.x = e.clientX;
+          old.y = e.clientY;
+          if (pair.length === 2 && oldDistance > 0) {
+            const rect = svg.getBoundingClientRect();
+            zoomAt(oldMid[0] - rect.left, oldMid[1] - rect.top, Math.hypot(pair[0].x - pair[1].x, pair[0].y - pair[1].y) / oldDistance);
+            camera.x += (pair[0].x + pair[1].x) / 2 - oldMid[0];
+            camera.y += (pair[0].y + pair[1].y) / 2 - oldMid[1];
+          } else {
+            camera.x += dx;
+            camera.y += dy;
+          }
+          draw();
+        }, opts);
+        function endPointer(e) {
+          const point = pointers.get(e.pointerId);
+          pointers.delete(e.pointerId);
+          if (!pointers.size) svg.classList.remove("panning");
+          if (e.type === "pointerup" && point && !moved && point.action) activate(nodes[Number(point.action.dataset.graphAction)], true);
+        }
+        svg.addEventListener("pointerup", endPointer, opts);
+        svg.addEventListener("pointercancel", endPointer, opts);
+        GRAPH = {
+          select,
+          pose: () => (scene ? scene.pose() : null),
+          hubPoint: (key) => {
+            if (scene) return scene.hubPoint(key);
+            if (!alive || !width || !height || (F.renderer === "3d" && !failed)) return null;
+            const node = nodes.find(item => !item.file && item.key === key)?.node;
+            if (!node) return null;
+            const rect = node.querySelector(".graph-hub-dot").getBoundingClientRect();
+            return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, color: getComputedStyle(node.querySelector(".graph-hub-dot")).fill };
+          },
+          focus: (path) => {
+            const entry = nodes.find((item) => item.file && item.file.relativePath === path);
+            if (entry) focusNode(entry); else $("q").focus();
+          },
+          destroy: () => {
+            if (!alive) return;
+            alive = false;
+            events.abort();
+            observe.disconnect();
+            if (visibility) visibility.disconnect();
+            if (scene) scene.destroy();
+            scene = null;
+            sceneHost.remove();
+            graph.classList.remove("graph-3d");
+            focusLabel.hidden = true;
+          },
+        };
+        select(SEL ? SEL.relativePath : null);
+        rendererState();
+      }
+
+      /* ── Detail drawer ───────────────────────────────────────── */
+      let RETURN_TO = null;
+      let RETURN_GRAPH = null;
+      function openDetail(f, from, pointer = false) {
+        stopOpening();
+        const entrance = pointer && ($("det").hidden || detailClosing);
+        SEL = f;
+        RETURN_TO = from ? from.dataset.i : null;
+        RETURN_GRAPH = from ? from.dataset.graphFile || null : null;
+        paint();
+        const d = $("det");
+        d.inert = false;
+        d.hidden = false;
+        d.replaceChildren();
+        const top = el("div", "det-top");
+        const h = el("h2", "", f.name);
+        h.tabIndex = -1;
+        const close = el("button", "icon-btn");
+        close.type = "button";
+        close.setAttribute("aria-label", "Close details");
+        close.appendChild(icon(X_ICON));
+        close.addEventListener("click", (e) => closeDetail(true, e.detail > 0));
+        top.append(h, close);
+        d.append(top, el("p", "det-sub num", f.type + " · ." + f.extension + " · " + kb(f.size)));
+
+        const dl = el("dl", "kv");
+        const row = (k, node) => {
+          const dd = el("dd");
+          dd.appendChild(typeof node === "string" ? document.createTextNode(node) : node);
+          dl.append(el("dt", "", k), dd);
+        };
+        const fb = el("button", "link-btn", f.folder || "workspace root");
+        fb.type = "button";
+        fb.addEventListener("click", () => setFolder(f.folder || ROOT));
+        row("Folder", fb);
+        row("Modified", fmtDate.format(f._ms));
+        row("Project", f.project);
+        d.appendChild(dl);
+
+        if (f.topics.length) {
+          d.appendChild(el("p", "sect", "Topics"));
+          const tags = el("div", "tags");
+          f.topics.forEach((t) => {
+            const c = el("button", "chip", t);
+            c.type = "button";
+            c.setAttribute("aria-label", "Show topic " + t);
+            c.addEventListener("click", () => {
+              F.topic = t;
+              F.group = "topic";
+              F.q = "";
+              $("q").value = "";
+              closeDetail(false);
+              apply();
+            });
+            tags.appendChild(c);
+          });
+          d.appendChild(tags);
+        }
+
+        d.appendChild(el("p", "sect", f.previewKind === "caption" ? "Preview from caption" : "Preview"));
+        d.appendChild(f.preview ? el("div", "pv", f.preview) : el("div", "pv none", "Preview unavailable for this file type."));
+
+        d.appendChild(el("p", "sect", "Path"));
+        d.appendChild(el("div", "pth", f.relativePath));
+        const abs = el("div", "pth", f.path);
+        d.appendChild(abs);
+
+        const acts = el("div", "acts");
+        const cp = el("button", "btn primary", "Copy full path");
+        cp.type = "button";
+        const status = el("p", "status");
+        status.setAttribute("role", "status");
+        cp.addEventListener("click", () => copyPath(f.path, cp, status, abs));
+        acts.appendChild(cp);
+        if (OPEN_BASE) {
+          // Path-style URL so relative links inside an opened artifact resolve through the same route.
+          const href = OPEN_BASE + "/" + f.relativePath.split("/").map(encodeURIComponent).join("/");
+          const open = el("a", "btn", "Open");
+          open.href = href;
+          open.target = "_blank";
+          open.rel = "noopener noreferrer";
+          const dl2 = el("a", "btn", "Download");
+          dl2.href = href + "?download=1";
+          acts.append(open, dl2);
+        }
+        d.append(acts, status);
+        h.focus();
+        transitionDetail(true, entrance);
+        if (GRAPH) GRAPH.select(f.relativePath);
+        syncAtlas();
+      }
+      function closeDetail(restore, pointer = false) {
+        if ($("det").hidden) return;
+        SEL = null;
+        transitionDetail(false, pointer);
+        paint();
+        if (GRAPH) GRAPH.select(null);
+        syncAtlas();
+        if (!restore) return;
+        if (GRAPH && RETURN_GRAPH) {
+          GRAPH.focus(RETURN_GRAPH);
+          return;
+        }
+        const back = RETURN_TO != null && document.querySelector('.row[data-i="' + RETURN_TO + '"]');
+        (back || $("q")).focus();
+      }
+      function copyPath(text, btn, status, node) {
+        const ok = () => {
+          btn.textContent = "Copied";
+          btn.classList.add("done");
+          status.textContent = "Full path copied to the clipboard.";
+          setTimeout(() => {
+            btn.textContent = "Copy full path";
+            btn.classList.remove("done");
+          }, 1600);
+        };
+        const fail = () => {
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          const s = getSelection();
+          s.removeAllRanges();
+          s.addRange(range);
+          status.textContent = "The browser blocked copying. The path is selected: press ⌘C or Ctrl+C.";
+        };
+        // Plain-http origins (e.g. a tailnet IP) have no Clipboard API: fall back
+        // to execCommand before asking the user to copy the selected path.
+        const legacy = () => {
+          const back = document.activeElement;
+          const ta = el("textarea");
+          ta.value = text;
+          ta.setAttribute("readonly", "");
+          ta.style.cssText = "position:fixed;top:0;opacity:0";
+          document.body.appendChild(ta);
+          ta.select();
+          let copied = false;
+          try {
+            copied = document.execCommand("copy");
+          } catch (e) {
+            copied = false;
+          }
+          ta.remove();
+          if (back && back.focus) back.focus({ preventScroll: true });
+          return copied;
+        };
+        const fallback = () => (legacy() ? ok() : fail());
+        if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(ok, fallback);
+        else fallback();
+      }
+
+      /* ── Wiring ──────────────────────────────────────────────── */
+      function setDensity(n) {
+        density = Math.max(0, Math.min(2, n));
+        document.documentElement.dataset.density = String(density);
+        $("zLabel").textContent = DENSITY[density];
+        $("zOut").disabled = density === 0;
+        $("zIn").disabled = density === 2;
+        $("zReset").disabled = density === 1;
+      }
+      function wire() {
+        setDensity(1);
+        $("atlas").addEventListener("atlas-ready", () => {
+          const start = openingWait;
+          openingWait = null;
+          if (start) start();
+        });
+        document.addEventListener("keydown", () => {
+          motionInput = "keyboard";
+          stopVisualMotion();
+        }, { capture: true });
+        document.addEventListener("pointerdown", (e) => {
+          motionInput = "pointer";
+          stopOpening();
+          if (e.target.closest(".graph-stage")) stopVisualMotion();
+          releasePress(true);
+          const control = e.target.closest(".graph-actions button, #tools button");
+          if (control && !control.disabled && !reducedMotion.matches && e.button === 0) {
+            pressedControl = control;
+            control.classList.add("motion-press");
+            control.setAttribute("data-motion-pressed", "");
+          }
+        }, { capture: true });
+        document.addEventListener("pointerup", () => releasePress(), { capture: true });
+        document.addEventListener("pointercancel", () => releasePress(true), { capture: true });
+        reducedMotion.addEventListener("change", (e) => { if (e.matches) stopVisualMotion(); });
+        window.addEventListener("pagehide", stopVisualMotion);
+        window.addEventListener("pagehide", () => {
+          if (GRAPH) GRAPH.destroy();
+          GRAPH = null;
+        });
+        window.addEventListener("pageshow", (e) => {
+          if (e.persisted && IDX && F.view === "graph") render();
+        });
+        for (const [id, view] of [["vAtlas", "atlas"], ["vGraph", "graph"]]) {
+          $(id).addEventListener("click", (e) => {
+            motionInput = e.detail > 0 ? "pointer" : "keyboard";
+            closeDetail(false);
+            F.view = view;
+            apply();
+          });
+        }
+        $("q").addEventListener("focus", syncAtlas);
+        $("q").addEventListener("blur", syncAtlas);
+        let t = null;
+        $("q").addEventListener("input", (e) => {
+          stopOpening();
+          F.q = e.target.value.trim();
+          clearTimeout(t);
+          syncAtlas();
+          t = setTimeout(() => {
+            apply();
+            $("main").scrollTop = 0;
+          }, 60);
+        });
+        $("q").addEventListener("keydown", (e) => {
+          // Overdrive: Enter lands on the top match and opens it.
+          if (e.key !== "Enter" || F.view !== "graph" || F.renderer !== "3d" || !VIEW.length) return;
+          e.preventDefault();
+          const f = VIEW[0];
+          if (GRAPH) GRAPH.select(f.relativePath);
+          openDetail(f, null, true);
+        });
+        $("clear").addEventListener("click", () => {
+          F.q = "";
+          $("q").value = "";
+          apply();
+          $("q").focus();
+        });
+        $("gTopic").addEventListener("click", () => {
+          F.group = "topic";
+          if (F.folder && F.folder !== ROOT && !F.topic) F.folder = F.folder.split("/")[0];
+          apply();
+        });
+        $("gFolder").addEventListener("click", () => {
+          F.group = "folder";
+          apply();
+        });
+        $("fType").addEventListener("change", (e) => {
+          F.type = e.target.value;
+          apply();
+        });
+        $("fFolder").addEventListener("change", (e) => {
+          F.folder = e.target.value;
+          apply();
+        });
+        $("fDate").addEventListener("change", (e) => {
+          F.date = e.target.value;
+          apply();
+        });
+        $("zOut").addEventListener("click", () => setDensity(density - 1));
+        $("zIn").addEventListener("click", () => setDensity(density + 1));
+        $("zReset").addEventListener("click", () => setDensity(1));
+        $("filtersToggle").addEventListener("click", (e) => {
+          const open = $("tools").classList.toggle("open");
+          e.currentTarget.setAttribute("aria-expanded", String(open));
+        });
+        $("reset").addEventListener("click", () => {
+          Object.assign(F, { q: "", topic: "", folder: "", type: "", date: "all" });
+          $("q").value = "";
+          closeDetail(false);
+          apply();
+          $("main").scrollTop = 0;
+        });
+        $("main").addEventListener("scroll", () => { stopOpening(); paint(); }, { passive: true });
+        window.addEventListener("resize", () => { stopOpening(); paint(); });
+        document.addEventListener("visibilitychange", () => { if (document.hidden) stopOpening(); });
+
+        document.addEventListener("keydown", (e) => {
+          const typing = e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement;
+          if (e.key === "/" && !typing) {
+            e.preventDefault();
+            $("q").focus();
+            $("q").select();
+            return;
+          }
+          if (e.key === "Escape") {
+            if (!$("det").hidden) closeDetail(true);
+            else if (F.q) {
+              F.q = "";
+              $("q").value = "";
+              apply();
+            } else if (F.group === "topic" && F.topic) {
+              F.topic = "";
+              apply();
+            } else if (F.group === "folder" && F.folder) {
+              setFolder(F.folder === ROOT || !F.folder.includes("/") ? "" : F.folder.slice(0, F.folder.lastIndexOf("/")));
+            }
+            return;
+          }
+          if ((e.key === "ArrowDown" || e.key === "ArrowUp") && $("vp") && LIST.length) {
+            const onRow = e.target.classList && e.target.classList.contains("row");
+            if (!onRow && e.target !== $("q")) return;
+            e.preventDefault();
+            const cur = onRow ? Number(e.target.dataset.i) : -1;
+            const nx = e.key === "ArrowDown" ? Math.min(LIST.length - 1, cur + 1) : Math.max(0, cur - 1);
+            const main = $("main");
+            const y = $("vp").offsetTop + nx * ROW;
+            if (y < main.scrollTop) main.scrollTop = y;
+            else if (y + ROW > main.scrollTop + main.clientHeight) main.scrollTop = y + ROW - main.clientHeight;
+            paint();
+            const b = document.querySelector('.row[data-i="' + nx + '"]');
+            if (b) b.focus();
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

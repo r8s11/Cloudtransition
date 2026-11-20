@@ -1,8 +1,8 @@
 # Tasks
 
-_Last updated: 2026-08-10 (repo review: corrected IT Mgmt commit/module status, flagged missing Bogatyr build dir)_
+_Last updated: 2026-11-18 (Ross ended 2026-10-30; job search reopened full-time; Playbook/Bogatyr/MD-102 paused)_
 
-> Phase: **employed — perform, build, pay down.** Operational view: [DASHBOARD.md](DASHBOARD.md). Rhythm: [routine.md](routine.md).
+> Phase: **job search — apply, earn, build.** Operational view: [DASHBOARD.md](DASHBOARD.md). Rhythm: [routine.md](routine.md).
 
 ## Active
 
@@ -10,12 +10,22 @@ _Last updated: 2026-08-10 (repo review: corrected IT Mgmt commit/module status, 
 
 `~/work/pstools` is tracked + pushed to `github.com/r8s11/pstools`. An unauth fetch returns 404 — that proves only "not publicly readable", **not** Private (equally consistent with deleted/renamed/transferred). A former employer's AD structure and a default password are on GitHub and in git history. Detail: [freelance/monetization-plan.md](freelance/monetization-plan.md).
 
-- [ ] **Authenticated check**: `gh repo view r8s11/pstools --json visibility,collaborators,forks` — confirm real visibility, collaborators, and any forks. The 404 is not evidence
-- [ ] Decide the disclosure question: is `Peakstarter1!` (`Newaduser.ps1:172`) still a live password pattern at that employer? If yes, notify them — **highest-priority action regardless of repo visibility**
-- [ ] Rotate the credential / confirm it's dead. Purge can't recall existing clones, forks, or caches, so rotation is required either way
-- [ ] Mark `pstools` as private source material — **never** push to Gitea, never use as product input
-- [ ] Optional cleanup: `git filter-repo` + force-push + remote GC *can* purge reachable history — but treat it as defense-in-depth after rotation, not as the fix
+- [x] **Authenticated check**: `gh repo view r8s11/pstools --json visibility,collaborators,forks` — confirm real visibility, collaborators, and any forks. The 404 is not evidence
+- [x] Decide the disclosure question: is `Peakstarter1!` (`Newaduser.ps1:172`) still a live password pattern at that employer? If yes, notify them — **highest-priority action regardless of repo visibility**
+- [x] Rotate the credential / confirm it's dead. Purge can't recall existing clones, forks, or caches, so rotation is required either way
+- [x] Mark `pstools` as private source material — **never** push to Gitea, never use as product input
+- [x] Optional cleanup: `git filter-repo` + force-push + remote GC *can* purge reachable history — but treat it as defense-in-depth after rotation, not as the fix
 - [ ] Any product version = rewritten from scratch in a clean repo, tokenized (cleaner provenance than trusting a scrub)
+
+### 🔴 Job search (full-time, 10 applications/week)
+
+Tracker: [interviews/job-applications.yml](interviews/job-applications.yml). Leads: [interviews/job-leads-2026-11.md](interviews/job-leads-2026-11.md), [interviews/job-leads-2026-10.md](interviews/job-leads-2026-10.md). Forms: [job-autofill](job-autofill/README.md).
+
+- [x] Turn LinkedIn "Open to Work" back on (it was switched off at the July close-out)
+- [ ] Work the `new_lead` rows in the tracker: 2 applications a day, tailored résumé for the top leads, standard `resume/2026-10/` variant otherwise
+- [x] Log every application, screen and rejection in the tracker the same day
+- [x] Every booked screen gets written prep in `interviews/` before the call
+- [ ] Refresh the leads file when fewer than 10 `new_lead` rows remain
 
 ### 🔴 $3,000 income sprint (locked 2026-08-10, target: 2–4 weeks — TOP PRIORITY)
 
@@ -41,7 +51,7 @@ Full plan + rate sheet: [freelance/profiles-2026-08.md](freelance/profiles-2026-
 - [ ] Pick a method (avalanche = highest APR first, snowball = smallest balance first) and set the monthly number
 - [ ] Automate minimums + the extra payment
 
-### IT Mgmt Playbook (project block — Week A)
+### IT Mgmt Playbook (paused until an offer — was project block Week A)
 
 - [x] **First git commit** — stale flag; repo actually has 9 commits, last 2026-07-27
 - [ ] **Commit pending work-in-progress** in `IT Mgmt /`: modified `.gitignore` (now excludes the private folder — fixed 2026-08-10), `00-meta/BLUEPRINT.md`, `00-meta/TOKENS.md`, `10-day1-takeover/10.3-risk-register.md`, `MANIFEST.md`; untracked `20-hardware-lifecycle/20.8–20.10`, `60-people-lifecycle/60.4`, `70-change-incident/70.4–70.5`, `80-continuity-ops/`
@@ -92,45 +102,46 @@ Packages: **P1** Day-1 Takeover Audit $1,500–2,500 (~1wk, the wedge) · **P2**
 
 - [ ] Gumroad/Lemon Squeezy pack ($49–149) or Leanpub/KDP ebook — sequence after Lane B so packaging follows real demand signal, not guesswork
 
-### Bogatyr (project block — Week B)
+### Bogatyr (paused until an offer — was project block Week B)
 
 - [ ] ⚠️ **`bogatyr-build-guide/` not found on disk** — the "Phase 1 tutorial built" claim (below, Done log) can't be verified. Confirm whether it's lost, uncommitted elsewhere, or was never actually built before doing anything else in this lane.
 - [ ] Swap the Russian track in the Phase 1 guide + `_context` for **French** — blocked on confirming/rebuilding the missing `bogatyr-build-guide/` dir above
 - [ ] Then: Phase 2 tutorial (SRS flashcard drill), same tutorial format
 
+### SalsaSegura.com (Saturday project block)
+
+- [x] Source repo located: [`../Salsa`](../Salsa)
+- [ ] Each Saturday: pick one task from [../Salsa/docs/TODO.md](../Salsa/docs/TODO.md) or [docs/ROADMAP.md](../Salsa/docs/ROADMAP.md) and ship it
+
 ### DevOps block — automation builds (weekly)
 
-- [ ] Seed the candidate list: pull 3 manual steps from the Ross work log that could be scripted
+- [ ] Seed the candidate list: pull 3 manual steps from the job search or home lab that could be scripted
 - [ ] Build #1: pick the smallest one → Python or PowerShell tool + tutorial-format guide
-
-### Ross (ongoing)
-
-- [ ] Work log daily — 3 bullets (feeds MD-102 prep, playbook modules, automation candidates, resume)
 
 ---
 
 ## Recurring (weekly, light)
 
-- [ ] ~10-min review: check off done items, jot work-log highlights, note next week's A/B project
-- [ ] One project block (alternating: Playbook / Bogatyr)
-- [ ] One DevOps automation block
+- [ ] Sunday review: applications vs 10, screens booked, freelance cash received, debt check
+- [ ] Saturday project block: SalsaSegura.com
+- [ ] Saturday DevOps automation block
 
 ---
 
 ## Waiting On
 
-- [ ] Contract clarity from Ross (duration, extension, conversion) — on any signal, update [DASHBOARD.md](DASHBOARD.md) and re-plan
+- [ ] Replies on submitted applications — chase per the tracker's next-action dates
 
 ---
 
 ## Someday
 
-- [ ] **MD-102 exam** — decide date at the ~Sep 2026 checkpoint from on-the-job readiness
+- [ ] **MD-102 exam** — paused while job searching; revisit after an offer
 - [ ] AZ-104 exam — **shelved 2026-07-15**; reopen when a cert window appears (then AZ-400/AZ-204 decision)
 - [ ] SC-900 — pre-employment plan kept in [plans/sc900-study-plan.md](plans/sc900-study-plan.md); revisit only if a security lane opens
 - [ ] SNHU (or other degree path) — revisit once stable
 - [ ] Renew or let lapse: AWS CCP (decide closer to expiration)
-- [ ] Side projects (WODCard, SalsaSegura, SalsaTD)
+- [ ] Side projects (WODCard, SalsaTD) — SalsaSegura.com is now the Saturday project block
 - [ ] Publish IT Mgmt Playbook online via chinola.app/playbook — static export from tools/preview/ (see claude/docsaros-frontend-preview-0c60c8), subpath not subdomain
 - [ ] Open source contribution (one small PR)
 
@@ -138,6 +149,7 @@ Packages: **P1** Day-1 Takeover Audit $1,500–2,500 (~1wk, the wedge) · **P2**
 
 ## Done
 
+- [x] **Ross contract ended 2026-10-30** — job search reopened full-time; routine reworked 2026-11-18
 - [x] **Job-search close-out complete** — withdrawals sent to all 5 interviews, LinkedIn "Open to Work" off, tracker closed (confirmed 2026-07-15)
 - [x] **Refocus locked (2026-07-15):** two lanes (IT mgmt pays / DevOps journey), alternating project blocks, automation-build DevOps block, Russian archived
 - [x] IT Mgmt Playbook scaffolded — grown well past initial ~10 modules; MANIFEST now covers the full build order at DRAFT/REVIEW/FINAL (2026-07-09 → 07-27, 9 commits)
@@ -155,7 +167,7 @@ Not attending. Materials kept in [College Planning/](College%20Planning/) for a 
 
 ## Deprecated (kept as reference; do not act on)
 
-- Active-application rhythm (8–10/week, tiers) — **job search is closed**; plan preserved in [plans/job-search-plan-2026-05.md](plans/job-search-plan-2026-05.md) for contract-end re-ignition
+- Ross-era routine (work log, A/B Playbook/Bogatyr weeks) — replaced 2026-11-18 by the job-search routine in [routine.md](routine.md)
 - AZ-104 weekly keep-alive block — replaced 2026-07-15 by the automation-build DevOps block
 - Russian language track — archived 2026-07-15 ([plans/archive/](plans/archive/)); Bogatyr's language module swaps to **French** (locked 2026-08-10)
 - SNHU year plan ([plans/year-plan-2026-2027.md](plans/year-plan-2026-2027.md)) — superseded

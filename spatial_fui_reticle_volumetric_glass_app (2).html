@@ -1,0 +1,3599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2.5D/3D Spatial FUI Reticle &amp; Volumetric Glass Interface</title>
+  <style>
+    /* =========================================================================
+       MODULE 01 // DESIGN TOKENS & ADDITIVE OPTICAL SUBSTRATE
+       - On Transparent OLEDs (T-OLED), #000000 pixels power off to clear glass.
+       - On web viewports, --fui-bg-void (#04070d) provides a deep optical substrate
+         so additive light strokes and selective HDR bloom read cleanly.
+       ========================================================================= */
+    :root {
+      --fui-bg-void: #04070d;
+      --fui-cyan: #5ce1e6;
+      --fui-cyan-bright: #9efaff;
+      --fui-cyan-dim: rgba(92, 225, 230, 0.24);
+      --fui-amber: #ffaa2b;
+      --fui-amber-bright: #ffd48a;
+      --fui-amber-dim: rgba(255, 170, 43, 0.28);
+      --fui-crimson: #ff3b5c;
+      --fui-text-primary: rgba(235, 248, 255, 0.94);
+      --fui-text-muted: rgba(155, 195, 215, 0.65);
+      --fui-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --fui-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --stage-tilt-x: 0deg;
+      --stage-tilt-y: 0deg;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--fui-bg-void);
+      color: var(--fui-text-primary);
+      font-family: var(--fui-font-mono);
+    }
+
+    /* =========================================================================
+       MODULE 02 // Z-LAYER STACKING ARCHITECTURE
+       - z: 1  -> WebGL Three.js Canvas (360 orbit, zoom, 3D node raycasting)
+       - z: 5  -> Full-viewport SVG leader lines (pointer-events: none)
+       - z: 6  -> Interactive HTML telemetry pills pinned to 3D bracket nodes
+       - z: 8  -> 2.5D CSS-transformed volumetric glass windows
+       - z: 14 -> Floating 3D-projected Graph Node Inspector card
+       - z: 15 -> Perimeter HUD chrome, Search/Filter bar & Bottom Docks
+       ========================================================================= */
+    #canvas-container {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    #canvas-container:active {
+      cursor: grabbing;
+    }
+
+    /* Layer 2: 3D-to-2D Projected SVG Leader Overlay */
+    #callout-svg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+      mix-blend-mode: plus-lighter;
+    }
+
+    .svg-leader-line {
+      fill: none;
+      stroke: var(--fui-cyan);
+      stroke-width: 1.25;
+      stroke-opacity: 0.78;
+      filter: drop-shadow(0 0 4px rgba(92, 225, 230, 0.5));
+      transition: stroke 0.28s ease;
+    }
+
+    body[data-state="alert"] .svg-leader-line {
+      stroke: var(--fui-amber);
+      filter: drop-shadow(0 0 5px rgba(255, 170, 43, 0.6));
+    }
+
+    .svg-anchor-dot {
+      fill: var(--fui-cyan-bright);
+      transition: fill 0.28s ease;
+    }
+
+    body[data-state="alert"] .svg-anchor-dot {
+      fill: var(--fui-amber-bright);
+    }
+
+    .svg-anchor-ring {
+      fill: none;
+      stroke: var(--fui-cyan);
+      stroke-width: 1;
+      stroke-opacity: 0.65;
+      transition: stroke 0.28s ease;
+    }
+
+    body[data-state="alert"] .svg-anchor-ring {
+      stroke: var(--fui-amber);
+    }
+
+    /* Layer 3: Interactive HTML Telemetry Pills Pinned to SVG Shelves */
+    #callout-pills {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 6;
+    }
+
+    .callout-pill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: auto;
+      background: rgba(6, 18, 30, 0.62);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--fui-cyan-dim);
+      padding: 6px 10px;
+      cursor: pointer;
+      min-width: 158px;
+      box-shadow: inset 0 0 12px rgba(92, 225, 230, 0.08);
+      transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+      will-change: transform, opacity;
+    }
+
+    .callout-pill:hover,
+    .callout-pill.win-active {
+      border-color: var(--fui-cyan);
+      background: rgba(92, 225, 230, 0.16);
+      box-shadow: 0 0 16px rgba(92, 225, 230, 0.28), inset 0 0 12px rgba(92, 225, 230, 0.14);
+    }
+
+    body[data-state="alert"] .callout-pill {
+      border-color: var(--fui-amber-dim);
+    }
+
+    body[data-state="alert"] .callout-pill:hover,
+    body[data-state="alert"] .callout-pill.win-active {
+      border-color: var(--fui-amber);
+      background: rgba(255, 170, 43, 0.18);
+      box-shadow: 0 0 16px rgba(255, 170, 43, 0.3);
+    }
+
+    .pill-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 9.5px;
+      letter-spacing: 0.12em;
+      color: var(--fui-cyan);
+    }
+
+    body[data-state="alert"] .pill-head {
+      color: var(--fui-amber);
+    }
+
+    .pill-tag {
+      font-size: 8.5px;
+      padding: 1px 4px;
+      border: 1px solid rgba(92, 225, 230, 0.35);
+      color: var(--fui-text-primary);
+    }
+
+    .pill-val {
+      font-size: 11px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* =========================================================================
+       MODULE 03 // 2.5D PERSPECTIVE STAGE & VOLUMETRIC GLASS WINDOWS
+       ========================================================================= */
+    #spatial-window-stage {
+      position: fixed;
+      inset: 0;
+      perspective: 1400px;
+      pointer-events: none;
+      z-index: 8;
+      overflow: hidden;
+    }
+
+    .window-rig {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transform: rotateX(var(--stage-tilt-x)) rotateY(var(--stage-tilt-y));
+      transition: transform 0.16s ease-out;
+    }
+
+    .volumetric-window {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0;
+      background: linear-gradient(
+        145deg,
+        rgba(10, 28, 46, 0.56) 0%,
+        rgba(4, 13, 24, 0.72) 100%
+      );
+      backdrop-filter: blur(14px) saturate(135%);
+      -webkit-backdrop-filter: blur(14px) saturate(135%);
+      border: 1px solid var(--fui-cyan-dim);
+      box-shadow:
+        0 18px 46px rgba(0, 0, 0, 0.68),
+        inset 0 0 24px rgba(92, 225, 230, 0.1);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      clip-path: inset(50% 0% 50% 0%);
+      transform-style: preserve-3d;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .volumetric-window.is-open {
+      pointer-events: auto;
+    }
+
+    body[data-state="alert"] .volumetric-window {
+      border-color: var(--fui-amber-dim);
+      box-shadow:
+        0 18px 46px rgba(0, 0, 0, 0.72),
+        inset 0 0 24px rgba(255, 170, 43, 0.12);
+    }
+
+    /* Angled 2.5D Wing Positions */
+    #win-01 {
+      top: 158px;
+      left: 24px;
+      width: 288px;
+      transform: translateZ(34px) rotateY(11deg);
+      transform-origin: left center;
+    }
+
+    #win-02 {
+      top: 158px;
+      right: 24px;
+      width: 294px;
+      transform: translateZ(34px) rotateY(-11deg);
+      transform-origin: right center;
+    }
+
+    #win-03 {
+      bottom: 84px;
+      right: 24px;
+      width: 312px;
+      transform: translateZ(46px) rotateY(-8deg) rotateX(4deg);
+      transform-origin: right bottom;
+    }
+
+    /* Laser Deployment Bar & Corner Brackets */
+    .win-laser-bar {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--fui-cyan-bright), transparent);
+      box-shadow: 0 0 14px var(--fui-cyan);
+      transform: scaleX(0);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    body[data-state="alert"] .win-laser-bar {
+      background: linear-gradient(90deg, transparent, var(--fui-amber-bright), transparent);
+      box-shadow: 0 0 14px var(--fui-amber);
+    }
+
+    .win-bracket {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-color: var(--fui-cyan);
+      border-style: solid;
+      pointer-events: none;
+      opacity: 0.85;
+      transition: border-color 0.3s ease;
+    }
+
+    body[data-state="alert"] .win-bracket {
+      border-color: var(--fui-amber);
+    }
+
+    .win-bracket.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+    .win-bracket.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+    .win-bracket.bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+    .win-bracket.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+    .win-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(92, 225, 230, 0.18);
+      padding-bottom: 6px;
+    }
+
+    body[data-state="alert"] .win-header {
+      border-bottom-color: rgba(255, 170, 43, 0.22);
+    }
+
+    .win-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .win-kicker {
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      color: var(--fui-cyan);
+    }
+
+    body[data-state="alert"] .win-kicker {
+      color: var(--fui-amber);
+    }
+
+    .win-name {
+      font-family: var(--fui-font-sans);
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: #ffffff;
+    }
+
+    .win-close-btn {
+      appearance: none;
+      background: rgba(92, 225, 230, 0.08);
+      border: 1px solid var(--fui-cyan-dim);
+      color: var(--fui-text-primary);
+      font-family: var(--fui-font-mono);
+      font-size: 11px;
+      padding: 2px 7px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .win-close-btn:hover {
+      background: rgba(92, 225, 230, 0.24);
+      border-color: var(--fui-cyan);
+    }
+
+    .win-viewport {
+      position: relative;
+      width: 100%;
+      height: 124px;
+      background: rgba(2, 6, 12, 0.85);
+      border: 1px solid rgba(92, 225, 230, 0.16);
+      overflow: hidden;
+    }
+
+    .win-viewport canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .win-scan-wipe {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(92, 225, 230, 0.28) 50%,
+        rgba(158, 250, 255, 0.7) 52%,
+        transparent 54%
+      );
+      transform: translateY(-100%);
+      pointer-events: none;
+    }
+
+    .win-telem-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 10.5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .telem-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 3px 6px;
+      background: rgba(92, 225, 230, 0.04);
+      border-left: 2px solid rgba(92, 225, 230, 0.35);
+    }
+
+    body[data-state="alert"] .telem-row {
+      background: rgba(255, 170, 43, 0.05);
+      border-left-color: rgba(255, 170, 43, 0.45);
+    }
+
+    .telem-key {
+      color: var(--fui-text-muted);
+    }
+
+    .telem-val {
+      color: var(--fui-cyan-bright);
+      font-weight: 600;
+    }
+
+    body[data-state="alert"] .telem-val {
+      color: var(--fui-amber-bright);
+    }
+
+    .sparkline-box {
+      width: 100%;
+      height: 24px;
+      border-top: 1px solid rgba(92, 225, 230, 0.14);
+      padding-top: 4px;
+    }
+
+    /* =========================================================================
+       MODULE 04 // FLOATING 3D GRAPH NODE INSPECTOR CARD (z: 14)
+       ========================================================================= */
+    #graph-inspector {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 215px;
+      background: rgba(5, 15, 27, 0.86);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--fui-cyan);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.78), inset 0 0 16px rgba(92, 225, 230, 0.14);
+      padding: 9px 11px;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 14;
+      transition: opacity 0.18s ease, border-color 0.25s ease;
+      will-change: transform, opacity;
+    }
+
+    #graph-inspector.visible {
+      opacity: 1;
+    }
+
+    body[data-state="alert"] #graph-inspector {
+      border-color: var(--fui-amber);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.78), inset 0 0 16px rgba(255, 170, 43, 0.18);
+    }
+
+    .gi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(92, 225, 230, 0.22);
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+    }
+
+    .gi-id {
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.08em;
+    }
+
+    .gi-role {
+      font-size: 9px;
+      color: var(--fui-cyan);
+      letter-spacing: 0.08em;
+    }
+
+    body[data-state="alert"] .gi-role {
+      color: var(--fui-amber);
+    }
+
+    .gi-grid {
+      display: grid;
+      grid-template-columns: auto auto;
+      gap: 3px 10px;
+      font-size: 10px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .gi-k { color: var(--fui-text-muted); }
+    .gi-v { color: var(--fui-cyan-bright); text-align: right; }
+
+    /* =========================================================================
+       MODULE 05 // PERIMETER HUD CHROME, TOPOLOGY BAR & BOTTOM DOCKS (z: 15)
+       ========================================================================= */
+    .hud-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 18px 22px;
+      z-index: 15;
+    }
+
+    .hud-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .hud-card {
+      background: rgba(8, 20, 34, 0.48);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--fui-cyan-dim);
+      padding: 11px 15px;
+      position: relative;
+      box-shadow: inset 0 0 18px rgba(92, 225, 230, 0.07);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    body[data-state="alert"] .hud-card {
+      border-color: var(--fui-amber-dim);
+      box-shadow: inset 0 0 18px rgba(255, 170, 43, 0.1);
+    }
+
+    .hud-card::before,
+    .hud-card::after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-color: var(--fui-cyan);
+      border-style: solid;
+      transition: border-color 0.3s ease;
+    }
+
+    .hud-card::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+    .hud-card::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+    body[data-state="alert"] .hud-card::before,
+    body[data-state="alert"] .hud-card::after {
+      border-color: var(--fui-amber);
+    }
+
+    .hud-kicker {
+      font-size: 9.5px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--fui-cyan);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    body[data-state="alert"] .hud-kicker {
+      color: var(--fui-amber);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--fui-cyan);
+      box-shadow: 0 0 8px var(--fui-cyan);
+    }
+
+    body[data-state="alert"] .status-dot {
+      background: var(--fui-amber);
+      box-shadow: 0 0 10px var(--fui-amber);
+      animation: pulseDot 0.72s infinite alternate ease-in-out;
+    }
+
+    @keyframes pulseDot {
+      from { opacity: 0.35; transform: scale(0.85); }
+      to { opacity: 1; transform: scale(1.25); }
+    }
+
+    .hud-title {
+      font-family: var(--fui-font-sans);
+      font-size: 13.5px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: var(--fui-text-primary);
+    }
+
+    .hud-sub {
+      font-size: 10.5px;
+      color: var(--fui-text-muted);
+      margin-top: 3px;
+    }
+
+    .audio-status-row {
+      margin-top: 7px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(92, 225, 230, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 9.5px;
+    }
+
+    .audio-bars {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 11px;
+    }
+
+    .audio-bar {
+      width: 2.5px;
+      height: 3px;
+      background: var(--fui-cyan);
+      transition: height 0.08s ease;
+    }
+
+    body[data-state="alert"] .audio-bar {
+      background: var(--fui-amber);
+    }
+
+    /* Spatial Node-Search & Topology Filter Command Bar */
+    #topology-bar {
+      pointer-events: auto;
+      flex: 1 1 360px;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      z-index: 20;
+    }
+
+    .topo-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .topo-counter {
+      font-size: 9.5px;
+      letter-spacing: 0.11em;
+      color: var(--fui-text-muted);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .topo-counter strong {
+      color: var(--fui-cyan-bright);
+      font-weight: 600;
+    }
+
+    body[data-state="alert"] .topo-counter strong {
+      color: var(--fui-amber);
+    }
+
+    .search-box-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: rgba(4, 12, 22, 0.78);
+      border: 1px solid var(--fui-cyan-dim);
+      padding: 0 8px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-box-wrap:focus-within {
+      border-color: var(--fui-cyan);
+      box-shadow: 0 0 14px rgba(92, 225, 230, 0.24), inset 0 0 8px rgba(92, 225, 230, 0.12);
+    }
+
+    body[data-state="alert"] .search-box-wrap:focus-within {
+      border-color: var(--fui-amber);
+      box-shadow: 0 0 14px rgba(255, 170, 43, 0.28);
+    }
+
+    .search-prefix {
+      font-size: 9.5px;
+      color: var(--fui-cyan);
+      letter-spacing: 0.1em;
+      margin-right: 6px;
+      opacity: 0.85;
+    }
+
+    body[data-state="alert"] .search-prefix {
+      color: var(--fui-amber);
+    }
+
+    #node-search-input {
+      flex: 1;
+      min-width: 0;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--fui-text-primary);
+      font-family: var(--fui-font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      padding: 6px 4px;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    #node-search-input::placeholder {
+      color: rgba(155, 195, 215, 0.42);
+      font-size: 10px;
+    }
+
+    .search-clear-btn {
+      appearance: none;
+      background: transparent;
+      border: none;
+      color: var(--fui-text-muted);
+      font-family: var(--fui-font-mono);
+      font-size: 13px;
+      line-height: 1;
+      padding: 2px 5px;
+      cursor: pointer;
+      display: none;
+    }
+
+    .search-clear-btn.visible {
+      display: inline-block;
+    }
+
+    .search-clear-btn:hover {
+      color: #ffffff;
+    }
+
+    .search-kbd-hint {
+      font-size: 9px;
+      padding: 1px 5px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: var(--fui-text-muted);
+      margin-left: 4px;
+    }
+
+    #search-results-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: -1px;
+      right: -1px;
+      background: rgba(5, 14, 24, 0.95);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--fui-cyan-dim);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.78), inset 0 0 14px rgba(92, 225, 230, 0.08);
+      max-height: 205px;
+      overflow-y: auto;
+      display: none;
+      z-index: 40;
+    }
+
+    #search-results-dropdown.open {
+      display: block;
+    }
+
+    .search-result-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 10px;
+      border-bottom: 1px solid rgba(92, 225, 230, 0.1);
+      cursor: pointer;
+      font-size: 10px;
+      transition: background 0.15s ease;
+    }
+
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+
+    .search-result-item:hover,
+    .search-result-item.selected {
+      background: rgba(92, 225, 230, 0.18);
+    }
+
+    .sri-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sri-id {
+      color: #ffffff;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+    }
+
+    .sri-role {
+      font-size: 9px;
+      padding: 1px 5px;
+      border: 1px solid var(--fui-cyan-dim);
+      color: var(--fui-cyan);
+    }
+
+    .sri-role.fault {
+      border-color: var(--fui-amber-dim);
+      color: var(--fui-amber);
+    }
+
+    .sri-meta {
+      color: var(--fui-text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .filter-pills {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .filter-pill {
+      appearance: none;
+      background: rgba(6, 18, 30, 0.6);
+      border: 1px solid rgba(92, 225, 230, 0.22);
+      color: var(--fui-text-muted);
+      font-family: var(--fui-font-mono);
+      font-size: 9.5px;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .filter-pill:hover {
+      border-color: var(--fui-cyan);
+      color: var(--fui-text-primary);
+      background: rgba(92, 225, 230, 0.12);
+    }
+
+    .filter-pill.active {
+      border-color: var(--fui-cyan);
+      background: rgba(92, 225, 230, 0.22);
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(92, 225, 230, 0.22);
+    }
+
+    .filter-pill[data-filter="FAULT"].active,
+    .filter-pill[data-filter="FAULT"]:hover {
+      border-color: var(--fui-amber);
+      color: #fff4e0;
+    }
+
+    .filter-pill[data-filter="FAULT"].active {
+      background: rgba(255, 170, 43, 0.22);
+      box-shadow: 0 0 12px rgba(255, 170, 43, 0.26);
+    }
+
+    /* Uniform Telemetry Panel */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: auto auto;
+      gap: 3px 14px;
+      font-size: 10.5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .telemetry-label {
+      color: var(--fui-text-muted);
+    }
+
+    .telemetry-val {
+      color: var(--fui-cyan-bright);
+      text-align: right;
+    }
+
+    body[data-state="alert"] .telemetry-val {
+      color: var(--fui-amber);
+    }
+
+    /* Bottom Interactive Control Docks */
+    .hud-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .dock-group {
+      pointer-events: auto;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .fui-btn {
+      appearance: none;
+      background: rgba(8, 22, 36, 0.62);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--fui-cyan-dim);
+      color: var(--fui-text-muted);
+      font-family: var(--fui-font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      padding: 8px 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .fui-btn:hover {
+      border-color: var(--fui-cyan);
+      color: var(--fui-text-primary);
+      background: rgba(92, 225, 230, 0.14);
+    }
+
+    .fui-btn .key-cap {
+      font-size: 9.5px;
+      padding: 1px 5px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: var(--fui-text-muted);
+    }
+
+    .fui-btn.active {
+      border-color: var(--fui-cyan);
+      background: rgba(92, 225, 230, 0.2);
+      color: #ffffff;
+      box-shadow: 0 0 16px rgba(92, 225, 230, 0.26), inset 0 0 10px rgba(92, 225, 230, 0.16);
+    }
+
+    .fui-btn.active .key-cap {
+      border-color: var(--fui-cyan);
+      color: var(--fui-cyan-bright);
+    }
+
+    .fui-btn[data-target="alert"].active {
+      border-color: var(--fui-amber);
+      background: rgba(255, 170, 43, 0.22);
+      color: #fff6e8;
+      box-shadow: 0 0 18px rgba(255, 170, 43, 0.32), inset 0 0 10px rgba(255, 170, 43, 0.2);
+    }
+
+    .fui-btn[data-target="alert"].active .key-cap {
+      border-color: var(--fui-amber);
+      color: var(--fui-amber);
+    }
+
+    .hint-pill {
+      font-size: 9.5px;
+      letter-spacing: 0.08em;
+      color: var(--fui-text-muted);
+      padding: 8px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      background: rgba(4, 7, 13, 0.62);
+    }
+
+    @media (max-width: 1120px) {
+      .hud-top {
+        flex-wrap: wrap;
+      }
+      #topology-bar {
+        order: 3;
+        flex: 1 1 100%;
+        max-width: 100%;
+      }
+      .hint-pill {
+        display: none;
+      }
+    }
+
+    @media (max-width: 720px) {
+      #win-01, #win-02, #win-03 {
+        width: calc(100vw - 48px);
+        left: 24px;
+        right: 24px;
+        transform: translateZ(20px);
+      }
+      #win-01 { top: 210px; }
+      #win-02 { top: 230px; }
+      #win-03 { bottom: 90px; }
+    }
+  </style>
+
+  <!-- ES Module Import Map for Three.js + Postprocessing Addons + GSAP -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://esm.sh/three@0.170.0",
+        "three/addons/": "https://esm.sh/three@0.170.0/examples/jsm/",
+        "gsap": "https://esm.sh/gsap@3.12.5"
+      }
+    }
+  </script>
+</head>
+<body data-state="idle">
+  <!-- Layer 1 (z: 1): Three.js Selective HDR Bloom & 3D Graph Canvas -->
+  <div id="canvas-container"></div>
+
+  <!-- Layer 2 (z: 5): Real-Time 3D-to-2D Projected SVG Leader Lines -->
+  <svg id="callout-svg" aria-hidden="true">
+    <g id="svg-node-0">
+      <circle class="svg-anchor-ring" r="7" cx="0" cy="0"></circle>
+      <circle class="svg-anchor-dot" r="2.6" cx="0" cy="0"></circle>
+      <polyline class="svg-leader-line" points="0,0 0,0 0,0"></polyline>
+    </g>
+    <g id="svg-node-1">
+      <circle class="svg-anchor-ring" r="7" cx="0" cy="0"></circle>
+      <circle class="svg-anchor-dot" r="2.6" cx="0" cy="0"></circle>
+      <polyline class="svg-leader-line" points="0,0 0,0 0,0"></polyline>
+    </g>
+    <g id="svg-node-2">
+      <circle class="svg-anchor-ring" r="7" cx="0" cy="0"></circle>
+      <circle class="svg-anchor-dot" r="2.6" cx="0" cy="0"></circle>
+      <polyline class="svg-leader-line" points="0,0 0,0 0,0"></polyline>
+    </g>
+  </svg>
+
+  <!-- Layer 3 (z: 6): Interactive HTML Telemetry Pills Pinned to SVG Shelves -->
+  <div id="callout-pills">
+    <div class="callout-pill" id="pill-node-0" data-open-win="win1" role="button" tabindex="0">
+      <div class="pill-head">
+        <span>NODE_01 // AZIMUTH</span>
+        <span class="pill-tag">WIN_01</span>
+      </div>
+      <div class="pill-val" id="pill-val-0">+000.0°</div>
+    </div>
+
+    <div class="callout-pill" id="pill-node-1" data-open-win="win2" role="button" tabindex="0">
+      <div class="pill-head">
+        <span>NODE_02 // Z_PLANE</span>
+        <span class="pill-tag">WIN_02</span>
+      </div>
+      <div class="pill-val" id="pill-val-1">+0.16m</div>
+    </div>
+
+    <div class="callout-pill" id="pill-node-2" data-open-win="win3" role="button" tabindex="0">
+      <div class="pill-head">
+        <span>NODE_03 // FLUX_IDX</span>
+        <span class="pill-tag">WIN_03</span>
+      </div>
+      <div class="pill-val" id="pill-val-2">1.30 HDR</div>
+    </div>
+  </div>
+
+  <!-- Layer 4 (z: 8): 2.5D Perspective Stage & Volumetric Glass Windows -->
+  <div id="spatial-window-stage">
+    <div class="window-rig">
+      <!-- WIN_01: LIDAR Bathymetry Scan -->
+      <section class="volumetric-window" id="win-01" aria-label="LIDAR Bathymetry Window">
+        <div class="win-laser-bar"></div>
+        <span class="win-bracket tl"></span>
+        <span class="win-bracket tr"></span>
+        <span class="win-bracket bl"></span>
+        <span class="win-bracket br"></span>
+
+        <div class="win-header">
+          <div class="win-title-group">
+            <span class="win-kicker">WIN_01 // Z+34MM // SECTOR_A</span>
+            <span class="win-name">LIDAR_BATHYMETRY</span>
+          </div>
+          <button type="button" class="win-close-btn" data-close-win="win1">[×]</button>
+        </div>
+
+        <div class="win-viewport">
+          <canvas id="canvas-win-01"></canvas>
+          <div class="win-scan-wipe"></div>
+        </div>
+
+        <div class="win-telem-list">
+          <div class="telem-row">
+            <span class="telem-key">PEAK_ELEVATION</span>
+            <span class="telem-val" id="w1-elev">+412.8 m</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-key">POINT_DENSITY</span>
+            <span class="telem-val" id="w1-dens">1.84M pts/s</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-key">RETURN_COHERENCE</span>
+            <span class="telem-val" id="w1-coh">99.4 %</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- WIN_02: Optical Recon Capture -->
+      <section class="volumetric-window" id="win-02" aria-label="Optical Recon Capture Window">
+        <div class="win-laser-bar"></div>
+        <span class="win-bracket tl"></span>
+        <span class="win-bracket tr"></span>
+        <span class="win-bracket bl"></span>
+        <span class="win-bracket br"></span>
+
+        <div class="win-header">
+          <div class="win-title-group">
+            <span class="win-kicker">WIN_02 // Z+34MM // APERTURE_B</span>
+            <span class="win-name">OPTICAL_RECON_CAPTURE</span>
+          </div>
+          <button type="button" class="win-close-btn" data-close-win="win2">[×]</button>
+        </div>
+
+        <div class="win-viewport">
+          <canvas id="canvas-win-02"></canvas>
+          <div class="win-scan-wipe"></div>
+        </div>
+
+        <div class="win-telem-list">
+          <div class="telem-row">
+            <span class="telem-key">PHASE_LOCK</span>
+            <span class="telem-val" id="w2-lock">SYNC_NOMINAL</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-key">ANGULAR_DRIFT</span>
+            <span class="telem-val" id="w2-drift">0.0014 rad</span>
+          </div>
+        </div>
+
+        <svg class="sparkline-box" viewBox="0 0 260 22" preserveAspectRatio="none">
+          <polyline
+            id="recon-sparkline"
+            fill="none"
+            stroke="#5ce1e6"
+            stroke-width="1.5"
+            points="0,11 260,11"
+          ></polyline>
+        </svg>
+      </section>
+
+      <!-- WIN_03: Thermal Anomaly Diagnostics -->
+      <section class="volumetric-window" id="win-03" aria-label="Thermal Anomaly Diagnostics Window">
+        <div class="win-laser-bar"></div>
+        <span class="win-bracket tl"></span>
+        <span class="win-bracket tr"></span>
+        <span class="win-bracket bl"></span>
+        <span class="win-bracket br"></span>
+
+        <div class="win-header">
+          <div class="win-title-group">
+            <span class="win-kicker">WIN_03 // Z+46MM // SPECTRA_C</span>
+            <span class="win-name">THERMAL_ANOMALY_DIAG</span>
+          </div>
+          <button type="button" class="win-close-btn" data-close-win="win3">[×]</button>
+        </div>
+
+        <div class="win-viewport">
+          <canvas id="canvas-win-03"></canvas>
+          <div class="win-scan-wipe"></div>
+        </div>
+
+        <div class="win-telem-list">
+          <div class="telem-row">
+            <span class="telem-key">CORE_TEMP_DELTA</span>
+            <span class="telem-val" id="w3-temp">+14.2 °C</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-key">HARMONIC_LOAD</span>
+            <span class="telem-val" id="w3-load">68.4 %</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-key">ISOLATION_BUS</span>
+            <span class="telem-val" id="w3-bus">ARMED_OK</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Layer 4B (z: 14): Floating 3D-Projected Graph Node Inspector Card -->
+  <div id="graph-inspector" aria-hidden="true">
+    <div class="gi-header">
+      <span class="gi-id" id="gi-node-id">SYS_CORE</span>
+      <span class="gi-role" id="gi-node-role">HUB // Z+0.14</span>
+    </div>
+    <div class="gi-grid">
+      <span class="gi-k">DEGREE</span>
+      <span class="gi-v" id="gi-degree">5 LINKS</span>
+      <span class="gi-k">LATENCY</span>
+      <span class="gi-v" id="gi-latency">0.4 ms</span>
+      <span class="gi-k">THROUGHPUT</span>
+      <span class="gi-v" id="gi-throughput">128.0 Gbps</span>
+      <span class="gi-k">WINDOW</span>
+      <span class="gi-v" id="gi-window">WIN_01 [LIDAR]</span>
+    </div>
+  </div>
+
+  <!-- Layer 5 (z: 15): Perimeter HUD Chrome, Search/Filter Bar & Bottom Docks -->
+  <div class="hud-layer">
+    <div class="hud-top">
+      <div class="hud-card">
+        <div class="hud-kicker">
+          <span class="status-dot"></span>
+          <span id="state-label">STATE // IDLE_STANDBY</span>
+        </div>
+        <div class="hud-title">2.5D/3D Spatial FUI &amp; Volumetric Glass</div>
+        <div class="hud-sub">HDR Selective Bloom (1.05) • 5 Z-Planes • Projected SVG Callouts</div>
+        <div class="audio-status-row">
+          <span class="telemetry-label" id="audio-status-text">SYNTH // STANDBY (CLICK TO ARM)</span>
+          <div class="audio-bars" id="audio-bars">
+            <span class="audio-bar"></span>
+            <span class="audio-bar"></span>
+            <span class="audio-bar"></span>
+            <span class="audio-bar"></span>
+            <span class="audio-bar"></span>
+            <span class="audio-bar"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spatial Node-Search & Topology Filter Command Bar -->
+      <div class="hud-card" id="topology-bar" role="region" aria-label="Spatial Node Search and Topology Filter">
+        <div class="topo-top-row">
+          <div class="hud-kicker" style="margin-bottom: 0;">TOPOLOGY // SEARCH &amp; FILTER</div>
+          <div class="topo-counter" id="topo-match-counter">
+            <strong>14/14</strong> NODES • <strong>22/22</strong> EDGES
+          </div>
+        </div>
+
+        <div class="search-box-wrap">
+          <span class="search-prefix">QUERY://</span>
+          <input
+            type="text"
+            id="node-search-input"
+            placeholder="SEARCH NODE ID, ROLE, OR WIN (e.g. LIDAR, HUB, W3)..."
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Search 3D graph nodes"
+          />
+          <button type="button" class="search-clear-btn" id="search-clear-btn" aria-label="Clear search">×</button>
+          <span class="search-kbd-hint">/</span>
+          <div id="search-results-dropdown" role="listbox" aria-label="Matching 3D nodes"></div>
+        </div>
+
+        <div class="filter-pills" id="topology-filters" role="group" aria-label="Topology Role Filters">
+          <button type="button" class="filter-pill active" data-filter="ALL">All (14)</button>
+          <button type="button" class="filter-pill" data-filter="HUB">Hubs (3)</button>
+          <button type="button" class="filter-pill" data-filter="SENSOR">Sensors (6)</button>
+          <button type="button" class="filter-pill" data-filter="COMPUTE">Compute (5)</button>
+          <button type="button" class="filter-pill" data-filter="FAULT">Fault Path (3)</button>
+        </div>
+      </div>
+
+      <div class="hud-card">
+        <div class="hud-kicker">UNIFORM TELEMETRY</div>
+        <div class="telemetry-grid">
+          <span class="telemetry-label">uScanSpeed</span>
+          <span class="telemetry-val" id="val-scan">0.40</span>
+          <span class="telemetry-label">uHdrGain</span>
+          <span class="telemetry-val" id="val-gain">1.30</span>
+          <span class="telemetry-label">bloom.strength</span>
+          <span class="telemetry-val" id="val-bloom">0.42</span>
+          <span class="telemetry-label">bracket.pos.z</span>
+          <span class="telemetry-val" id="val-bz">+0.16m</span>
+          <span class="telemetry-label">rig.tilt (X/Y)</span>
+          <span class="telemetry-val" id="val-tilt">0.0° / 0.0°</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud-bottom">
+      <div class="dock-group" role="group" aria-label="FUI State Controls">
+        <button type="button" class="fui-btn active" data-target="idle"><span class="key-cap">1</span>Idle</button>
+        <button type="button" class="fui-btn" data-target="scanning"><span class="key-cap">2</span>Scanning</button>
+        <button type="button" class="fui-btn" data-target="locked"><span class="key-cap">3</span>Locked</button>
+        <button type="button" class="fui-btn" data-target="alert"><span class="key-cap">4</span>Alert</button>
+      </div>
+
+      <div class="dock-group" role="group" aria-label="Volumetric Window and Graph Controls">
+        <button type="button" class="fui-btn" data-win-toggle="win1"><span class="key-cap">W1</span>LIDAR</button>
+        <button type="button" class="fui-btn" data-win-toggle="win2"><span class="key-cap">W2</span>RECON</button>
+        <button type="button" class="fui-btn" data-win-toggle="win3"><span class="key-cap">W3</span>DIAG</button>
+        <button type="button" class="fui-btn" id="toggle-all-win-btn"><span class="key-cap">W</span>All</button>
+        <button type="button" class="fui-btn active" id="toggle-graph-btn"><span class="key-cap">G</span>Graph</button>
+      </div>
+
+      <div class="dock-group">
+        <span class="hint-pill">DRAG: 360° ORBIT • /: SEARCH • CLICK NODES: WINDOWS</span>
+        <button type="button" class="fui-btn" id="mute-btn"><span class="key-cap">M</span>Mute</button>
+        <button type="button" class="fui-btn" id="reset-cam-btn"><span class="key-cap">R</span>Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+    import gsap from 'gsap';
+
+    /* =========================================================================
+       MODULE 01 // PROCEDURAL WEB AUDIO SYNTHESIZER (FuiAudioEngine)
+       Pure Web Audio synthesis with zero external sound file URLs.
+       ========================================================================= */
+    class FuiAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.masterGain = null;
+        this.isMuted = false;
+        this.isUnlocked = false;
+        this.energy = 0.08;
+        this.lastSweepSector = -1;
+        this.statusEl = document.getElementById('audio-status-text');
+      }
+
+      unlock() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return;
+          this.ctx = new AudioCtx();
+          this.masterGain = this.ctx.createGain();
+          this.masterGain.gain.value = this.isMuted ? 0 : 0.35;
+          this.masterGain.connect(this.ctx.destination);
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+        if (!this.isUnlocked) {
+          this.isUnlocked = true;
+          this.updateStatusLabel();
+        }
+      }
+
+      canPlay() {
+        return Boolean(this.ctx && this.isUnlocked && !this.isMuted && this.ctx.state === 'running');
+      }
+
+      boostEnergy(amount = 0.4) {
+        this.energy = Math.min(1.0, this.energy + amount);
+      }
+
+      updateStatusLabel() {
+        if (!this.statusEl) return;
+        if (this.isMuted) {
+          this.statusEl.textContent = 'SYNTH // MUTED [M]';
+        } else if (this.isUnlocked) {
+          this.statusEl.textContent = 'SYNTH // ARMED (48KHZ DSP)';
+        } else {
+          this.statusEl.textContent = 'SYNTH // STANDBY (CLICK TO ARM)';
+        }
+      }
+
+      setMuted(muted) {
+        this.isMuted = Boolean(muted);
+        if (this.masterGain && this.ctx) {
+          this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.35, this.ctx.currentTime, 0.02);
+        }
+        this.updateStatusLabel();
+      }
+
+      toggleMute() {
+        this.unlock();
+        this.setMuted(!this.isMuted);
+        return this.isMuted;
+      }
+
+      playUiClick() {
+        if (!this.canPlay()) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1750, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.028);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.032);
+        this.boostEnergy(0.28);
+      }
+
+      playNodeHover(degree = 3) {
+        if (!this.canPlay()) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const baseFreq = 920 + Math.min(degree, 8) * 115;
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(baseFreq, now);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.24, now + 0.045);
+        gain.gain.setValueAtTime(0.065, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.055);
+        this.boostEnergy(0.32);
+      }
+
+      playSweepPing(normalizedAngle) {
+        if (!this.canPlay()) return;
+        const sector = Math.floor(normalizedAngle * 3);
+        if (sector === this.lastSweepSector) return;
+        this.lastSweepSector = sector;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const freqs = [1180, 1320, 1480];
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freqs[sector % 3], now);
+        gain.gain.setValueAtTime(0.028, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.075);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.08);
+        this.boostEnergy(0.22);
+      }
+
+      playWindowOpen(pitchScale = 1.0) {
+        if (!this.canPlay()) return;
+        const now = this.ctx.currentTime;
+
+        const sweep = this.ctx.createOscillator();
+        const sweepGain = this.ctx.createGain();
+        sweep.type = 'triangle';
+        sweep.frequency.setValueAtTime(220 * pitchScale, now);
+        sweep.frequency.exponentialRampToValueAtTime(980 * pitchScale, now + 0.16);
+        sweepGain.gain.setValueAtTime(0.09, now);
+        sweepGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+        sweep.connect(sweepGain);
+        sweepGain.connect(this.masterGain);
+        sweep.start(now);
+        sweep.stop(now + 0.19);
+
+        const chime = this.ctx.createOscillator();
+        const chimeGain = this.ctx.createGain();
+        chime.type = 'sine';
+        chime.frequency.setValueAtTime(1480 * pitchScale, now + 0.11);
+        chimeGain.gain.setValueAtTime(0.0001, now);
+        chimeGain.gain.setValueAtTime(0.075, now + 0.11);
+        chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+        chime.connect(chimeGain);
+        chimeGain.connect(this.masterGain);
+        chime.start(now + 0.11);
+        chime.stop(now + 0.34);
+
+        this.boostEnergy(0.65);
+      }
+
+      playWindowClose() {
+        if (!this.canPlay()) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(760, now);
+        osc.frequency.exponentialRampToValueAtTime(210, now + 0.12);
+        gain.gain.setValueAtTime(0.07, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.13);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.14);
+        this.boostEnergy(0.35);
+      }
+
+      playStateTransition(stateName) {
+        if (!this.canPlay()) return;
+        const now = this.ctx.currentTime;
+
+        if (stateName === 'locked') {
+          const sub = this.ctx.createOscillator();
+          const subGain = this.ctx.createGain();
+          sub.type = 'sine';
+          sub.frequency.setValueAtTime(150, now);
+          sub.frequency.exponentialRampToValueAtTime(48, now + 0.22);
+          subGain.gain.setValueAtTime(0.24, now);
+          subGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+          sub.connect(subGain);
+          subGain.connect(this.masterGain);
+          sub.start(now);
+          sub.stop(now + 0.26);
+
+          [880, 1320, 1760].forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + i * 0.035);
+            g.gain.setValueAtTime(0.075, now + i * 0.035);
+            g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.035 + 0.24);
+            osc.connect(g);
+            g.connect(this.masterGain);
+            osc.start(now + i * 0.035);
+            osc.stop(now + i * 0.035 + 0.26);
+          });
+          this.boostEnergy(0.95);
+        } else if (stateName === 'alert') {
+          [0, 0.14].forEach((offset) => {
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(620, now + offset);
+            osc.frequency.linearRampToValueAtTime(460, now + offset + 0.1);
+            g.gain.setValueAtTime(0.09, now + offset);
+            g.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.11);
+            osc.connect(g);
+            g.connect(this.masterGain);
+            osc.start(now + offset);
+            osc.stop(now + offset + 0.12);
+          });
+          this.boostEnergy(1.0);
+        } else {
+          this.playUiClick();
+          this.boostEnergy(0.45);
+        }
+      }
+
+      updateVisualizer(delta, elapsed, barEls) {
+        this.energy = Math.max(0.08, this.energy - delta * 1.4);
+        if (!barEls || barEls.length === 0) return;
+        barEls.forEach((bar, i) => {
+          const wave = Math.sin(elapsed * 9 + i * 1.1) * 0.5 + 0.5;
+          const h = 2 + this.energy * (3 + wave * 7);
+          bar.style.height = `${h.toFixed(1)}px`;
+        });
+      }
+    }
+
+    /* =========================================================================
+       MODULE 02 // PROCEDURAL WINDOW IMAGERY & TELEMETRY RENDERER
+       Renders Retina-scaled graphics onto open volumetric window canvases.
+       ========================================================================= */
+    class WindowImageryEngine {
+      constructor() {
+        this.c1 = document.getElementById('canvas-win-01');
+        this.c2 = document.getElementById('canvas-win-02');
+        this.c3 = document.getElementById('canvas-win-03');
+
+        this.waterfallBuffer = document.createElement('canvas');
+        this.waterfallBuffer.width = 280;
+        this.waterfallBuffer.height = 120;
+        const wfCtx = this.waterfallBuffer.getContext('2d');
+        if (wfCtx) {
+          wfCtx.fillStyle = '#02060c';
+          wfCtx.fillRect(0, 0, 280, 120);
+        }
+
+        this.lastTelemUpdate = 0;
+        this.sparklineHistory = new Array(32).fill(11);
+
+        // Fibonacci sphere vertices for Optical Recon lattice
+        this.spherePts = [];
+        const count = 14;
+        const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+        for (let i = 0; i < count; i++) {
+          const y = 1 - (i / (count - 1)) * 2;
+          const radius = Math.sqrt(1 - y * y);
+          const theta = goldenAngle * i;
+          this.spherePts.push({
+            x: Math.cos(theta) * radius,
+            y,
+            z: Math.sin(theta) * radius,
+          });
+        }
+      }
+
+      resizeCanvas(canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const w = Math.max(10, Math.floor(rect.width * dpr));
+        const h = Math.max(10, Math.floor(rect.height * dpr));
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w;
+          canvas.height = h;
+        }
+        return { w, h, dpr };
+      }
+
+      renderLidarTerrain(elapsed, isAlert) {
+        if (!this.c1) return;
+        const { w, h } = this.resizeCanvas(this.c1);
+        const ctx = this.c1.getContext('2d');
+        if (!ctx) return;
+
+        ctx.clearRect(0, 0, w, h);
+        const strokeHex = isAlert ? '#ffaa2b' : '#5ce1e6';
+        const rows = 15;
+        const cols = 26;
+
+        for (let r = 0; r < rows; r++) {
+          const depthT = r / (rows - 1);
+          const persp = 0.42 + depthT * 0.58;
+          const baseY = h * (0.24 + depthT * 0.66);
+          const rowWidth = w * persp;
+          const startX = (w - rowWidth) * 0.5;
+
+          ctx.beginPath();
+          for (let c = 0; c <= cols; c++) {
+            const u = c / cols;
+            const x = startX + u * rowWidth;
+            const wave1 = Math.sin(u * 8.0 + elapsed * 1.4 + r * 0.45) * 9;
+            const ridge = Math.exp(-Math.pow((u - 0.5) * 3.8, 2)) * (16 + Math.sin(elapsed * 2 + r) * 5);
+            const y = baseY - (wave1 + ridge) * persp;
+            if (c === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.strokeStyle = strokeHex;
+          ctx.globalAlpha = 0.16 + depthT * 0.65;
+          ctx.lineWidth = 1.1;
+          ctx.stroke();
+        }
+
+        // Sweeping laser scan beam
+        const scanY = ((elapsed * 48) % h);
+        ctx.globalAlpha = 0.85;
+        ctx.strokeStyle = isAlert ? '#ffd48a' : '#9efaff';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, scanY);
+        ctx.lineTo(w, scanY);
+        ctx.stroke();
+        ctx.globalAlpha = 1.0;
+      }
+
+      renderOpticalRecon(elapsed, isAlert, isLocked) {
+        if (!this.c2) return;
+        const { w, h } = this.resizeCanvas(this.c2);
+        const ctx = this.c2.getContext('2d');
+        if (!ctx) return;
+
+        ctx.clearRect(0, 0, w, h);
+        const cx = w * 0.5;
+        const cy = h * 0.5;
+        const scale = Math.min(w, h) * 0.34;
+        const rotY = elapsed * (isLocked ? 0.35 : 1.15);
+        const rotX = Math.sin(elapsed * 0.7) * 0.45;
+
+        const projected = this.spherePts.map((pt) => {
+          const x1 = pt.x * Math.cos(rotY) - pt.z * Math.sin(rotY);
+          const z1 = pt.x * Math.sin(rotY) + pt.z * Math.cos(rotY);
+          const y2 = pt.y * Math.cos(rotX) - z1 * Math.sin(rotX);
+          const z2 = pt.y * Math.sin(rotX) + z1 * Math.cos(rotX);
+          const f = 2.4 / (2.4 - z2);
+          return { sx: cx + x1 * scale * f, sy: cy + y2 * scale * f, z: z2 };
+        });
+
+        ctx.strokeStyle = isAlert ? 'rgba(255, 170, 43, 0.34)' : 'rgba(92, 225, 230, 0.32)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < projected.length; i++) {
+          for (let j = i + 1; j < projected.length; j++) {
+            const d = Math.hypot(projected[i].sx - projected[j].sx, projected[i].sy - projected[j].sy);
+            if (d < scale * 1.15) {
+              ctx.beginPath();
+              ctx.moveTo(projected[i].sx, projected[i].sy);
+              ctx.lineTo(projected[j].sx, projected[j].sy);
+              ctx.stroke();
+            }
+          }
+        }
+
+        projected.forEach((p) => {
+          ctx.fillStyle = isAlert ? '#ffd48a' : '#9efaff';
+          ctx.beginPath();
+          ctx.arc(p.sx, p.sy, p.z > 0 ? 2.6 : 1.6, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Aperture reticle ring
+        ctx.strokeStyle = isAlert ? '#ffaa2b' : '#5ce1e6';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, scale * 1.15, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      renderThermalDiagnostics(elapsed) {
+        if (!this.c3) return;
+        const { w, h } = this.resizeCanvas(this.c3);
+        const ctx = this.c3.getContext('2d');
+        const wfCtx = this.waterfallBuffer.getContext('2d');
+        if (!ctx || !wfCtx) return;
+
+        const bw = this.waterfallBuffer.width;
+        const bh = this.waterfallBuffer.height;
+
+        // Scroll waterfall 1px left
+        wfCtx.drawImage(this.waterfallBuffer, -1, 0);
+
+        // Paint new spectral energy column on right edge
+        for (let y = 0; y < bh; y++) {
+          const ny = y / bh;
+          const band1 = Math.exp(-Math.pow((ny - 0.32) * 9, 2)) * (0.6 + 0.4 * Math.sin(elapsed * 7));
+          const band2 = Math.exp(-Math.pow((ny - 0.72) * 11, 2)) * (0.5 + 0.5 * Math.cos(elapsed * 11));
+          const noise = Math.random() * 0.16;
+          const energy = Math.min(1, band1 + band2 + noise);
+
+          if (energy > 0.68) {
+            wfCtx.fillStyle = `rgba(255, 170, 43, ${energy})`;
+          } else {
+            wfCtx.fillStyle = `rgba(92, 225, 230, ${energy * 0.85})`;
+          }
+          wfCtx.fillRect(bw - 1, y, 1, 1);
+        }
+
+        ctx.clearRect(0, 0, w, h);
+        ctx.drawImage(this.waterfallBuffer, 0, 0, w, h);
+
+        // Fault bounding box overlay
+        ctx.strokeStyle = '#ffaa2b';
+        ctx.lineWidth = 1.4;
+        ctx.strokeRect(w * 0.56, h * 0.18, w * 0.34, h * 0.32);
+      }
+
+      updateTelemetryReadouts(elapsed, stateName) {
+        if (elapsed - this.lastTelemUpdate < 0.09) return;
+        this.lastTelemUpdate = elapsed;
+
+        const isAlert = stateName === 'alert';
+        const isLocked = stateName === 'locked';
+
+        const elElev = document.getElementById('w1-elev');
+        const elDens = document.getElementById('w1-dens');
+        const elCoh = document.getElementById('w1-coh');
+        if (elElev) elElev.textContent = `+${(412.4 + Math.sin(elapsed * 1.8) * 1.9).toFixed(1)} m`;
+        if (elDens) elDens.textContent = `${(1.82 + Math.cos(elapsed * 2.3) * 0.06).toFixed(2)}M pts/s`;
+        if (elCoh) elCoh.textContent = isAlert ? '91.2 %' : '99.4 %';
+
+        const elLock = document.getElementById('w2-lock');
+        const elDrift = document.getElementById('w2-drift');
+        if (elLock) elLock.textContent = isLocked ? 'DETENT_LOCKED' : isAlert ? 'PHASE_WARN' : 'SYNC_NOMINAL';
+        if (elDrift) elDrift.textContent = `${(0.0014 + Math.abs(Math.sin(elapsed * 3.1)) * 0.0008).toFixed(4)} rad`;
+
+        const spark = document.getElementById('recon-sparkline');
+        if (spark) {
+          this.sparklineHistory.shift();
+          const val = 11 + Math.sin(elapsed * 6.5) * 6 + (Math.random() - 0.5) * 3;
+          this.sparklineHistory.push(Math.max(2, Math.min(20, val)));
+          const pts = this.sparklineHistory
+            .map((v, idx) => `${((idx / (this.sparklineHistory.length - 1)) * 260).toFixed(1)},${v.toFixed(1)}`)
+            .join(' ');
+          spark.setAttribute('points', pts);
+          spark.setAttribute('stroke', isAlert ? '#ffaa2b' : '#5ce1e6');
+        }
+
+        const elTemp = document.getElementById('w3-temp');
+        const elLoad = document.getElementById('w3-load');
+        const elBus = document.getElementById('w3-bus');
+        if (elTemp) elTemp.textContent = isAlert ? `+${(38.6 + Math.sin(elapsed * 5) * 1.4).toFixed(1)} °C` : `+${(14.2 + Math.sin(elapsed) * 0.4).toFixed(1)} °C`;
+        if (elLoad) elLoad.textContent = isAlert ? '94.8 %' : '68.4 %';
+        if (elBus) elBus.textContent = isAlert ? 'BYPASS_ACTIVE' : 'ARMED_OK';
+      }
+
+      update(elapsed, windowStates, stateName) {
+        const isAlert = stateName === 'alert';
+        const isLocked = stateName === 'locked';
+        if (windowStates.win1) this.renderLidarTerrain(elapsed, isAlert);
+        if (windowStates.win2) this.renderOpticalRecon(elapsed, isAlert, isLocked);
+        if (windowStates.win3) this.renderThermalDiagnostics(elapsed);
+        this.updateTelemetryReadouts(elapsed, stateName);
+      }
+    }
+
+    /* =========================================================================
+       MODULE 03 // CHOREOGRAPHED VOLUMETRIC WINDOW MANAGER
+       Manages 5-stage GSAP laser deployment & retraction animations.
+       ========================================================================= */
+    class SpatialWindowManager {
+      constructor(audioEngine) {
+        this.audioEngine = audioEngine;
+        this.windows = {
+          win1: { el: document.getElementById('win-01'), isOpen: false, tl: null, pitch: 0.95 },
+          win2: { el: document.getElementById('win-02'), isOpen: false, tl: null, pitch: 1.08 },
+          win3: { el: document.getElementById('win-03'), isOpen: false, tl: null, pitch: 0.84 },
+        };
+      }
+
+      syncUiButtons() {
+        Object.keys(this.windows).forEach((key) => {
+          const isOpen = this.windows[key].isOpen;
+          document.querySelectorAll(`[data-win-toggle="${key}"]`).forEach((btn) => {
+            btn.classList.toggle('active', isOpen);
+          });
+          document.querySelectorAll(`[data-open-win="${key}"]`).forEach((pill) => {
+            pill.classList.toggle('win-active', isOpen);
+          });
+        });
+
+        const allOpen = Object.values(this.windows).every((w) => w.isOpen);
+        const allBtn = document.getElementById('toggle-all-win-btn');
+        if (allBtn) allBtn.classList.toggle('active', allOpen);
+      }
+
+      openWindow(key, silent = false) {
+        const win = this.windows[key];
+        if (!win || !win.el || win.isOpen) return;
+        win.isOpen = true;
+        win.el.classList.add('is-open');
+        this.syncUiButtons();
+
+        if (!silent) this.audioEngine?.playWindowOpen(win.pitch);
+        win.tl?.kill();
+
+        const laser = win.el.querySelector('.win-laser-bar');
+        const wipe = win.el.querySelector('.win-scan-wipe');
+        const rows = win.el.querySelectorAll('.telem-row');
+
+        const tl = gsap.timeline();
+        tl.set(win.el, { opacity: 1, clipPath: 'inset(49% 0% 49% 0%)' })
+          .fromTo(laser, { scaleX: 0, opacity: 1 }, { scaleX: 1, duration: 0.16, ease: 'power3.out' })
+          .to(win.el, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.34, ease: 'power3.out' }, 0.1)
+          .to(laser, { opacity: 0, duration: 0.18 }, 0.22)
+          .fromTo(wipe, { yPercent: -100 }, { yPercent: 120, duration: 0.45, ease: 'power2.inOut' }, 0.18)
+          .fromTo(
+            rows,
+            { opacity: 0, x: -8 },
+            { opacity: 1, x: 0, duration: 0.22, stagger: 0.045, ease: 'power2.out' },
+            0.22
+          );
+
+        win.tl = tl;
+      }
+
+      closeWindow(key, silent = false) {
+        const win = this.windows[key];
+        if (!win || !win.el || !win.isOpen) return;
+        win.isOpen = false;
+        win.el.classList.remove('is-open');
+        this.syncUiButtons();
+
+        if (!silent) this.audioEngine?.playWindowClose();
+        win.tl?.kill();
+
+        const tl = gsap.timeline({
+          onComplete: () => {
+            gsap.set(win.el, { opacity: 0 });
+          },
+        });
+        tl.to(win.el, {
+          clipPath: 'inset(50% 0% 50% 0%)',
+          duration: 0.24,
+          ease: 'power3.in',
+        });
+
+        win.tl = tl;
+      }
+
+      toggleWindow(key) {
+        const win = this.windows[key];
+        if (!win) return;
+        if (win.isOpen) this.closeWindow(key);
+        else this.openWindow(key);
+      }
+
+      toggleAll() {
+        const anyClosed = Object.values(this.windows).some((w) => !w.isOpen);
+        Object.keys(this.windows).forEach((key, idx) => {
+          if (anyClosed) this.openWindow(key, idx > 0);
+          else this.closeWindow(key, idx > 0);
+        });
+      }
+
+      applyStateChoreography(stateName, silent = false) {
+        if (stateName === 'idle') {
+          this.closeWindow('win1', true);
+          this.closeWindow('win2', true);
+          this.closeWindow('win3', true);
+        } else if (stateName === 'scanning') {
+          this.openWindow('win1', silent);
+          this.closeWindow('win2', true);
+          this.closeWindow('win3', true);
+        } else if (stateName === 'locked') {
+          this.openWindow('win1', silent);
+          this.openWindow('win2', true);
+          this.closeWindow('win3', true);
+        } else if (stateName === 'alert') {
+          this.openWindow('win1', true);
+          this.openWindow('win2', true);
+          this.openWindow('win3', silent);
+        }
+      }
+
+      getStates() {
+        return {
+          win1: this.windows.win1.isOpen,
+          win2: this.windows.win2.isOpen,
+          win3: this.windows.win3.isOpen,
+        };
+      }
+    }
+
+    /* =========================================================================
+       MODULE 04 // SELECTIVE HDR BLOOM & 5-PLANE 2.5D/3D RETICLE RIG
+       ========================================================================= */
+    function createFuiComposer(renderer, scene, camera) {
+      const size = renderer.getSize(new THREE.Vector2());
+      const pixelRatio = renderer.getPixelRatio();
+
+      const renderTarget = new THREE.WebGLRenderTarget(
+        Math.max(1, Math.floor(size.x * pixelRatio)),
+        Math.max(1, Math.floor(size.y * pixelRatio)),
+        {
+          type: THREE.HalfFloatType,
+          format: THREE.RGBAFormat,
+          samples: 4,
+        }
+      );
+
+      const composer = new EffectComposer(renderer, renderTarget);
+      composer.setPixelRatio(pixelRatio);
+      composer.setSize(size.x, size.y);
+
+      const renderPass = new RenderPass(scene, camera);
+      renderPass.clearColor = new THREE.Color(0x04070d);
+      renderPass.clearAlpha = 1.0;
+      composer.addPass(renderPass);
+
+      const bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(size.x, size.y),
+        0.42,
+        0.34,
+        1.05
+      );
+      composer.addPass(bloomPass);
+
+      const outputPass = new OutputPass();
+      composer.addPass(outputPass);
+
+      const resize = (width, height) => {
+        const dpr = renderer.getPixelRatio();
+        composer.setPixelRatio(dpr);
+        composer.setSize(width, height);
+        bloomPass.resolution.set(width, height);
+      };
+
+      return { composer, bloomPass, resize };
+    }
+
+    function createBackgroundSpatialGrid() {
+      const group = new THREE.Group();
+      group.position.z = -0.85;
+
+      const points = [];
+      const extent = 3.2;
+      const step = 0.4;
+
+      for (let x = -extent; x <= extent + 0.001; x += step) {
+        for (let y = -extent; y <= extent + 0.001; y += step) {
+          const dist = Math.hypot(x, y);
+          if (dist < 1.2 || dist > 3.1) continue;
+          const s = 0.025;
+          points.push(x - s, y, 0, x + s, y, 0);
+          points.push(x, y - s, 0, x, y + s, 0);
+        }
+      }
+
+      const geom = new THREE.BufferGeometry();
+      geom.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
+
+      const material = new THREE.LineBasicMaterial({
+        color: new THREE.Color(0x5ce1e6).multiplyScalar(0.28),
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      });
+
+      group.add(new THREE.LineSegments(geom, material));
+      return { group, material };
+    }
+
+    function createPolarReticleDisc(radius = 2.15) {
+      const geometry = new THREE.PlaneGeometry(radius * 2, radius * 2);
+
+      const material = new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending,
+        toneMapped: false,
+        uniforms: {
+          uTime: { value: 0 },
+          uScanSpeed: { value: 0.4 },
+          uBaseColor: { value: new THREE.Color(0x5ce1e6) },
+          uAlertColor: { value: new THREE.Color(0xffaa2b) },
+          uAlertMix: { value: 0.0 },
+          uHdrGain: { value: 1.3 },
+        },
+        vertexShader: /* glsl */ `
+          varying vec2 vUv;
+          void main() {
+            vUv = uv * 2.0 - 1.0;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: /* glsl */ `
+          uniform float uTime;
+          uniform float uScanSpeed;
+          uniform vec3 uBaseColor;
+          uniform vec3 uAlertColor;
+          uniform float uAlertMix;
+          uniform float uHdrGain;
+
+          varying vec2 vUv;
+
+          const float PI = 3.14159265359;
+          const float TAU = 6.28318530718;
+
+          float sdfRing(float r, float targetRadius, float halfWidth) {
+            float d = abs(r - targetRadius) - halfWidth;
+            float aa = fwidth(d) * 1.15;
+            return 1.0 - smoothstep(-aa, aa, d);
+          }
+
+          void main() {
+            float r = length(vUv);
+            if (r > 1.0) discard;
+
+            float angle = atan(vUv.y, vUv.x);
+            float normAngle = (angle + PI) / TAU;
+
+            float outerRing = sdfRing(r, 0.95, 0.003) * 0.82;
+            float dashPattern = step(0.45, fract(normAngle * 72.0 - uTime * 0.04));
+            float dashedTrack = sdfRing(r, 0.83, 0.011) * dashPattern * 0.65;
+            float midRing = sdfRing(r, 0.68, 0.002) * 0.48;
+            float innerCore = sdfRing(r, 0.54, 0.0042) * uHdrGain;
+
+            float sweepPhase = fract(normAngle - uTime * (uScanSpeed / TAU));
+            float radialBand = smoothstep(0.54, 0.56, r) * (1.0 - smoothstep(0.93, 0.95, r));
+            float sweepTail = pow(sweepPhase, 6.0) * radialBand;
+            float sweepLead = smoothstep(0.985, 1.0, sweepPhase) * radialBand;
+
+            vec3 tint = mix(uBaseColor, uAlertColor, uAlertMix);
+
+            float sdrLum = outerRing + dashedTrack + midRing + (sweepTail * 0.45);
+            float hdrLum = innerCore + (sweepLead * uHdrGain * 1.2);
+
+            vec3 finalRgb = tint * (sdrLum + hdrLum);
+            gl_FragColor = vec4(finalRgb, 1.0);
+          }
+        `,
+      });
+
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.z = -0.35;
+      return mesh;
+    }
+
+    function createVolumetricGlassEnclosure() {
+      const geometry = new THREE.BoxGeometry(5.1, 3.6, 0.07);
+
+      const material = new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending,
+        toneMapped: false,
+        uniforms: {
+          uTime: { value: 0 },
+          uBaseColor: { value: new THREE.Color(0x0b3a4a) },
+          uRimColor: { value: new THREE.Color(0x5ce1e6) },
+          uAlertColor: { value: new THREE.Color(0xffaa2b) },
+          uAlertMix: { value: 0.0 },
+          uFresnelPower: { value: 2.8 },
+          uRearDimming: { value: 0.65 },
+        },
+        vertexShader: /* glsl */ `
+          varying vec3 vWorldPos;
+          varying vec3 vWorldNormal;
+          varying vec2 vUv;
+
+          void main() {
+            vUv = uv;
+            vec4 worldPos = modelMatrix * vec4(position, 1.0);
+            vWorldPos = worldPos.xyz;
+            vWorldNormal = normalize(mat3(modelMatrix) * normal);
+            gl_Position = projectionMatrix * viewMatrix * worldPos;
+          }
+        `,
+        fragmentShader: /* glsl */ `
+          uniform float uTime;
+          uniform vec3 uBaseColor;
+          uniform vec3 uRimColor;
+          uniform vec3 uAlertColor;
+          uniform float uAlertMix;
+          uniform float uFresnelPower;
+          uniform float uRearDimming;
+
+          varying vec3 vWorldPos;
+          varying vec3 vWorldNormal;
+          varying vec2 vUv;
+
+          void main() {
+            vec3 normalWS = normalize(vWorldNormal);
+            if (!gl_FrontFacing) {
+              normalWS = -normalWS;
+            }
+
+            vec3 viewDir = normalize(cameraPosition - vWorldPos);
+            float ndotv = clamp(dot(normalWS, viewDir), 0.0, 1.0);
+            float fresnel = pow(1.0 - ndotv, uFresnelPower);
+
+            float scanline = sin((vUv.y * 160.0) - (uTime * 1.4)) * 0.5 + 0.5;
+            float gridMask = 1.0 - (0.09 * scanline);
+
+            vec2 edgeDist = min(vUv, 1.0 - vUv);
+            float minEdge = min(edgeDist.x, edgeDist.y);
+            float borderLine = 1.0 - smoothstep(0.003, 0.007, minEdge);
+
+            vec3 activeRim = mix(uRimColor, uAlertColor, uAlertMix);
+            vec3 activeBase = mix(uBaseColor, uAlertColor * 0.22, uAlertMix);
+
+            vec3 interior = activeBase * 0.14 * gridMask;
+            vec3 edgeGlow = activeRim * (fresnel * 0.95 + borderLine * 0.65);
+            float faceScalar = gl_FrontFacing ? 1.0 : uRearDimming;
+
+            gl_FragColor = vec4((interior + edgeGlow) * faceScalar, 1.0);
+          }
+        `,
+      });
+
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.z = -0.14;
+      return mesh;
+    }
+
+    function createInstancedRadialTicks(count = 72, radius = 1.56, baseHex = 0x5ce1e6) {
+      const tickGeom = new THREE.PlaneGeometry(0.013, 0.085);
+      const tickMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide,
+        toneMapped: false,
+      });
+
+      const instancedTicks = new THREE.InstancedMesh(tickGeom, tickMat, count);
+      const dummy = new THREE.Object3D();
+      const baseColor = new THREE.Color(baseHex);
+      const instanceColor = new THREE.Color();
+
+      for (let i = 0; i < count; i++) {
+        const theta = (i / count) * Math.PI * 2;
+        const isMajor = i % 6 === 0;
+        const radialOffset = isMajor ? radius + 0.03 : radius;
+
+        dummy.position.set(
+          Math.cos(theta) * radialOffset,
+          Math.sin(theta) * radialOffset,
+          0
+        );
+        dummy.rotation.z = theta - Math.PI / 2;
+        dummy.scale.set(isMajor ? 1.5 : 1.0, isMajor ? 1.85 : 1.0, 1.0);
+        dummy.updateMatrix();
+        instancedTicks.setMatrixAt(i, dummy.matrix);
+
+        instanceColor.copy(baseColor).multiplyScalar(isMajor ? 2.2 : 0.78);
+        instancedTicks.setColorAt(i, instanceColor);
+      }
+
+      instancedTicks.instanceMatrix.needsUpdate = true;
+      if (instancedTicks.instanceColor) {
+        instancedTicks.instanceColor.needsUpdate = true;
+      }
+
+      return { instancedTicks };
+    }
+
+    function createArcBracketGeometry(innerRadius, outerRadius, startAngle, endAngle, segments = 48) {
+      const positions = [];
+      const indices = [];
+
+      for (let i = 0; i <= segments; i++) {
+        const t = i / segments;
+        const theta = THREE.MathUtils.lerp(startAngle, endAngle, t);
+        const cos = Math.cos(theta);
+        const sin = Math.sin(theta);
+
+        positions.push(cos * innerRadius, sin * innerRadius, 0);
+        positions.push(cos * outerRadius, sin * outerRadius, 0);
+
+        if (i < segments) {
+          const base = i * 2;
+          indices.push(base, base + 1, base + 2);
+          indices.push(base + 1, base + 3, base + 2);
+        }
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geometry.setIndex(indices);
+      geometry.computeVertexNormals();
+      return geometry;
+    }
+
+    function createForegroundLockBrackets(radius = 0.94, hexColor = 0x5ce1e6) {
+      const group = new THREE.Group();
+      group.position.z = 0.16;
+
+      const bracketMaterial = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(hexColor).multiplyScalar(1.45),
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide,
+        toneMapped: false,
+      });
+
+      const arcSpan = THREE.MathUtils.degToRad(52);
+      const offsets = [0, (Math.PI * 2) / 3, (Math.PI * 4) / 3];
+      const anchors = [];
+
+      for (const offset of offsets) {
+        const geom = createArcBracketGeometry(
+          radius,
+          radius + 0.042,
+          offset - arcSpan / 2,
+          offset + arcSpan / 2
+        );
+        group.add(new THREE.Mesh(geom, bracketMaterial));
+
+        const pipGeom = createArcBracketGeometry(
+          radius - 0.045,
+          radius - 0.015,
+          offset - 0.03,
+          offset + 0.03,
+          6
+        );
+        group.add(new THREE.Mesh(pipGeom, bracketMaterial));
+
+        // 3D Anchor Object projected to 2D SVG callout overlay
+        const anchor = new THREE.Object3D();
+        anchor.position.set(
+          Math.cos(offset) * (radius + 0.045),
+          Math.sin(offset) * (radius + 0.045),
+          0
+        );
+        group.add(anchor);
+        anchors.push(anchor);
+      }
+
+      return { group, bracketMaterial, anchors };
+    }
+
+    function createCenterCore() {
+      const group = new THREE.Group();
+      group.position.z = 0.48;
+
+      const coreMat = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(0x5ce1e6).multiplyScalar(1.8),
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide,
+        toneMapped: false,
+      });
+
+      const ring = new THREE.Mesh(new THREE.RingGeometry(0.14, 0.155, 64), coreMat);
+      const dot = new THREE.Mesh(new THREE.CircleGeometry(0.022, 24), coreMat);
+      group.add(ring, dot);
+
+      const linePts = [
+        -0.28, 0, 0, -0.18, 0, 0,
+         0.18, 0, 0,  0.28, 0, 0,
+         0, -0.28, 0, 0, -0.18, 0,
+         0,  0.18, 0, 0,  0.28, 0,
+      ];
+      const lineGeom = new THREE.BufferGeometry();
+      lineGeom.setAttribute('position', new THREE.Float32BufferAttribute(linePts, 3));
+      const lineMat = new THREE.LineBasicMaterial({
+        color: new THREE.Color(0x5ce1e6).multiplyScalar(0.9),
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      });
+      group.add(new THREE.LineSegments(lineGeom, lineMat));
+
+      return { group, coreMat, lineMat };
+    }
+
+    /* =========================================================================
+       MODULE 05 // INTERACTIVE 3D GRAPH NODES & EDGES TOPOLOGY
+       14 3D nodes, 22 weighted edges, 44 HDR signal packets, raycast hover/click,
+       and real-time search & role filtering.
+       ========================================================================= */
+    class SpatialGraphSystem {
+      constructor(parentRig, audioEngine, windowManager, camera, domElement) {
+        this.parentRig = parentRig;
+        this.audioEngine = audioEngine;
+        this.windowManager = windowManager;
+        this.camera = camera;
+        this.domElement = domElement;
+
+        this.group = new THREE.Group();
+        this.parentRig.add(this.group);
+
+        this.isVisible = true;
+        this.currentState = 'idle';
+        this.searchQuery = '';
+        this.activeFilter = 'ALL';
+        this.hoveredIndex = -1;
+        this.pinnedIndex = -1;
+        this.onFilterChange = null;
+
+        const nodeSpecs = [
+          { id: 'SYS_CORE',   role: 'HUB',     pos: [ 0.00,  0.00,  0.14], win: 'win1', winLabel: 'WIN_01 [LIDAR]', latency: '0.4 ms', throughput: '128.0 Gbps', isFault: false },
+          { id: 'NAV_HUB',    role: 'HUB',     pos: [-0.68,  0.46,  0.24], win: 'win2', winLabel: 'WIN_02 [RECON]', latency: '0.9 ms', throughput: '84.2 Gbps',  isFault: false },
+          { id: 'OPTIC_AI',   role: 'HUB',     pos: [ 0.72,  0.42,  0.22], win: 'win2', winLabel: 'WIN_02 [RECON]', latency: '1.1 ms', throughput: '92.6 Gbps',  isFault: false },
+          { id: 'LIDAR_N',    role: 'SENSOR',  pos: [-1.28,  0.86, -0.18], win: 'win1', winLabel: 'WIN_01 [LIDAR]', latency: '1.8 ms', throughput: '42.0 Gbps',  isFault: false },
+          { id: 'LIDAR_S',    role: 'SENSOR',  pos: [-1.34, -0.64, -0.26], win: 'win1', winLabel: 'WIN_01 [LIDAR]', latency: '2.1 ms', throughput: '39.5 Gbps',  isFault: false },
+          { id: 'BATHY_DSP',  role: 'COMPUTE', pos: [-0.78, -0.42,  0.06], win: 'win1', winLabel: 'WIN_01 [LIDAR]', latency: '1.4 ms', throughput: '64.8 Gbps',  isFault: false },
+          { id: 'APERTURE_L', role: 'SENSOR',  pos: [ 0.12,  1.12, -0.12], win: 'win2', winLabel: 'WIN_02 [RECON]', latency: '1.6 ms', throughput: '51.2 Gbps',  isFault: false },
+          { id: 'PHASE_SYNC', role: 'COMPUTE', pos: [ 0.06, -0.96,  0.08], win: 'win2', winLabel: 'WIN_02 [RECON]', latency: '1.2 ms', throughput: '58.4 Gbps',  isFault: false },
+          { id: 'SAR_BEAM',   role: 'SENSOR',  pos: [ 1.26,  0.88, -0.20], win: 'win2', winLabel: 'WIN_02 [RECON]', latency: '1.9 ms', throughput: '47.1 Gbps',  isFault: false },
+          { id: 'VEC_SOLVER', role: 'COMPUTE', pos: [ 1.32, -0.12,  0.32], win: 'win2', winLabel: 'WIN_02 [RECON]', latency: '1.3 ms', throughput: '71.0 Gbps',  isFault: false },
+          { id: 'GYRO_REF',   role: 'SENSOR',  pos: [-0.18, -1.34, -0.45], win: 'win1', winLabel: 'WIN_01 [LIDAR]', latency: '2.4 ms', throughput: '18.6 Gbps',  isFault: false },
+          { id: 'THERM_ARR',  role: 'SENSOR',  pos: [ 0.82, -0.58,  0.28], win: 'win3', winLabel: 'WIN_03 [DIAG]',  latency: '3.8 ms', throughput: '33.4 Gbps',  isFault: true  },
+          { id: 'PWR_CELL',   role: 'COMPUTE', pos: [ 1.24, -0.94, -0.14], win: 'win3', winLabel: 'WIN_03 [DIAG]',  latency: '4.5 ms', throughput: '29.1 Gbps',  isFault: true  },
+          { id: 'SPECTRA_IO', role: 'COMPUTE', pos: [ 0.42, -1.28, -0.34], win: 'win3', winLabel: 'WIN_03 [DIAG]',  latency: '4.1 ms', throughput: '31.7 Gbps',  isFault: true  },
+        ];
+
+        const edgeSpecs = [
+          ['SYS_CORE', 'NAV_HUB', 0.95],
+          ['SYS_CORE', 'OPTIC_AI', 0.95],
+          ['SYS_CORE', 'BATHY_DSP', 0.85],
+          ['SYS_CORE', 'PHASE_SYNC', 0.82],
+          ['SYS_CORE', 'THERM_ARR', 0.78],
+          ['NAV_HUB', 'LIDAR_N', 0.88],
+          ['NAV_HUB', 'APERTURE_L', 0.80],
+          ['NAV_HUB', 'BATHY_DSP', 0.74],
+          ['OPTIC_AI', 'APERTURE_L', 0.84],
+          ['OPTIC_AI', 'SAR_BEAM', 0.90],
+          ['OPTIC_AI', 'VEC_SOLVER', 0.86],
+          ['LIDAR_N', 'LIDAR_S', 0.72],
+          ['LIDAR_S', 'BATHY_DSP', 0.85],
+          ['LIDAR_S', 'GYRO_REF', 0.65],
+          ['BATHY_DSP', 'PHASE_SYNC', 0.70],
+          ['PHASE_SYNC', 'GYRO_REF', 0.68],
+          ['PHASE_SYNC', 'SPECTRA_IO', 0.75],
+          ['SAR_BEAM', 'VEC_SOLVER', 0.82],
+          ['VEC_SOLVER', 'THERM_ARR', 0.76],
+          ['THERM_ARR', 'PWR_CELL', 0.92],
+          ['THERM_ARR', 'SPECTRA_IO', 0.89],
+          ['PWR_CELL', 'SPECTRA_IO', 0.84],
+        ];
+
+        const idToIndex = new Map();
+        nodeSpecs.forEach((spec, idx) => idToIndex.set(spec.id, idx));
+
+        this.nodes = nodeSpecs.map((spec, index) => ({
+          ...spec,
+          index,
+          basePos: new THREE.Vector3(...spec.pos),
+          currentPos: new THREE.Vector3(...spec.pos),
+          degree: 0,
+          neighbors: new Set(),
+          matched: true,
+          phase: index * 0.73,
+          group: null,
+          coreMat: null,
+          ringMat: null,
+          ringMesh: null,
+          hitMesh: null,
+        }));
+
+        this.edges = edgeSpecs.map(([fromId, toId, weight], idx) => {
+          const a = idToIndex.get(fromId);
+          const b = idToIndex.get(toId);
+          this.nodes[a].degree++;
+          this.nodes[b].degree++;
+          this.nodes[a].neighbors.add(b);
+          this.nodes[b].neighbors.add(a);
+          return { index: idx, a, b, weight };
+        });
+
+        this.edgePulseTimers = new Float32Array(this.edges.length);
+
+        this.hitMeshes = [];
+        const hitGeom = new THREE.SphereGeometry(0.135, 10, 10);
+        const hitMat = new THREE.MeshBasicMaterial({
+          transparent: true,
+          opacity: 0,
+          depthWrite: false,
+        });
+
+        this.nodes.forEach((node) => {
+          const nodeGroup = new THREE.Group();
+          nodeGroup.position.copy(node.basePos);
+
+          const isHub = node.role === 'HUB';
+          const coreGeom = new THREE.OctahedronGeometry(isHub ? 0.052 : 0.036, 0);
+          const coreMat = new THREE.MeshBasicMaterial({
+            color: new THREE.Color(0x5ce1e6).multiplyScalar(1.6),
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            toneMapped: false,
+          });
+          const coreMesh = new THREE.Mesh(coreGeom, coreMat);
+
+          const ringGeom = new THREE.RingGeometry(
+            isHub ? 0.076 : 0.056,
+            isHub ? 0.089 : 0.067,
+            32
+          );
+          const ringMat = new THREE.MeshBasicMaterial({
+            color: new THREE.Color(0x5ce1e6).multiplyScalar(0.85),
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+            toneMapped: false,
+          });
+          const ringMesh = new THREE.Mesh(ringGeom, ringMat);
+
+          const hitMesh = new THREE.Mesh(hitGeom, hitMat);
+          hitMesh.userData.nodeIndex = node.index;
+          this.hitMeshes.push(hitMesh);
+
+          nodeGroup.add(coreMesh, ringMesh, hitMesh);
+          this.group.add(nodeGroup);
+
+          node.group = nodeGroup;
+          node.coreMat = coreMat;
+          node.ringMat = ringMat;
+          node.ringMesh = ringMesh;
+          node.hitMesh = hitMesh;
+        });
+
+        // 3D Diamond Target Lock Reticle
+        const lockGeom = new THREE.RingGeometry(0.115, 0.134, 4);
+        this.lockMat = new THREE.MeshBasicMaterial({
+          color: new THREE.Color(0x9efaff).multiplyScalar(2.4),
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+          toneMapped: false,
+        });
+        this.selectionReticle = new THREE.Mesh(lockGeom, this.lockMat);
+        this.selectionReticle.visible = false;
+        this.group.add(this.selectionReticle);
+
+        // Weighted 3D Edges
+        const edgePositions = new Float32Array(this.edges.length * 2 * 3);
+        const edgeColors = new Float32Array(this.edges.length * 2 * 3);
+        this.edgeGeometry = new THREE.BufferGeometry();
+        this.edgeGeometry.setAttribute('position', new THREE.BufferAttribute(edgePositions, 3));
+        this.edgeGeometry.setAttribute('color', new THREE.BufferAttribute(edgeColors, 3));
+
+        this.edgeMaterial = new THREE.LineBasicMaterial({
+          vertexColors: true,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          toneMapped: false,
+        });
+        this.edgeLines = new THREE.LineSegments(this.edgeGeometry, this.edgeMaterial);
+        this.group.add(this.edgeLines);
+
+        // Animated HDR Signal Packets
+        this.packets = [];
+        for (let e = 0; e < this.edges.length; e++) {
+          this.packets.push({ edgeIdx: e, t: (e * 0.37) % 1, dir: 1 });
+          this.packets.push({ edgeIdx: e, t: (e * 0.61 + 0.5) % 1, dir: -1 });
+        }
+
+        const pktPositions = new Float32Array(this.packets.length * 3);
+        const pktColors = new Float32Array(this.packets.length * 3);
+        this.packetGeometry = new THREE.BufferGeometry();
+        this.packetGeometry.setAttribute('position', new THREE.BufferAttribute(pktPositions, 3));
+        this.packetGeometry.setAttribute('color', new THREE.BufferAttribute(pktColors, 3));
+
+        this.packetMaterial = new THREE.ShaderMaterial({
+          transparent: true,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+          toneMapped: false,
+          vertexShader: /* glsl */ `
+            attribute vec3 color;
+            varying vec3 vColor;
+            void main() {
+              vColor = color;
+              vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+              gl_PointSize = clamp(24.0 / -mvPosition.z, 3.0, 9.0);
+              gl_Position = projectionMatrix * mvPosition;
+            }
+          `,
+          fragmentShader: /* glsl */ `
+            varying vec3 vColor;
+            void main() {
+              vec2 c = gl_PointCoord * 2.0 - 1.0;
+              float distSq = dot(c, c);
+              if (distSq > 1.0) discard;
+              float alpha = exp(-distSq * 4.8);
+              gl_FragColor = vec4(vColor * alpha, 1.0);
+            }
+          `,
+        });
+
+        this.packetPoints = new THREE.Points(this.packetGeometry, this.packetMaterial);
+        this.group.add(this.packetPoints);
+
+        // Raycaster & DOM Inspector Setup
+        this.raycaster = new THREE.Raycaster();
+        this.pointerNdc = new THREE.Vector2(-99, -99);
+        this.pointerDownPos = { x: 0, y: 0 };
+        this.hasPointer = false;
+
+        this.inspectorEl = document.getElementById('graph-inspector');
+        this.giNodeId = document.getElementById('gi-node-id');
+        this.giNodeRole = document.getElementById('gi-node-role');
+        this.giDegree = document.getElementById('gi-degree');
+        this.giLatency = document.getElementById('gi-latency');
+        this.giThroughput = document.getElementById('gi-throughput');
+        this.giWindow = document.getElementById('gi-window');
+
+        this.tempWorldVec = new THREE.Vector3();
+        this.tempViewVec = new THREE.Vector3();
+        this.tempNdcVec = new THREE.Vector3();
+        this.tempColor = new THREE.Color();
+
+        this.domElement.addEventListener('pointermove', (e) => {
+          const rect = this.domElement.getBoundingClientRect();
+          this.pointerNdc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          this.pointerNdc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+          this.hasPointer = true;
+        }, { passive: true });
+
+        this.domElement.addEventListener('pointerleave', () => {
+          this.hasPointer = false;
+          this.hoveredIndex = -1;
+        });
+
+        this.domElement.addEventListener('pointerdown', (e) => {
+          this.pointerDownPos.x = e.clientX;
+          this.pointerDownPos.y = e.clientY;
+        }, { passive: true });
+
+        this.domElement.addEventListener('pointerup', (e) => {
+          if (!this.isVisible) return;
+          const dist = Math.hypot(
+            e.clientX - this.pointerDownPos.x,
+            e.clientY - this.pointerDownPos.y
+          );
+          if (dist < 6) {
+            if (this.hoveredIndex >= 0) {
+              this.focusNodeByIndex(this.hoveredIndex, true);
+            } else if (this.pinnedIndex >= 0 && !this.searchQuery) {
+              this.pinnedIndex = -1;
+            }
+          }
+        });
+
+        this.recomputeMatches(false);
+      }
+
+      recomputeMatches(autoPinSingleMatch = true) {
+        const q = this.searchQuery.trim().toUpperCase();
+        let matchedCount = 0;
+        let lastMatchedIdx = -1;
+
+        this.nodes.forEach((node) => {
+          const roleOk =
+            this.activeFilter === 'ALL' ||
+            (this.activeFilter === 'FAULT' ? node.isFault : node.role === this.activeFilter);
+
+          const haystack = `${node.id} ${node.role} ${node.win} ${node.winLabel} ${node.isFault ? 'FAULT' : ''}`.toUpperCase();
+          const queryOk = !q || haystack.includes(q);
+
+          node.matched = roleOk && queryOk;
+          if (node.matched) {
+            matchedCount++;
+            lastMatchedIdx = node.index;
+          }
+        });
+
+        if (autoPinSingleMatch) {
+          if (q && matchedCount === 1 && lastMatchedIdx >= 0) {
+            this.pinnedIndex = lastMatchedIdx;
+            this.pulseIncidentEdges(lastMatchedIdx);
+          } else if (this.pinnedIndex >= 0 && !this.nodes[this.pinnedIndex].matched) {
+            this.pinnedIndex = -1;
+          }
+        }
+
+        if (typeof this.onFilterChange === 'function') {
+          this.onFilterChange(this.getStats());
+        }
+      }
+
+      setSearchQuery(query) {
+        this.searchQuery = String(query ?? '');
+        this.recomputeMatches(true);
+      }
+
+      setFilterRole(role) {
+        this.activeFilter = role || 'ALL';
+        this.recomputeMatches(true);
+      }
+
+      getFilteredNodes() {
+        return this.nodes.filter((n) => n.matched);
+      }
+
+      getStats() {
+        const matchedNodes = this.nodes.filter((n) => n.matched).length;
+        const matchedEdges = this.edges.filter(
+          (e) => this.nodes[e.a].matched && this.nodes[e.b].matched
+        ).length;
+        return {
+          matchedNodes,
+          totalNodes: this.nodes.length,
+          matchedEdges,
+          totalEdges: this.edges.length,
+        };
+      }
+
+      pulseIncidentEdges(nodeIndex) {
+        this.edges.forEach((edge, idx) => {
+          if (edge.a === nodeIndex || edge.b === nodeIndex) {
+            this.edgePulseTimers[idx] = 1.0;
+          }
+        });
+      }
+
+      focusNodeByIndex(index, openLinkedWindow = true) {
+        const node = this.nodes[index];
+        if (!node) return;
+        this.pinnedIndex = index;
+        this.pulseIncidentEdges(index);
+        this.audioEngine?.playNodeHover(node.degree + 2);
+
+        gsap.fromTo(
+          node.group.scale,
+          { x: 1.65, y: 1.65, z: 1.65 },
+          { x: 1.0, y: 1.0, z: 1.0, duration: 0.42, ease: 'back.out(2)' }
+        );
+
+        if (openLinkedWindow && this.windowManager?.openWindow) {
+          this.windowManager.openWindow(node.win);
+        }
+      }
+
+      setVisible(visible) {
+        this.isVisible = Boolean(visible);
+        this.group.visible = this.isVisible;
+        if (!this.isVisible) {
+          this.hoveredIndex = -1;
+          this.hideInspector();
+        }
+      }
+
+      toggleVisibility() {
+        this.setVisible(!this.isVisible);
+        return this.isVisible;
+      }
+
+      setState(stateName) {
+        this.currentState = stateName;
+        const spreadScalar = stateName === 'locked' ? 0.88 : stateName === 'scanning' ? 1.06 : 1.0;
+        const zScalar = stateName === 'locked' ? 1.25 : stateName === 'alert' ? 1.15 : 1.0;
+
+        this.nodes.forEach((node) => {
+          gsap.to(node.basePos, {
+            x: node.pos[0] * spreadScalar,
+            y: node.pos[1] * spreadScalar,
+            z: node.pos[2] * zScalar,
+            duration: 0.45,
+            ease: 'power3.out',
+          });
+        });
+      }
+
+      hideInspector() {
+        if (!this.inspectorEl) return;
+        this.inspectorEl.classList.remove('visible');
+        this.inspectorEl.style.opacity = '0';
+        this.inspectorEl.setAttribute('aria-hidden', 'true');
+      }
+
+      updateInspector(node, width, height) {
+        if (!this.inspectorEl || !node) {
+          this.hideInspector();
+          return;
+        }
+
+        node.group.getWorldPosition(this.tempWorldVec);
+        this.tempViewVec.copy(this.tempWorldVec).applyMatrix4(this.camera.matrixWorldInverse);
+        if (this.tempViewVec.z >= -0.05) {
+          this.hideInspector();
+          return;
+        }
+
+        this.tempNdcVec.copy(this.tempWorldVec).project(this.camera);
+        const sx = (this.tempNdcVec.x * 0.5 + 0.5) * width;
+        const sy = (-this.tempNdcVec.y * 0.5 + 0.5) * height;
+
+        const cardW = 215;
+        const cardH = 128;
+        const offsetX = sx > width - cardW - 36 ? -(cardW + 18) : 18;
+        const offsetY = sy > height - cardH - 36 ? -(cardH + 12) : -14;
+
+        const clampedX = Math.max(14, Math.min(width - cardW - 14, sx + offsetX));
+        const clampedY = Math.max(14, Math.min(height - cardH - 14, sy + offsetY));
+
+        this.giNodeId.textContent = node.id;
+        const zStr = `${node.currentPos.z >= 0 ? '+' : ''}${node.currentPos.z.toFixed(2)}`;
+        this.giNodeRole.textContent = `${node.isFault ? 'FAULT' : node.role} // Z${zStr}`;
+        this.giDegree.textContent = `${node.degree} LINKS`;
+        this.giLatency.textContent = node.latency;
+        this.giThroughput.textContent = node.throughput;
+        this.giWindow.textContent = node.winLabel;
+
+        this.inspectorEl.style.transform = `translate3d(${clampedX.toFixed(1)}px, ${clampedY.toFixed(1)}px, 0)`;
+        this.inspectorEl.classList.add('visible');
+        this.inspectorEl.style.opacity = '1';
+        this.inspectorEl.setAttribute('aria-hidden', 'false');
+      }
+
+      update(delta, elapsed, width, height) {
+        if (!this.isVisible) return;
+
+        const isAlertState = this.currentState === 'alert';
+        const isFiltered = this.activeFilter !== 'ALL' || this.searchQuery.trim().length > 0;
+
+        if (this.hasPointer) {
+          this.raycaster.setFromCamera(this.pointerNdc, this.camera);
+          const hits = this.raycaster.intersectObjects(this.hitMeshes, false);
+          let nextHover = -1;
+          for (const hit of hits) {
+            const idx = hit.object.userData.nodeIndex;
+            if (!isFiltered || this.nodes[idx].matched) {
+              nextHover = idx;
+              break;
+            }
+          }
+          if (nextHover !== this.hoveredIndex) {
+            this.hoveredIndex = nextHover;
+            if (nextHover >= 0) {
+              this.audioEngine?.playNodeHover(this.nodes[nextHover].degree);
+            }
+          }
+        }
+
+        const activeInspectIdx = this.hoveredIndex >= 0 ? this.hoveredIndex : this.pinnedIndex;
+        const activeNode = activeInspectIdx >= 0 ? this.nodes[activeInspectIdx] : null;
+
+        this.nodes.forEach((node) => {
+          const breathZ = Math.sin(elapsed * 1.4 + node.phase) * 0.018;
+          node.currentPos.set(node.basePos.x, node.basePos.y, node.basePos.z + breathZ);
+          node.group.position.copy(node.currentPos);
+
+          const isActive = node.index === activeInspectIdx;
+          const isNeighbor = activeNode ? activeNode.neighbors.has(node.index) : false;
+
+          const spinSpeed = isActive ? 2.6 : node.matched && isFiltered ? 1.35 : 0.45;
+          node.ringMesh.rotation.z += spinSpeed * delta;
+
+          const targetRingScale = isActive ? 1.38 : node.matched && isFiltered ? 1.18 : 1.0;
+          node.ringMesh.scale.lerp(
+            this.tempWorldVec.set(targetRingScale, targetRingScale, 1),
+            0.16
+          );
+
+          const useAmber =
+            (isAlertState && node.isFault) ||
+            (this.activeFilter === 'FAULT' && node.isFault);
+          const hex = isActive
+            ? (useAmber ? 0xffd27d : 0xb8fcff)
+            : useAmber
+              ? 0xffaa2b
+              : 0x5ce1e6;
+
+          let coreGain = 1.45;
+          let ringGain = 0.78;
+
+          if (!node.matched) {
+            coreGain = 0.14;
+            ringGain = 0.08;
+          } else if (isActive) {
+            coreGain = 2.85;
+            ringGain = 2.15;
+          } else if (isNeighbor) {
+            coreGain = 2.05;
+            ringGain = 1.45;
+          } else if (isFiltered) {
+            coreGain = 2.15;
+            ringGain = 1.55;
+          }
+
+          node.coreMat.color.setHex(hex).multiplyScalar(coreGain);
+          node.ringMat.color.setHex(hex).multiplyScalar(ringGain);
+        });
+
+        if (this.pinnedIndex >= 0 && this.nodes[this.pinnedIndex].matched) {
+          const pinnedNode = this.nodes[this.pinnedIndex];
+          this.selectionReticle.visible = true;
+          this.selectionReticle.position.copy(pinnedNode.currentPos);
+          this.selectionReticle.rotation.z = elapsed * 1.1;
+          const pulseScale = 1.0 + Math.sin(elapsed * 5.0) * 0.08;
+          this.selectionReticle.scale.set(pulseScale, pulseScale, 1);
+          this.lockMat.color
+            .setHex(pinnedNode.isFault && isAlertState ? 0xffaa2b : 0x9efaff)
+            .multiplyScalar(2.4);
+        } else {
+          this.selectionReticle.visible = false;
+        }
+
+        const posArr = this.edgeGeometry.attributes.position.array;
+        const colArr = this.edgeGeometry.attributes.color.array;
+
+        this.edges.forEach((edge, idx) => {
+          const nodeA = this.nodes[edge.a];
+          const nodeB = this.nodes[edge.b];
+
+          const baseIdx = idx * 6;
+          posArr[baseIdx] = nodeA.currentPos.x;
+          posArr[baseIdx + 1] = nodeA.currentPos.y;
+          posArr[baseIdx + 2] = nodeA.currentPos.z;
+          posArr[baseIdx + 3] = nodeB.currentPos.x;
+          posArr[baseIdx + 4] = nodeB.currentPos.y;
+          posArr[baseIdx + 5] = nodeB.currentPos.z;
+
+          if (this.edgePulseTimers[idx] > 0) {
+            this.edgePulseTimers[idx] = Math.max(0, this.edgePulseTimers[idx] - delta * 1.8);
+          }
+
+          const bothMatched = nodeA.matched && nodeB.matched;
+          const oneMatched = nodeA.matched || nodeB.matched;
+          const isIncident = activeInspectIdx === edge.a || activeInspectIdx === edge.b;
+          const isFaultEdge = nodeA.isFault || nodeB.isFault;
+          const useAmber =
+            (isAlertState && isFaultEdge) ||
+            (this.activeFilter === 'FAULT' && isFaultEdge);
+
+          let lum = 0.28 + edge.weight * 0.36;
+          if (!bothMatched) {
+            lum = oneMatched ? 0.14 : 0.04;
+          } else if (isIncident) {
+            lum = 1.65;
+          } else if (isFiltered) {
+            lum = 1.15;
+          }
+
+          lum += this.edgePulseTimers[idx] * 1.75;
+
+          this.tempColor.setHex(useAmber ? 0xffaa2b : 0x5ce1e6).multiplyScalar(lum);
+          colArr[baseIdx] = this.tempColor.r;
+          colArr[baseIdx + 1] = this.tempColor.g;
+          colArr[baseIdx + 2] = this.tempColor.b;
+          colArr[baseIdx + 3] = this.tempColor.r;
+          colArr[baseIdx + 4] = this.tempColor.g;
+          colArr[baseIdx + 5] = this.tempColor.b;
+        });
+
+        this.edgeGeometry.attributes.position.needsUpdate = true;
+        this.edgeGeometry.attributes.color.needsUpdate = true;
+
+        const pktPos = this.packetGeometry.attributes.position.array;
+        const pktCol = this.packetGeometry.attributes.color.array;
+        const speedScalar =
+          this.currentState === 'scanning' ? 1.55 : this.currentState === 'alert' ? 1.85 : 1.0;
+
+        this.packets.forEach((pkt, i) => {
+          const edge = this.edges[pkt.edgeIdx];
+          const nodeA = this.nodes[edge.a];
+          const nodeB = this.nodes[edge.b];
+
+          pkt.t = (pkt.t + delta * (0.28 + edge.weight * 0.34) * speedScalar) % 1.0;
+          const u = pkt.dir > 0 ? pkt.t : 1.0 - pkt.t;
+
+          const pIdx = i * 3;
+          pktPos[pIdx] = THREE.MathUtils.lerp(nodeA.currentPos.x, nodeB.currentPos.x, u);
+          pktPos[pIdx + 1] = THREE.MathUtils.lerp(nodeA.currentPos.y, nodeB.currentPos.y, u);
+          pktPos[pIdx + 2] = THREE.MathUtils.lerp(nodeA.currentPos.z, nodeB.currentPos.z, u);
+
+          const bothMatched = nodeA.matched && nodeB.matched;
+          const isIncident = activeInspectIdx === edge.a || activeInspectIdx === edge.b;
+          const isFaultEdge = nodeA.isFault || nodeB.isFault;
+          const useAmber =
+            (isAlertState && isFaultEdge) ||
+            (this.activeFilter === 'FAULT' && isFaultEdge);
+
+          const pktGain = !bothMatched ? 0.0 : isIncident ? 2.6 : 1.75;
+          this.tempColor.setHex(useAmber ? 0xffc25c : 0x9efaff).multiplyScalar(pktGain);
+
+          pktCol[pIdx] = this.tempColor.r;
+          pktCol[pIdx + 1] = this.tempColor.g;
+          pktCol[pIdx + 2] = this.tempColor.b;
+        });
+
+        this.packetGeometry.attributes.position.needsUpdate = true;
+        this.packetGeometry.attributes.color.needsUpdate = true;
+
+        this.updateInspector(activeNode, width, height);
+      }
+    }
+
+    /* =========================================================================
+       MODULE 06 // REAL-TIME 3D-TO-2D PROJECTED SVG CALLOUT PROJECTOR
+       ========================================================================= */
+    function createCalloutProjector(anchors) {
+      const svgGroups = [0, 1, 2].map((i) => document.getElementById(`svg-node-${i}`));
+      const pills = [0, 1, 2].map((i) => document.getElementById(`pill-node-${i}`));
+      const pillVals = [0, 1, 2].map((i) => document.getElementById(`pill-val-${i}`));
+
+      const worldVec = new THREE.Vector3();
+      const viewVec = new THREE.Vector3();
+      const ndcVec = new THREE.Vector3();
+
+      function update(camera, width, height, lockBrackets, polarMaterial) {
+        const deg = (((THREE.MathUtils.radToDeg(lockBrackets.rotation.z) % 360) + 360) % 360).toFixed(1);
+        const zStr = `+${lockBrackets.position.z.toFixed(2)}m`;
+        const fluxStr = `${polarMaterial.uniforms.uHdrGain.value.toFixed(2)} HDR`;
+
+        if (pillVals[0]) pillVals[0].textContent = `${deg}°`;
+        if (pillVals[1]) pillVals[1].textContent = zStr;
+        if (pillVals[2]) pillVals[2].textContent = fluxStr;
+
+        anchors.forEach((anchor, i) => {
+          const grp = svgGroups[i];
+          const pill = pills[i];
+          if (!grp || !pill) return;
+
+          anchor.getWorldPosition(worldVec);
+          viewVec.copy(worldVec).applyMatrix4(camera.matrixWorldInverse);
+
+          // Cull callout when anchor moves behind camera plane
+          if (viewVec.z >= -0.05) {
+            grp.style.opacity = '0';
+            pill.style.opacity = '0';
+            pill.style.pointerEvents = 'none';
+            return;
+          }
+
+          ndcVec.copy(worldVec).project(camera);
+          const sx = (ndcVec.x * 0.5 + 0.5) * width;
+          const sy = (-ndcVec.y * 0.5 + 0.5) * height;
+
+          const isRight = sx >= width * 0.5;
+          const dirX = isRight ? 1 : -1;
+          const dirY = sy < height * 0.5 ? -1 : 1;
+
+          const elbowX = sx + dirX * 26;
+          const elbowY = sy + dirY * 22;
+          const shelfX = elbowX + dirX * 42;
+
+          const ring = grp.querySelector('.svg-anchor-ring');
+          const dot = grp.querySelector('.svg-anchor-dot');
+          const line = grp.querySelector('.svg-leader-line');
+
+          if (ring) {
+            ring.setAttribute('cx', sx.toFixed(1));
+            ring.setAttribute('cy', sy.toFixed(1));
+          }
+          if (dot) {
+            dot.setAttribute('cx', sx.toFixed(1));
+            dot.setAttribute('cy', sy.toFixed(1));
+          }
+          if (line) {
+            line.setAttribute(
+              'points',
+              `${sx.toFixed(1)},${sy.toFixed(1)} ${elbowX.toFixed(1)},${elbowY.toFixed(1)} ${shelfX.toFixed(1)},${elbowY.toFixed(1)}`
+            );
+          }
+
+          grp.style.opacity = '1';
+          pill.style.opacity = '1';
+          pill.style.pointerEvents = 'auto';
+
+          const pillW = pill.offsetWidth || 158;
+          const pillH = pill.offsetHeight || 42;
+          const rawX = isRight ? shelfX + 6 : shelfX - pillW - 6;
+          const rawY = elbowY - pillH * 0.5;
+
+          const clampedX = Math.max(12, Math.min(width - pillW - 12, rawX));
+          const clampedY = Math.max(12, Math.min(height - pillH - 12, rawY));
+          pill.style.transform = `translate3d(${clampedX.toFixed(1)}px, ${clampedY.toFixed(1)}px, 0)`;
+        });
+      }
+
+      return { update };
+    }
+
+    /* =========================================================================
+       MODULE 07 // GSAP BALLISTIC STATE CONTROLLER
+       ========================================================================= */
+    const STATE_PRESETS = {
+      idle: {
+        label: 'STATE // IDLE_STANDBY',
+        scanSpeed: 0.4,
+        alertMix: 0.0,
+        hdrGain: 1.3,
+        bloomStrength: 0.42,
+        bloomRadius: 0.3,
+        bracketScale: 1.14,
+        bracketZ: 0.16,
+        coreScale: 1.0,
+        tickVelocity: 0.05,
+        bracketVelocity: -0.07,
+        bracketColorHex: 0x5ce1e6,
+        bracketHdrScalar: 1.45,
+      },
+      scanning: {
+        label: 'STATE // ACTIVE_SCANNING',
+        scanSpeed: 2.8,
+        alertMix: 0.0,
+        hdrGain: 2.1,
+        bloomStrength: 0.72,
+        bloomRadius: 0.38,
+        bracketScale: 1.02,
+        bracketZ: 0.25,
+        coreScale: 0.92,
+        tickVelocity: 0.32,
+        bracketVelocity: -0.52,
+        bracketColorHex: 0x5ce1e6,
+        bracketHdrScalar: 2.35,
+      },
+      locked: {
+        label: 'STATE // TARGET_LOCKED',
+        scanSpeed: 0.85,
+        alertMix: 0.0,
+        hdrGain: 2.65,
+        bloomStrength: 0.92,
+        bloomRadius: 0.44,
+        bracketScale: 0.84,
+        bracketZ: 0.42,
+        coreScale: 0.72,
+        tickVelocity: 0.02,
+        bracketVelocity: 0.0,
+        bracketColorHex: 0x9efaff,
+        bracketHdrScalar: 2.9,
+      },
+      alert: {
+        label: 'STATE // SYSTEM_ALERT',
+        scanSpeed: 4.2,
+        alertMix: 1.0,
+        hdrGain: 2.8,
+        bloomStrength: 1.05,
+        bloomRadius: 0.48,
+        bracketScale: 0.92,
+        bracketZ: 0.36,
+        coreScale: 1.12,
+        tickVelocity: -0.48,
+        bracketVelocity: 0.75,
+        bracketColorHex: 0xffaa2b,
+        bracketHdrScalar: 3.1,
+      },
+    };
+
+    function createFuiStateController(targets) {
+      let currentState = 'idle';
+      let activeTimeline = null;
+      let pulseTween = null;
+
+      const kinetics = {
+        tickVelocity: STATE_PRESETS.idle.tickVelocity,
+        bracketVelocity: STATE_PRESETS.idle.bracketVelocity,
+      };
+
+      const tempColor = new THREE.Color();
+      const tempTickColor = new THREE.Color();
+
+      function recolorInstancedTicks(hex) {
+        const base = new THREE.Color(hex);
+        const count = targets.radialTicks.count;
+        for (let i = 0; i < count; i++) {
+          const isMajor = i % 6 === 0;
+          tempTickColor.copy(base).multiplyScalar(isMajor ? 2.2 : 0.78);
+          targets.radialTicks.setColorAt(i, tempTickColor);
+        }
+        if (targets.radialTicks.instanceColor) {
+          targets.radialTicks.instanceColor.needsUpdate = true;
+        }
+      }
+
+      function setState(nextState, force = false) {
+        if (nextState === currentState && !force) return;
+        currentState = nextState;
+
+        document.body.dataset.state = nextState;
+        const stateLabelEl = document.getElementById('state-label');
+        if (stateLabelEl) stateLabelEl.textContent = STATE_PRESETS[nextState].label;
+
+        document.querySelectorAll('.fui-btn[data-target]').forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.target === nextState);
+        });
+
+        activeTimeline?.kill();
+        pulseTween?.kill();
+
+        const preset = STATE_PRESETS[nextState];
+        const isBallistic = nextState === 'locked' || nextState === 'alert';
+        const duration = isBallistic ? 0.38 : 0.65;
+        const ease = isBallistic ? 'back.out(1.65)' : 'power3.out';
+
+        tempColor.setHex(preset.bracketColorHex).multiplyScalar(preset.bracketHdrScalar);
+
+        const paletteHex = nextState === 'alert' ? 0xffaa2b : 0x5ce1e6;
+        recolorInstancedTicks(paletteHex);
+        targets.gridMaterial.color.setHex(paletteHex).multiplyScalar(0.28);
+        targets.coreMat.color.setHex(paletteHex).multiplyScalar(nextState === 'locked' ? 2.6 : 1.8);
+        targets.coreLineMat.color.setHex(paletteHex).multiplyScalar(0.9);
+
+        if (!force) {
+          targets.audioEngine?.playStateTransition(nextState);
+        }
+        targets.windowManager?.applyStateChoreography(nextState, force);
+        targets.graphSystem?.setState(nextState);
+
+        const tl = gsap.timeline({ defaults: { duration, ease } });
+
+        tl.to(targets.polarMaterial.uniforms.uScanSpeed, { value: preset.scanSpeed, ease: 'power2.inOut' }, 0)
+          .to(targets.polarMaterial.uniforms.uAlertMix, { value: preset.alertMix, duration: 0.28, ease: 'power2.out' }, 0)
+          .to(targets.polarMaterial.uniforms.uHdrGain, { value: preset.hdrGain }, 0)
+          .to(targets.glassMaterial.uniforms.uAlertMix, { value: preset.alertMix, duration: 0.28, ease: 'power2.out' }, 0);
+
+        tl.to(targets.bloomPass, { strength: preset.bloomStrength, radius: preset.bloomRadius }, 0);
+
+        tl.to(targets.lockBrackets.scale, { x: preset.bracketScale, y: preset.bracketScale, z: 1 }, 0)
+          .to(targets.lockBrackets.position, { z: preset.bracketZ }, 0)
+          .to(targets.coreGroup.scale, { x: preset.coreScale, y: preset.coreScale, z: 1 }, 0)
+          .to(targets.bracketMaterial.color, { r: tempColor.r, g: tempColor.g, b: tempColor.b, duration: 0.26 }, 0);
+
+        tl.to(
+          kinetics,
+          {
+            tickVelocity: preset.tickVelocity,
+            bracketVelocity: preset.bracketVelocity,
+            duration: isBallistic ? 0.3 : 0.75,
+            ease: 'power3.out',
+          },
+          0
+        );
+
+        if (nextState === 'locked') {
+          const detentStep = (Math.PI * 2) / 3;
+          const currentZ = targets.lockBrackets.rotation.z;
+          const snappedZ = Math.round(currentZ / detentStep) * detentStep;
+
+          tl.to(
+            targets.lockBrackets.rotation,
+            { z: snappedZ, duration: 0.42, ease: 'back.out(2.1)' },
+            0.04
+          );
+
+          tl.fromTo(
+            targets.bloomPass,
+            { strength: preset.bloomStrength * 1.48 },
+            { strength: preset.bloomStrength, duration: 0.34, ease: 'power2.out' },
+            0.05
+          );
+        } else if (nextState === 'alert') {
+          tl.fromTo(
+            targets.reticleRig.position,
+            { z: -0.22 },
+            { z: 0, duration: 0.38, ease: 'elastic.out(1, 0.52)' },
+            0
+          );
+
+          tl.call(() => {
+            pulseTween = gsap.to(targets.bloomPass, {
+              strength: preset.bloomStrength * 1.32,
+              duration: 0.36,
+              repeat: -1,
+              yoyo: true,
+              ease: 'sine.inOut',
+            });
+          });
+        }
+
+        activeTimeline = tl;
+      }
+
+      function update(delta, elapsed) {
+        targets.polarMaterial.uniforms.uTime.value = elapsed;
+        targets.glassMaterial.uniforms.uTime.value = elapsed;
+        targets.radialTicks.rotation.z += kinetics.tickVelocity * delta;
+        targets.lockBrackets.rotation.z += kinetics.bracketVelocity * delta;
+
+        if (currentState === 'scanning') {
+          const phase = ((elapsed * (targets.polarMaterial.uniforms.uScanSpeed.value / (Math.PI * 2))) % 1 + 1) % 1;
+          targets.audioEngine?.playSweepPing(phase);
+        }
+      }
+
+      function getState() {
+        return currentState;
+      }
+
+      setState('idle', true);
+      return { setState, update, getState };
+    }
+
+    /* =========================================================================
+       MODULE 08 // SCENE BOOTSTRAP, SEARCH/FILTER CONTROLLER & RENDER LOOP
+       ========================================================================= */
+    try {
+      const container = document.getElementById('canvas-container');
+      const scene = new THREE.Scene();
+
+      const camera = new THREE.PerspectiveCamera(
+        42,
+        container.clientWidth / container.clientHeight,
+        0.1,
+        50
+      );
+      const DEFAULT_CAM_POS = new THREE.Vector3(0, 0, 6.2);
+      camera.position.copy(DEFAULT_CAM_POS);
+
+      const renderer = new THREE.WebGLRenderer({
+        antialias: false,
+        powerPreference: 'high-performance',
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.0;
+      container.appendChild(renderer.domElement);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.06;
+      controls.minDistance = 2.6;
+      controls.maxDistance = 12.0;
+
+      const { composer, bloomPass, resize } = createFuiComposer(renderer, scene, camera);
+
+      // Instantiate Audio, Imagery, and Window Managers
+      const audioEngine = new FuiAudioEngine();
+      const imageryEngine = new WindowImageryEngine();
+      const windowManager = new SpatialWindowManager(audioEngine);
+
+      // Assemble 5-Plane 2.5D/3D Reticle Rig
+      const reticleRig = new THREE.Group();
+      const bgGrid = createBackgroundSpatialGrid();
+      const polarDisc = createPolarReticleDisc(2.15);
+      const glassEnclosure = createVolumetricGlassEnclosure();
+      const { instancedTicks } = createInstancedRadialTicks(72, 1.56);
+      const { group: lockBrackets, bracketMaterial, anchors } = createForegroundLockBrackets(0.94);
+      const centerCore = createCenterCore();
+
+      reticleRig.add(
+        bgGrid.group,
+        polarDisc,
+        glassEnclosure,
+        instancedTicks,
+        lockBrackets,
+        centerCore.group
+      );
+      scene.add(reticleRig);
+
+      // Instantiate 3D Graph Nodes & Edges Topology
+      const graphSystem = new SpatialGraphSystem(
+        reticleRig,
+        audioEngine,
+        windowManager,
+        camera,
+        renderer.domElement
+      );
+
+      const calloutProjector = createCalloutProjector(anchors);
+
+      const controller = createFuiStateController({
+        reticleRig,
+        polarMaterial: polarDisc.material,
+        glassMaterial: glassEnclosure.material,
+        gridMaterial: bgGrid.material,
+        radialTicks: instancedTicks,
+        lockBrackets,
+        bracketMaterial,
+        coreGroup: centerCore.group,
+        coreMat: centerCore.coreMat,
+        coreLineMat: centerCore.lineMat,
+        bloomPass,
+        audioEngine,
+        windowManager,
+        graphSystem,
+      });
+
+      // Unlock Web Audio on first user interaction
+      const unlockAudioOnce = () => audioEngine.unlock();
+      window.addEventListener('pointerdown', unlockAudioOnce, { passive: true });
+      window.addEventListener('keydown', unlockAudioOnce, { passive: true });
+
+      // Synchronized 2.5D Pointer Parallax (Three.js Rig + CSS Stage)
+      const targetTilt = { x: 0, y: 0 };
+      const maxTiltRad = THREE.MathUtils.degToRad(7.5);
+      const maxTiltDeg = 5.5;
+
+      window.addEventListener(
+        'pointermove',
+        (e) => {
+          const nx = (e.clientX / window.innerWidth) * 2 - 1;
+          const ny = (e.clientY / window.innerHeight) * 2 - 1;
+          targetTilt.x = -ny * maxTiltRad;
+          targetTilt.y = nx * maxTiltRad;
+          document.documentElement.style.setProperty('--stage-tilt-x', `${(-ny * maxTiltDeg).toFixed(2)}deg`);
+          document.documentElement.style.setProperty('--stage-tilt-y', `${(nx * maxTiltDeg).toFixed(2)}deg`);
+        },
+        { passive: true }
+      );
+
+      // State Choreography Buttons
+      document.querySelectorAll('.fui-btn[data-target]').forEach((btn) => {
+        btn.addEventListener('click', () => controller.setState(btn.dataset.target));
+      });
+
+      // Volumetric Window Toggle Buttons & Close Buttons
+      document.querySelectorAll('[data-win-toggle]').forEach((btn) => {
+        btn.addEventListener('click', () => windowManager.toggleWindow(btn.dataset.winToggle));
+      });
+
+      document.querySelectorAll('[data-open-win]').forEach((pill) => {
+        pill.addEventListener('click', () => windowManager.toggleWindow(pill.dataset.openWin));
+      });
+
+      document.querySelectorAll('[data-close-win]').forEach((btn) => {
+        btn.addEventListener('click', () => windowManager.closeWindow(btn.dataset.closeWin));
+      });
+
+      document.getElementById('toggle-all-win-btn')?.addEventListener('click', () => {
+        windowManager.toggleAll();
+      });
+
+      // 3D Graph Visibility Toggle
+      const toggleGraphBtn = document.getElementById('toggle-graph-btn');
+      toggleGraphBtn?.addEventListener('click', () => {
+        const visible = graphSystem.toggleVisibility();
+        toggleGraphBtn.classList.toggle('active', visible);
+        audioEngine.playUiClick();
+      });
+
+      // Audio Mute & Camera Reset Buttons
+      const muteBtn = document.getElementById('mute-btn');
+      muteBtn?.addEventListener('click', () => {
+        const muted = audioEngine.toggleMute();
+        muteBtn.classList.toggle('active', muted);
+      });
+
+      const resetCamera = () => {
+        audioEngine.playUiClick();
+        gsap.to(camera.position, {
+          x: DEFAULT_CAM_POS.x,
+          y: DEFAULT_CAM_POS.y,
+          z: DEFAULT_CAM_POS.z,
+          duration: 0.65,
+          ease: 'power3.out',
+        });
+        gsap.to(controls.target, {
+          x: 0,
+          y: 0,
+          z: 0,
+          duration: 0.65,
+          ease: 'power3.out',
+        });
+      };
+      document.getElementById('reset-cam-btn')?.addEventListener('click', resetCamera);
+
+      // Spatial Node-Search & Topology Filter Bar Controller
+      const searchInput = document.getElementById('node-search-input');
+      const clearBtn = document.getElementById('search-clear-btn');
+      const dropdown = document.getElementById('search-results-dropdown');
+      const counterEl = document.getElementById('topo-match-counter');
+      const filterPills = document.querySelectorAll('.filter-pill[data-filter]');
+      let dropdownIndex = -1;
+
+      function renderDropdown() {
+        if (!searchInput || !dropdown) return;
+        const query = searchInput.value.trim();
+        const matches = graphSystem.getFilteredNodes();
+
+        if (clearBtn) clearBtn.classList.toggle('visible', query.length > 0);
+
+        if (!query && document.activeElement !== searchInput) {
+          dropdown.classList.remove('open');
+          dropdown.innerHTML = '';
+          dropdownIndex = -1;
+          return;
+        }
+
+        if (matches.length === 0) {
+          dropdown.innerHTML = `<div class="search-result-item"><span class="sri-meta">NO MATCHING TOPOLOGY NODES IN ACTIVE FILTER</span></div>`;
+          dropdown.classList.add('open');
+          dropdownIndex = -1;
+          return;
+        }
+
+        dropdown.innerHTML = matches
+          .map((node, idx) => {
+            const zStr = `${node.basePos.z >= 0 ? '+' : ''}${node.basePos.z.toFixed(2)}m`;
+            const roleClass = node.isFault ? 'sri-role fault' : 'sri-role';
+            const roleText = node.isFault ? 'FAULT' : node.role;
+            return `
+              <div class="search-result-item ${idx === dropdownIndex ? 'selected' : ''}" data-node-idx="${node.index}" role="option">
+                <div class="sri-left">
+                  <span class="sri-id">${node.id}</span>
+                  <span class="${roleClass}">${roleText}</span>
+                </div>
+                <span class="sri-meta">${node.winLabel} • Z${zStr}</span>
+              </div>
+            `;
+          })
+          .join('');
+
+        dropdown.classList.add('open');
+      }
+
+      graphSystem.onFilterChange = (stats) => {
+        if (counterEl) {
+          counterEl.innerHTML = `<strong>${stats.matchedNodes}/${stats.totalNodes}</strong> NODES • <strong>${stats.matchedEdges}/${stats.totalEdges}</strong> EDGES`;
+        }
+        renderDropdown();
+      };
+      graphSystem.onFilterChange(graphSystem.getStats());
+
+      searchInput?.addEventListener('input', () => {
+        dropdownIndex = -1;
+        if (!graphSystem.isVisible) {
+          graphSystem.setVisible(true);
+          toggleGraphBtn?.classList.add('active');
+        }
+        graphSystem.setSearchQuery(searchInput.value);
+      });
+
+      searchInput?.addEventListener('focus', renderDropdown);
+
+      searchInput?.addEventListener('keydown', (e) => {
+        e.stopPropagation();
+        const matches = graphSystem.getFilteredNodes();
+
+        if (e.key === 'Escape') {
+          if (searchInput.value) {
+            searchInput.value = '';
+            graphSystem.setSearchQuery('');
+          }
+          dropdown?.classList.remove('open');
+          searchInput.blur();
+          return;
+        }
+
+        if (e.key === 'ArrowDown' && matches.length > 0) {
+          e.preventDefault();
+          dropdownIndex = (dropdownIndex + 1) % matches.length;
+          renderDropdown();
+        } else if (e.key === 'ArrowUp' && matches.length > 0) {
+          e.preventDefault();
+          dropdownIndex = (dropdownIndex - 1 + matches.length) % matches.length;
+          renderDropdown();
+        } else if (e.key === 'Enter' && matches.length > 0) {
+          e.preventDefault();
+          const chosen = matches[dropdownIndex >= 0 ? dropdownIndex : 0];
+          if (chosen) {
+            graphSystem.focusNodeByIndex(chosen.index, true);
+            dropdown?.classList.remove('open');
+            searchInput.blur();
+          }
+        }
+      });
+
+      dropdown?.addEventListener('pointerdown', (e) => {
+        const item = e.target.closest('.search-result-item[data-node-idx]');
+        if (!item) return;
+        e.preventDefault();
+        const nodeIdx = Number(item.dataset.nodeIdx);
+        graphSystem.focusNodeByIndex(nodeIdx, true);
+        dropdown.classList.remove('open');
+        searchInput?.blur();
+      });
+
+      clearBtn?.addEventListener('click', () => {
+        if (searchInput) searchInput.value = '';
+        graphSystem.setSearchQuery('');
+        audioEngine.playUiClick();
+        searchInput?.focus();
+      });
+
+      filterPills.forEach((pill) => {
+        pill.addEventListener('click', () => {
+          const targetFilter = pill.dataset.filter;
+          filterPills.forEach((p) => p.classList.toggle('active', p === pill));
+          if (!graphSystem.isVisible) {
+            graphSystem.setVisible(true);
+            toggleGraphBtn?.classList.add('active');
+          }
+          graphSystem.setFilterRole(targetFilter);
+          audioEngine.playUiClick();
+        });
+      });
+
+      document.addEventListener('pointerdown', (e) => {
+        if (!e.target.closest('#topology-bar')) {
+          dropdown?.classList.remove('open');
+        }
+      });
+
+      // Global Keyboard Shortcuts (Ignored when typing inside Search Input)
+      window.addEventListener('keydown', (e) => {
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+        const k = e.key.toLowerCase();
+        if (e.key === '/') {
+          e.preventDefault();
+          searchInput?.focus();
+        } else if (e.key === '1') {
+          controller.setState('idle');
+        } else if (e.key === '2') {
+          controller.setState('scanning');
+        } else if (e.key === '3') {
+          controller.setState('locked');
+        } else if (e.key === '4') {
+          controller.setState('alert');
+        } else if (k === 'w') {
+          windowManager.toggleAll();
+        } else if (k === 'g') {
+          const visible = graphSystem.toggleVisibility();
+          toggleGraphBtn?.classList.toggle('active', visible);
+          audioEngine.playUiClick();
+        } else if (k === 'm') {
+          const muted = audioEngine.toggleMute();
+          muteBtn?.classList.toggle('active', muted);
+        } else if (k === 'r') {
+          resetCamera();
+        }
+      });
+
+      // Viewport Resize Handler
+      window.addEventListener('resize', () => {
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        resize(w, h);
+      });
+
+      // Telemetry DOM Refs
+      const elScan = document.getElementById('val-scan');
+      const elGain = document.getElementById('val-gain');
+      const elBloom = document.getElementById('val-bloom');
+      const elBz = document.getElementById('val-bz');
+      const elTilt = document.getElementById('val-tilt');
+      const audioBars = document.querySelectorAll('#audio-bars .audio-bar');
+
+      const clock = new THREE.Clock();
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        const delta = Math.min(clock.getDelta(), 0.05);
+        const elapsed = clock.getElapsedTime();
+
+        reticleRig.rotation.x += (targetTilt.x - reticleRig.rotation.x) * 0.08;
+        reticleRig.rotation.y += (targetTilt.y - reticleRig.rotation.y) * 0.08;
+
+        controller.update(delta, elapsed);
+        controls.update();
+
+        graphSystem.update(delta, elapsed, container.clientWidth, container.clientHeight);
+        calloutProjector.update(
+          camera,
+          container.clientWidth,
+          container.clientHeight,
+          lockBrackets,
+          polarDisc.material
+        );
+        imageryEngine.update(elapsed, windowManager.getStates(), controller.getState());
+        audioEngine.updateVisualizer(delta, elapsed, audioBars);
+
+        composer.render();
+
+        if (elScan) elScan.textContent = polarDisc.material.uniforms.uScanSpeed.value.toFixed(2);
+        if (elGain) elGain.textContent = polarDisc.material.uniforms.uHdrGain.value.toFixed(2);
+        if (elBloom) elBloom.textContent = bloomPass.strength.toFixed(2);
+        if (elBz) elBz.textContent = `+${lockBrackets.position.z.toFixed(2)}m`;
+        if (elTilt) {
+          const degX = THREE.MathUtils.radToDeg(reticleRig.rotation.x).toFixed(1);
+          const degY = THREE.MathUtils.radToDeg(reticleRig.rotation.y).toFixed(1);
+          elTilt.textContent = `${degX}° / ${degY}°`;
+        }
+      }
+
+      animate();
+    } catch (err) {
+      const label = document.getElementById('state-label');
+      if (label) label.textContent = `RENDER_FAULT // ${err?.message || 'WEBGL_INIT_ERROR'}`;
+    }
+  </script>
+</body>
+</html>

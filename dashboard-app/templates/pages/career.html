@@ -1,96 +1,169 @@
-{% from "_macros.html" import metric_table %}
+{% from "_macros.html" import metric_table, readout %}
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- CAREER PAGE                                                 -->
 <!-- ════════════════════════════════════════════════════════════ -->
 <div class="page" id="page-career" role="tabpanel" aria-labelledby="tab-career">
-  <div class="page-header">
-    <h2>Career Hub</h2>
-    <p>Goals, networking, and job search &mdash; from your YAML files</p>
+  <div class="page-header hud-header">
+    <div class="hud-title">
+      <h2>Career Hub</h2>
+      <p>Goals, networking, and job search &mdash; from your YAML files</p>
+    </div>
+    {# Job Applications — 2026: the page's numbers lead the header. #}
+    {{ readout([
+      ("Applied", job_stats["applied"], "color-blue"),
+      ("Screening", job_stats["screening"], "color-yellow"),
+      ("Interviews", job_stats["interviews"], "color-purple"),
+      ("Onsites", job_stats["onsites"], "color-accent"),
+      ("Offers", job_stats["offers"], "color-green"),
+      ("Pending", job_stats["pending"], "color-muted"),
+    ], "Job Applications — 2026") }}
   </div>
 
-  <div class="grid-2">
-    <!-- Left -->
-    <div>
-      <!-- Goals -->
-      <div class="card">
-        <div class="card-title">Career Goals</div>
-        {% if has_goals %}
-        <h3>{{ vision.title }}</h3>
-        <p>{{ vision.description }}</p>
-        {% else %}
-        <div class="empty-state">
-          <div class="empty-icon">&#x1F3AF;</div>
-          <p>No goals defined yet. Update goals/career-goals.yml to set your vision and milestones.</p>
-        </div>
-        {% endif %}
-      </div>
-
-      <!-- Job Applications -->
-      <div class="card">
-        <div class="card-title">Job Applications &mdash; 2026</div>
-        <div class="grid-3 mb-12 job-stats">
-          {% for label, key, color in [
-            ("Applied", "applied", "color-blue"),
-            ("Screening", "screening", "color-yellow"),
-            ("Interviews", "interviews", "color-purple"),
-            ("Onsites", "onsites", "color-accent"),
-            ("Offers", "offers", "color-green"),
-            ("Pending", "pending", "color-muted"),
-          ] %}
-          <div class="stat-box stat-sm">
-            <div class="stat-value {{ color }}">{{ job_stats[key] }}</div>
-            <div class="stat-label">{{ label }}</div>
-          </div>
-          {% endfor %}
-        </div>
-
-        {% if job_stats.applied == 0 %}
-        <div class="empty-state empty-state-pad">
-          <p>Job search begins Week 49 (December). Update interviews/job-applications.yml when ready.</p>
-        </div>
-        {% endif %}
-      </div>
+  <div class="hud-stage">
+  <!-- Focal column: the weekly report, then the year's success metrics -->
+  <div class="span-8 hud-wing">
+  <section class="card work-search" id="workSearch" aria-labelledby="workSearchTitle">
+    <div class="work-search-heading">
+      <h3 id="workSearchTitle">Weekly work-search report</h3>
+      <button class="action-btn" type="button" id="workSearchCopy" disabled>Copy week report</button>
     </div>
-
-    <!-- Right -->
-    <div>
-      <!-- Networking -->
-      <div class="card">
-        <div class="card-title">Networking Goals</div>
-        {% for g in net_goals %}
-        <div class="net-goal">
-          <div class="net-goal-text">
-            <h4>{{ g.goal }}</h4>
-            <p>Progress for 2026</p>
-          </div>
-          <div class="net-goal-progress">{{ g.progress }}</div>
+    <p class="interview-note">Choose the first date of your claim week. Copy recorded details into your form; this report does not submit a claim or determine eligibility.</p>
+    <form class="work-search-period" id="workSearchPeriod">
+      <label class="interview-field">
+        <span>Week starting</span>
+        <input class="run-input" type="date" name="start" required>
+      </label>
+      <button class="action-btn action-btn-ghost" type="submit">Show week</button>
+      <p id="workSearchSummary" role="status" aria-live="polite">Loading recorded activities&hellip;</p>
+    </form>
+    <p class="run-status" id="workSearchStatus" role="status" aria-live="polite"></p>
+    <label class="interview-field" id="workSearchManual" hidden>
+      <span>Selected text to copy manually</span>
+      <textarea class="run-input" id="workSearchClipboard" rows="4" readonly></textarea>
+    </label>
+    <div id="workSearchActivities" aria-busy="true"></div>
+    <details class="work-search-text">
+      <summary>Select report text manually</summary>
+      <label class="interview-field">
+        <span>Copy-ready report</span>
+        <textarea class="run-input" id="workSearchText" rows="10" readonly></textarea>
+      </label>
+    </details>
+    <details class="interview-tools" id="workSearchEditor">
+      <summary>Log a completed activity</summary>
+      <p class="interview-note">Applications, interviews, follow-ups, networking, workshops, and other completed activities. Log each activity once. Pipeline statuses and planned tasks are not counted automatically.</p>
+      <form class="interview-grid" id="workSearchForm">
+        <input type="hidden" name="id">
+        <label class="interview-field interview-field-wide">
+          <span>Use a tracked application (optional)</span>
+          <select class="run-select" id="workSearchApplication">
+            <option value="">Enter details below</option>
+            {% for a in interview_rows %}
+            <option value="{{ loop.index }}" data-employer="{{ a.company }}" data-position="{{ a.role }}">{{ a.company }} — {{ a.role }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="interview-field">
+          <span>Date of activity *</span>
+          <input class="run-input" type="date" name="date" value="{{ today }}" max="{{ today }}" required>
+        </label>
+        <label class="interview-field">
+          <span>Type of activity *</span>
+          <input class="run-input" name="activity_type" list="workSearchTypes" maxlength="200" required>
+          <datalist id="workSearchTypes"><option value="Employer Contact"><option value="Networking"><option value="Workshop or training"><option value="Other work-search activity"></datalist>
+        </label>
+        <label class="interview-field interview-field-wide">
+          <span>Activity description *</span>
+          <input class="run-input" name="description" list="workSearchDescriptions" maxlength="1000" required>
+          <datalist id="workSearchDescriptions"><option value="Submitted a job application"><option value="Attended a job interview"><option value="Followed up with an employer"><option value="Attended a networking event"><option value="Completed a workshop"></datalist>
+        </label>
+        <label class="interview-field">
+          <span>Position applied for</span>
+          <input class="run-input" name="position" maxlength="200">
+        </label>
+        <label class="interview-field">
+          <span>Business / employer or organization name *</span>
+          <input class="run-input" name="employer" maxlength="200" required>
+        </label>
+        <label class="interview-field interview-field-wide">
+          <span>Employer / organization address</span>
+          <textarea class="run-input" name="address" rows="2" maxlength="1000"></textarea>
+        </label>
+        <label class="interview-field interview-field-wide">
+          <span>Result of your contact</span>
+          <input class="run-input" name="result" maxlength="1000" placeholder="Record the actual result at the time of this activity">
+        </label>
+        <p class="interview-note interview-field-wide">Use your form's exact wording where available. Missing details stay marked “Not recorded”; enter “Not applicable” only when accurate.</p>
+        <div class="interview-form-actions">
+          <button class="action-btn" type="submit">Save completed activity</button>
+          <button class="action-btn action-btn-ghost" type="button" id="workSearchNew">New activity</button>
+          <span class="run-status" id="workSearchSaveStatus" role="status" aria-live="polite"></span>
         </div>
-        {% endfor %}
+      </form>
+    </details>
+  </section>
 
-        {% if not net_goals %}
-        <div class="empty-state">
-          <div class="empty-icon">&#x1F91D;</div>
-          <p>Add networking goals in networking/contacts.yml</p>
+  <section class="card" aria-labelledby="careerMetricsTitle">
+    <h3 class="card-title" id="careerMetricsTitle">2026 Success Metrics</h3>
+    {{ metric_table(success_metrics) }}
+  </section>
+  </div>
+
+  <!-- Wing: networking, applications, vision -->
+  <div class="span-4 hud-wing">
+    <section class="card" aria-labelledby="netGoalsTitle">
+      <h3 class="card-title" id="netGoalsTitle">Networking Goals</h3>
+      {% for g in net_goals %}
+      <div class="net-goal">
+        <div class="net-goal-text">
+          <h4>{{ g.goal }}</h4>
+          <p>Progress for 2026</p>
         </div>
-        {% endif %}
+        <div class="net-goal-progress">{{ g.progress }}</div>
       </div>
+      {% endfor %}
 
-      <!-- Application Checklist -->
-      <div class="card">
-        <div class="card-title">Application Checklist</div>
-        {% for item in app_checklist %}
-        <div class="task-item">
-          <div class="task-check" role="checkbox" aria-checked="false" aria-label="{{ item }}"></div>
-          <span class="task-text">{{ item }}</span>
-        </div>
-        {% endfor %}
+      {% if not net_goals %}
+      <div class="empty-state">
+        <div class="empty-icon">&#x1F91D;</div>
+        <p>Add networking goals in networking/contacts.yml</p>
       </div>
+      {% endif %}
+    </section>
 
-      <!-- Success Metrics -->
-      <div class="card">
-        <div class="card-title">2026 Success Metrics</div>
-        {{ metric_table(success_metrics) }}
+    {# Once applications exist the header readout carries the numbers; this
+       panel only explains the empty state. #}
+    {% if job_stats.applied == 0 %}
+    <section class="card" aria-labelledby="jobAppsTitle">
+      <h3 class="card-title" id="jobAppsTitle">Job Applications &mdash; 2026</h3>
+      <div class="empty-state empty-state-pad">
+        <p>Job search begins Week 49 (December). Update interviews/job-applications.yml when ready.</p>
       </div>
-    </div>
+    </section>
+    {% endif %}
+
+    <section class="card" aria-labelledby="appChecklistTitle">
+      <h3 class="card-title" id="appChecklistTitle">Application Checklist</h3>
+      {% for item in app_checklist %}
+      <div class="task-item">
+        <div class="task-check" role="checkbox" aria-checked="false" aria-label="{{ item }}"></div>
+        <span class="task-text">{{ item }}</span>
+      </div>
+      {% endfor %}
+    </section>
+
+    <section class="card" aria-labelledby="careerGoalsTitle">
+      <h3 class="card-title" id="careerGoalsTitle">Career Goals</h3>
+      {% if has_goals %}
+      <h4 class="card-subtitle">{{ vision.title }}</h4>
+      <p>{{ vision.description }}</p>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">&#x1F3AF;</div>
+        <p>No goals defined yet. Update goals/career-goals.yml to set your vision and milestones.</p>
+      </div>
+      {% endif %}
+    </section>
+  </div>
   </div>
 </div>

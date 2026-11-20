@@ -1,16 +1,25 @@
+{% from "_macros.html" import readout %}
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- WORKSPACE MAP — visual-second-brain viewer, served by app.py  -->
 <!-- at /workspace-map/. Links with data-map-query (app.js) set    -->
 <!-- the iframe's ?q=&topic=&folder= before switching here.        -->
 <!-- ════════════════════════════════════════════════════════════ -->
 <div class="page" id="page-workspace-map" role="tabpanel" aria-labelledby="tab-workspace-map">
-  <div class="page-header">
-    <h2>Workspace map</h2>
-    <p>
-      Find any workspace file by topic, folder or name.
-      {% if map_index.ok %}Snapshot from {{ map_index.generated }}, {{ map_index.files }} files.{% else %}{{ map_index.reason }}.{% endif %}
-      Refresh from Today &rarr; Daily.
-    </p>
+  <div class="page-header hud-header">
+    <div class="hud-title">
+      <h2>Workspace map</h2>
+      <p>
+        Find any workspace file by topic, folder or name.
+        {% if not map_index.ok %}{{ map_index.reason }}.{% endif %}
+        Refresh from Today &rarr; Daily.
+      </p>
+    </div>
+    {% if map_index.ok %}
+    {{ readout([
+      ("Snapshot from", map_index.generated, none),
+      ("Files", map_index.files, "color-accent"),
+    ]) }}
+    {% endif %}
   </div>
 
   <div class="card embed-card">

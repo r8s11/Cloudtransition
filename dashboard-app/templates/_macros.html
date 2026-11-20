@@ -9,6 +9,22 @@
 {% endfor %}
 {%- endmacro %}
 
+{# Project status → state class. Colour follows the status words, not the card. #}
+{%- macro project_state(status) -%}
+{%- set s = (status or '')|lower -%}
+{{ 'is-paused' if s.startswith('deprioritized') or s.startswith('paused') else ('is-planned' if s.startswith('planned') else 'is-active') }}
+{%- endmacro %}
+
+{# Perimeter HUD readout: (key, value, tone class) triples as one <dl>.
+   Keys stay in the UI sans; values take the mono face with tabular numerals. #}
+{%- macro readout(items, label=none) -%}
+<dl class="hud-readout"{% if label %} aria-label="{{ label }}"{% endif %}>
+  {%- for key, value, tone in items %}
+  <div><dt>{{ key }}</dt><dd{% if tone %} class="{{ tone }}"{% endif %}>{{ value }}</dd></div>
+  {%- endfor %}
+</dl>
+{%- endmacro %}
+
 {# One toggleable task checkbox. app.js binds every .task-check[data-realm];
    data-text lets the server follow the item if its line number moved. #}
 {%- macro task_check(t) -%}

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Keeps the agentic-os Mission Control API up on loopback (127.0.0.1:8787) so
+  the dashboard's Mission Control tab and Today row always have something to
+  read. Runs only while the USB drive is mounted (KeepAlive/PathState).
+
+  The working directory must be agentic-os/: the database path in
+  config/agentic-os.yaml (.agentic-os/os.db) is relative to it. Starting the
+  server from apps/api/ opens a different, empty database.
+
+  PATH carries node plus the agent CLIs the runtime launches (claude, codex,
+  opencode).
+
+  Install:  mkdir -p ~/.local-routines/mission-control
+            cp agentic-os/launchd/com.cloudtransition.mission-control.plist ~/Library/LaunchAgents/
+            launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.cloudtransition.mission-control.plist
+  Restart:  launchctl kickstart -k gui/$(id -u)/com.cloudtransition.mission-control
+  Remove:   launchctl bootout gui/$(id -u)/com.cloudtransition.mission-control
+-->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.cloudtransition.mission-control</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/roosevelt/.volta/bin/node</string>
+		<string>node_modules/tsx/dist/cli.mjs</string>
+		<string>apps/api/src/server.ts</string>
+	</array>
+	<key>WorkingDirectory</key>
+	<string>/Volumes/SANDISK USB/work/Cloudtransition/agentic-os</string>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/Users/roosevelt/.local/bin:/Users/roosevelt/.opencode/bin:/Users/roosevelt/.volta/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<dict>
+		<key>PathState</key>
+		<dict>
+			<key>/Volumes/SANDISK USB/work/Cloudtransition/agentic-os/apps/api/src/server.ts</key>
+			<true/>
+		</dict>
+	</dict>
+	<key>ThrottleInterval</key>
+	<integer>30</integer>
+	<key>StandardOutPath</key>
+	<string>/Users/roosevelt/.local-routines/mission-control/mission-control.out.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/roosevelt/.local-routines/mission-control/mission-control.err.log</string>
+</dict>
+</plist>

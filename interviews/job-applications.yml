@@ -5,10 +5,33 @@
 # (survival/bridge income) tracked separately at the bottom. Hottest first.
 
 active_applications:
+  - company: BlackRock
+    role: Technical Support, Associate
+    status: "waiting"
+    job_url: https://www.builtinnyc.com/job/technical-support-associate/11237284
+    salary_range: $110-140K base + discretionary bonus
+    location: New York, NY (in-office support; posting describes at least 4 days on-site)
+    priority: high
+    resume: tailored/2026-11/Roosevelt_Segura_Technical_Support_Resume.pdf
+    timeline:
+      - date: 2026-11-09
+        stage: resume_prepared
+        notes: Tailored to Windows/macOS, M365, Intune MDM, desktop and mobile support, A/V, incident escalation, and asset lifecycle. Not submitted.
+      - date: "2026-11-16"
+        stage: "applied"
+        notes: |
+          No response
+    next_steps:
+      - task: "Review and apply. Main gap: dedicated financial-sector C-suite/board support is not represented because Two Sigma remains excluded by prior decision. Other experience not documented in the master: SCCM, Citrix Gateway, Jabber/AnyConnect, WebEx, Splunk/ControlUp, sophisticated home networks, privacy/data-broker services, satellite/aviation support. Confirm willingness for on-call/weekends and travel."
+        date: "2026-11-09"
+        calendar_id: "f981298553b61969dd7848c21678715c2d96b4f896c86ce5dacf9c818d3fa060"
+    interview_notes: ""
+    notes: "Source: Built In NYC posting 11237284, reviewed 2026-11-09. Existing resume exclusions preserved; no executive-support or unsupported product claims added."
+
   # ====== 🔥 LIVE — needs action this week ======
   - company: Generate:Biomedicines
     role: IT Engineer II
-    status: interviewing
+    status: "rejected"
     location: Somerville, MA / hybrid (confirm remote feasibility from NYC)
     priority: high
     contacts:
@@ -24,7 +47,8 @@ active_applications:
         notes: Rescheduled due to personal matters. Heather offered "next Friday" (~5/15). No confirmation since.
     next_steps:
       - task: "FOLLOW UP NOW — email Heather to re-confirm a time. ~2+ weeks cold; salvage it."
-        date: 2026-05-24
+        date: "2026-05-24"
+        calendar_id: "d8b174c353c68785c0080a7fd3295c9b32bdbc4a07f94e15aef806a8b2c1fc26"
     notes: |
       DIRECTION-ALIGNED: IT Engineer at a biotech (Regeneron-class adjacency).
       Highest-value live thread. Risk: gone quiet after the reschedule. She noted
@@ -32,7 +56,7 @@ active_applications:
 
   - company: The Farmer's Dog
     role: IT Helpdesk Technician
-    status: interviewing
+    status: "rejected"
     location: New York, NY
     priority: high
     contacts:
@@ -53,11 +77,12 @@ active_applications:
         notes: Thank-you sent to Jenny. Awaiting next-round/decision.
     next_steps:
       - task: "Follow up with Jenny if no word by ~5/27 (1 wk post-interview)."
-        date: 2026-05-27
+        date: "2026-05-27"
+        calendar_id: "5e322d1bdf4c85a900ab76d1066b3b1d992644c1523f45ba6105e1df8d8a0b0c"
 
   - company: Rokt
     role: (confirm role)
-    status: assessment
+    status: "withdrawn"
     location:
     priority: medium
     timeline:
@@ -69,11 +94,12 @@ active_applications:
         notes: Reminder to complete. Incomplete = passive drop-out.
     next_steps:
       - task: "Complete CCAT & EPP if still interested, or close it out."
-        date: 2026-05-24
+        date: "2026-05-24"
+        calendar_id: "d43452e6976b05d14890db1bcfd23ec90870e230614a21e24662d601b9f0793c"
 
   - company: Milestone Technologies
     role: Service Desk Technician L2 (temp-to-hire)
-    status: screening
+    status: "rejected"
     salary_range: $37/hr (~$77K annualized) — clears $70K floor
     location: New York, NY (100% onsite, client site)
     priority: high
@@ -87,11 +113,12 @@ active_applications:
         notes: Requested interview. Temp-to-hire — fast route to a paycheck.
     next_steps:
       - task: "Confirm whether you replied; if not, respond to schedule."
-        date: 2026-05-24
+        date: "2026-05-24"
+        calendar_id: "f2b90d2db4c62abca63ea6da92b8e70434d1797819f61a50dd23efa8c7b608b5"
 
   - company: Object Win (via Dice)
     role: End User Computing (EUC) Operations Lead
-    status: new_lead
+    status: "withdrawn"
     location: New York, NY (onsite)
     priority: medium
     contacts:
@@ -103,12 +130,13 @@ active_applications:
         notes: Inbound via Dice re posted resume. Senior EUC lead — strong fit.
     next_steps:
       - task: "Reply while warm; ask for rate/JD."
-        date: 2026-05-24
+        date: "2026-05-24"
+        calendar_id: "96a41df2abb9ae011c64f48df56271bea8bcea20cd9135f82a16bb2e5a6ea120"
 
   - company: Ground Up International
     role: Senior IT Support Specialist
     application_date: 2026-05-05
-    status: screening
+    status: "rejected"
     salary_range: target $95-115K, floor $70K (lowered 2026-05-24)
     location: New York, NY (onsite)
     priority: high
@@ -116,8 +144,30 @@ active_applications:
       - interviews/Ground Up/prep.md
       - interviews/Ground Up/jd-senior-it-support-specialist.md
     next_steps:
+    next_steps:
       - task: "Confirm recruiter-screen outcome; capture comp/team/timeline; thank-you."
         date:
+    interview_questions: |
+      What comp range has Ground Up set for the role?
+      What's the size and shape of the help desk team I'd be overseeing?
+      How does IT split work between New York and Dongguan day-to-day?
+      What's driving the hire — backfill, growth, or new scope?
+      What would the first 90 days look like — what does the VP want tackled first?
+      What does the interview process look like end-to-end, and the timeline?
+      Beyond the JD, what does success look like at 6–12 months?
+    interview_preparation: |
+      60-second pitch: 10+ yrs IT; M365 admin (Entra/Intune/Exchange/SharePoint); ABM + Intune ADE at Peak; built Jira SM from scratch at Ventus; Zendesk/ServiceNow/Jira SM/ConnectWise.
+      Story — Jira SM at Ventus: no system of record → request types, SLAs, catalog, reporting.
+      Story — ABM + Intune ADE at Peak: zero-touch Mac/iOS, config profiles, compliance, conditional access.
+      Story — cross-time-zone handovers with India/Europe at Peak → the Dongguan question.
+      PowerShell: honest framing — M365 admin use, deeper via AZ-204; can extend an existing toolkit.
+      Power Automate: approvals/notifications, not a primary build tool; would lean in early.
+      ZohoDesk: four ITSM platforms; same model, a couple of days to fluent.
+      Security: Defender daily; Cortex XDR at Jounce; KnowBe4 not administered but familiar; HIPAA-regulated background.
+      Synology / BitWarden: not administered; closest comparable is file-share and enterprise password mgmt (CyberArk).
+      Team oversight: senior IC — Jira SM build, OneView Win10 for 200+ workstations, office relocation; formal oversight is the next step.
+      Salary: ask their range first. Tracker target $95–115K, floor $70K lowered 2026-05-24; prep.md still says a $95K floor — reconcile before the call.
+      Onsite NYC: Bronx-based, already commuting. Why Ground Up: scope (admin + team oversight), Dongguan collaboration, product company, long term.
     notes: |
       Strong JD match: M365 admin (Intune/Entra/Exchange/SharePoint), Mac MDM
       (ABM+Intune ADE done at Peak), ITSM depth. Gaps: PowerShell depth, Power
@@ -125,7 +175,7 @@ active_applications:
 
   - company: Solarus Technologies
     role: (IT role — confirm) — 1st round preliminary
-    status: interviewing
+    status: "rejected"
     location:
     priority: low
     timeline:
@@ -135,12 +185,386 @@ active_applications:
 
   - company: Kronia Technologies
     role: (confirm role)
-    status: screening
+    status: "withdrawn"
     priority: low
     timeline:
       - date: 2026-05-05
         stage: recruiter_outreach
         notes: LinkedIn "next steps"; you replied. Verify status.
+
+  # ====== NEW LEADS — found 2026-10-30, not yet applied (details: interviews/job-leads-2026-10.md) ======
+  # Pay is as posted. `resume:` = file under resume/ to submit. Move to "applied" + set application_date when sent.
+  - company: Fireworks
+    role: IT Support Engineer
+    status: "withdrawn"
+    job_url: https://jobs.ashbyhq.com/fireworks/d6540b5f-fe22-4b7a-bf18-48fb2212cd4b
+    salary_range: $110-150K + equity
+    location: New York, NY (hybrid)
+    priority: high
+    resume: tailored/2026-10/resume-2026-10-fireworks-it-support-engineer.pdf
+    next_steps:
+      - task: "Apply. Asks 5+ yrs, MDM (Intune), Okta/AD/Entra, ServiceNow/Jira. Gaps: patch-management tooling (BigFix/Automox), Jamf."
+        date: "2026-10-31"
+        calendar_id: "8696cd641a200f1dba38c67e304d500a53cea2a959ccb6ff12c1b90e5e1fe26f"
+
+  - company: 6sense
+    role: IT Support Specialist
+    status: new_lead
+    job_url: https://job-boards.greenhouse.io/6sense/jobs/8273670
+    salary_range: $73.6-103.9K
+    location: US remote
+    priority: high
+    resume: tailored/2026-10/resume-2026-10-6sense-it-support-specialist.pdf
+    next_steps:
+      - task: "Apply. Asks 3+ yrs; M365, Entra, Okta, Intune. Gap: PowerShell/Workato (resume lists Bash/JavaScript, Python in progress)."
+        date: "2026-11-19"
+        calendar_id: "ad1c76638acc005791039c471b50b484c4e9950190dd2d874d7ee9880af48bf0"
+
+  - company: Stripe
+    role: IT Support Engineer
+    status: "waiting"
+    job_url: https://job-boards.greenhouse.io/stripe/jobs/8265151
+    salary_range: $107-160.6K
+    location: New York, NY (in office >=50%)
+    priority: high
+    resume: tailored/2026-10/resume-2026-10-stripe-it-support-engineer.pdf
+    next_steps:
+      - task: "Apply. Asks 2+ yrs help desk, Apple, Jira/Confluence, DEP, scripting. Gaps: Google Workspace, FleetDM, Ruby/Python scripting."
+        date: "2026-10-31"
+        calendar_id: "1757a6ba72a7b9f6f8492320813bd6bce3ce526ee29d637dd7f376800e1272bb"
+    interview_notes: ""
+
+  - company: Beast Industries (MrBeast)
+    role: Senior IT Support Engineer
+    status: "waiting"
+    job_url: https://job-boards.greenhouse.io/mrbeastyoutube/jobs/6191860004
+    salary_range: $100-130K incl. bonus
+    location: New York, NY (hybrid)
+    priority: high
+    resume: tailored/2026-10/resume-2026-10-beast-industries-senior-it-support-engineer.pdf
+    next_steps:
+      - task: "Apply. Asks 4+ yrs, macOS+Windows, M365 or Google admin, MDM. Gaps: VLANs/Ubiquiti/Cisco WiFi, media-industry experience."
+        date: "2026-11-02"
+        calendar_id: "0082af336cc853ce0a0658c355f4ba5f292510a4f9e90778d515a846418c57d5"
+
+  - company: EliseAI
+    role: IT Support Specialist
+    status: "withdrawn"
+    job_url: https://jobs.ashbyhq.com/EliseAI/903db7cc-53f6-4217-b177-fd6bd17aee1a
+    salary_range: $80-115K + equity
+    location: New York, NY (on-site 5 days)
+    priority: high
+    resume: tailored/2026-10/resume-2026-10-eliseai-it-support-specialist.pdf
+    next_steps:
+      - task: "Apply. Asks 1-3 yrs; macOS, MDM, Okta lifecycle, AV/all-hands. Gaps: Google Workspace, Mosyle/Jamf, event AV."
+        date: "2026-11-02"
+        calendar_id: "0fb404629c3af9809fbab61b069ca988c8a7aebef48e9a93b376f5d67ed02c0c"
+
+  - company: Sierra
+    role: IT Support Specialist
+    status: new_lead
+    job_url: https://jobs.ashbyhq.com/sierra/ef6ee85e-597e-49cd-b2fb-c304b8f3cda7
+    salary_range: $160-180K + equity (listed)
+    location: New York, NY (in office Mon-Thu)
+    priority: medium
+    resume: 2026-10/resume-2026-10-it-support-tech.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Posting says employment type Contract despite annual pay + equity: confirm terms before investing. Gaps: Jamf, Okta admin, Google Workspace."
+        date: "2026-11-02"
+        calendar_id: "5348c44546caeeaf8d95b39ce0d1bb52de41737641fd7395900d9f77a52470a8"
+
+  - company: NYC Housing Authority (NYCHA)
+    role: IT Support Specialist
+    status: "rejected"
+    job_url: https://cityjobs.nyc.gov/job/it-support-specialist-in-nyc-all-boros-jid-48582
+    salary_range: $75,000-77,438
+    location: NYC, all boroughs (on-site)
+    priority: medium
+    resume: 2026-10/resume-2026-10-it-support-tech.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Posted 2026-10-22. Asks 4 yrs ITSM, MDM, ServiceNow familiarity; check civil-service filing deadline and residency rules on the posting."
+        date: "2026-10-31"
+        calendar_id: "de36c5253e5aacefe20ba53bf5d73213dcc251bab2ef795a5dd79f9c50e11461"
+
+  - company: TEKsystems
+    role: Desktop Support Analyst (Executive)
+    status: new_lead
+    job_url: https://careers.teksystems.com/us/en/job/JP-006380345/Desktop-Support-Analyst-Executive
+    salary_range: $35-45/hr contract-to-hire (~$73-94K annualized)
+    location: New York, NY (on-site)
+    priority: medium
+    resume: 2026-10/resume-2026-10-it-support-tech.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Posted 2026-10-27. Requires 3+ yrs executive/C-level support; that experience is Two Sigma (kept off all resumes by decision 2026-10-30), so this is a weak match."
+        date: "2026-11-02"
+        calendar_id: "0825b98b2fb27364f28c2f49e95d4d9e3edaec1a88fb923a3a64e9a9933f0dc2"
+
+  - company: Coretelligent
+    role: Senior Client IT Engineer (Entra, Intune & Azure)
+    status: new_lead
+    job_url: https://www.jobleads.com/us/job/senior-client-it-engineer-entra-intune-azure--new-york--e1e701b0d892dbc508eee304c68b3ed42
+    salary_range: $120-150K
+    location: New York, NY (on-site)
+    priority: medium
+    resume: 2026-10/resume-2026-10-systems-infra.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Aggregator listing only: find and apply on Coretelligent's own careers page. Asks 5+ yrs, MSP-style client work."
+        date: "2026-11-02"
+        calendar_id: "af2b091a4097380c2a018b76c923424a6d803c0d9ef5817dcbf6c1dc010cd286"
+
+  - company: Atrium
+    role: Systems Administrator
+    status: "waiting"
+    job_url: https://www.atriumstaff.com/internal-jobs/systems-administrator-1180/
+    salary_range: $80-85K
+    location: New York, NY (in office 4 days)
+    priority: medium
+    resume: 2026-10/resume-2026-10-systems-infra.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Posted 2026-10-23. Gaps: PowerShell depth, RMM, MSP background, Fortinet admin."
+        date: "2026-11-02"
+        calendar_id: "c09cec4d1035236e3c7d01fe5847270350d8fc2d516be7ea849b655f365ade7a"
+
+  - company: Gymshark
+    role: IT Support Lead
+    status: "withdrawn"
+    job_url: https://www.monster.com/job-openings/it-support-lead-new-york-ny--44ba3a4e-a4c9-4e32-ab18-73777e171a08
+    salary_range: $75.5-94K
+    location: New York, NY (hybrid)
+    priority: medium
+    resume: 2026-10/resume-2026-10-service-desk.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Aggregator listing: apply via Gymshark careers. Posted ~2026-10-23. Gaps: retail/POS support, vendor/MSP management, lead scope."
+        date: "2026-11-02"
+        calendar_id: "8b6df730485aaf6a0dbe97fb22073d2249c74e81c3225515d4f658e1a8866fee"
+
+  - company: Motion Recruitment Partners
+    role: IT Support Engineer (onsite NYC)
+    status: new_lead
+    job_url: https://www.dice.com/job-detail/fac60caf-6e87-4109-ba75-14639ed5e0e1
+    salary_range: $90-120K
+    location: New York, NY (on-site)
+    priority: medium
+    resume: 2026-10/resume-2026-10-it-support-tech.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Dice shows posted 24 days ago: confirm it is still open before applying. Staffing-firm client is unnamed."
+        date: "2026-10-31"
+        calendar_id: "a9aacd6a0818ea4b04e49c31b93a13b9afdd727b44af524d0d7421f12414e231"
+
+  - company: Teachers Retirement System (NYC)
+    role: Microsoft 365 Engineer
+    status: new_lead
+    job_url: https://cityjobs.nyc.gov/job/microsoft-365-engineer-in-manhattan-jid-48681
+    salary_range: $125-150K
+    location: New York, NY (hybrid)
+    priority: low
+    resume: 2026-10/resume-2026-10-systems-infra.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Stretch: primary owner of the M365 platform; asks 4 yrs, PowerShell automation, Copilot rollout. Apply only if willing to be screened on scripting depth."
+        date: "2026-11-02"
+        calendar_id: "2b5c2c9823559efbaf9fa20e8dd096901ed50c01142716cd6071a3fc52fe6731"
+
+  - company: Thornton Tomasetti
+    role: Cloud Systems Administrator
+    status: new_lead
+    job_url: https://tt.wd503.myworkdayjobs.com/en-US/ThorntonTomasetti/job/Cloud-Systems-Administrator_R7458
+    salary_range: $85-100K
+    location: New York, NY (also Chicago / Austin)
+    priority: low
+    resume: 2026-10/resume-2026-10-systems-infra.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Stretch: requires US citizenship + background check, hands-on Citrix DaaS, Windows Server hardening, PowerShell. AZ-104 preferred."
+        date: "2026-11-06"
+        calendar_id: "d7fb8951f4d5f4ae71694469ba530273ecee628a325fed935e60b6c29bf7e500"
+
+  - company: ZGF
+    role: System Administrator
+    status: new_lead
+    job_url: https://www.zgf.com/careers/UAPVqyOOwL-systems-administrator
+    salary_range: $68.6-80K
+    location: New York, NY (on-site)
+    priority: low
+    resume: 2026-10/resume-2026-10-systems-infra.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Bottom of range is under the $70K floor; apply only as a fallback."
+        date: "2026-11-06"
+        calendar_id: "c9f1161adcf12d9b8edcb9cf0844c5ccac0c2cbbcbf24c71eec7ee7d6004da23"
+
+  - company: Synthesis Health
+    role: Associate IT & Security Engineer
+    status: "withdrawn"
+    job_url: https://job-boards.greenhouse.io/synthesishealth/jobs/4748081005
+    salary_range: $65-80K
+    location: US remote
+    priority: low
+    resume: 2026-10/resume-2026-10-service-desk.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Under the $70K floor at the low end; apply only as a fallback."
+        date: "2026-11-06"
+        calendar_id: "91f8023ba78dac997773bcb0ffc5fabb55805bf2109da1b9eb3ec31c8238c707"
+
+  # ====== NEW LEADS — found 2026-11-06, not yet applied (details: interviews/job-leads-2026-11.md) ======
+  # Pay is as posted. `resume:` = file under resume/ to submit. Move to "applied" + set application_date when sent.
+  - company: CAIS
+    role: IT Support Associate
+    status: new_lead
+    job_url: https://job-boards.greenhouse.io/cais/jobs/8881943002
+    salary_range: $95-125K + performance bonus
+    location: New York, NY (Midtown, hybrid)
+    priority: high
+    # Posted must-haves only, as recorded from the posting on 2026-11-06. No
+    # gap conclusions here: leads_jev.py judges the resume against these.
+    requirements:
+      - "1-3 years of IT support experience"
+      - "Deskside end-user support"
+      - "Microsoft 365 administration"
+      - "Intune device management"
+      - "Entra ID administration"
+      - "New-hire onboarding and offboarding"
+      - "Rolling out AI assistants (Claude, Copilot) to staff"
+    resume: 2026-10/resume-2026-10-it-support-tech.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Apply. Posted 2026-10-14. Asks 1-3 yrs: deskside support, M365 + Intune/Entra admin, onboarding, Claude/Copilot rollout. PowerShell/Python a plus. Best fit on the Nov 6 list."
+        date: "2026-11-07"
+        calendar_id: "fa98414a5117fdbe6a2b7fcebf8fd0a7dcccb6c130664c073f6f0943e1ce1365"
+
+  - company: ASCAP
+    role: Desktop & A/V Support Engineer
+    status: new_lead
+    job_url: https://careers.jobscore.com/careers/ascap/jobs/desktop-a-v-support-engineer-bytVib6IngBPFIazbq-qzq
+    salary_range: $90-95K
+    location: New York, NY (in office 3 days)
+    priority: high
+    requirements:
+      - "3+ years of desktop support experience"
+      - "Mac-first fleet administration with Jamf policies"
+      - "Windows endpoint management with BigFix or Intune"
+      - "Webex, Zoom, Teams and Google Meet meeting support"
+      - "Cisco conference-room kit support"
+      - "Event AV production"
+      - "High-touch executive support"
+    resume: 2026-10/resume-2026-10-it-support-tech.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Apply. Asks 3+ yrs Mac-first desktop + AV: Jamf, BigFix/Intune, Webex/Zoom/Teams, Cisco room kits, event AV, exec support. Gaps: Jamf, BigFix, AV production."
+        date: "2026-11-07"
+        calendar_id: "2fb61954bab0bb22a3524eb869c86a5a5824be0802015ecc0600a9ad9375f839"
+
+  - company: Plaid
+    role: TechOps Site Support
+    status: new_lead
+    job_url: https://plaid.com/careers/openings/security/new-york-city-office/tech-ops-site-support
+    salary_range: $118.8-140.4K
+    location: New York, NY (hybrid)
+    priority: high
+    requirements:
+      - "Own the in-office technical experience: conference rooms, network, workplace tools"
+      - "Conference-room A/V and meeting-room support"
+      - "Office network troubleshooting"
+      - "Workplace tooling administration"
+    resume: 2026-10/resume-2026-10-systems-infra.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Apply via Ashby: https://jobs.ashbyhq.com/plaid/4c51247f-8da5-4fa3-b331-7da94b76bdac/application. Posted ~2026-09-25: confirm still open. In-office AV/network/workplace tech with a path into IAM."
+        date: "2026-11-07"
+        calendar_id: "1a0708c821be78762371d385de8f0d017338fb63f20b342b05d62d688203130d"
+
+  - company: Morgan Lewis
+    role: Technology Support Specialist I
+    status: new_lead
+    job_url: https://morganlewis.wd5.myworkdayjobs.com/morganlewis/job/New-York-New-York/Technology-Support-Specialist_R4261
+    salary_range: $67,400-107,825
+    location: New York, NY (101 Park Ave, on-site 9:00-5:30)
+    priority: medium
+    requirements:
+      - "Associate degree or equivalent"
+      - "1 year of hardware, software or AV support experience"
+      - "Experience in a professional-services (law firm) environment"
+      - "Hardware deployment and basic software support for end users"
+    resume: 2026-10/resume-2026-10-it-support-tech.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Apply. Posted 2026-10-30. Level I: associate degree + 1 yr hardware/basic software/AV support in professional services. Low-bar interview, low end under the floor."
+        date: "2026-11-09"
+        calendar_id: "ef473c0e634e625f2577bf429581a727c1f86c4b39c3080e882e8e05e7cdefa2"
+
+  - company: Align Communications
+    role: Desktop Engineer
+    status: new_lead
+    job_url: https://job-boards.greenhouse.io/align46/jobs/5272244007
+    salary_range: $70-80K
+    location: New York, NY (hybrid, 3 days on-site)
+    priority: medium
+    requirements:
+      - "2-5 years in an MSP or client-facing support environment"
+      - "Executive and VIP deskside support"
+      - "M365, Exchange, Intune and Entra administration"
+      - "Azure Virtual Desktop support"
+      - "VPN and Active Directory/Group Policy support"
+      - "IP phone and printer support"
+      - "Rotational on-call including overnights and weekends"
+    resume: 2026-10/resume-2026-10-it-support-tech.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Apply. Posted 2026-10-22. MSP desk for hedge fund / alt-investment clients; exec VIP support, M365/Intune/Entra, AVD, AD/GPO. Rotational on-call incl. overnights/weekends. Gap: no MSP background."
+        date: "2026-11-09"
+        calendar_id: "c965cf8b7428b4092be6cf9a4547f052be636d9637c5c0fbf5bb2dd7c320b4bc"
+
+  - company: Dalio Family Office
+    role: IT Service Associate
+    status: new_lead
+    job_url: https://www.simplyhired.com/job/PpnUoYEyXdewguka1UnjUCQOlsxjscXxKMMaDNPfV9uIbnAykXjLEQ
+    salary_range: $120-150K incl. bonus
+    location: New York, NY + Westport, CT (hybrid, 3-5 days in office split across both)
+    priority: medium
+    requirements:
+      - "3+ years of IT support experience"
+      - "macOS/iOS and Windows endpoint support"
+      - "High-touch support for principals and family-office staff"
+      - "On-call rotation"
+      - "Regular presence in New York and Westport, CT"
+    resume: 2026-10/resume-2026-10-systems-infra.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Aggregator listing only: find and apply on Dalio Family Office's own careers page. 3+ yrs, macOS/iOS + Windows, principal-level support, on-call. Cost: NYC/Westport split."
+        date: "2026-11-09"
+        calendar_id: "e01940278b01c89852289131d17136d2e4758c75088e1d2a673d9e75256fce78"
+
+  - company: Norm Ai
+    role: Technology Support Specialist
+    status: new_lead
+    job_url: https://jobs.ashbyhq.com/norm-ai/1d885861-177f-43b8-a601-d8704ee820a8
+    salary_range: $120-145K + equity
+    location: New York, NY (One WTC, on-site 4-5 days + rotating on-call)
+    priority: medium
+    requirements:
+      - "2 years supporting a law firm"
+      - "Hands-on iManage Work or Litera"
+      - "macOS and Windows support"
+      - "Microsoft 365 and Google Workspace administration"
+      - "Onboarding program delivery and office hours"
+      - "SLA management in Linear"
+    resume: 2026-10/resume-2026-10-it-support-tech.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Stretch. White-glove support for an AI-native law firm: macOS/Windows, M365 + Google Workspace, iManage, Litera, training program. Hard gap: 2 yrs law-firm and iManage/Litera hands-on."
+        date: "2026-11-09"
+        calendar_id: "1de9c268f1d3cff2738a61ad282845d3fdfdf452ca09e9b4630d6698f6b00936"
+
+  - company: Headway
+    role: IT Engineer
+    status: new_lead
+    job_url: https://jobs.ashbyhq.com/headway/fc4279f7-98b3-4532-832d-07353491dada
+    salary_range: $131.75-155K + equity
+    location: New York, NY (on-site 2 days)
+    priority: low
+    requirements:
+      - "Network ownership: Meraki, VLANs, multi-ISP failover"
+      - "Conference-room AV across multiple offices (Zoom Rooms, Neat)"
+      - "Okta administration"
+      - "Google Workspace administration"
+      - "Slack and Jira Service Management administration"
+      - "1Password administration"
+      - "Endpoint administration across macOS, Windows and ChromeOS"
+    resume: 2026-10/resume-2026-10-systems-infra.pdf  # standard variant, not tailored yet
+    next_steps:
+      - task: "Stretch; posted 2026-09-04 so confirm it is still live. Escalations + owning network/AV across 3 offices (Meraki, VLANs, multi-ISP, Zoom Rooms/Neat), Okta/Google/Jira SM admin. Gaps: Meraki, Okta admin, network ownership."
+        date: "2026-11-20"
+        calendar_id: "c3b0a2370f1d6b77a4b2599570edbd6614c3583f4f5ea8aeca7a272cc8ed806d"
 
   # ====== APPLIED — awaiting response (direct/meaningful IT) ======
   # Wilson Elser (IT Support Analyst) · PBS Radiology (IT Support Specialist) ·
@@ -188,6 +612,142 @@ active_applications:
   #       date:
   #
   #   notes: |
+
+  - company: "Compass"
+    role: "IT Engineer"
+    status: "rejected"
+    priority: "high"
+    interview_preparation: |
+      Ventus SQL
+    interview_questions: |
+      How do you see this person hitting the ground running?
+    next_steps:
+      - task: "Follow up"
+        date: "2026-11-12"
+        calendar_id: "75eac22366775f4c3e5d7becd2b8f02198b5dbe456d7db65f56d4669e35d2d87"
+    interview_notes: |
+      ITIL
+      JSM
+      They decided to look for a contractor and not get back to me
+
+  - company: "Metropolitan Transportation Authority"
+    role: "Systems Administrator Levels 1–5 (Senior Cloud Infrastructure Engineer — Azure & Hybrid Identity)"
+    status: "new_lead"
+    priority: "medium"
+    location: "New York, NY"
+    salary_range: "$57,100–$98,703/yr (by level)"
+    job_url: "https://careers.mta.org/jobs/18130368-systems-administrator-levels-1-5"
+
+  - company: "Related Companies"
+    role: "System Administrator – Endpoint & Client Technologies"
+    status: "new_lead"
+    priority: "medium"
+    location: "New York, NY"
+    job_url: "https://www.related.jobs/careers-home/jobs/21220?lang=en-us"
+
+  - company: "Atrium"
+    role: "Digital Experience & Endpoint Systems Engineer"
+    status: "new_lead"
+    priority: "medium"
+    location: "New York, NY"
+    job_url: "https://www.linkedin.com/jobs/view/digital-experience-endpoint-systems-engineer-409887-at-atrium-4477432556"
+
+  - company: "Vanta"
+    role: "IT Operations Engineer, Corporate Engineering"
+    status: "new_lead"
+    priority: "medium"
+    location: "New York, NY"
+    salary_range: "not stated"
+    job_url: "https://www.builtinnyc.com/job/it-operations-engineer-corporate-engineering/8552140"
+
+  - company: "Vercel"
+    role: "IT Operations Engineer"
+    status: "new_lead"
+    priority: "medium"
+    location: "New York, NY"
+    salary_range: "not stated"
+    job_url: "https://www.employbl.com/jobs/it-operations-engineer-vercel-1711608"
+
+  - company: "Cohere AI"
+    role: "IT Support Engineer"
+    status: "new_lead"
+    priority: "medium"
+    location: "New York, NY"
+    salary_range: "not stated"
+    job_url: "https://www.builtinnyc.com/job/it-support-engineer/8998444"
+
+  - company: "Judge Group, Inc."
+    role: "L2 Support Engineer"
+    status: "new_lead"
+    priority: "medium"
+    location: "New York City, NY"
+    salary_range: "$35.00-$45.00/hr"
+    job_url: "https://www.dice.com/job-detail/ffb0bcae-8334-4024-9c14-67fa98a0e312"
+
+  - company: "Point72"
+    role: "IT Operations Engineer, Application Support"
+    status: "new_lead"
+    priority: "medium"
+    location: "New York, NY"
+    salary_range: "not stated"
+    job_url: "https://www.builtinnyc.com/job/it-operations-engineer-application-support/6916650"
+
+  - company: "Tennr"
+    role: "Senior IT Systems Engineer"
+    status: "new_lead"
+    priority: "medium"
+    location: "New York, NY"
+    salary_range: "$135K-$155K"
+
+  - company: "Point72"
+    role: "Systems Engineer, Collaboration Technology"
+    status: "new_lead"
+    priority: "medium"
+    location: "New York, NY"
+    salary_range: "not stated"
+
+  - company: "PharmaForceIQ"
+    role: "System Engineer Manager, Information Technology"
+    status: "new_lead"
+    priority: "medium"
+    location: "New York, NY"
+    salary_range: "$135K-$150K"
+
+  - company: "Tribe AI"
+    role: "IT Manager"
+    status: "new_lead"
+    priority: "medium"
+    location: "New York, NY"
+    salary_range: "$150K-$190K"
+
+  - company: "Lightning AI"
+    role: "IT Systems Engineer"
+    status: "new_lead"
+    priority: "medium"
+    location: "New York, NY"
+    salary_range: "$90K-$115K"
+
+  - company: "Dana-Co"
+    role: "IT Infrastructure Manager"
+    status: "new_lead"
+    priority: "medium"
+    location: "New York, NY"
+    salary_range: "not stated"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 past_applications:
   # - company:

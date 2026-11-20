@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup — Agents tab in the AutoFill popup</title>
+<link rel="stylesheet" href="../../../job-autofill/extension/popup/popup.css">
+<style>
+	/* Mockup frame only: the real popup is one 360px body. */
+	html, body { background: #e9e2d2; }
+	body { width: auto; padding: 24px; }
+	.frames { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+	.frame { width: 360px; }
+	.frame > p.label { font: 600 13px/1.4 -apple-system, "Inter", sans-serif; color: #3b352b; margin-bottom: 8px; }
+	.frame .popup { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; min-height: 0; }
+
+	/* ── Proposed additions to popup.css ───────────────────────── */
+	.tabs.four { grid-template-columns: repeat(4, 1fr); }
+	.job { display: grid; gap: 8px; }
+	.url { color: var(--ink-muted); word-break: break-all; }
+	.states { list-style: none; display: grid; gap: 2px; font-size: 13px; }
+	.states li { display: flex; gap: 8px; align-items: baseline; }
+	.states .k { width: 78px; flex: none; color: var(--ink-muted); font-size: 11.5px; font-weight: 600; }
+	.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+	.actions .wide { grid-column: 1 / -1; }
+	.confirm { display: grid; gap: 6px; }
+	.confirm dl { display: grid; grid-template-columns: 62px 1fr; gap: 2px 8px; font-size: 13px; }
+	.confirm dt { color: var(--ink-muted); font-size: 11.5px; font-weight: 600; }
+	.confirm dd { min-width: 0; word-break: break-word; }
+	.tag { font-size: 11px; font-weight: 600; padding: 0 6px; border-radius: 4px; border: 1px solid var(--vermilion); color: var(--vermilion-deep); }
+	.section-title { font-size: 12.5px; font-weight: 600; margin-top: 4px; }
+	.list { list-style: none; display: grid; gap: 0; }
+	.list li { padding: 7px 0; border-top: 1px solid var(--border); font-size: 13px; display: grid; gap: 1px; }
+	.list li:first-child { border-top: 0; padding-top: 2px; }
+	.list a { color: var(--sumi); font-weight: 600; text-underline-offset: 2px; }
+	.list .meta { color: var(--ink-muted); font-size: 12px; }
+	.score { font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 11.5px; font-variant-numeric: tabular-nums; color: var(--ink-muted); float: right; }
+	.snip { color: var(--ink-muted); font-size: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+</style>
+</head>
+<body>
+<div class="frames">
+
+<div class="frame">
+	<p class="label">Agents — job detected</p>
+	<div class="popup">
+		<header><h1>AutoFill <span class="status"><span class="dot on"></span><span>Paired</span></span></h1></header>
+		<div class="tabs four" role="tablist">
+			<button type="button" role="tab" aria-selected="false">Run</button>
+			<button type="button" role="tab" aria-selected="false">Profile</button>
+			<button type="button" role="tab" aria-selected="false">AI</button>
+			<button type="button" role="tab" aria-selected="true">Agents</button>
+		</div>
+		<main>
+			<div class="job">
+				<div class="field"><label for="a-company">Company</label><input type="text" id="a-company" value="Acme Health"></div>
+				<div class="field"><label for="a-role">Role</label><input type="text" id="a-role" value="Systems Administrator"></div>
+				<div class="mono url">https://jobs.example.com/acme/123</div>
+			</div>
+			<ul class="states">
+				<li><span class="k">Tracker</span><span>Not in tracker</span></li>
+				<li><span class="k">Job Reader</span><span>Not read</span></li>
+				<li><span class="k">CV Adapter</span><span>No tailored CV</span></li>
+			</ul>
+			<div class="actions">
+				<button type="button" class="wide">Add to tracker</button>
+				<button type="button">Read posting</button>
+				<button type="button" disabled aria-describedby="tailor-hint">Tailor CV</button>
+			</div>
+			<div class="hint" id="tailor-hint">Read the posting first.</div>
+			<button type="button">Find emails</button>
+			<div class="msg" aria-live="polite"></div>
+		</main>
+	</div>
+</div>
+
+<div class="frame">
+	<p class="label">Confirm run</p>
+	<div class="popup">
+		<header><h1>AutoFill <span class="status"><span class="dot on"></span><span>Paired</span></span></h1></header>
+		<div class="tabs four" role="tablist">
+			<button type="button" role="tab" aria-selected="false">Run</button>
+			<button type="button" role="tab" aria-selected="false">Profile</button>
+			<button type="button" role="tab" aria-selected="false">AI</button>
+			<button type="button" role="tab" aria-selected="true">Agents</button>
+		</div>
+		<main>
+			<div class="card confirm">
+				<h2>This will run</h2>
+				<dl>
+					<dt>Agent</dt><dd>Job Reader <span class="tag">Model call · free</span></dd>
+					<dt>Model</dt><dd class="mono">opencode-go/beam-free</dd>
+					<dt>Input</dt><dd class="mono">acme-health-systems-administrator https://jobs.example.com/acme/123</dd>
+				</dl>
+				<div class="hint">It fetches only this posting and writes one JSON file in the workspace.</div>
+			</div>
+			<button type="button" class="primary">Run Job Reader</button>
+			<button type="button">Cancel</button>
+			<div class="msg" aria-live="polite"></div>
+		</main>
+	</div>
+</div>
+
+<div class="frame">
+	<p class="label">Leads and emails</p>
+	<div class="popup">
+		<header><h1>AutoFill <span class="status"><span class="dot on"></span><span>Paired</span></span></h1></header>
+		<div class="tabs four" role="tablist">
+			<button type="button" role="tab" aria-selected="false">Run</button>
+			<button type="button" role="tab" aria-selected="false">Profile</button>
+			<button type="button" role="tab" aria-selected="false">AI</button>
+			<button type="button" role="tab" aria-selected="true">Agents</button>
+		</div>
+		<main>
+			<div class="card">
+				<h2>Job Reader</h2>
+				<div>Acme Health · Done <span class="hint">Read 2026-11-16</span></div>
+			</div>
+			<div class="section-title">Emails about Acme Health</div>
+			<div class="hint">From your local Gmail archive. Nothing is sent to a model.</div>
+			<ul class="list">
+				<li><a href="#">Interview confirmation — Systems Administrator</a><span class="meta">2026-11-05</span><span class="snip">You're confirmed for your interview on 6 Nov 2026 3:30pm–4:00pm Eastern Time…</span></li>
+				<li><a href="#">Thanks for applying to Acme Health</a><span class="meta">2026-10-28</span><span class="snip">We received your application and will review it shortly.</span></li>
+			</ul>
+			<div class="section-title">Scout leads not in the tracker <span class="mono hint">scan-2026-11-16</span></div>
+			<ul class="list">
+				<li><span><span class="score">76</span><a href="#">Desktop / Endpoint Engineer</a></span><span class="meta">Novus · New York, NY</span></li>
+				<li><span><span class="score">75</span><a href="#">IT Operations Engineer I</a></span><span class="meta">Newmark · New York, NY</span></li>
+				<li><span><span class="score">74</span><a href="#">End User Computing Manager</a></span><span class="meta">TEKsystems (client) · New York, NY</span></li>
+			</ul>
+		</main>
+	</div>
+</div>
+
+<div class="frame">
+	<p class="label">Command Center offline</p>
+	<div class="popup">
+		<header><h1>AutoFill <span class="status"><span class="dot on"></span><span>Paired</span></span></h1></header>
+		<div class="tabs four" role="tablist">
+			<button type="button" role="tab" aria-selected="false">Run</button>
+			<button type="button" role="tab" aria-selected="false">Profile</button>
+			<button type="button" role="tab" aria-selected="false">AI</button>
+			<button type="button" role="tab" aria-selected="true">Agents</button>
+		</div>
+		<main>
+			<div class="warnline">Command Center is not running on 127.0.0.1:8000. Start it to use the tracker and agents.</div>
+			<div class="job">
+				<div class="field"><label for="o-company">Company</label><input type="text" id="o-company" value="Acme Health"></div>
+				<div class="field"><label for="o-role">Role</label><input type="text" id="o-role" value="Systems Administrator"></div>
+			</div>
+			<div class="actions">
+				<button type="button" class="wide" disabled>Add to tracker</button>
+				<button type="button" disabled>Read posting</button>
+				<button type="button" disabled>Tailor CV</button>
+			</div>
+			<button type="button">Find emails</button>
+			<div class="msg" aria-live="polite"></div>
+		</main>
+	</div>
+</div>
+
+</div>
+</body>
+</html>

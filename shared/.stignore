@@ -1,0 +1,56 @@
+(?d).DS_Store
+(?d)Thumbs.db
+
+// Secrets and credentials
+.env
+.env.*
+**/.env
+**/.env.*
+*.pem
+*.key
+credentials/
+**/credentials/
+secrets/
+**/secrets/
+
+// Dependencies and generated output
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+dist/
+**/dist/
+build/
+**/build/
+coverage/
+**/coverage/
+.cache/
+**/.cache/
+tmp/
+**/tmp/
+venv/
+.venv/
+**/venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+
+// Local runtime state
+*.sqlite
+**/*.sqlite
+*.db
+**/*.db
+*.sock
+**/*.sock
+*.lock
+**/*.lock
+*.qcow2
+**/*.qcow2
+*.vmdk
+**/*.vmdk
+*.log
+**/*.log
+
+// Version control is intentionally machine-local
+.git/
+**/.git/

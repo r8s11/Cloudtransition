@@ -1,0 +1,213 @@
+{# Read-only Skill Registry — opened from the Agents tab. Standalone page like
+   the Reader: it never edits a skill or an agent, and assigns nothing. #}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Skill registry — CloudTransition</title>
+<link rel="stylesheet" href="/static/tokens.css?v=command-20261118-colour">
+<link rel="stylesheet" href="/static/deck.css?v=deck-20261119-polish">
+<style>
+  body.deck { margin: 0; padding: 20px 16px 48px; background: var(--deck-ground); color-scheme: dark; }
+  main { max-width: 1180px; margin: 0 auto; }
+  .deck .skills-nav { margin: 0 0 16px; }
+  .deck .skills-icon { width: 16px; height: 16px; flex: none; }
+  .deck .skills-icon * { vector-effect: non-scaling-stroke; }
+  .deck h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.2px; color: var(--ink-strong); }
+  .deck .deck-header p { margin: 4px 0 0; }
+  .deck h2 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
+  .deck section.deck-panel > p { margin: 0 0 12px; font-size: 13px; }
+  .deck .skills-note { display: grid; gap: 6px; font-size: 13px; }
+  .deck .skills-note p { margin: 0; max-width: 90ch; }
+  .deck .skills-stats { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0 0 16px; font-size: 13px; color: var(--deck-text-3); }
+  .deck .skills-stats .deck-num { color: var(--deck-text); }
+  .deck .skills-stats .skills-stats-note { flex-basis: 100%; }
+  .deck .muted { color: var(--deck-text-3); }
+  .deck .skills-warn { color: var(--deck-warn); }
+  .deck ul.warn { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 4px; font-size: 12.5px; }
+  .deck ul.warn li { position: relative; padding-left: 14px; color: var(--deck-text-2); overflow-wrap: anywhere; }
+  .deck ul.warn li::before { content: ""; position: absolute; left: 0; top: 0.6em; width: 6px; height: 6px; border-radius: 50%; background: var(--deck-warn); }
+  .deck > main > ul.warn { margin: -4px 0 16px; }
+  .deck .legend { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 6px; font-size: 13px; }
+  .deck .legend li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
+  .deck .legend .deck-chip { min-width: 84px; }
+  .deck .scroll { overflow-x: auto; border: 1px solid var(--deck-edge); border-radius: var(--deck-radius-sm); background: var(--deck-sunken); }
+  .deck .scroll > table { min-width: 640px; }
+  .deck thead th { position: sticky; top: 0; background: var(--deck-sunken); white-space: nowrap; }
+  .deck td, .deck th { overflow-wrap: anywhere; }
+  .deck td.num { font-family: var(--deck-mono); font-variant-numeric: tabular-nums; color: var(--deck-text); }
+  .deck td.num.zero { color: var(--deck-text-3); }
+  .deck tr:target > * { background: var(--deck-accent-weak); }
+  .deck tr[id] { scroll-margin-top: 16px; }
+  .deck td .deck-chip, .deck th .deck-chip { padding: 2px 7px; margin-top: 4px; }
+  .deck details { margin-top: 6px; }
+  .deck details > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; color: var(--deck-accent); font-size: 12.5px; border-radius: var(--deck-radius-sm); }
+  .deck details > summary::before { content: ""; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); transition: transform var(--deck-fast) var(--deck-ease); }
+  .deck details[open] > summary::before { transform: rotate(45deg); }
+  .deck details > summary:hover { color: var(--ember-light); }
+  .deck pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 360px; overflow: auto; margin: 6px 0 0; padding: 10px 12px;
+              font: 400 12px/1.55 var(--deck-mono); color: var(--deck-text-2);
+              background: var(--deck-ground); border: 1px solid var(--deck-edge); border-radius: var(--deck-radius-sm); }
+  @media (pointer: coarse) { .deck details > summary { min-height: 44px; } }
+  @media (max-width: 640px) { body.deck { padding: 12px 10px 32px; } }
+  @media (prefers-reduced-motion: reduce) { .deck details > summary::before { transition: none; } }
+</style>
+</head>
+<body class="deck">
+<main>
+  <nav class="skills-nav">
+    <a class="deck-btn deck-btn-ghost" href="/#agents">
+      <svg class="skills-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></svg>
+      Agents
+    </a>
+  </nav>
+
+  <header class="deck-header">
+    <h1>Skill registry</h1>
+    <p>
+      Skills OpenCode 2.3 registers for runs started at the workspace root, and what each agent's OpenCode rules let its
+      model load. Read-only: nothing here edits a skill or an agent, and nothing is assigned.
+    </p>
+  </header>
+
+  <div class="deck-panel skills-note" role="note">
+    <p><strong>A skill grants nothing.</strong> Loading a skill only adds its text to the conversation. Every tool the
+    skill mentions (files, shell, web) still follows the agent's own permission rules. Whether the model may load a
+    skill is decided by the agent's OpenCode <code>skill</code> rules, the last matching rule wins.</p>
+    <p>Those rules gate the model's <code>skill</code> tool only: OpenCode's explicit activation API loaded a skill the
+    agent's rules deny (checked 2026-11-17), so skill rules are not an access boundary for whoever drives OpenCode.</p>
+  </div>
+
+  <p class="skills-stats">
+    <span><span class="deck-num">{{ registry.counts.skills }}</span> skills registered from <span class="deck-num">{{ registry.counts.files }}</span> files</span>
+    <span><span class="deck-num">{{ registry.counts.advertised }}</span> advertised to models</span>
+    <span><span class="deck-num">{{ registry.counts.duplicates }}</span> duplicate IDs (<span class="deck-num">{{ registry.counts.conflicts }}</span> with different instructions)</span>
+    <span><span class="deck-num">{{ registry.counts.invalid }}</span> loaded copies with metadata problems</span>
+    <span class="skills-stats-note">Built-in and plugin skills (for example the <code>superpowers</code> plugin) are registered first and are not listed.</span>
+  </p>
+  {% if registry.warnings %}
+  <ul class="warn" aria-label="Registry warnings">
+    {% for w in registry.warnings %}<li>{{ w }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+
+  <section class="deck-panel" aria-labelledby="sources-title">
+    <h2 id="sources-title">Sources, lowest precedence first</h2>
+    <p class="muted">Where OpenCode looks for <code>SKILL.md</code> files; a later source overrides an earlier one with the same ID.</p>
+    <div class="scroll" tabindex="0" role="region" aria-label="Skill sources"><table>
+      <thead><tr><th scope="col">Source</th><th scope="col">Skills</th><th scope="col">Loaded for workspace runs?</th></tr></thead>
+      <tbody>
+      {% for s in registry.sources %}
+        <tr>
+          <th scope="row"><code>{{ s.path }}</code></th>
+          <td{% if s.exists %} class="num"{% endif %}>{% if s.exists %}{{ s.files }}{% else %}<span class="deck-chip" data-tone="warn">missing</span>{% endif %}</td>
+          <td>{% if s.scoped %}Only when OpenCode runs inside <code>dashboard-app/</code>{% else %}Yes{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="deck-panel" aria-labelledby="matrix-title">
+    <h2 id="matrix-title">Agents and skills</h2>
+    {% if not opencode_ok %}
+    <p class="skills-warn">OpenCode gave no readable answer to <code>opencode debug agents</code>, so no agent's access is shown. Check that <code>opencode</code> runs from the workspace root, then reload this page.</p>
+    {% endif %}
+    <p class="muted">From OpenCode's own resolved rules for each agent.</p>
+    <ul class="legend" aria-label="Access states">
+      <li><span class="deck-chip" data-tone="ok">Loadable</span> advertised and loaded without approval.</li>
+      <li><span class="deck-chip" data-tone="neutral">Hidden</span> permitted but never advertised (no description or autoinvoke off).</li>
+      <li><span class="deck-chip" data-tone="warn">Ask</span> OpenCode asks first, and a dashboard run has nobody to answer.</li>
+      <li><span class="deck-chip" data-tone="bad">Denied</span> hidden and rejected.</li>
+      <li><span class="deck-chip" data-tone="info">Approved</span> loadable, valid metadata, no conflicting copies; what a future per-run picker could offer.</li>
+    </ul>
+    <div class="scroll" tabindex="0" role="region" aria-label="Skill access by agent"><table>
+      <thead><tr>
+        <th scope="col">Agent</th><th scope="col">Loadable</th><th scope="col">Hidden</th><th scope="col">Ask</th>
+        <th scope="col">Denied</th><th scope="col">Approved</th><th scope="col">Skill rules</th>
+      </tr></thead>
+      <tbody>
+      {% for row in matrix %}
+        <tr id="agent-{{ row.agent }}">
+          <th scope="row"><code>{{ row.agent }}</code></th>
+          {% if row.evaluated %}
+          <td class="num{% if not row.counts.loadable %} zero{% endif %}">{{ row.counts.loadable }}</td>
+          <td class="num{% if not row.counts.hidden %} zero{% endif %}">{{ row.counts.hidden }}</td>
+          <td class="num{% if not row.counts.ask %} zero{% endif %}">{{ row.counts.ask }}</td>
+          <td class="num{% if not row.counts.denied %} zero{% endif %}">{{ row.counts.denied }}</td>
+          <td class="num{% if not row.approved %} zero{% endif %}">{{ row.approved|length }}</td>
+          <td>{% for r in row.skill_rules %}<code>{{ r }}</code>{% if not loop.last %}, {% endif %}{% else %}<span class="muted">none</span>{% endfor %}</td>
+          {% else %}
+          <td colspan="6" class="muted">Not evaluated: {{ row.reason }}</td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="deck-panel" aria-labelledby="skills-title">
+    <h2 id="skills-title">Skills</h2>
+    <p class="muted">Open <em>Instructions</em> to read a skill's text; it loads only when opened.</p>
+    <div class="scroll" tabindex="0" role="region" aria-label="Registered skills"><table>
+      <thead><tr>
+        <th scope="col">ID</th><th scope="col">Description</th><th scope="col">Loaded copy</th>
+        <th scope="col">Copies</th><th scope="col">Agents that can load it</th>
+      </tr></thead>
+      <tbody>
+      {% for s in registry.skills %}
+        {% set c = s.loaded or s.copies[0] %}
+        <tr id="skill-{{ s.id }}">
+          <th scope="row">
+            <code>{{ s.id }}</code>
+            {% if c.name != s.id %}<br><span class="muted">{{ c.name }}</span>{% endif %}
+            {% if not s.advertised %}<br><span class="deck-chip" data-tone="neutral">not advertised</span>{% endif %}
+          </th>
+          <td>
+            {{ c.description or "—" }}
+            {% if s.warnings %}<ul class="warn">{% for w in s.warnings %}<li>{{ w }}</li>{% endfor %}</ul>{% endif %}
+            <details{% if c.in_workspace %} data-src="{{ c.path }}"{% endif %}>
+              <summary>Instructions</summary>
+              {% if c.in_workspace %}
+              <pre>Loading&hellip;</pre>
+              {% else %}
+              <p class="muted">Outside the workspace ({{ c.size or 0 }} bytes); the dashboard's file viewer serves only workspace files, so only the path is shown.</p>
+              {% endif %}
+            </details>
+          </td>
+          <td><code>{{ c.path }}</code></td>
+          <td>
+            <span class="deck-num">{{ s.copies|length }}</span>{% if s.versions > 1 %} <span class="deck-chip" data-tone="warn">{{ s.versions }} versions</span>{% endif %}
+            {% if s.copies|length > 1 %}
+            <details><summary>Paths</summary>
+              {% for copy in s.copies %}<code>{{ copy.path }}</code>{% if copy.scoped %} <span class="muted">(dashboard-app only)</span>{% endif %}<br>{% endfor %}
+            </details>
+            {% endif %}
+          </td>
+          <td>
+            {% set who = loaders.get(s.id, []) %}
+            {% if who %}<span class="deck-num">{{ who|length }}</span>: {% for a in who %}<a href="#agent-{{ a }}"><code>{{ a }}</code></a>{% if not loop.last %}, {% endif %}{% endfor %}{% else %}<span class="muted">none</span>{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+</main>
+<script>
+  // Instructions load only when opened, through the existing /api/file rules.
+  document.addEventListener("toggle", (e) => {
+    const d = e.target;
+    if (!(d instanceof HTMLDetailsElement) || !d.open || !d.dataset.src || d.dataset.loaded) return;
+    d.dataset.loaded = "1";
+    const pre = d.querySelector("pre");
+    fetch(`/api/file?path=${encodeURIComponent(d.dataset.src)}`)
+      .then((r) => r.json().then((body) => ({ ok: r.ok, body })))
+      .then(({ ok, body }) => { pre.textContent = ok ? body.content : `Not available: ${body.error}`; })
+      .catch(() => { pre.textContent = "Could not load."; });
+  }, true);
+</script>
+</body>
+</html>

@@ -9,20 +9,20 @@
       href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/static/tokens.css?v=polish-20261109b" />
+    <link rel="stylesheet" href="/static/tokens.css?v=command-20261118" />
     <style>
       /* ── Foundation ────────────────────────────────────────────── */
       /* Shared palette, type, and shape tokens come from /static/tokens.css.
          Only reader-specific overrides live here. */
       :root {
-        --bg: #f3ead8;
-        --surface: var(--paper-hi);
-        --surface-alt: var(--paper-deep);
-        --accent-warm: var(--vermilion-light);
+        --bg: var(--void);
+        --surface: var(--panel-hi);
+        --surface-alt: var(--panel-deep);
+        --accent-warm: var(--ember-light);
         --accent-bg: var(--accent-soft);
-        --ink: var(--sumi);
-        --code-bg: var(--sumi);
-        --code-text: #e8dfd6;
+        --ink: var(--ink-strong);
+        --code-bg: var(--panel-deep);
+        --code-text: var(--ink);
         --sidebar-w: 280px;
         --header-h: 52px;
         --serif: "Newsreader", "Georgia", serif;
@@ -186,7 +186,7 @@
       }
       .search-input:focus {
         border-color: var(--accent-warm);
-        box-shadow: 0 0 0 3px rgba(179, 33, 46, 0.1);
+        box-shadow: 0 0 0 3px rgba(255, 122, 26, 0.1);
       }
       .search-wrap {
         position: relative;
@@ -277,7 +277,7 @@
       .file-item.active {
         background: var(--accent-bg);
         color: var(--accent);
-        border-color: rgba(179, 33, 46, 0.15);
+        border-color: rgba(255, 122, 26, 0.15);
         font-weight: 500;
       }
       .file-item svg {
@@ -322,16 +322,16 @@
       .welcome-mark {
         width: 72px;
         height: 72px;
-        border-radius: 12px;
+        border-radius: 2px;
         background: var(--accent);
-        border: 1px solid rgba(79, 9, 14, 0.5);
+        border: 1px solid rgba(0, 4, 12, 0.5);
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 24px;
         box-shadow:
           0 1px 0 rgba(255, 255, 255, 0.3) inset,
-          0 6px 18px rgba(90, 62, 31, 0.25);
+          0 6px 18px rgba(0, 0, 0, 0.45);
       }
       .welcome h2 {
         font-family: var(--serif);
@@ -474,7 +474,7 @@
       .prose a {
         color: var(--accent);
         text-decoration: underline;
-        text-decoration-color: rgba(179, 33, 46, 0.3);
+        text-decoration-color: rgba(255, 122, 26, 0.3);
         text-underline-offset: 3px;
         transition: text-decoration-color 0.2s;
       }
@@ -592,7 +592,7 @@
         vertical-align: top;
       }
       .prose tbody tr:hover td {
-        background: rgba(179, 33, 46, 0.03);
+        background: rgba(255, 122, 26, 0.03);
       }
 
       /* Task lists */
@@ -618,7 +618,7 @@
         position: absolute;
         top: -1px;
         left: 2px;
-        color: #fff;
+        color: var(--on-ember);
         font-size: 11px;
         font-weight: 700;
       }

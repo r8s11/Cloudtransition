@@ -1,0 +1,770 @@
+
+DUTIES:
+
+
+
+Design, test, and implement responsive web applications.
+Collaborate with various teams for research, analysis, and architecture of business solutions.
+Develop and maintain innovative, scalable solutions that provide value to the business and provide operational support as required.
+Develop, design, code, debug and document high traffic web applications and services running from cloud platforms.
+Design, write, and implement unit tests and end to end tests.
+Provide input and guidance on development and architecture decisions; collaborate with other engineers.
+Evaluate new technologies and determine viability per solution.
+Analyze requirements and solution architecture and provide task specific estimates.
+Mentor junior engineers with regards to coding practices and design decisions.
+Participate in code reviews to ensure high quality and consistent coding practices.
+Participate in scrum team ceremonies in agile methodology, sprint planning, and backlog grooming.
+Collaborate closely with other IT teams globally from Product Management, Architecture, DevOps, Quality Assurance (QA), and Infrastructure.
+Ensure quality and performance standards are met across omnichannel customer experiences including kiosks, mobile, and web platforms.
+Other duties as assigned.
+
+
+REQUIREMENTS: Bachelor’s degree or foreign equivalent degree in computer science, Computer Engineering, or related technical discipline and 4 years of software engineering experience, building responsive web applications and Application Program Interfaces (APIs).
+
+
+
+Other required experience:
+
+
+
+4 years of professional full stack development using NodeJs, Java, and Angular.
+4 years of experience with Continuous Integration (CI)/Continuous Delivery (CD) pipeline and tools like Jenkins, Sonarqube, etc.
+4 years of experience with developing software applications in at least one of the major Cloud platforms – Azure, GCP or AWS.
+4 years of experience in agile practices in Scrum teams.
+Any amount of experience with Magnolia Content Management Systems (CMS) and Fastly Content Delivery Networks (CDN).
+4 years of experience with Yarn, Gradle, WebPack, and CSS.
+Demonstrated knowledge* of:
+Modern software architecture, microservices, micro-frontends, serverless applications and frameworks.
+Search Engine Optimization (SEO).
+Application security and knowledge of security best practices.
+DevOps practices.
+Omnichannel customer experiences across kiosks, mobile, and web platforms.
+
+
+* Knowledge may be demonstrated through education, training and/or experience.
+
+All candidates must maintain possession of valid travel documents and the ability to travel in and out of the United States. This position requires the ability to work flexible hours and be available for emergency response on short notice. Must be able to pass a pre-employment drug test. Candidates must demonstrate coding skills in a work sample assessment.
+
+
+Title:  Engineer IT Quality Data
+Location:  Long Island City, NY, US, 11101
+Req ID:  57857
+Category:  Information Technology
+JetBlue Airways Corporation: Engineer IT Quality Data – Long Island City, NY
+
+
+
+DUTIES:
+
+
+
+Collaborate with multiple teams to ensure data integrity and validation using the right tools and automation.
+Be proficient in pre-screening raw data, vital checks on completeness and integrity of data, field tests on Aggregation,
+Reconciliation tests and Report testing.
+Evaluate the quality of data received from data sources to ensure that it meets company standards.
+Review Data Models, Data Mappings, and Architectural Documentation to execute effective system integration testing.
+Work closely with Business Analysts, Architects, Development team and Product Owners to ensure data housed in multiple source systems is loaded to target accurately.
+Develops validation scripts for automated execution, while creating actionable data quality reports that measure trends over time.
+Build new scripts and troubleshoot existing scripts. Solve complex record and run issues including complex correlation problems.
+Verify and validate data accuracy, completeness, and consistency using Extract/Transform/Load (ETL) tools and SQL queries.
+Analyzes and troubleshoots erroneous results, determines the root cause of defects, logs the defects JIRA/QTest and enables defect management, including working with the development team on the resolution of Software related defects.
+Drive opportunities and lead efforts to improve existing test processes or create new to increase efficiency and
+productivity in test case development, scheduling, or deployment.
+Analyze test results and prioritize and log defects with appropriate information.
+Manage multiple projects/deadlines with changing priorities.
+Other duties as assigned.
+
+
+REQUIREMENTS: Bachelor’s degree or foreign equivalent degree in Computer Science or related technical field and 3 years of experience with ETL/Data warehouse test or development experience. Experience must include:
+
+3 years of experience with data analysis.
+3 years of experience in SQL for data querying, validation, and analysis.
+3 years of experience with complex joins, subqueries, and performance optimization.
+3 years of experience in Scala/Python for test automation and data manipulation.
+3 years of experience on Snowflake and Azure Databricks.
+3 years of experience identifying changes, driving improvements, and streamlining processes.
+Demonstrated knowledge of:
+Software development lifecycle.
+Microsoft Azure technologies.
+
+
+*Knowledge may be demonstrated through education, training and/or experience
+
+
+Title:  Developer IT Portal Corporate Products
+Location:  Long Island City, NY, US, 11101 Washington, DC, US, 20005 Orlando, FL, US, 32827 Salt Lake City, UT, US, 84121
+Req ID:  57829
+Category:  Information Technology
+
+
+
+
+
+
+Position Summary
+
+The SAP Developer is responsible for analyzing, designing, developing and maintaining modern, role-based secure web applications that enhance user experience and support business processes at Jetblue Airways. The SAP Developer partners closely with functional analysts, business stakeholders, and peer developers to deliver intuitive, secure, and scalable solutions aligned with SAP Fiori Design Guidelines, best practices and Jetblue Standards. The SAP Developer focuses on applications development using SAP UI5 while integrating with SAP back-end systems like S/4 HANA, SuccessFactors, Ariba,  Concur   and other  SAP Products..
+
+Essential Responsibilities
+
+Design, Develop, Test, and Deploy SAP Fiori applications using SAP UI5 and Fiori Tools.
+Customize, enhance and extend standard SAP Fiori applications to meet business requirements.
+Develop and Customize SAP Fiori Themes and CSS using UI Theme Designer.
+Develop and Consume OData(v2/v4) services using Netweaver Gateway, RAP or CAP methodologies.
+Engage in end-to-end application lifecycle management, including deployment to SAP S/4HANA and/or SAP Business Technology Platform (BTP) landscapes.
+Support SAP S/4 HANA and BTP upgrades, enhancements, and continuous improvement initiatives.
+Troubleshoot and resolve issues for applications maintenance and support adhering to change management processes.
+Collaborate with functional analysts, business and matrix partners to deliver user-centric applications.
+Participate in code reviews, technical design discussions, and solutions documentation.
+Other duties as assigned.
+Minimum Experience and Qualifications
+
+Bachelor’s degree in computer science, Information Systems, or a related field, OR demonstrated capability to perform job responsibilities with a combination of a High School Diploma/GED and at least four (4) years of previous related work experience.
+Three (3) years of experience in SAP UI5 and Fiori development.
+Three (3) years of experience working with JavaScript, HTML5, XML, JSON, CSS, and MVC architecture.
+Hands-on experience with SAP Business Application Studio and/or Visual Studio Code for SAP Fiori applications development.
+Familiarity with SAP Fiori Launchpad configuration, catalogs and role-based access concepts
+Demonstrated ability to work as part of a team, explain technology issues and work progress to both technical and non-technical staff.
+Must pass a pre-employment drug test.
+Must be legally eligible to work in the country in which the position is located.
+Preferred Experience and Qualifications
+
+Certified Associate - SAP Fiori Application Developer is preferred.
+ABAP development experience, particularly related to Gateway and OData services, CDS views.
+Working knowledge of SAP S/4HANA particularly in Human Capital Management (HCM) or Finance (FI) processes and at least one SAP cloud solution such as SuccessFactors, Ariba, or Concur.
+Experience working on MTA based applications using SAP HANA Cloud DB as a backend database, including data modeling concepts, performance considerations, or service integration
+Crewmember Expectations
+
+Regular attendance and punctuality is expected.
+Potential need to work flexible hours and be available to respond on short notice.
+Able to maintain a professional appearance.
+When working or traveling on JetBlue flights, and if time permits, capable crewmembers are asked to assist with light cleaning of the aircraft.
+Must be an appropriate organizational fit for the JetBlue culture, i.e. exhibit the JetBlue values of Safety, Caring, Integrity, Fun and Passion.
+Identify safety and security concerns, issues, incidents or hazards that should be reported and report them whenever possible and by any means necessary including JetBlue's confidential reporting systems (Aviation Safety Action Program (ASAP) or Safety Action Report (SAR)).
+The use of ChatGPT or any other automated tool during the interview process will disqualify a candidate from being considered for the position.
+Equipment
+
+Computer and other office equipment.
+Work Environment
+
+Traditional office environment.
+Physical Effort
+
+Generally not required, or up to 10 pounds occasionally, 0 pounds frequently. (Sedentary)
+Compensation
+
+The base pay range for this position is between $90,500.00 and $128,600.00 per year. Base pay is one component of JetBlue’s total compensation package, which may also include access to healthcare benefits, a 401(k) plan and company match, crewmember stock purchase plan, short-term and long-term disability coverage, basic life insurance, free space available travel on JetBlue, and more.
+
+
+Engineer, IT Software
+Posting Start Date:  4/9/26
+Location: DFW Headquarters Building 8 (DFW-SV08)
+Cities: Fort Worth - TX
+Requisition ID: 84914
+
+Job Description
+Intro
+Are you ready to explore a world of possibilities, both at work and during your time off? Join our American Airlines family, and you’ll travel the world, grow your expertise and become the best version of you.  As you embark on a new journey, you’ll tackle challenges with flexibility and grace, learning new skills and advancing your career while having the time of your life.  Feel free to enrich both your personal and work life and hop on board!
+
+Why you'll love this job
+As one diverse, high-performing team dedicated to technical excellence, you will focus relentlessly on delivering unrivaled digital products that drive a more reliable and profitable airline.
+The Software domain refers to the area within Information Technology that focuses on the development, deployment, management, and maintenance of software applications that support business processes and user needs. This includes development, application lifecycle management, requirement analysis, QA, security & compliance, and maintaining the applications and infrastructure.
+
+What you'll do
+As noted above, this list is intended to reflect the current job but there may be additional essential functions (and certainly non-essential job functions) that are not referenced.  Management will modify the job or require other tasks be performed whenever it is deemed appropriate to do so, observing, of course, any legal obligations including any collective bargaining obligations.
+
+Writes, tests, and documents technical work products (e.g., code, scripts, processes) according to organizational standards and practices  
+Consistently produces good quality technical work products that are clear, concise, tested, and easily understood by others 
+Efficiently debugs design-time and run-time problems and effectively identifies problems in dependencies or caused by interactions with other services 
+Designs new implementations and provides enhancements to existing architectures, maintaining reliability, resiliency, security, and performance 
+Identifies and corrects issues with system components affecting operational reliability, stability and performance based on observable telemetry 
+Understands and follows secure coding practices to avoid known potential vulnerabilities and actively looks for vulnerabilities during code reviews 
+Identifies opportunities for automation that improve team performance and raises them to the team 
+Consistently identifies and capitalizes on opportunities for simplification 
+All you'll need for success
+Minimum Qualifications- Education & Prior Job Experience
+
+Bachelor's degree in Computer Science, Computer Engineering, Technology, Information Systems (CIS/MIS), Engineering or related technical discipline, or equivalent experience/training
+3+ years of experience designing, developing, and implementing large-scale solutions in production environments
+3+ years of strong hands-on development background in C#/.NET, NET CORE. +1 years in any javascript frameworks such as React JS or Angular. 1+ years in RDBMS – SQL Server or PostgreSQL.
+Knowledge of Azure cloud environment development, and deployment
+Hands on SQL using SQL Server or Postgres - DDL, DML queries creation and execution.
+2+ years working in a large team of 10 members.
+Preferred Qualifications- Education & Prior Job Experience
+
+Master's degree in Computer Science, Computer Engineering, Technology, Information Systems (CIS/MIS), Engineering or related technical discipline, or equivalent experience/training
+Airline Industry experience
+Skills, Licenses & Certifications
+
+Experience with the following technologies: 
+Programming Languages:  C#/.NET, .NET CORE, Javascript/Typescript 
+Frameworks: Spring/SpringBoot, FastAPI 
+Front End Technologies: Angular/React JS
+Deployment Technologies: Kubernetes, Docker 
+Source Control: GitHub, Azure DevOps 
+CICD: GitHub Actions, Azure DevOps 
+Data management: MS SQL, PostgreSQL
+Integration/APIs Technologies: Azure Data Factory, Kafka, REST, GraphQL 
+Cloud Providers such as Azure  
+Test Automation: Selenium, TestNG, Postman, SonarQube, JUnit/NUnit/PyTest, Cucumber, Playwright
+Ability to concisely convey ideas verbally, in writing, in code, and in diagrams 
+Experience in Agile methodologies, such as SCRUM 
+Experience in DevOps Toolchain methodologies, including TDD (test-driven development), Continuous Integration and  Continuous Deployment 
+What you'll get
+Feel free to take advantage of all that American Airlines has to offer:
+
+Travel Perks: Ready to explore the world? You, your family and your friends can reach 365 destinations on more than 6,800 daily flights across our global network.
+Health Benefits: On day one, you’ll have access to your health, dental, prescription and vision benefits to help you stay well. And that’s just the start, we also offer virtual doctor visits, flexible spending accounts and more.
+Wellness Programs: We want you to be the best version of yourself – that’s why our wellness programs provide you with all the right tools, resources and support you need.
+401(k) Program: Available upon hire and, depending on the workgroup, employer contributions to your 401(k) program are available after one year.
+Additional Benefits: Other great benefits include our Employee Assistance Program, pet insurance and discounts on hotels, cars, cruises and more
+Feel free to be yourself at American
+From the team members we hire to the customers we serve, inclusion and diversity are the foundation of the dynamic workforce at American Airlines. Our 20+ Employee Business Resource Groups are focused on connecting our team members to our customers, suppliers, communities and shareholders, helping team members reach their full potential and creating an inclusive work environment to meet and exceed the needs of our diverse world.
+
+Are you ready to feel a tremendous sense of pride and satisfaction as you do your part to keep the largest airline in the world running smoothly as we care for people on life’s journey? Feel free to be yourself at American.
+
+Cities: Fort Worth - TX
+Requisition ID: 84914
+
+
+
+Sr Manager, IT Engineering
+Posting Start Date:  4/14/26
+Location: DFW Headquarters Building 7 (DFW-SV07)
+Cities: Fort Worth - TX
+Requisition ID: 85025
+
+Job Description
+Intro
+The Senior Manager, IT Engineering will play a critical leadership role in powering our Loyalty platform—the engine behind how we recognize and care for our most valued customers. This role leads an experienced engineering team responsible for delivering and supporting an Oracle Siebel–based solution that underpins the AAdvantage® program, Sales capabilities, Admirals Club operations, and Customer Relations services. Operating in a fast‑paced, high‑visibility environment, this leader will drive technical excellence, foster a culture of innovation, and partner closely with product, business, and technology teams to ensure scalable, reliable, and customer‑centric solutions that support the continued evolution of our Loyalty ecosystem.
+
+Why you'll love this job
+As one diverse, high-performing team dedicated to technical excellence, you will focus relentlessly on delivering unrivaled digital products that drive a more reliable and profitable airline.
+The Engineering domain is an area focused on development, deployment, management, and maintenance of software applications that support business processes and user needs while ensuring reliability, performance, and security. This includes development, application lifecycle management, requirement analysis, QA, security & compliance, and maintaining the applications and infrastructure.
+What you'll do
+As noted above, this list is intended to reflect the current job but there may be additional essential functions (and certainly non-essential job functions) that are not referenced.  Management will modify the job or require other tasks be performed whenever it is deemed appropriate to do so, observing, of course, any legal obligations including any collective bargaining obligations.
+
+Exhibits strong business and leadership skills, deep technology perspective to guide solutions, and strong communication skills to coordinate with Engineers and Engineering Managers to ensure they understand business needs and objectives, as well as technical requirements of products
+Collaborates with Business and IT leadership to execute and communicate organization’s technical vision, mission, and work priorities, and drives progress towards roadmaps and ensures efficient technical product management and effective communication with stakeholders
+Create a clear strategic direction across multiple engineering teams to align with technical direction as well as business priorities
+Supports an environment for engineering teams to be self-governing organizations who are accountable for their own performance and delivery commitments and measured accordingly
+Removes roadblocks, cultivates relationships, and effectively communicates across IT and at various levels of leadership
+Communicates across engineering teams to relay business and IT initiatives, priorities, and support clear adherence to business priorities
+Facilitates increased technical upskilling across organization
+Promote use of industry leading technology trends and continuously assess AA IT needs and areas for improvement
+Leads, develops, and mentors leaders and top performers across the engineering teams to build next generation of leaders
+Exhibits a desire for continuous learning and sharing of new knowledge within the organization
+Responsible for budget management, forecasting, resource allocation, and long-term planning to drive alignment with business priorities
+Escalation point for production issues and off-hours support, communication, and coordination
+All you'll need for success
+Minimum Qualifications- Education & Prior Job Experience
+
+Bachelor's degree in Technology, Computer Science, Information Systems,  or related technical discipline, or equivalent experience/training
+7+ years of experience participating in delivery of solutions using ITIL / Agile / XP, or similar methodologies
+5+ years of experience leading product teams
+Preferred Qualifications- Education & Prior Job Experience
+
+Master's degree in Computer Science, Computer Engineering, Technology, Information Systems (CIS/MIS), Engineering or related technical discipline, or equivalent experience/training
+Airline industry experience, including engineering / business processes and supporting technology
+Skills, Licenses & Certifications
+
+Proven track record in leading Engineering initiatives that generate substantial value; well organized, able to multi-task, able to prioritize with minimal direction
+Strong technical leadership, and extensive experience in Agile methodology-style leadership environment
+Excellent communication skills to present to executive management often and emphasize the important intersection of business and technology
+Proven ability to handle multiple products/work streams and demands efficiently
+Experience in leading a team of individuals with various levels of skills and experience in potentially high stress and challenging situations
+Demonstrated initiative, flexibility, and ability to adapt to changing priorities and work environment
+Leads, influences, and upholds technology standards to ensure resiliency goals are met and continuously improved upon
+Good understanding of financial practices
+What you'll get
+Feel free to take advantage of all that American Airlines has to offer:
+
+Travel Perks: Ready to explore the world? You, your family and your friends can reach 365 destinations on more than 6,800 daily flights across our global network.
+Health Benefits: On day one, you’ll have access to your health, dental, prescription and vision benefits to help you stay well. And that’s just the start, we also offer virtual doctor visits, flexible spending accounts and more.
+Wellness Programs: We want you to be the best version of yourself – that’s why our wellness programs provide you with all the right tools, resources and support you need.
+401(k) Program: Available upon hire and, depending on the workgroup, employer contributions to your 401(k) program are available after one year.
+Additional Benefits: Other great benefits include our Employee Assistance Program, pet insurance and discounts on hotels, cars, cruises and more
+Feel free to be yourself at American
+From the team members we hire to the customers we serve, inclusion and diversity are the foundation of the dynamic workforce at American Airlines. Our 20+ Employee Business Resource Groups are focused on connecting our team members to our customers, suppliers, communities and shareholders, helping team members reach their full potential and creating an inclusive work environment to meet and exceed the needs of our diverse world.
+
+Are you ready to feel a tremendous sense of pride and satisfaction as you do your part to keep the largest airline in the world running smoothly as we care for people on life’s journey? Feel free to be yourself at American.
+
+Cities: Fort Worth - TX
+Requisition ID: 85025
+
+
+Posting Start Date:  4/9/26
+Location: DFW Headquarters Building 8 (DFW-SV08)
+Cities: Fort Worth - TX
+Requisition ID: 84914
+
+Job Description
+Intro
+Are you ready to explore a world of possibilities, both at work and during your time off? Join our American Airlines family, and you’ll travel the world, grow your expertise and become the best version of you.  As you embark on a new journey, you’ll tackle challenges with flexibility and grace, learning new skills and advancing your career while having the time of your life.  Feel free to enrich both your personal and work life and hop on board!
+
+Why you'll love this job
+As one diverse, high-performing team dedicated to technical excellence, you will focus relentlessly on delivering unrivaled digital products that drive a more reliable and profitable airline.
+The Software domain refers to the area within Information Technology that focuses on the development, deployment, management, and maintenance of software applications that support business processes and user needs. This includes development, application lifecycle management, requirement analysis, QA, security & compliance, and maintaining the applications and infrastructure.
+
+What you'll do
+As noted above, this list is intended to reflect the current job but there may be additional essential functions (and certainly non-essential job functions) that are not referenced.  Management will modify the job or require other tasks be performed whenever it is deemed appropriate to do so, observing, of course, any legal obligations including any collective bargaining obligations.
+
+Writes, tests, and documents technical work products (e.g., code, scripts, processes) according to organizational standards and practices  
+Consistently produces good quality technical work products that are clear, concise, tested, and easily understood by others 
+Efficiently debugs design-time and run-time problems and effectively identifies problems in dependencies or caused by interactions with other services 
+Designs new implementations and provides enhancements to existing architectures, maintaining reliability, resiliency, security, and performance 
+Identifies and corrects issues with system components affecting operational reliability, stability and performance based on observable telemetry 
+Understands and follows secure coding practices to avoid known potential vulnerabilities and actively looks for vulnerabilities during code reviews 
+Identifies opportunities for automation that improve team performance and raises them to the team 
+Consistently identifies and capitalizes on opportunities for simplification 
+All you'll need for success
+Minimum Qualifications- Education & Prior Job Experience
+
+Bachelor's degree in Computer Science, Computer Engineering, Technology, Information Systems (CIS/MIS), Engineering or related technical discipline, or equivalent experience/training
+3+ years of experience designing, developing, and implementing large-scale solutions in production environments
+3+ years of strong hands-on development background in C#/.NET, NET CORE. +1 years in any javascript frameworks such as React JS or Angular. 1+ years in RDBMS – SQL Server or PostgreSQL.
+Knowledge of Azure cloud environment development, and deployment
+Hands on SQL using SQL Server or Postgres - DDL, DML queries creation and execution.
+2+ years working in a large team of 10 members.
+Preferred Qualifications- Education & Prior Job Experience
+
+Master's degree in Computer Science, Computer Engineering, Technology, Information Systems (CIS/MIS), Engineering or related technical discipline, or equivalent experience/training
+Airline Industry experience
+Skills, Licenses & Certifications
+
+Experience with the following technologies: 
+Programming Languages:  C#/.NET, .NET CORE, Javascript/Typescript 
+Frameworks: Spring/SpringBoot, FastAPI 
+Front End Technologies: Angular/React JS
+Deployment Technologies: Kubernetes, Docker 
+Source Control: GitHub, Azure DevOps 
+CICD: GitHub Actions, Azure DevOps 
+Data management: MS SQL, PostgreSQL
+Integration/APIs Technologies: Azure Data Factory, Kafka, REST, GraphQL 
+Cloud Providers such as Azure  
+Test Automation: Selenium, TestNG, Postman, SonarQube, JUnit/NUnit/PyTest, Cucumber, Playwright
+Ability to concisely convey ideas verbally, in writing, in code, and in diagrams 
+Experience in Agile methodologies, such as SCRUM 
+Experience in DevOps Toolchain methodologies, including TDD (test-driven development), Continuous Integration and  Continuous Deployment 
+What you'll get
+Feel free to take advantage of all that American Airlines has to offer:
+
+Travel Perks: Ready to explore the world? You, your family and your friends can reach 365 destinations on more than 6,800 daily flights across our global network.
+Health Benefits: On day one, you’ll have access to your health, dental, prescription and vision benefits to help you stay well. And that’s just the start, we also offer virtual doctor visits, flexible spending accounts and more.
+Wellness Programs: We want you to be the best version of yourself – that’s why our wellness programs provide you with all the right tools, resources and support you need.
+401(k) Program: Available upon hire and, depending on the workgroup, employer contributions to your 401(k) program are available after one year.
+Additional Benefits: Other great benefits include our Employee Assistance Program, pet insurance and discounts on hotels, cars, cruises and more
+Feel free to be yourself at American
+From the team members we hire to the customers we serve, inclusion and diversity are the foundation of the dynamic workforce at American Airlines. Our 20+ Employee Business Resource Groups are focused on connecting our team members to our customers, suppliers, communities and shareholders, helping team members reach their full potential and creating an inclusive work environment to meet and exceed the needs of our diverse world.
+
+Are you ready to feel a tremendous sense of pride and satisfaction as you do your part to keep the largest airline in the world running smoothly as we care for people on life’s journey? Feel free to be yourself at American.
+
+
+Full Stack Developer/Sr Developer, IT Applications
+Posting Start Date:  4/20/26
+Location: DFW Headquarters Building 8 (DFW-SV08)
+Cities: Fort Worth - TX
+Requisition ID: 85143
+
+Job Description
+Intro
+Are you ready to explore a world of possibilities, both at work and during your time off? Join our American Airlines family, and you’ll travel the world, grow your expertise and become the best version of you. As you embark on a new journey, you’ll tackle challenges with flexibility and grace, learning new skills and advancing your career while having the time of your life. Feel free to enrich both your personal and work life and hop on board!
+
+
+
+Why you'll love this job
+​This job is a member of the Information Technology Team within the Information Technology Division
+Responsible for leveraging cutting edge technology to solve business problems at American Airlines by participating in all phases of the development process from inception through transition, advocating the agile process and test-driven development, using object-oriented development tools to analyze, model, design, construct and test reusable objects, and making the codebase a better place to live and work
+What you'll do
+​Collaborates with leaders, business analysts, project managers, IT architects, technical leads and other developers, along with internal customers, to understand requirements and develop needs according to business requirements
+Maintains and enhances existing enterprise services, applications, and platforms using domain driven design and test-driven development
+Troubleshoots and debugs complex issues; identifies and implements solutions
+Creates detailed project specifications, requirements, and estimates
+Researches and implements new technologies to enhance current processes, security, and performance
+Supports the development of coding standards and adheres to best practices and security guidelines
+Works closely with software architects and technical leads to ensure decisions meet long-term enterprise growth needs
+All you'll need for success
+Minimum Qualifications- Education & Prior Job Experience
+
+​Bachelor's degree in Computer Science, Computer Engineering, Technology, Information Systems (CIS/MIS), Engineering or related technical discipline, or equivalent experience/training
+3 years of full Software Development Life Cycle (SDLC) experience designing, developing, and implementing large-scale applications in hosted production environments
+3 years of professional, design, and open-source experience
+
+
+Preferred Qualifications- Education & Prior Job Experience
+
+​Master's degree in Computer Science, Computer Engineering, Technology, Information Systems (CIS/MIS), Engineering or related technical discipline, or equivalent experience/training
+5 years of full Software Development Life Cycle (SDLC) experience
+Airline Industry experience
+Hands‑on experience or exposure to Azure and/or AWS
+Understanding of containerization and Kubernetes is a plus
+Platform engineering or DevOps exposure is a plus
+
+
+Skills, Licenses & Certifications
+
+​Experience in at least one programming language:
+Javascript/Typescript
+Python
+Java
+NodeJS
+Familiarity with front‑end frameworks: React, Angular, or Vue.js
+Knowledge of back‑end development and API design
+Basic understanding of databases, SQL, and data modeling
+Experience writing test cases (unit and integration)
+Familiarity with application monitoring and logging concepts
+Experience with Git and version control workflows
+Strong problem‑solving and analytical skills
+Good communication and collaboration abilities
+Passion for learning and continuous improvement
+What you'll get
+Feel free to take advantage of all that American Airlines has to offer:
+
+Travel Perks: Ready to explore the world? You, your family and your friends can reach 365 destinations on more than 6,800 daily flights across our global network.
+Health Benefits: On day one, you’ll have access to your health, dental, prescription and vision benefits to help you stay well. And that’s just the start, we also offer virtual doctor visits, flexible spending accounts and more.
+Wellness Programs: We want you to be the best version of yourself – that’s why our wellness programs provide you with all the right tools, resources and support you need.
+401(k) Program: Available upon hire and, depending on the workgroup, employer contributions to your 401(k) program are available after one year.
+Additional Benefits: Other great benefits include our Employee Assistance Program, pet insurance and discounts on hotels, cars, cruises and more
+Feel free to be yourself at American
+From the team members we hire to the customers we serve, inclusion and diversity are the foundation of the dynamic workforce at American Airlines. Our 20+ Employee Business Resource Groups are focused on connecting our team members to our customers, suppliers, communities and shareholders, helping team members reach their full potential and creating an inclusive work environment to meet and exceed the needs of our diverse world.
+
+Are you ready to feel a tremendous sense of pride and satisfaction as you do your part to keep the largest airline in the world running smoothly as we care for people on life’s journey? Feel free to be yourself at American.
+
+Cities: Fort Worth - TX
+Requisition ID: 85143
+
+Sr Associate Engineer/Engineer, IT Software
+Posting Start Date:  4/17/26
+Location: DFW Headquarters Building 8 (DFW-SV08)
+Cities: Fort Worth - TX
+Requisition ID: 85124
+
+Job Description
+Intro
+Are you ready to explore a world of possibilities, both at work and during your time off? Join our American Airlines family, and you’ll travel the world, grow your expertise and become the best version of you.  As you embark on a new journey, you’ll tackle challenges with flexibility and grace, learning new skills and advancing your career while having the time of your life.  Feel free to enrich both your personal and work life and hop on board!
+
+Why you'll love this job
+As one diverse, high-performing team dedicated to technical excellence, you will focus relentlessly on delivering unrivaled digital products that drive a more reliable and profitable airline.
+The Software domain refers to the area within Information Technology that focuses on the development, deployment, management, and maintenance of software applications that support business processes and user needs. This includes development, application lifecycle management, requirement analysis, QA, security & compliance, and maintaining the applications and infrastructure.
+
+What you'll do
+As noted above, this list is intended to reflect the current job but there may be additional essential functions (and certainly non-essential job functions) that are not referenced.  Management will modify the job or require other tasks be performed whenever it is deemed appropriate to do so, observing, of course, any legal obligations including any collective bargaining obligations.
+
+Writes, tests, and documents technical work products (e.g., code, scripts, processes) according to organizational standards and practices  
+Consistently produces good quality technical work products that are clear, concise, tested, and easily understood by others 
+Efficiently debugs design-time and run-time problems and effectively identifies problems in dependencies or caused by interactions with other services 
+Designs new implementations and provides enhancements to existing architectures, maintaining reliability, resiliency, security, and performance 
+Identifies and corrects issues with system components affecting operational reliability, stability and performance based on observable telemetry 
+Understands and follows secure coding practices to avoid known potential vulnerabilities and actively looks for vulnerabilities during code reviews 
+Identifies opportunities for automation that improve team performance and raises them to the team 
+Consistently identifies and capitalizes on opportunities for simplification 
+All you'll need for success
+Minimum Qualifications- Education & Prior Job Experience
+
+Bachelor's degree in Computer Science, Computer Engineering, Technology, Information Systems (CIS/MIS), Engineering or related technical discipline, or equivalent experience/training
+1+ years of experience designing, developing, and implementing large-scale solutions in production environments
+Preferred Qualifications- Education & Prior Job Experience
+
+Master's degree in Computer Science, Computer Engineering, Technology, Information Systems (CIS/MIS), Engineering or related technical discipline, or equivalent experience/training
+Airline Industry experience
+Skills, Licenses & Certifications
+
+Experience with the following technologies: 
+Programming Languages: Java, Python, C#, Javascript/Typescript 
+Frameworks: Spring/SpringBoot, FastAPI 
+Front End Technologies: Angular/React 
+Deployment Technologies: Kubernetes, Docker 
+iOS development is a plus
+Lens
+Source Control: GitHub, Azure DevOps 
+CICD: GitHub Actions, Azure DevOps 
+Data management: PostgreSQL, MongoDB, Redis 
+Integration/APIs Technologies: Kafka, REST, GraphQL Eventhub, MQ
+Cloud Providers such as Azure
+Test Automation: Selenium, TestNG, Postman, SonarQube, Cypress, JUnit/NUnit/PyTest, Cucumber, Playwright, Wiremock/Mockito/Moq
+Ability to concisely convey ideas verbally, in writing, in code, and in diagrams 
+Experience in Agile methodologies, such as SCRUM 
+Experience in DevOps Toolchain methodologies, including Continuous Integration and 
+Continuous Deployment 
+Experience with working in VSCode to modify code base
+Troubleshooting skills when promoting from stage to prod
+
+Specialist, Systems
+Posting Start Date:  4/14/26
+Location: DFW Headquarters Building 8 (DFW-SV08)
+Cities: Fort Worth - TX, Tulsa - OK
+Requisition ID: 84273
+
+Job Description
+Intro
+Are you ready to explore a world of possibilities, both at work and during your time off? Join our American Airlines family, and you’ll travel the world, grow your expertise and become the best version of you. As you embark on a new journey, you’ll tackle challenges with flexibility and grace, learning new skills and advancing your career while having the time of your life. Feel free to enrich both your personal and work life and hop on board!
+
+Why you'll love this job
+As a member of the Maintenance Publications and Engineering Team within the Integrated Operations Division, you will serve as a liaison between AA and maintenance manual providers for Maintenance Publications and our internal/external users.
+What you'll do
+As noted above, this list is intended to reflect the current job but there may be additional essential functions (and certainly non-essential job functions) that are not referenced. Management will modify the job or require other tasks be performed whenever it is deemed appropriate to do so, observing, of course, any legal obligations including any collective bargaining obligations.
+
+Provides oversight of the day-to-day operation for the Maintenance Publications team.
+Responsible for developing new applications with specific purposes to help resolve business needs.
+Support existing system applications, including bug fixes, system enhancements, troubleshooting complex issues and identifying/implementing solutions.
+Learn and understand business functions of the department and user groups.
+Communicates project status and roadblocks to the team.
+Coordinates with software vendors and IT to test and deploy new applications within our publishing software tools.
+Synchronize, test, and deliver new OEM/other data integrated with American Airlines customized data within digital publication software systems.
+Provides technical support to Maintenance Publications staff.
+Management and tracking of system issues using the vendor reporting system, JIRA.
+Create new ideas, reports, ad-hoc queries, and processes for current applications to improve performance.
+Develop and manage departmental spreadsheets and performance metrics.
+All you'll need for success
+Minimum Qualifications- Education & Prior Job Experience
+
+1-year PM experience; demonstrated project management skills
+Bachelors degree in related field or equivalent industry experience
+3+ years of related work experience
+Experience delivering data solutions for, or within, a technical data environment
+Preferred Qualifications- Education & Prior Job Experience
+
+Experience working with content management systems
+Experience working with various OEM technical manuals and documents
+Experience working with Adobe PDF editable documents, Excel, SharePoint and Power Apps
+Ability to interact effectively with various organizational groups (mechanics, multiple management levels, FAA, etc.) and domestic / international manufacturers and vendors
+Skills, Licenses & Certifications
+
+Highly developed interpersonal, organizational, and oral/written communication skills, along with proficient PC skills
+Self-motivated and team-oriented, with the ability to work effectively with minimal supervision
+Detail-oriented and capable of prioritizing multiple tasks and meeting deadlines
+Excellent analytical skills in addressing technical data problems and implementing sustainable solutions
+Demonstrated ability in analytical thinking, technical writing, problem-solving, planning, and organization
+Demonstrated ability to manage major projects and keep them on schedule
+
+
+About The Role...
+
+Duolingo’s Enterprise Engineering team builds and operates the internal platforms, identity systems, and automation that power how Duos work every day. We apply modern engineering practices—infra as code, CI/CD, and internal tools—to deliver secure, reliable, and scalable employee experiences. As a Staff Enterprise Engineer, you will lead high‑impact initiatives across identity and access, SaaS governance, device/endpoint platforms, and employee lifecycle automation. You’ll partner closely with Security, Finance, Legal, and Platform peers to set technical direction, reduce toil through automation, and raise the operational bar for internal systems at scale. This role is based in New York City or Pittsburgh.
+
+🧠 You will...
+
+Lead design and implementation of foundational enterprise platforms and services (e.g., identity and access management, SaaS integrations, MDM/endpoint, internal tooling) with reliability, security, and scalability in mind.
+Drive infrastructure‑as‑code, CI/CD, and configuration‑as‑code practices across Enterprise Engineering; own standards, reviews, and reusable modules/templates.
+Architect and automate employee lifecycle workflows (onboarding, transfers, offboarding), RBAC/SCIM provisioning, and policy enforcement across core systems (Okta, Google Workspace, Slack, Atlassian, etc.).
+Establish and measure SLOs for internal services; build dashboards, alerts, and runbooks; participate in incident response and on‑call for enterprise platforms.
+Partner with Security, Finance, Legal, and Procurement to implement SaaS governance, license optimization, and risk controls—turning policy into maintainable, testable code and workflows.
+Lead cross‑functional technical initiatives end‑to‑end: author specs, align stakeholders, sequence deliverables, de‑risk launches, and land durable outcomes.
+Mentor engineers across the team; elevate documentation quality so internal tools and jobs are discoverable, well‑maintained, and easy to use.
+
+✅ You have...
+
+Demonstrated staff‑level impact leading large, multi‑stakeholder engineering projects to completion with measurable reliability or efficiency improvements.
+Deep hands‑on experience with infrastructure‑as‑code and CI/CD (e.g., Terraform and modern pipelines) to manage identity, SaaS, or internal platform configuration.
+Strong background in identity and access management concepts and integrations (e.g., SSO/SAML/OIDC, SCIM provisioning, RBAC/ABAC) across enterprise systems.
+Proficiency building automations and internal tooling (scripts/services/jobs) that integrate with APIs for systems like Okta, Google Workspace, Slack, and Atlassian.
+Operational excellence: define SLOs, create dashboards/alerts/runbooks, and contribute to on‑call/incident response for internal platforms.
+Clear, concise communication and documentation skills; ability to influence across Security, Finance, Legal, and Platform engineering partners.
+The ability to work from or relocate to New York City or Pittsburgh.
+
+⭐ Exceptional candidates will have...
+
+Experience implementing SaaS governance and license optimization programs in partnership with Finance/Procurement and Security.
+Track record building reliable employee‑lifecycle automation at scale (joiner/mover/leaver), including data pipelines and policy guardrails.
+Experience defining and landing engineering standards for internal platforms (module libraries, templates, checkers, docs patterns) that are adopted org‑wide.
+Prior ownership of MDM/endpoint platforms and fleet‑level automation for security/compliance baselines.
+Incident leadership experience for enterprise systems and the ability to drive post‑incident improvements that stick.
+
+We post a multi-level salary range for all of our roles.
+
+environment and play a key role in maintaining performance, security, and scalability across critical systems.
+This position is ideal for a hands-on infrastructure professional who thrives in a fast-paced environment and enjoys working across Azure, Microsoft 365, switching, and firewall technologies.
+
+
+Key Responsibilities
+Administer and optimize Microsoft Azure infrastructure, including virtual machines, networking, storage, and identity management
+Manage and support the Microsoft 365 ecosystem (Exchange Online, SharePoint, Teams, Entra ID/Azure AD)
+Configure, maintain, and troubleshoot Extreme Networks switching environments
+Administer and support Fortinet firewalls, including VPN configuration, security policies, and threat mitigation
+Monitor system performance, security posture, and capacity planning across cloud and on-prem environments
+Lead patch management, backup strategies, and disaster recovery planning
+Support infrastructure upgrades, migrations, and cloud transformation initiatives
+Collaborate with cross-functional teams to ensure secure and reliable IT operations
+Maintain documentation for infrastructure architecture, policies, and procedures
+
+
+Required Experience
+5+ years of experience in systems administration within enterprise environments
+Strong hands-on experience with Microsoft Azure (IaaS, networking, identity, security)
+Proven experience administering Microsoft 365 environments
+Experience managing Extreme Networks switches
+Experience configuring and maintaining Fortinet firewalls
+Solid understanding of network architecture, TCP/IP, DNS, DHCP, VLANs, and VPN technologies
+Experience with security best practices, monitoring tools, and compliance standards
+
+
+Preferred Qualifications
+Microsoft certifications (e.g., Azure Administrator Associate)
+Fortinet NSE certification
+Experience with automation tools or scripting (PowerShell preferred)
+Experience supporting hybrid cloud environments
+
+Wilson Elser is a leading defense litigation law firm with more than 1400 attorneys in 46 offices throughout the United States. Founded in 1978, we rank among the top 100 law firms identified by The American Lawyer and 36 in the National Law Journal’s survey of the nation’s largest law firms.
+
+
+Our firm is committed to attracting and retaining professionals who value each other and the service we provide by embracing Teamwork, Collaboration, Client Service, and Innovation. If you are a motivated professional looking for a long-term fit where you can grow in a role, and will be valued and empowered, then we invite you to apply to our On-Site IT Support Analyst in our New York office.
+
+This position is a full-time on site position.
+
+The Position
+
+This role provides on-site technology support to our attorneys and staff in an assigned office location. Acting as a resident technology support expert, it is expected for this role to properly troubleshoot and resolve hardware, software, and peripheral issues reported by all personnel working at that assigned office location. As a local representative of Wilson Elser’s national IT department, the ideal candidate thrives on working in a fast-paced, growing environment and has the ability to provide white-glove, concierge-level services while juggling multiple demands.
+Key Responsibilities:
+
+Understand and execute standard operating procedures for imaging and deploying computer equipment for onboarding new hires.
+Collect and track equipment from departed end users following standardized asset tracking procedures.
+Provide support for video conferencing and related A/V on-site systems.
+Install, configure, and troubleshoot software, including document management, Microsoft office applications, remote conferencing tools, and financial systems.
+Coordinate user requirements with regional supervisors, management, and other IT teams.
+Build service-based relationships with the attorneys and staff, while utilizing exceptional customer service skills.
+Collaborate with other team members on tasks or requests, in an efficient and expeditious manner.
+Evaluate and record tickets for ongoing requests for new hardware, software installations, and incidents reported by end users within your assigned office.
+Adhere to organizational change management processes.
+Perform special duties, tasks, or projects, as required.
+Qualifications
+
+Minimum 2 years in technical support on IT hardware, software, and desktop peripherals, including but not limited to:
+Windows 10 & Windows 11 Operating Systems
+Microsoft Office O365 with a strong acumen in Outlook
+Desktop client v. web-based applications
+Active Directory & Azure AD
+Zoom Rooms & Microsoft Teams
+Desktop Driver Controls
+All-in-One Monitors
+VPN, Remote Access, & Cloud Network Access
+Virtual Desktop Environments and Functions
+Cloud & On-Prem Telephony functions
+Desktop imaging & BIOS controls
+LAN and SD-WAN support
+Minimum 3 years working in ITSM and ITIL environments.
+Self-starter with the ability to manage own time effectively and work autonomously.
+Ability to lift and move items up to 50 lbs.
+Ability to travel throughout the region, if needed.
+Experience working in an environment that promotes active listening, transparency, and customer-centric service.
+Experience in system operations and/or administration a plus.
+Prior law firm experience a big plus.
+Strong analytical and problem-solving skills.
+Excellent verbal and written communication skills.
+Certifications in CompTIA A+, CompTIA Network+, or MCDST, HDI Support Center Analyst.
+ITIL4 certification preferred (in-house training is available).
+Education
+
+Bachelor’s degree in Computer Science, Information Security, or other related field. Or equivalent work experience.
+Certifications in CompTIA A+, CompTIA Network+, or MCDST, HDI Support Center Analyst, or ITIL preferred but not required.
+
+Responsibilities
+
+Provide on-site and remote technology support for ESRT, ESBO, and building staff (Property Management Office, Building Engineers, Maintenance, Security, and Front Desk) while meeting established SLA response, update, escalation, and resolution expectations
+Deliver white-glove, executive-level support for ESRT and ESBO senior leadership, including rapid response for high-visibility incidents and critical support needs
+Support workplace technology in conference rooms, offices, and shared spaces, including conferencing PCs, displays, docking stations, printers, peripherals, Teams/Zoom meetings, room readiness, and related end-user equipment.
+Support core endpoint and network-connected services and collaborate with IT/network teams to resolve connectivity, authentication, device performance, and secure web access issues (e.g., Zscaler)
+Support and maintain ESBO operations technology (e.g., turnstiles, kiosks, ticketing/POS (POST), timeclocks, ticket booths/printers, and other end-user systems); partner with Operations, POS Ticketing (POST), vendors, security, and specialized teams as needed to restore service quickly and safely
+Perform daily system monitoring, proactive health checks, and preventive maintenance to verify the integrity and availability of endpoints, workplace technology, and supporting services
+Administer and support end-user computing services including Windows 11 (imaging, patching, deployments), Microsoft 365, Adobe, remote access, and endpoint management platforms such as Intune, PDQ Deploy/Inventory, and Qualys to maintain device compliance and remediate vulnerabilities
+Administer Microsoft Active Directory and related identity services, including user/group management, account provisioning and deprovisioning, password resets, group memberships, access controls, and onboarding/offboarding support for employees and contractors
+Manage and support mobile devices (Windows/Android/iOS), including installation, troubleshooting, and asset lifecycle coordination
+Maintain accurate ticket documentation in the helpdesk/ticketing system (including Salesforce), track workstreams and projects in Monday.com, provide regular status updates, escalate appropriately, and ensure all activity aligns with SLA and change management requirements
+Work with third-party vendors, service providers, and internal stakeholders to plan, deploy, and support new or updated hardware and software, device refreshes, building technology systems, telecommunications infrastructure, and conference room technology where applicable
+Maintain accurate IT asset inventory and configuration documentation; develop and maintain SOPs, runbooks, and knowledge articles; provide end-user guidance and training; and support post-incident reviews to reduce repeat issues.
+Incorporate cybersecurity best practices into all IT work and uphold PCI and SOX compliance requirements for the Observatory
+Continuously identify opportunities to improve workflows and service delivery, support IT projects and cross-functional initiatives as assigned, and maintain excellent customer service
+Cross training for Audio Visual (AV) support at the Empire State Building Observatory, including AV troubleshooting, room readiness, adjacent guest-facing technologies, and backup support during peak periods or critical incidents to broaden on-site coverage and collaboration across Service Desk, Operations, and AV support partners
+
+What Success Looks Like
+
+Deliver reliable, secure IT support for the Empire State Building Observatory and ESRT portfolio workplaces, including end-user devices, shared spaces, and conference rooms
+Provide exceptional customer service and clear communication to stakeholders before, during, and after incidents and service requests
+Meet or exceed SLA response, update, escalation, and resolution targets through effective triage, ownership, communication, and follow-through from intake to completion
+Maintain high system uptime through proactive monitoring, preventive maintenance, and disciplined patching/deployment practices
+Embed cybersecurity best practices in daily work, escalating risks and ensuring PCI/SOX compliance requirements are upheld at the Observatory
+Strengthen team performance by sharing knowledge, improving documentation, and contributing to process and technology improvements
+
+Required Skills / Abilities
+
+In-depth understanding of information systems technology including Windows OS, PC hardware, Microsoft 365, and common enterprise applications
+Working knowledge of Windows administration fundamentals (imaging, patching, software deployments) and endpoint management tools such as Intune, PDQ Deploy/Inventory, and Qualys
+Proficiency supporting identity and access services (Active Directory, account lifecycle, group memberships, and access controls), secure remote/web access solutions, and basic networking concepts
+Strong hands-on support skills across collaboration tools, conference room technology, printers, peripherals, mobile devices, and general workplace technology troubleshooting
+Experience with ticketing and case management platforms such as Salesforce, disciplined ticket updates, knowledge article development, SOP documentation, and strong incident ownership
+Strong technical aptitude, analytical troubleshooting skills, and ability to resolve issues independently while accurately escalating complex problems to specialized teams when required
+Outstanding communication, customer service, and stakeholder management skills, including executive support, high-visibility incident response, and regular user updates
+Ability to manage stressful situations calmly, prioritize effectively, maintain accurate documentation, and make quick, clear decisions while consistently working within SLA, change management, and security expectations
+
+Education & Experience
+
+Bachelor’s degree in Computer Science, Engineering, Information Systems, or related field preferred
+2+ years in an IT service desk, help desk, or end-user support environment preferred, including front-line support; Windows administration fundamentals (imaging, patching, and user/account support); and experience with collaboration tools, conference room technology, and endpoint/device support
+Experience supporting high-availability, customer-facing environments (e.g., attractions, retail, hospitality, or similar) and working in partnership with operations teams is a plus
+Certifications a plus: A+, Network+, Security+, ITIL, Microsoft, or related endpoint/support certifications
+New graduate candidates with relevant internships, campus IT/help desk experience, strong customer service skills, or equivalent hands-on technical training will also be considered
+
+Physical Requirements
+
+Prolonged periods of sitting at a desk and working on a computer
+Ability to move between offices
+Must be able to lift 15 pounds at times
+
+What You Can Expect
+
+At ESRT, like our tenants, our employees come from everywhere. We foster a collaborative work environment that captures top talent and cultivates the best ideas. As a Great Place to Work® Certified employer, we are committed to maintaining our positive work culture where employees are engaged and can grow and develop. In addition, ESRT employees embody our Company Culture & Success Factors -
+
+Adaptable – you are a self-starter who’s able to quickly digest and execute new processes to work both collaboratively and independently
+Dynamic – you are solutions-oriented, aim to improve processes and implement efficiency, and offer insightful feedback to improve ESRT
+Dependable – you take a strong sense of ownership and accountability over your work
+Passionate – you keep up with industry trends and are excited about the potential to propel the industry forward with a “roll-up-your-sleeves” attitude
+Curious – you consistently look for new ways to work smarter, not just harder
+Ethical – you treat others with respect, act with integrity in how you perform your work, and embrace our collaborative culture
+Positive – you possess a service-oriented attitude with excellent follow through
+
+Job Description
+
+We currently have a career opportunity for a Systems Administrator to join our team located in New York City.
+
+Job Overview:
+
+The System Administrator (SA) is responsible for effective provisioning, installation/configuration, operation, and maintenance of systems hardware and software and related infrastructure. This individual participates in technical research and development to enable continuing innovation within the infrastructure. This individual ensures that system hardware, operating systems, software systems, and related procedures adhere to organizational values, enabling staff, volunteers, and Partners.
+
+This individual will assist project teams with technical issues in the Initiation and Planning phases of our standard Project Management Methodology. These activities include the definition of needs, benefits, and technical strategy; research & development within the project life-cycle; technical analysis and design; and support of operations staff in executing, testing and rolling-out the solutions. Participation on projects is focused on smoothing the transition of projects from development staff to production staff by performing operations activities within the project life-cycle.
+
+Our Corporate team plays a critical role in supporting Perficient’s global AI-first consultancy as we transform how the world’s most innovative brands connect with customers and grow. Spanning Human Resources, Marketing, Finance, IT, Legal, and other key functions, we drive smooth operations across nearly 40 global locations. With a culture built on collaboration, innovation, and integrity, we enable our teams to deliver world-class digital solutions and make a tangible impact through their work
+
+Perficient is always looking for the best and brightest talent and we need you! We’re a quickly-growing, global digital consulting leader, and we’re transforming the world’s largest enterprises and biggest brands. You’ll work with the latest technologies, expand your skills, and become a part of our global community of talented, diverse, and knowledgeable colleagues.
+
+Responsibilities
+
+Engineering of SA-related solutions for various project and operational needs.
+Install new/rebuild existing servers and configure hardware, peripherals, services, settings, directories, storage, etc. in accordance with standards and project/operational requirements.
+Install and configure systems such as supports GIS infrastructure applications or Asset Management applications.
+Develop and maintain installation and configuration procedures.
+Contribute to and maintain system standards.
+Research and recommend innovative, and where possible automated approaches for system administration tasks. Identify approaches that leverage our resources and provide economies of scale.
+Perform daily system monitoring, verifying the integrity and availability of all hardware, server resources, systems and key processes, reviewing system and application logs, and verifying completion of scheduled jobs such as backups.
+Perform regular security monitoring to identify any possible intrusions.
+Perform daily backup operations, ensuring all required file systems and system data is successfully backed up to the appropriate media, recovery tapes or disks are created, and media is recycled and sent off site as necessary.
+Perform regular file archival and purge as necessary.
+Create, change, and delete user accounts per request.
+Provide Tier III/other support per request from various constituencies. Investigate and troubleshoot issues.
+Repair and recover from hardware or software failures. Coordinate and communicate with impacted constituencies.
+Apply OS patches and upgrades on a regular basis, and upgrade administrative tools and utilities. Configure / add new services as necessary.
+Upgrade and configure system software that supports GIS infrastructure applications or Asset Management applications per project or operational needs.
+Maintain operational, configuration, or other procedures.
+Perform periodic performance reporting to support capacity planning.
+Perform ongoing performance tuning, hardware upgrades, and resource optimization as required. Configure CPU, memory, and disk partitions as required.
+Maintain data center environmental and monitoring equipment.
+
+Qualifications
+
+Bachelor's degree, with a technical major, such as engineering or computer science.
+Mac experience required
+Two to four years of system administration experience.
+One year Cloud based Administration (Google and Azure).
+Experience building AI Agents.
+Demonstrated ability to leverage AI tools to enhance productivity, streamline workflows, and support data-informed task execution.
+Familiarity with AI-enhanced platforms
+A solid understanding of AI capabilities and limitations including ethical considerations is expected.
+

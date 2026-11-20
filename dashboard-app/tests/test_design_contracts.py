@@ -1,4 +1,4 @@
-"""Design-contract regression tests for the Orizuru visual system.
+"""Design-contract regression tests for the dark-blue FUI visual system.
 
 These gate the specific regressions that the audit found: muted-ink contrast
 falling below WCAG AA, blanket `prefers-reduced-motion` overrides killing the
@@ -16,12 +16,23 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 TOKENS = (ROOT / "static" / "tokens.css").read_text()
 STYLE = (ROOT / "static" / "style.css").read_text()
+RUN_CSS = (ROOT / "static" / "run.css").read_text()
+METRICS_CSS = (ROOT / "static" / "metrics.css").read_text()
+AGENTS_CSS = (ROOT / "static" / "agents.css").read_text()
+# Every stylesheet in load order: the layout checks must cover moved tab rules too.
+ALL_STYLE = "\n".join(
+    (ROOT / "static" / name).read_text()
+    for name in (
+        "style.css", "skills.css", "books.css", "education.css", "run.css",
+        "today.css", "metrics.css", "interviews.css", "agents.css", "career.css",
+    )
+)
 READER = (ROOT / "templates" / "reader.html").read_text()
 INDEX = (ROOT / "templates" / "index.html").read_text()
 
 sys.path.insert(0, str(ROOT))
 
-import app as dashboard  # noqa: E402
+from core import config  # noqa: E402
 
 
 def _hex_ratio(fg: str, bg: str) -> float:
@@ -44,19 +55,19 @@ def _token(name: str, source: str = TOKENS) -> str:
 
 
 def _paper_surfaces() -> list[str]:
-    """Every washi face the muted ink renders on."""
+    """Every panel face the muted ink renders on."""
     return [
-        _token("paper"),
-        _token("paper-deep"),
-        _token("paper-hi"),
-        _token("fold-white"),
+        _token("panel"),
+        _token("panel-deep"),
+        _token("panel-hi"),
+        _token("void"),
     ]
 
 
-def test_muted_ink_passes_wcag_aa_on_every_washi_face():
+def test_muted_ink_passes_wcag_aa_on_every_panel_face():
     fg = _token("ink-muted")
     worst = min(_hex_ratio(fg, bg) for bg in _paper_surfaces())
-    assert worst >= 4.5, f"{fg} on washi faces is {worst:.2f}:1, needs 4.5:1"
+    assert worst >= 4.5, f"{fg} on panel faces is {worst:.2f}:1, needs 4.5:1"
 
 
 def test_reader_loads_shared_tokens_instead_of_duplicating_them():
@@ -65,8 +76,8 @@ def test_reader_loads_shared_tokens_instead_of_duplicating_them():
     assert "/static/tokens.css" in INDEX
     reader_root = re.search(r":root\s*\{(.*?)\}", READER, re.S).group(1)
     for shared in (
-        "--vermilion:",
-        "--paper:",
+        "--ember:",
+        "--panel:",
         "--ink-muted:",
         "--border:",
         "--accent:",
@@ -74,23 +85,23 @@ def test_reader_loads_shared_tokens_instead_of_duplicating_them():
         "--radius:",
     ):
         assert shared not in reader_root, f"reader re-declares shared token {shared}"
-    assert "--surface: var(--paper-hi);" in reader_root
-    assert "--accent-warm: var(--vermilion-light);" in reader_root
+    assert "--surface: var(--panel-hi);" in reader_root
+    assert "--accent-warm: var(--ember-light);" in reader_root
 
 
-def test_run_state_colors_pass_wcag_aa_on_every_washi_face():
-    """Run status text (yellow/green/red) must be readable on all paper faces."""
+def test_run_state_colors_pass_wcag_aa_on_every_panel_face():
+    """Run status text (yellow/green/red) must be readable on all panel faces."""
     for name in ("yellow", "green", "red"):
         fg = _token(name)
         worst = min(_hex_ratio(fg, bg) for bg in _paper_surfaces())
         assert worst >= 4.5, (
-            f"run state color --{name} {fg} on washi faces is {worst:.2f}:1, needs 4.5:1"
+            f"run state color --{name} {fg} on panel faces is {worst:.2f}:1, needs 4.5:1"
         )
 
 
 def test_no_blanket_reduced_motion_wildcard():
     """The `*: 0.01ms` kill removed the crease animation entirely."""
-    assert "0.01ms" not in STYLE, (
+    assert "0.01ms" not in ALL_STYLE, (
         "blanket prefers-reduced-motion wildcard still present"
     )
     assert "prefers-reduced-motion: reduce" in STYLE
@@ -105,7 +116,7 @@ def test_no_layout_property_transitions():
     """width/height/margin/padding transitions thrash layout."""
     bad = re.findall(
         r"transition:\s*(?:[^;]*?\b(?:width|height|margin|padding|top|left|right|bottom)\b)",
-        STYLE,
+        ALL_STYLE,
     )
     assert not bad, f"layout-property transitions: {bad}"
 
@@ -128,17 +139,17 @@ def test_project_card_uses_token_not_inline_color():
 
 def test_run_history_status_is_visible_text_not_just_a_dot():
     """The dot is aria-hidden and colour-only; the row must carry the words."""
-    js = (ROOT / "static" / "app.js").read_text()
+    js = (ROOT / "static" / "run.js").read_text()
     assert 'dot.setAttribute("aria-hidden", "true")' in js
     assert "run-log-status" in js
     assert 'el("span", null, RUN_STATUS_LABELS[r.status]' in js
-    assert ".run-log-status {" in STYLE
+    assert ".run-log-status {" in RUN_CSS
 
 
 def test_run_pickers_cannot_widen_the_card():
     """Long model option names must not force horizontal overflow."""
-    field = re.search(r"\.run-settings-row \.run-field \{([^}]*)\}", STYLE)
-    select = re.search(r"\.run-select \{([^}]*)\}", STYLE)
+    field = re.search(r"\.run-settings-row \.run-field \{([^}]*)\}", RUN_CSS)
+    select = re.search(r"\.run-select \{([^}]*)\}", RUN_CSS)
     assert field and "min-width: 0" in field.group(1)
     assert select and "min-width: 0" in select.group(1)
     assert "width: 100%" in select.group(1)
@@ -146,7 +157,7 @@ def test_run_pickers_cannot_widen_the_card():
 
 def test_refresh_models_announces_success_and_failure():
     """The refresh button needs a live region; silent failures hide the cause."""
-    js = (ROOT / "static" / "app.js").read_text()
+    js = (ROOT / "static" / "run.js").read_text()
     run_page = (ROOT / "templates" / "pages" / "run.html").read_text()
     assert 'id="refreshModelsStatus"' in run_page
     assert 'aria-live="polite"' in run_page
@@ -160,7 +171,7 @@ def test_refresh_models_announces_success_and_failure():
 
 def test_run_model_picker_preselects_the_configured_model():
     """Bare Claude option values never matched the `claude:<model>` default."""
-    js = (ROOT / "static" / "app.js").read_text()
+    js = (ROOT / "static" / "run.js").read_text()
     assert "option.value = `${provider}:${m.id}`;" in js
     assert 'let defaultValue = `claude:${s.model || "sonnet"}`;' in js
     assert "option.selected = option.value === defaultValue;" in js
@@ -203,28 +214,28 @@ def test_mobile_primary_targets_reach_44px():
 
 
 def test_metrics_heading_scale_steps_above_body():
-    body = re.search(r"\.ops-table \{[^}]*font-size: (\d+)px", STYLE)
-    h4 = re.search(r"\.metrics-section-heading h4 \{[^}]*font-size: (\d+)px", STYLE)
+    body = re.search(r"\.ops-table \{[^}]*font-size: (\d+)px", METRICS_CSS)
+    h4 = re.search(r"\.metrics-section-heading h4 \{[^}]*font-size: (\d+)px", METRICS_CSS)
     assert body and h4
     assert int(h4.group(1)) / int(body.group(1)) >= 1.25
 
 
 def test_data_hues_map_onto_the_verified_palette():
     """Legacy data colors must not bypass the contrast-checked palette."""
-    palette = set(dashboard.SAFE_HUES.values())
-    for legacy, safe in dashboard.SAFE_HUE_MAP.items():
+    palette = set(config.SAFE_HUES.values())
+    for legacy, safe in config.SAFE_HUE_MAP.items():
         assert safe in palette, f"{legacy} maps to unverified {safe}"
-    assert dashboard.safe_hue("#D97757") == dashboard.SAFE_HUES["vermilion"]
-    assert dashboard.safe_hue("#888") == dashboard.SAFE_HUES["ink-muted"]
-    assert dashboard.safe_hue("not-a-color") == dashboard.SAFE_HUES["ink-muted"]
+    assert config.safe_hue("#D97757") == config.SAFE_HUES["ember"]
+    assert config.safe_hue("#888") == config.SAFE_HUES["ink-muted"]
+    assert config.safe_hue("not-a-color") == config.SAFE_HUES["ink-muted"]
     # app.py and tokens.css stay in sync.
-    assert dashboard.SAFE_HUES["green"] == _token("green")
-    assert dashboard.SAFE_HUES["blue"] == _token("blue")
-    assert dashboard.SAFE_HUES["purple"] == _token("purple")
-    assert dashboard.SAFE_HUES["red"] == _token("red")
-    assert dashboard.SAFE_HUES["yellow"] == _token("yellow")
-    assert dashboard.SAFE_HUES["vermilion"] == _token("vermilion")
-    assert dashboard.SAFE_HUES["teal"] == _token("teal")
+    assert config.SAFE_HUES["green"] == _token("green")
+    assert config.SAFE_HUES["blue"] == _token("blue")
+    assert config.SAFE_HUES["purple"] == _token("purple")
+    assert config.SAFE_HUES["red"] == _token("red")
+    assert config.SAFE_HUES["yellow"] == _token("yellow")
+    assert config.SAFE_HUES["ember"] == _token("ember")
+    assert config.SAFE_HUES["teal"] == _token("teal")
 
 
 def test_printable_sheet_leading_and_fold_insets():
@@ -247,8 +258,8 @@ def test_agents_tab_renders_roster_and_a_contained_scan_table():
     assert "No Scout scan yet" in page
     assert 'class="ops-table-scroll"' in page
     assert 'class="ops-table agents-scan-table"' in page
-    assert ".agents-scan-table" in STYLE
-    block = re.search(r"\.agents-scan-table \{[^}]*\}", STYLE)
+    assert ".agents-scan-table" in AGENTS_CSS
+    block = re.search(r"\.agents-scan-table \{[^}]*\}", AGENTS_CSS)
     assert block and "min-width" in block.group(0)
 
 
@@ -275,7 +286,7 @@ def test_every_data_supplied_color_is_covered_by_the_safe_map():
         ROOT.parent / "Books" / "books-data.yml",
         ROOT.parent / "College Planning" / "education-data.yml",
     ]
-    known = set(dashboard.SAFE_HUE_MAP) | {v.lower() for v in dashboard.SAFE_HUES.values()}
+    known = set(config.SAFE_HUE_MAP) | {v.lower() for v in config.SAFE_HUES.values()}
     for path in yaml_files:
         for raw in re.findall(r'color:\s*"(#[0-9a-fA-F]{3,6})"', path.read_text()):
             assert raw.lower() in known, f"{path.name} color {raw} bypasses SAFE_HUE_MAP"

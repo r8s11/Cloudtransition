@@ -1,0 +1,795 @@
+/* ══════════════════════════════════════════════════════════════
+   Deck — the component scope for list–detail tabs and runner cards
+   (Interviews, Run, Agents, Today). A tab panel opts in with
+   `class="page deck"` to borrow these components. Since 2026-11-18 it
+   has no look of its own: every --deck-* token is an alias of the base
+   tokens in tokens.css, so these tabs read exactly like the rest of the
+   site. Never give a --deck-* token its own value.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Tokens: aliases of the base theme ─────────────────────── */
+.deck {
+	--deck-ground: var(--void);
+	--deck-raised: var(--panel-hi);
+	--deck-sunken: var(--panel-deep);
+	--deck-panel: linear-gradient(160deg, rgba(106, 169, 255, 0.07) 0%, rgba(106, 169, 255, 0) 34%);
+	--deck-panel-solid: var(--panel);
+	--deck-hover: rgba(106, 169, 255, 0.08);
+	--deck-edge: var(--border);
+	--deck-edge-strong: color-mix(in srgb, var(--border) 70%, var(--ink-muted));
+	--deck-edge-light: rgba(106, 169, 255, 0.18);
+	--deck-text: var(--ink);
+	--deck-text-2: var(--ink-mid);
+	--deck-text-3: var(--ink-muted);
+	--deck-accent: var(--ember);
+	--deck-accent-ink: var(--on-ember);
+	--deck-accent-weak: var(--accent-soft);
+	--deck-accent-edge: color-mix(in srgb, var(--ember) 50%, transparent);
+	--deck-ok: var(--green);
+	--deck-ok-weak: var(--green-light);
+	--deck-warn: var(--yellow);
+	--deck-warn-weak: var(--yellow-light);
+	--deck-bad: var(--red);
+	--deck-bad-weak: var(--red-light);
+	--deck-info: var(--blue);
+	--deck-radius: 0;
+	--deck-radius-sm: 2px;
+	--deck-shadow: 0 1px 0 rgba(106, 169, 255, 0.12) inset;
+	--deck-ease: cubic-bezier(0.16, 1, 0.3, 1);
+	--deck-fast: 160ms;
+	--deck-font: var(--sans);
+	--deck-mono: var(--mono);
+}
+
+.deck {
+	color: var(--deck-text);
+	font-family: var(--deck-font);
+	font-size: 14px;
+	line-height: 1.5;
+}
+.deck.active {
+	animation: deck-in var(--deck-fast) var(--deck-ease);
+}
+@keyframes deck-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+/* Headers built as `.deck-header` (Agents, the skill registry) set their
+   title like the base `.page-header`. */
+.deck .deck-header > h2 {
+	font-size: 24px;
+	font-weight: 700;
+	letter-spacing: -0.2px;
+	color: var(--ink-strong);
+}
+.deck .deck-header > p {
+	font-size: 13.5px;
+	color: var(--text-muted);
+}
+
+/* Browser surfaces carry the deck too. */
+.deck * {
+	scrollbar-color: var(--border) transparent;
+	scrollbar-width: thin;
+}
+.deck a {
+	color: var(--ember-text);
+	text-underline-offset: 3px;
+	text-decoration-color: color-mix(in srgb, var(--ember) 45%, transparent);
+}
+.deck a:hover {
+	text-decoration-color: currentColor;
+}
+.deck code {
+	font-family: var(--deck-mono);
+	font-size: max(12px, 0.92em);
+	color: var(--deck-text);
+	background: rgba(255, 255, 255, 0.06);
+	border-radius: 4px;
+	padding: 0.05em 0.35em;
+}
+.deck .deck-num,
+.deck time,
+.deck .deck-mono {
+	font-family: var(--deck-mono);
+	font-variant-numeric: tabular-nums;
+}
+
+/* ── Panels (glass): the one container ─────────────────────── */
+.deck .deck-panel,
+.deck .card {
+	background: var(--deck-panel), var(--deck-raised);
+	border: 1px solid var(--deck-edge);
+	border-top-color: var(--deck-edge-light);
+	border-radius: var(--deck-radius);
+	box-shadow: var(--deck-shadow);
+	color: var(--deck-text);
+	padding: 16px;
+	margin: 0 0 16px;
+}
+.deck .card-title,
+.deck .deck-panel-title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--deck-text);
+	margin: 0 0 12px;
+	padding: 0;
+	border: 0;
+}
+.deck .card-title h3,
+.deck .run-card-heading {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--deck-text);
+}
+.deck details > summary {
+	cursor: pointer;
+	list-style: none;
+}
+.deck details > summary::-webkit-details-marker {
+	display: none;
+}
+.deck p,
+.deck li {
+	color: var(--deck-text-2);
+}
+.deck strong,
+.deck h3,
+.deck h4 {
+	color: var(--deck-text);
+}
+.deck .muted,
+.deck .interview-meta {
+	color: var(--deck-text-3);
+}
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.deck .action-btn,
+.deck .deck-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-height: 32px;
+	padding: 0 12px;
+	font: 500 13px/1 var(--deck-font);
+	color: var(--deck-text);
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid var(--deck-edge-strong);
+	border-radius: var(--deck-radius-sm);
+	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+	cursor: pointer;
+	text-decoration: none;
+	white-space: nowrap;
+	transition:
+		background var(--deck-fast) var(--deck-ease),
+		border-color var(--deck-fast) var(--deck-ease),
+		color var(--deck-fast) var(--deck-ease);
+}
+.deck .action-btn:hover,
+.deck .deck-btn:hover {
+	background: rgba(255, 255, 255, 0.1);
+	border-color: rgba(255, 255, 255, 0.2);
+}
+.deck .action-btn:active,
+.deck .deck-btn:active {
+	background: rgba(255, 255, 255, 0.04);
+}
+/* Primary: the one action of a region. */
+.deck .action-btn:not(.action-btn-ghost),
+.deck .deck-btn-primary {
+	background: var(--deck-accent);
+	border-color: var(--deck-accent);
+	color: var(--deck-accent-ink);
+	font-weight: 600;
+	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset;
+}
+.deck .action-btn:not(.action-btn-ghost):hover,
+.deck .deck-btn-primary:hover {
+	background: var(--ember-light);
+	border-color: var(--ember-light);
+}
+/* Run buttons repeat down a list: an accent outline, solid only on hover or focus. */
+.deck .action-btn[data-run] {
+	background: var(--deck-accent-weak);
+	border-color: var(--deck-accent-edge);
+	color: var(--deck-accent);
+	box-shadow: none;
+}
+.deck .action-btn[data-run]:hover,
+.deck .action-btn[data-run]:focus-visible {
+	background: var(--deck-accent);
+	border-color: var(--deck-accent);
+	color: var(--deck-accent-ink);
+}
+.deck .action-btn-ghost,
+.deck .deck-btn-ghost {
+	background: transparent;
+	border-color: var(--deck-edge-strong);
+	color: var(--deck-text);
+}
+.deck .action-btn[disabled],
+.deck .action-btn[aria-disabled="true"],
+.deck .deck-btn[disabled],
+.deck .is-disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+@media (pointer: coarse) {
+	.deck .action-btn,
+	.deck .deck-btn,
+	.deck .run-select,
+	.deck input,
+	.deck select {
+		min-height: 44px;
+	}
+}
+
+/* ── Form controls ─────────────────────────────────────────── */
+.deck input[type="text"],
+.deck input[type="search"],
+.deck input[type="url"],
+.deck input[type="date"],
+.deck input:not([type]),
+.deck textarea,
+.deck select,
+.deck .run-select,
+.deck .deck-input {
+	font: 400 13px/1.4 var(--deck-font);
+	color: var(--deck-text);
+	background: var(--deck-sunken);
+	border: 1px solid var(--deck-edge-strong);
+	border-radius: var(--deck-radius-sm);
+	padding: 7px 10px;
+	min-height: 32px;
+	transition:
+		border-color var(--deck-fast) var(--deck-ease),
+		box-shadow var(--deck-fast) var(--deck-ease);
+}
+.deck textarea {
+	line-height: 1.5;
+	resize: vertical;
+}
+.deck input::placeholder,
+.deck textarea::placeholder {
+	color: var(--deck-text-3);
+}
+.deck input:focus,
+.deck textarea:focus,
+.deck select:focus {
+	outline: none;
+	border-color: var(--deck-accent-edge);
+	box-shadow: 0 0 0 3px var(--deck-accent-weak);
+}
+.deck input[type="date"] {
+	color-scheme: dark;
+}
+.deck label,
+.deck .deck-label {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--deck-text-2);
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+/* ── Chips and badges: state, never decoration ─────────────── */
+.deck .badge,
+.deck .deck-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font: 500 12px/1 var(--deck-font);
+	padding: 4px 8px;
+	border-radius: 999px;
+	border: 1px solid var(--deck-edge-strong);
+	background: rgba(255, 255, 255, 0.04);
+	color: var(--deck-text-2);
+	white-space: nowrap;
+}
+.deck .deck-chip::before,
+.deck .badge:not(.badge-count)::before {
+	content: "";
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: currentColor;
+	opacity: 0.9;
+}
+.deck .badge-count {
+	background: rgba(255, 255, 255, 0.08);
+	border-color: transparent;
+	color: var(--deck-text-2);
+	font-family: var(--deck-mono);
+	font-variant-numeric: tabular-nums;
+	padding: 3px 7px;
+}
+.deck .badge-done,
+.deck .badge-status-done,
+.deck .badge-status-active,
+.deck .deck-chip[data-tone="ok"] {
+	color: var(--deck-ok);
+	background: var(--deck-ok-weak);
+	border-color: rgba(98, 207, 146, 0.3);
+}
+.deck .badge-status-pending,
+.deck .badge-status-planned,
+.deck .badge-status-upcoming,
+.deck .badge-p2,
+.deck .deck-chip[data-tone="info"] {
+	color: var(--deck-info);
+	background: var(--deck-accent-weak);
+	border-color: color-mix(in srgb, var(--ember) 30%, transparent);
+}
+.deck .badge-status-waiting,
+.deck .deck-chip[data-tone="warn"] {
+	color: var(--deck-warn);
+	background: var(--deck-warn-weak);
+	border-color: rgba(233, 182, 94, 0.3);
+}
+.deck .badge-p1,
+.deck .deck-chip[data-tone="bad"] {
+	color: var(--deck-bad);
+	background: var(--deck-bad-weak);
+	border-color: rgba(243, 123, 112, 0.3);
+}
+.deck .badge-p3,
+.deck .deck-chip[data-tone="neutral"] {
+	color: var(--deck-text-2);
+}
+
+/* Keyboard hint. */
+.deck kbd,
+.deck .deck-kbd {
+	font: 500 12px/1 var(--deck-mono);
+	color: var(--deck-text-2);
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid var(--deck-edge-strong);
+	border-bottom-width: 2px;
+	border-radius: 4px;
+	padding: 2px 5px;
+}
+
+/* ── Toolbar ───────────────────────────────────────────────── */
+.deck .deck-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 12px;
+}
+.deck .deck-search {
+	flex: 1 1 260px;
+	min-width: 0;
+}
+/* Segmented filter. */
+.deck .deck-segments {
+	display: inline-flex;
+	gap: 2px;
+	padding: 2px;
+	background: var(--deck-sunken);
+	border: 1px solid var(--deck-edge);
+	border-radius: 2px;
+	overflow-x: auto;
+	max-width: 100%;
+	scrollbar-width: none;
+}
+@media (max-width: 720px) {
+	.deck .deck-segments {
+		-webkit-mask-image: linear-gradient(90deg, #000 85%, transparent);
+		mask-image: linear-gradient(90deg, #000 85%, transparent);
+		padding-right: 24px;
+	}
+}
+.deck .deck-segments button {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 28px;
+	padding: 0 10px;
+	font: 500 13px/1 var(--deck-font);
+	color: var(--deck-text-2);
+	background: transparent;
+	border: 0;
+	border-radius: 2px;
+	cursor: pointer;
+	white-space: nowrap;
+}
+.deck .deck-segments button:hover {
+	color: var(--deck-text);
+}
+.deck .deck-segments button[aria-pressed="true"],
+.deck .deck-segments button[aria-selected="true"] {
+	background: rgba(255, 255, 255, 0.09);
+	color: var(--deck-text);
+	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset;
+}
+.deck .deck-segments .deck-num {
+	color: var(--deck-text-3);
+	font-size: 12px;
+}
+
+/* ── List–detail ───────────────────────────────────────────── */
+/* List is the 4-column wing, the selected item the 8-column focal. Tracks
+   and children may shrink so the detail never overflows beside the fold
+   column at 1024px. */
+.deck .deck-split {
+	display: grid;
+	grid-template-columns: minmax(240px, 4fr) minmax(0, 8fr);
+	gap: 24px;
+	align-items: start;
+}
+.deck .deck-split > * {
+	min-width: 0;
+}
+.deck .deck-split select {
+	max-width: 100%;
+}
+.deck .deck-list {
+	list-style: none;
+	margin: 0;
+	padding: 4px;
+	background: var(--deck-raised);
+	border: 1px solid var(--deck-edge);
+	border-radius: var(--deck-radius);
+	max-height: calc(100vh - 210px);
+	overflow-y: auto;
+	position: sticky;
+	top: 12px;
+}
+.deck .deck-group {
+	position: sticky;
+	top: -4px;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 10px 6px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--deck-text-2);
+	background: var(--deck-raised);
+}
+.deck .deck-row {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 4px 10px;
+	width: 100%;
+	padding: 8px 10px;
+	border: 0;
+	border-radius: var(--deck-radius-sm);
+	background: transparent;
+	color: var(--deck-text);
+	text-align: left;
+	font: inherit;
+	cursor: pointer;
+	transition: background var(--deck-fast) var(--deck-ease);
+}
+.deck .deck-row:hover {
+	background: var(--deck-hover);
+}
+.deck .deck-row[aria-selected="true"],
+.deck .deck-row.is-selected {
+	background: var(--deck-accent-weak);
+	box-shadow: 0 0 0 1px var(--deck-accent-edge) inset;
+}
+.deck .deck-row-title {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--deck-text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.deck .deck-row-sub {
+	font-size: 13px;
+	color: var(--deck-text-2);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.deck .deck-row-meta {
+	font: 400 12px/1 var(--deck-mono);
+	font-variant-numeric: tabular-nums;
+	color: var(--deck-text-3);
+	white-space: nowrap;
+}
+.deck .deck-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--deck-text-3);
+	flex: none;
+}
+.deck .deck-dot[data-tone="ok"] {
+	background: var(--deck-ok);
+}
+.deck .deck-dot[data-tone="warn"] {
+	background: var(--deck-warn);
+}
+.deck .deck-dot[data-tone="bad"] {
+	background: var(--deck-bad);
+}
+.deck .deck-dot[data-tone="info"] {
+	background: var(--deck-info);
+}
+.deck .deck-detail {
+	min-width: 0;
+}
+
+/* ── Key/value rows ────────────────────────────────────────── */
+.deck .deck-kv {
+	display: grid;
+	grid-template-columns: max-content minmax(0, 1fr);
+	gap: 6px 16px;
+	margin: 0;
+	font-size: 13px;
+}
+.deck .deck-kv dt {
+	color: var(--deck-text-3);
+}
+.deck .deck-kv dd {
+	margin: 0;
+	color: var(--deck-text);
+	overflow-wrap: anywhere;
+}
+
+/* ── Status line feedback (existing .run-status) ───────────── */
+.deck .run-status {
+	font-size: 13px;
+	color: var(--deck-text-3);
+}
+.deck .run-status.is-running {
+	color: var(--deck-info);
+}
+.deck .run-status.is-done {
+	color: var(--deck-ok);
+}
+.deck .run-status.is-failed {
+	color: var(--deck-bad);
+}
+
+/* ── Empty states teach the next step ──────────────────────── */
+.deck .empty-state,
+.deck .deck-empty {
+	color: var(--deck-text-2);
+	text-align: left;
+	padding: 16px;
+	border: 1px dashed var(--deck-edge-strong);
+	border-radius: var(--deck-radius);
+	background: transparent;
+}
+.deck .empty-icon {
+	display: none;
+}
+
+/* ── Tables ────────────────────────────────────────────────── */
+.deck table {
+	border-collapse: collapse;
+	width: 100%;
+	font-size: 13px;
+}
+.deck th,
+.deck td {
+	text-align: left;
+	padding: 8px 10px;
+	border-bottom: 1px solid var(--deck-edge);
+	color: var(--deck-text-2);
+	vertical-align: top;
+}
+.deck thead th {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--deck-text-3);
+	background: transparent;
+}
+.deck tbody th {
+	color: var(--deck-text);
+	font-weight: 500;
+}
+.deck tbody tr:hover td,
+.deck tbody tr:hover th {
+	background: rgba(255, 255, 255, 0.025);
+}
+
+/* ── HUD layout: every deck page, Today included ──────
+   Square panels with two accent corner brackets, a perimeter header with a
+   telemetry readout, one command bar, a focal + wing stage and a key-hint
+   dock. Brackets are background layers, so scrolling lists and
+   display:contents wrappers need no pseudo-elements. */
+.deck {
+	--deck-radius: 0;
+	--deck-radius-sm: 2px;
+	--deck-brackets:
+		linear-gradient(var(--deck-accent), var(--deck-accent)) left top / 10px 2px no-repeat border-box,
+		linear-gradient(var(--deck-accent), var(--deck-accent)) left top / 2px 10px no-repeat border-box,
+		linear-gradient(var(--deck-accent), var(--deck-accent)) right bottom / 10px 2px no-repeat border-box,
+		linear-gradient(var(--deck-accent), var(--deck-accent)) right bottom / 2px 10px no-repeat border-box;
+}
+.deck :is(.card, .deck-panel) {
+	background: var(--deck-brackets), var(--deck-panel), var(--deck-raised);
+	border-color: var(--deck-edge);
+	border-radius: 0;
+	box-shadow: none;
+}
+.deck .deck-list {
+	background: var(--deck-brackets), var(--deck-raised);
+}
+.deck :is(.card-title, .deck-panel-title) {
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--deck-edge);
+}
+.deck :is(.deck-segments, .deck-segments button) {
+	border-radius: 2px;
+}
+
+/* Perimeter header: title + context left, telemetry readout right. */
+.deck .deck-hud {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: end;
+	gap: 12px 32px;
+	padding: 0 0 16px;
+	margin: 0 0 16px;
+	border-bottom: 1px solid var(--deck-edge);
+}
+.deck .deck-hud > .page-header {
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+.deck .deck-readout {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 8px 24px;
+	margin: 0;
+}
+.deck .deck-readout > * {
+	display: flex;
+	flex-direction: column-reverse;
+	align-items: flex-end;
+	gap: 2px;
+	padding: 0;
+	background: none;
+	border: 0;
+	box-shadow: none;
+	min-height: 0;
+	font-size: 12px;
+	font-weight: 400;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--deck-text-3);
+}
+.deck .deck-readout :is(.deck-num, .stat-value) {
+	font: 600 16px/1.25 var(--deck-mono);
+	font-variant-numeric: tabular-nums;
+	color: var(--deck-text);
+}
+.deck .deck-readout .stat-label {
+	font: inherit;
+	color: inherit;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+/* Command bar: filter, segments and the page's primary action in one row. */
+.deck .deck-toolbar {
+	gap: 8px;
+	padding: 8px;
+	margin: 0 0 24px;
+	background: var(--deck-sunken);
+	border: 1px solid var(--deck-edge);
+}
+
+/* Telemetry rows: facts as key/value pairs between hairlines. */
+.deck .deck-kv {
+	gap: 0 16px;
+	border-top: 1px solid var(--deck-edge);
+}
+.deck .deck-kv > :is(dt, dd) {
+	padding: 8px 0;
+	border-bottom: 1px solid var(--deck-edge);
+}
+.deck .deck-kv dd {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+/* Runner cards inside panels become rows, not nested cards. */
+.deck .run-grid {
+	gap: 0 24px;
+}
+.deck .run-item {
+	padding: 12px 0;
+	background: transparent;
+	border: 0;
+	border-top: 1px solid var(--deck-edge);
+	border-radius: 0;
+}
+.deck .run-item:hover,
+.deck .run-item:focus-within {
+	border-top-color: var(--deck-edge-strong);
+}
+
+/* Bottom dock: key hints as quiet square pills. */
+.deck .deck-dock {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 24px 0 0;
+	padding: 12px 0 0;
+	border-top: 1px solid var(--deck-edge);
+	font-size: 12px;
+	color: var(--deck-text-3);
+}
+.deck .deck-hint {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px;
+	background: var(--deck-sunken);
+	border: 1px solid var(--deck-edge);
+}
+.deck .deck-hint kbd + kbd {
+	margin-left: -2px;
+}
+@media (max-width: 960px), (pointer: coarse) {
+	.deck .deck-dock {
+		display: none;
+	}
+}
+@media (max-width: 900px) {
+	.deck .deck-hud {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.deck .deck-readout {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 12px 16px;
+	}
+	.deck .deck-readout > * {
+		align-items: flex-start;
+	}
+}
+
+/* ── Narrow screens: list over detail ──────────────────────── */
+@media (max-width: 960px) {
+	.deck .deck-split {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.deck .deck-list {
+		position: static;
+		max-height: none;
+	}
+}
+@media (max-width: 640px) {
+	.deck .deck-panel,
+	.deck .card {
+		padding: 12px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.deck.active {
+		animation: none;
+	}
+	.deck .deck-row,
+	.deck .action-btn,
+	.deck .deck-btn,
+	.deck input,
+	.deck select,
+	.deck textarea {
+		transition: none;
+	}
+}

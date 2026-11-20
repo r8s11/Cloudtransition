@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import server_activity  # noqa: E402
+from collectors import server_activity  # noqa: E402
 
 
 def process(stat, value, name="worker", pid="12", job="integrations/windows_exporter"):

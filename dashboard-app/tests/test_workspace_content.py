@@ -11,7 +11,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import workspace_content as wc  # noqa: E402
+from core import workspace_content as wc  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 _spec = importlib.util.spec_from_file_location("catalog", ROOT / "artifacts" / "catalog.py")
@@ -220,20 +220,20 @@ def test_reader_privacy_rules(rel, allowed):
 
 
 def test_reader_api_refuses_private_files_and_lists_none():
-    import app
+    from routes import files as file_routes
 
-    resp = app.api_file(path="College Planning/README.md")
+    resp = file_routes.api_file(path="College Planning/README.md")
     assert resp.status_code == 403
-    listed = [f["path"] for f in app.discover_md_files()]
+    listed = [f["path"] for f in file_routes.discover_md_files()]
     assert not any(p.startswith("College Planning/") or "Private" in p for p in listed)
     assert any(p == "TASKS.md" for p in listed)
 
 
 def test_artifacts_api_reports_unreadable_folder(monkeypatch):
-    import app
+    from routes import files as file_routes
 
     def boom(*_a, **_k):
         raise OSError("drive gone")
 
     monkeypatch.setattr(wc, "artifact_entries", boom)
-    assert app.workspace_artifacts().status_code == 503
+    assert file_routes.workspace_artifacts().status_code == 503

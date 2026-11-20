@@ -1,63 +1,354 @@
+{% macro icon(name) -%}
+<svg class="deck-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+{%- if name == "file" -%}<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>
+{%- elif name == "memory" -%}<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>
+{%- elif name == "folder" -%}<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+{%- elif name == "alert" -%}<path d="M12 3 2 20h20z"/><path d="M12 10v4"/><path d="M12 17h.01"/>
+{%- elif name == "hub" -%}<circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 7v5m0 0-5.5 5.5M12 12l5.5 5.5"/>
+{%- elif name == "play" -%}<path d="M7 4v16l13-8z"/>
+{%- elif name == "skills" -%}<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>
+{%- elif name == "back" -%}<path d="M19 12H5"/><path d="m11 18-6-6 6-6"/>
+{%- elif name == "external" -%}<path d="M7 17 17 7"/><path d="M8 7h9v9"/>
+{%- elif name == "scan" -%}<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>
+{%- endif -%}
+</svg>
+{%- endmacro %}
 <!-- ════════════════════════════════════════════════════════════ -->
-<!-- AGENTS PAGE — Forge job-hunting roster + latest Scout scan   -->
+<!-- AGENTS PAGE — read-only agent directory + latest Scout scan  -->
 <!-- ════════════════════════════════════════════════════════════ -->
-<div class="page" id="page-agents" role="tabpanel" aria-labelledby="tab-agents">
-  <div class="page-header">
+<div class="page deck" id="page-agents" role="tabpanel" aria-labelledby="tab-agents">
+  <header class="deck-header deck-hud agents-header">
     <h2>Agents</h2>
-    <p>
-      The Forge job-hunting team &mdash; Forge routes work to Scout, Job Reader
-      and CV Adapter. Definitions come from <code>.opencode/agents/</code>;
-      memory and the latest Scout scan come from <code>workspace/agents/</code>.
-    </p>
-  </div>
-
-  <section aria-labelledby="agents-roster-title">
-    <h3 class="ops-subheading" id="agents-roster-title">Roster</h3>
-
-    {% if not agents %}
-    <div class="empty-state empty-state-pad">
-      <div class="empty-icon" aria-hidden="true">&#x25CB;</div>
-      <p>No agent definitions were found in <code>.opencode/agents/</code>.</p>
+    <div class="agents-header-actions">
+      <a class="deck-btn deck-btn-ghost" href="/agents/skills">{{ icon("skills") }}Skill registry</a>
+      <span class="agents-header-note">Asks OpenCode; takes a few seconds.</span>
     </div>
-    {% else %}
-    {% for agent in agents %}
-    <article class="card agent-card">
-      <div class="card-title">
-        <h4 class="run-card-heading">{{ agent.name }}</h4>
-        {% if agent.mode %}<span class="badge">{{ agent.mode }}</span>{% endif %}
-      </div>
-
-      {% if agent.description %}
-      <p>{{ agent.description }}</p>
-      {% endif %}
-
-      {% if agent.summary %}
-      <pre class="agent-memory">{{ agent.summary }}</pre>
-      {% else %}
-      <p class="muted">No memory recorded.</p>
-      {% endif %}
-
-      {% if agent.events_error %}
-      <p class="run-status is-failed">{{ agent.events_error }}</p>
-      {% elif agent_events[agent.slug] %}
-      <ul class="agent-events">
-        {% for event in agent_events[agent.slug] %}
-        <li>
-          {% if event.when %}<span class="agent-event-when">{{ event.when }}</span>{% endif %}
-          <strong>{{ event.event }}</strong>
-          {% if event.detail %}<span>{{ event.detail }}</span>{% endif %}
-        </li>
-        {% endfor %}
+    <p>
+      Every agent defined in <code>.opencode</code>, <code>.claude</code>,
+      <code>.codex</code> and <code>dashboard-app/</code> agent folders, matched
+      with <code>agentic-os.yaml</code> and its <code>workspace/agents/</code>
+      folder. Read-only: nothing here edits a definition or memory file.
+    </p>
+    {% if agent_registry %}
+    <p class="agents-stats deck-readout">
+      <span><span class="deck-num">{{ agent_registry.counts.discovered }}</span> discovered</span>
+      <span><span class="deck-num">{{ agent_registry.counts.registered }}</span> in hub</span>
+      <span><span class="deck-num">{{ agent_registry.counts.loadable }}</span> loadable by a CLI tool</span>
+      <span><span class="deck-num">{{ agent_registry.counts.files }}</span> definition files</span>
+    </p>
+    {% if agent_registry.warnings %}
+    <details class="agents-registry-warnings">
+      <summary><span class="deck-chip" data-tone="warn">{{ agent_registry.warnings|length }} registry {{ "warning" if agent_registry.warnings|length == 1 else "warnings" }}</span></summary>
+      <ul class="agents-warn-list" aria-label="Registry warnings">
+        {% for warning in agent_registry.warnings %}<li>{{ warning }}</li>{% endfor %}
       </ul>
-      {% endif %}
-    </article>
-    {% endfor %}
+    </details>
     {% endif %}
-  </section>
+    {% endif %}
+  </header>
 
-  <section class="card" aria-labelledby="agents-scan-title">
-    <div class="card-title">
-      <h3 class="run-card-heading" id="agents-scan-title">Latest Scout scan</h3>
+  {% set runners = agent_card_runs or {} %}
+  {% if not agents %}
+  <div class="deck-empty">
+    <p>No agent definitions were found. Add one under <code>.opencode/agents/</code>, <code>.claude/agents/</code> or <code>.codex/agents/</code>, then reload this page.</p>
+  </div>
+  {% else %}
+  {% set has_job_reader = agents|selectattr("slug", "equalto", "job-reader")|list %}
+  {% set default_slug = "job-reader" if has_job_reader else agents[0].slug %}
+  {% set tones = {"active": "ok", "scoped": "info", "unverified": "warn", "none": "bad"} %}
+
+  <div class="deck-toolbar agents-toolbar">
+    <input
+      type="search"
+      class="deck-search"
+      id="agentsFilter"
+      placeholder="Filter by name, id or role"
+      aria-label="Filter agents by name, id or role"
+      aria-controls="agentsList"
+      aria-keyshortcuts="/"
+      autocomplete="off"
+      spellcheck="false"
+    >
+    <div class="deck-segments" role="group" aria-label="Show agents">
+      <button type="button" aria-pressed="true" data-agents-view="all">All <span class="deck-num">{{ agents|length }}</span></button>
+      <button type="button" aria-pressed="false" data-agents-view="runnable">Runnable here <span class="deck-num">{{ agents|selectattr("slug", "in", runners)|list|length }}</span></button>
+      <button type="button" aria-pressed="false" data-agents-view="warnings">With warnings <span class="deck-num">{{ agents|selectattr("warnings")|list|length }}</span></button>
+      <button type="button" aria-pressed="false" data-agents-view="nohub">Not in hub <span class="deck-num">{{ agents|rejectattr("hub")|list|length }}</span></button>
+    </div>
+  </div>
+  <p class="metrics-visually-hidden" aria-live="polite" data-agents-count></p>
+
+  <div class="deck-split agents-split" data-agents data-default="{{ default_slug }}">
+    <ul class="deck-list agents-list" id="agentsList" aria-label="Agents">
+      {% for agent in agents %}
+      {% set selected = agent.slug == default_slug %}
+      <li
+        data-agent-item="{{ agent.slug }}"
+        data-search="{{ (agent.name ~ ' ' ~ agent.slug ~ ' ' ~ agent.description)|lower }}"
+        data-runnable="{{ 1 if agent.slug in runners else 0 }}"
+        data-warnings="{{ agent.warnings|length }}"
+        data-hub="{{ 1 if agent.hub else 0 }}"
+      >
+        <button
+          type="button"
+          class="deck-row{% if selected %} is-selected{% endif %}"
+          data-agent-row="{{ agent.slug }}"
+          aria-controls="agent-pane-{{ agent.slug }}"
+          {% if selected %}aria-current="true" tabindex="0"{% else %}tabindex="-1"{% endif %}
+        >
+          <span class="deck-dot" data-tone="{{ tones[agent.loadable] }}" title="{{ agent.loadable_label }}"></span>
+          <span class="agents-row-main">
+            <span class="deck-row-title">{{ agent.name }}{% if agent.name|lower != agent.slug|replace("-", " ") and agent.name != agent.slug %} <span class="agents-row-id">{{ agent.slug }}</span>{% endif %}</span>
+            <span class="deck-row-sub">{{ agent.description or "No description in the definition." }}</span>
+          </span>
+          <span class="deck-row-meta agents-row-meta">
+            {% if agent.slug in runners %}<span class="agents-tag" data-tone="info">{{ icon("play") }}Run</span>{% endif %}
+            {% if not agent.hub %}<span class="agents-tag">No hub</span>{% endif %}
+            {% if agent.warnings %}<span class="agents-tag" data-tone="warn">{{ icon("alert") }}<span class="deck-num">{{ agent.warnings|length }}</span><span class="metrics-visually-hidden"> {{ "warning" if agent.warnings|length == 1 else "warnings" }}</span></span>{% endif %}
+          </span>
+          <span class="metrics-visually-hidden">. {{ agent.loadable_label }}</span>
+        </button>
+      </li>
+      {% endfor %}
+      <li class="deck-empty agents-no-match" data-agents-empty hidden>
+        <p>No agent matches this filter.</p>
+        <button type="button" class="deck-btn deck-btn-ghost" data-agents-clear>Clear filter</button>
+      </li>
+    </ul>
+
+    <div class="deck-detail agents-detail" id="agentsDetail">
+      <button type="button" class="deck-btn deck-btn-ghost agents-back" data-agents-back>{{ icon("back") }}Back to list</button>
+
+      {% for agent in agents %}
+      {% set state = agent.state %}
+      {% set slug = agent.slug %}
+      <article
+        class="agents-pane"
+        id="agent-pane-{{ slug }}"
+        data-agent-pane="{{ slug }}"
+        aria-labelledby="agent-name-{{ slug }}"
+        tabindex="-1"
+        {% if slug != default_slug %}hidden{% endif %}
+      >
+        <header class="deck-panel agents-pane-head">
+          <div class="agents-pane-title">
+            <h3 id="agent-name-{{ slug }}">{{ agent.name }}</h3>
+            <code>{{ slug }}</code>
+            {% if agent.mode %}<span class="agents-mode">{{ agent.mode }}</span>{% endif %}
+          </div>
+          <div class="agents-chips">
+            <span class="deck-chip" data-tone="{{ 'ok' if agent.discovered else 'bad' }}">{{ "Discovered" if agent.discovered else "No definition" }}</span>
+            <span class="deck-chip" data-tone="{% if agent.hub %}{{ 'ok' if agent.hub.installed else 'warn' }}{% else %}neutral{% endif %}">{% if agent.hub %}Hub: {{ "installed" if agent.hub.installed else "not installed" }}{% else %}Not in hub{% endif %}</span>
+            <span class="deck-chip" data-tone="{{ tones[agent.loadable] }}">{{ agent.loadable_label }}</span>
+          </div>
+          <p class="agents-role">{{ agent.description or "No description in the definition." }}</p>
+        </header>
+
+        {% if agent.warnings %}
+        <section class="deck-panel agents-section" aria-labelledby="agent-warn-{{ slug }}">
+          <h4 class="deck-panel-title agents-title-warn" id="agent-warn-{{ slug }}">{{ icon("alert") }}Warnings <span class="badge badge-count">{{ agent.warnings|length }}</span></h4>
+          <ul class="agents-warn-list agent-warnings" aria-label="{{ agent.name }} warnings">
+            {% for warning in agent.warnings %}<li>{{ warning }}</li>{% endfor %}
+          </ul>
+        </section>
+        {% endif %}
+
+        {% set card_run = runners.get(slug) %}
+        {% if card_run %}
+        <section class="deck-panel agents-section agent-run" aria-labelledby="agent-run-{{ slug }}">
+          <h4 class="deck-panel-title" id="agent-run-{{ slug }}">{{ icon("play") }}Run</h4>
+          <p class="agents-note">
+            Runs through <code>opencode run --agent {{ slug }}</code> from the workspace root.
+            OpenCode's rules in the definition limit its tools (they bind OpenCode's tools, not the process);
+            before launch the dashboard checks those rules and refuses anything it cannot verify.
+          </p>
+          <div class="run-grid" data-run-grid data-skills="{{ card_run.skill }}" aria-busy="true">
+            <p class="run-empty">Loading the runner&hellip;</p>
+          </div>
+          {% set last = card_run.last %}
+          {% if last %}
+          <dl class="agent-last-run deck-kv">
+            <dt>Last run</dt>
+            <dd>
+              {{ last.status }} &middot; <span class="deck-mono">{{ last.started }}{% if last.finished %} &rarr; {{ last.finished }}{% endif %}</span>
+              {% if last.duration %}(<span class="deck-mono">{{ last.duration }}</span>){% endif %}
+              &middot; {{ last.provider }} &middot; {{ last.model }}
+              {% if last.output %}
+              <button type="button" class="action-btn action-btn-ghost" data-output="{{ last.output }}" data-output-label="{{ agent.name }} run output">Output</button>
+              {% endif %}
+            </dd>
+            {% if last.definition %}
+            <dt>Definition</dt>
+            <dd>
+              <code>{{ last.definition.path }}</code> sha256 <code>{{ last.definition.sha256[:12] }}</code>
+              &middot; version <code>{{ last.definition.version }}</code>
+              &middot; {{ last.definition.check }}: {{ last.definition.detail }}
+            </dd>
+            {% endif %}
+            {% if last.cwd %}<dt>Working folder</dt><dd><code>{{ last.cwd }}</code> &middot; log <code>{{ last.log }}</code></dd>{% endif %}
+          </dl>
+          {% else %}
+          <p class="muted">No finished run recorded in <code>runs.log</code>. Start one above.</p>
+          {% endif %}
+        </section>
+        {% endif %}
+
+        <section class="deck-panel agents-section" aria-labelledby="agent-def-{{ slug }}">
+          <h4 class="deck-panel-title" id="agent-def-{{ slug }}">{{ icon("file") }}Definition</h4>
+          {% if agent.displayed %}
+          <dl class="deck-kv">
+            <dt>Shown</dt>
+            <dd><code>{{ agent.displayed.path }}</code> &middot; {{ agent.displayed.tool }}</dd>
+            <dt>Copies</dt>
+            <dd><span class="deck-num">{{ agent.copies|length }}</span>{% if agent.copies|length > 1 %} &middot; {{ agent.copies|length - 1 }} other {{ "copy" if agent.copies|length == 2 else "copies" }}{% endif %}</dd>
+            <dt>Versions</dt>
+            <dd>
+              <span class="deck-num">{{ agent.versions|length }}</span>
+              {% if agent.versions|length > 1 %}<span class="deck-chip" data-tone="warn">Copies differ</span>{% endif %}
+            </dd>
+          </dl>
+          <p class="agents-note">&ldquo;Shown&rdquo; is the copy this page displays; each tool loads its own copy.</p>
+          {% else %}
+          <p class="muted">No definition file was found for <code>{{ slug }}</code>.</p>
+          {% endif %}
+
+          {% if agent.copies %}
+          <div class="ops-table-scroll" tabindex="0" role="region" aria-label="{{ agent.name }} definition copies">
+            <table class="ops-table agents-copies-table">
+              <caption class="metrics-visually-hidden">Definition copies of {{ agent.name }}, in display precedence</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Copy</th>
+                  <th scope="col">Tool</th>
+                  <th scope="col">Loaded?</th>
+                  <th scope="col">Version</th>
+                  <th scope="col">Modified</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for copy in agent.copies %}
+                <tr>
+                  <th scope="row">
+                    {% if copy.path.endswith(".md") %}
+                    <button type="button" class="action-btn action-btn-ghost agents-path-btn" data-output="{{ copy.path }}" data-output-label="{{ agent.name }} definition">{{ copy.path }}</button>
+                    {% else %}
+                    <code>{{ copy.path }}</code>
+                    {% endif %}
+                    {% if agent.displayed and copy.path == agent.displayed.path %}<small>shown</small>{% endif %}
+                  </th>
+                  <td>{{ copy.tool }}</td>
+                  <td title="{{ copy.load_note }}">{{ copy.load_label }}</td>
+                  <td><code>{{ copy.version or "unreadable" }}</code></td>
+                  <td class="deck-mono">{{ copy.modified or "" }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% endif %}
+        </section>
+
+        <section class="deck-panel agents-section" aria-labelledby="agent-mem-{{ slug }}">
+          <h4 class="deck-panel-title" id="agent-mem-{{ slug }}">{{ icon("memory") }}Memory</h4>
+          {% if state.memory_index or state.memory_log %}
+          <dl class="deck-kv">
+            {% if state.memory_index %}<dt>Index</dt><dd><code>index.md</code> modified <span class="deck-mono">{{ state.memory_index.modified }}</span></dd>{% endif %}
+            {% if state.memory_log %}<dt>Log</dt><dd><code>log.jsonl</code> <span class="deck-num">{{ state.memory_log.entries }}</span> entries, modified <span class="deck-mono">{{ state.memory_log.modified }}</span></dd>{% endif %}
+          </dl>
+          {% else %}
+          <p class="muted">No memory initialized{% if not state.exists %} (no <code>{{ state.path }}/</code>){% endif %}.</p>
+          {% endif %}
+
+          {% if agent.memory_content %}
+          {% if agent.summary %}
+          <pre class="agent-memory">{{ agent.summary }}</pre>
+          {% else %}
+          <p class="muted">No memory recorded.</p>
+          {% endif %}
+
+          {% if agent.events_error %}
+          <p class="run-status is-failed">{{ agent.events_error }}</p>
+          {% elif agent_events[agent.slug] %}
+          <ul class="agent-events" aria-label="{{ agent.name }} recent memory events">
+            {% for event in agent_events[agent.slug] %}
+            <li>
+              {% if event.when %}<span class="agent-event-when">{{ event.when }}</span>{% endif %}
+              <strong>{{ event.event }}</strong>
+              {% if event.detail %}<span>{{ event.detail }}</span>{% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          {% elif state.memory_index or state.memory_log %}
+          <p class="muted">Memory content hidden: metadata only until an access policy is reviewed.</p>
+          {% endif %}
+        </section>
+
+        <section class="deck-panel agents-section" aria-labelledby="agent-out-{{ slug }}">
+          <h4 class="deck-panel-title" id="agent-out-{{ slug }}">{{ icon("folder") }}Outputs{% if state.output_count %} <span class="badge badge-count">{{ state.output_count }}</span>{% endif %}</h4>
+          {% if state.outputs %}
+          <p class="agents-note">Latest: <code>{{ state.outputs[0].name }}</code> modified <span class="deck-mono">{{ state.outputs[0].modified }}</span></p>
+          <ul class="agent-files" aria-label="{{ agent.name }} outputs, newest first">
+            {% for file in state.outputs %}
+            <li>
+              {% if file.name.endswith((".md", ".json")) %}
+              <button type="button" class="action-btn action-btn-ghost agents-path-btn" data-output="{{ file.path }}" data-output-label="{{ agent.name }} output">{{ file.name }}</button>
+              {% else %}
+              <code>{{ file.name }}</code>
+              {% endif %}
+              <small class="deck-mono">{{ file.modified or "" }}</small>
+            </li>
+            {% endfor %}
+            {% if state.output_count > state.outputs|length %}<li class="muted">and {{ state.output_count - state.outputs|length }} older files</li>{% endif %}
+          </ul>
+          {% else %}
+          <p class="muted">No outputs. Files appear in <code>{{ state.path }}/outputs/</code> after a run.</p>
+          {% endif %}
+          {% if slug == "scout" %}
+          <button type="button" class="deck-btn deck-btn-ghost" data-agents-scroll="agentsScan">{{ icon("scan") }}Show latest scan</button>
+          {% endif %}
+          <p class="agents-note">Memory and outputs are the files as observed on this machine; the parrot sync keeps whichever copy is newer.</p>
+        </section>
+
+        <div class="agents-pair">
+          <section class="deck-panel agents-section" aria-labelledby="agent-hub-{{ slug }}">
+            <h4 class="deck-panel-title" id="agent-hub-{{ slug }}">{{ icon("hub") }}Hub</h4>
+            {% if agent.hub %}
+            <dl class="deck-kv">
+              <dt>Installed</dt><dd>{{ "Yes" if agent.hub.installed else "No" }}</dd>
+              <dt>Coordinator</dt><dd>{{ agent.hub.coordinator or "none" }}</dd>
+              <dt>Cost</dt><dd>{{ agent.hub.cost_class or "not set" }}</dd>
+              <dt>Memory</dt><dd><code>{{ agent.hub.memory_dir or "not set" }}</code></dd>
+            </dl>
+            {% else %}
+            <p class="muted">Not registered in <code>agentic-os.yaml</code>. Add a <code>hub.agents.{{ slug }}</code> entry to register it.</p>
+            {% endif %}
+          </section>
+
+          <section class="deck-panel agents-section" aria-labelledby="agent-skills-{{ slug }}">
+            <h4 class="deck-panel-title" id="agent-skills-{{ slug }}">{{ icon("skills") }}Skills</h4>
+            {% if agent.copies|selectattr("tool", "equalto", "OpenCode")|list %}
+            <p>The <code>skill</code> rules in this agent's OpenCode definition decide which skills its model may load. A skill adds instructions only; tools still follow the agent's own permissions.</p>
+            {% elif agent.discovered %}
+            <p>No OpenCode definition. Claude Code and Codex load skills by their own rules, which this dashboard does not evaluate.</p>
+            {% else %}
+            <p class="muted">No definition, so no skill rules apply.</p>
+            {% endif %}
+            {% if agent.discovered %}
+            <a class="deck-btn deck-btn-ghost" href="/agents/skills#agent-{{ slug }}">{{ icon("external") }}Open in skill registry</a>
+            <p class="agents-note">Asks OpenCode; takes a few seconds.</p>
+            {% endif %}
+          </section>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <section class="deck-panel agents-scan" id="agentsScan" aria-labelledby="agents-scan-title" tabindex="-1">
+    <div class="deck-panel-title agents-scan-head">
+      <h3 id="agents-scan-title">{{ icon("scan") }}Latest Scout scan</h3>
       {% if agent_scan and agent_scan_files.json %}
       <span class="run-actions">
         <button
@@ -83,13 +374,13 @@
     </div>
 
     {% if agent_scan %}
-    <p class="interview-meta">
-      Generated
-      {% if agent_scan.generated_at %}<time datetime="{{ agent_scan.generated_at }}">{{ agent_scan.generated_at }}</time>{% else %}timestamp not recorded{% endif %}
-      &middot; {{ agent_scan.job_count }} jobs
-      &middot; {{ agent_scan.primary_count }} primary
-      &middot; {{ agent_scan.secondary_count }} secondary
-      {% if agent_scan.scan_id %}&middot; <code>{{ agent_scan.scan_id }}</code>{% endif %}
+    <p class="agents-stats">
+      <span>Generated
+      {% if agent_scan.generated_at %}<time datetime="{{ agent_scan.generated_at }}">{{ agent_scan.generated_at }}</time>{% else %}timestamp not recorded{% endif %}</span>
+      <span><span class="deck-num">{{ agent_scan.job_count }}</span> jobs</span>
+      <span><span class="deck-num">{{ agent_scan.primary_count }}</span> primary</span>
+      <span><span class="deck-num">{{ agent_scan.secondary_count }}</span> secondary</span>
+      {% if agent_scan.scan_id %}<span><code>{{ agent_scan.scan_id }}</code></span>{% endif %}
     </p>
 
     {% if agent_scan.notes %}
@@ -122,7 +413,7 @@
               {{ job.title or "" }}
               {% endif %}
             </th>
-            <td>{% if job.score is defined and job.score is not none %}{{ job.score }}{% endif %}</td>
+            <td class="deck-num">{% if job.score is defined and job.score is not none %}{{ job.score }}{% endif %}</td>
             <td>{{ job.company or "" }}</td>
             <td>
               {{ job.location or "" }}
@@ -130,7 +421,7 @@
             </td>
             <td>{{ job.salary or "" }}</td>
             <td>{{ job.source or "" }}</td>
-            <td>{{ job.posted or "" }}</td>
+            <td class="deck-mono">{{ job.posted or "" }}</td>
             <td>{{ job.track or "" }}</td>
           </tr>
           {% endfor %}
@@ -138,26 +429,33 @@
       </table>
     </div>
     {% else %}
-    <p class="ops-empty">This scan recorded no jobs.</p>
+    <p class="ops-empty">This scan recorded no jobs. Run another scan below.</p>
     {% endif %}
     {% elif agent_scan_error %}
-    <div class="empty-state empty-state-pad">
-      <div class="empty-icon" aria-hidden="true">&#x25CB;</div>
+    <div class="deck-empty">
       <p>{{ agent_scan_error }}</p>
     </div>
     {% else %}
-    <div class="empty-state empty-state-pad">
-      <div class="empty-icon" aria-hidden="true">&#x25CB;</div>
+    <div class="deck-empty">
       <p>No Scout scan yet. Run one below.</p>
     </div>
     {% endif %}
   </section>
 
-  <div class="card">
-    <div class="card-title">Run a scan</div>
-    <p>Starts Scout's free search-and-rank pass. It reads no full job descriptions and never runs Job Reader or CV Adapter.</p>
+  <section class="deck-panel agents-scan-run" aria-labelledby="agents-scan-run-title">
+    <h3 class="deck-panel-title" id="agents-scan-run-title">{{ icon("play") }}Run a scan</h3>
+    <p class="agents-note">Starts Scout's free search-and-rank pass. It reads no full job descriptions and never runs Job Reader or CV Adapter.</p>
     <div class="run-grid" data-run-grid data-skills="scout-scan" aria-busy="true">
       <p class="run-empty">Loading the scan runner&hellip;</p>
     </div>
-  </div>
+  </section>
+
+  {% if agents %}
+  <p class="deck-dock agents-keys" aria-hidden="true">
+    <span class="deck-hint"><kbd>/</kbd> filter</span>
+    <span class="deck-hint"><kbd>j</kbd><kbd>k</kbd> move</span>
+    <span class="deck-hint"><kbd>Enter</kbd> open</span>
+    <span class="deck-hint"><kbd>Esc</kbd> back</span>
+  </p>
+  {% endif %}
 </div>

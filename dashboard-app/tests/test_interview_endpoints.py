@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app as module  # noqa: E402
+from core import config  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 CSRF = {"X-Requested-With": "XMLHttpRequest"}
@@ -22,7 +23,7 @@ CSRF = {"X-Requested-With": "XMLHttpRequest"}
 def tracker(tmp_path, monkeypatch):
     target = tmp_path / "job-applications.yml"
     shutil.copyfile(ROOT / "interviews" / "job-applications.yml", target)
-    monkeypatch.setattr(module, "JOBS_FILE", target)
+    monkeypatch.setattr(config, "JOBS_FILE", target)
     return target
 
 

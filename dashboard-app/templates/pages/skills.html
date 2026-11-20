@@ -1,24 +1,34 @@
+{% from "_macros.html" import readout %}
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- SKILLS PAGE                                                 -->
 <!-- ════════════════════════════════════════════════════════════ -->
 <div class="page" id="page-skills" role="tabpanel" aria-labelledby="tab-skills">
-  <div class="page-header">
-    <h2>Skills &amp; Certifications</h2>
-    <p>From skills/skills-inventory.yml &mdash; updates automatically</p>
+  <div class="page-header hud-header">
+    <div class="hud-title">
+      <h2>Skills &amp; Certifications</h2>
+      <p>From skills/skills-inventory.yml &mdash; updates automatically</p>
+    </div>
+    {{ readout([
+      ("Technical", technical_skills|length, none),
+      ("Soft", soft_skills|length, none),
+      ("Certifications", certifications|length, "color-purple"),
+      ("Obtained", certifications|selectattr("obtained")|list|length, "color-green"),
+    ]) }}
   </div>
 
   {% set prof_pct   = {"beginner": 25, "intermediate": 50, "advanced": 75, "expert": 100} %}
-  {% set prof_color = {"beginner": "var(--red)", "intermediate": "var(--yellow)", "advanced": "var(--blue)", "expert": "var(--green)"} %}
+  {# One-hue ladder: proficiency is a magnitude, not a verdict, so no red/green. #}
+  {% set prof_color = {"beginner": "var(--level-1)", "intermediate": "var(--level-2)", "advanced": "var(--level-3)", "expert": "var(--level-4)"} %}
 
-  <div class="grid-2">
-    <!-- Left: Technical + Soft Skills -->
-    <div>
+  <div class="hud-stage">
+    <!-- Focal: technical + soft skills, two columns of category panels -->
+    <div class="span-8 hud-pair">
       {% set ns = namespace(current_cat="") %}
       {% for sk in technical_skills %}
         {% if sk.category != ns.current_cat %}
-          {% if ns.current_cat != "" %}</div>{% endif %}
-          <div class="card">
-          <div class="card-title">{{ sk.category }}</div>
+          {% if ns.current_cat != "" %}</section>{% endif %}
+          <section class="card">
+          <h3 class="card-title">{{ sk.category }}</h3>
           {% set ns.current_cat = sk.category %}
         {% endif %}
 
@@ -38,11 +48,11 @@
           </div>
         </div>
       {% endfor %}
-      {% if ns.current_cat != "" %}</div>{% endif %}
+      {% if ns.current_cat != "" %}</section>{% endif %}
 
       <!-- Soft Skills -->
-      <div class="card">
-        <div class="card-title">Soft Skills</div>
+      <section class="card">
+        <h3 class="card-title">Soft Skills</h3>
         {% for sk in soft_skills %}
         <div class="skill-row">
           <div class="progress-label">
@@ -56,13 +66,13 @@
           </div>
         </div>
         {% endfor %}
-      </div>
+      </section>
     </div>
 
-    <!-- Right: Certifications -->
-    <div>
-      <div class="card">
-        <div class="card-title">Certifications</div>
+    <!-- Wing: certifications + monthly checkpoints -->
+    <div class="span-4 hud-wing">
+      <section class="card">
+        <h3 class="card-title">Certifications</h3>
         {% for cert in certifications %}
         <div class="cert-card">
           <div class="cert-icon {{ 'cert-icon-obtained' if cert.obtained else 'cert-icon-pending' }}">
@@ -92,31 +102,34 @@
           <p>No certifications yet. Update skills/skills-inventory.yml to add them.</p>
         </div>
         {% endif %}
-      </div>
+      </section>
 
       <!-- Monthly Checkpoints -->
-      <div class="card">
-        <div class="card-title">Monthly Learning Checkpoints</div>
+      <section class="card">
+        <h3 class="card-title">Monthly Learning Checkpoints</h3>
+        {# (label, first month, last month, checkpoint, validation) #}
         {% set checkpoints = [
-          ("Jan", "React + Git", "3 projects with components"),
-          ("Feb", "Cosmos DB + FastAPI", "Data persisting"),
-          ("Mar", "Docker + CI/CD", "Automated deployments"),
-          ("Apr", "Auth + Adv React", "User systems working"),
-          ("May", "PWA + WebSockets", "Offline + real-time"),
-          ("Jun", "Performance", "Lighthouse 90+"),
-          ("Jul-Aug", "K8s + Terraform", "Production infra"),
-          ("Sep-Oct", "AZ-204 Prep", "Practice exams 75%+"),
-          ("Nov", "AZ-204 EXAM", "PASS"),
-          ("Dec", "Job Search", "Applications submitted"),
+          ("Jan", 1, 1, "React + Git", "3 projects with components"),
+          ("Feb", 2, 2, "Cosmos DB + FastAPI", "Data persisting"),
+          ("Mar", 3, 3, "Docker + CI/CD", "Automated deployments"),
+          ("Apr", 4, 4, "Auth + Adv React", "User systems working"),
+          ("May", 5, 5, "PWA + WebSockets", "Offline + real-time"),
+          ("Jun", 6, 6, "Performance", "Lighthouse 90+"),
+          ("Jul-Aug", 7, 8, "K8s + Terraform", "Production infra"),
+          ("Sep-Oct", 9, 10, "AZ-204 Prep", "Practice exams 75%+"),
+          ("Nov", 11, 11, "AZ-204 EXAM", "PASS"),
+          ("Dec", 12, 12, "Job Search", "Applications submitted"),
         ] %}
-        {% for month, skill, validation in checkpoints %}
-        <div class="metric-row">
-          <div class="metric-cat {{ 'month-active' if loop.index <= 2 else 'color-muted' }}">{{ month }}</div>
+        {% set this_month = today[5:7]|int %}
+        {% for month, first, last, skill, validation in checkpoints %}
+        {% set is_now = first <= this_month <= last %}
+        <div class="metric-row{{ ' is-now' if is_now }}"{% if is_now %} aria-current="date"{% endif %}>
+          <div class="metric-cat{{ ' month-active' if is_now }}">{{ month }}{% if is_now %} &middot; now{% endif %}</div>
           <div class="metric-goal">{{ skill }}</div>
           <div class="metric-measure">{{ validation }}</div>
         </div>
         {% endfor %}
-      </div>
+      </section>
     </div>
   </div>
 </div>

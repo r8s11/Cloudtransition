@@ -8,8 +8,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import metric_charts  # noqa: E402
-import metrics  # noqa: E402
+from collectors import metric_charts  # noqa: E402
+from collectors import metrics  # noqa: E402
 
 NOW = 1_800_000_000.0
 STEP = metrics.HISTORY_WINDOWS["6h"][1]

@@ -1,0 +1,8 @@
+Live TypeSafe jev-1.14.0 classification only (no helper dispatched), user-authorized messages, cap $0.25.
+Offered: 407 skills (2 Choice groups of <=254 + None, then arbitration), 29 chat models (21 Anthropic, 8 OpenAI) in one Choice with None.
+12 requests, 116,786 input tokens, ~$0.0049.
+1 "What is 2 + 2? Reply with only the number." -> skill None, easy, anthropic/claude-haiku-5-5
+2 "Explain why binary search needs sorted input in two sentences." -> skill None, easy, anthropic/claude-haiku-5-5
+3 "Compare mutexes and semaphores in three short bullets." -> skill None, easy, anthropic/claude-haiku-5-5
+Pick log written to a temporary file on the USB volume (metadata only).
+Not done: live helper dispatch. Omp helper sessions expose no documented output-token cap, so the promised 64-token cap could not be enforced; per the stated condition this was not run.

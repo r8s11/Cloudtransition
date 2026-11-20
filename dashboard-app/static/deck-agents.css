@@ -1,0 +1,483 @@
+/* Deck: agents tab. Builds on deck.css tokens and primitives. */
+
+#page-agents .deck-icon {
+	flex: none;
+	width: 16px;
+	height: 16px;
+}
+#page-agents .deck-icon * {
+	vector-effect: non-scaling-stroke;
+}
+
+/* ── Header: title + context left, registry readout right ──── */
+#page-agents .agents-header > h2,
+#page-agents .agents-header > p:not(.deck-readout) {
+	grid-column: 1;
+}
+#page-agents .agents-header > .deck-readout {
+	grid-column: 2;
+	grid-row: 1 / span 2;
+}
+#page-agents .agents-header-actions {
+	grid-column: 1;
+	grid-row: 3;
+}
+#page-agents .agents-registry-warnings {
+	grid-column: 1 / -1;
+}
+@media (max-width: 900px) {
+	#page-agents.deck .agents-header > * {
+		grid-column: 1;
+		grid-row: auto;
+	}
+}
+#page-agents .agents-header-actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+#page-agents .agents-header-note,
+#page-agents .agents-note {
+	font-size: 13px;
+	color: var(--deck-text-3);
+}
+#page-agents .agents-note {
+	margin: 8px 0 0;
+}
+#page-agents .agents-scan .agents-stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 16px;
+	margin: 0;
+	font-size: 13px;
+	color: var(--deck-text-3);
+}
+#page-agents .agents-scan .agents-stats .deck-num {
+	color: var(--deck-text);
+}
+#page-agents .agents-registry-warnings > summary {
+	display: inline-flex;
+	border-radius: 999px;
+}
+#page-agents .agents-registry-warnings > summary:hover .deck-chip {
+	border-color: rgba(233, 182, 94, 0.55);
+}
+
+/* Warning lists: a quiet amber dot per line, text stays readable. */
+#page-agents .agents-warn-list {
+	list-style: none;
+	margin: 8px 0 0;
+	padding: 0;
+	display: grid;
+	gap: 6px;
+	font-size: 13px;
+}
+#page-agents .agents-warn-list li {
+	position: relative;
+	padding-left: 14px;
+	color: var(--deck-text-2);
+	overflow-wrap: anywhere;
+}
+#page-agents .agents-warn-list li::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0.6em;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--deck-warn);
+}
+
+/* ── List ──────────────────────────────────────────────────── */
+#page-agents .agents-list > li {
+	list-style: none;
+}
+#page-agents .agents-list > li + li {
+	margin-top: 2px;
+}
+#page-agents .agents-list .deck-row {
+	position: relative;
+	min-height: 52px;
+}
+#page-agents .agents-row-main {
+	display: grid;
+	gap: 2px;
+	min-width: 0;
+}
+#page-agents .agents-row-id {
+	margin-left: 4px;
+	font: 400 12px/1 var(--deck-mono);
+	color: var(--deck-text-3);
+}
+#page-agents .agents-row-meta {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+#page-agents .agents-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 3px 6px;
+	border-radius: 4px;
+	font: 500 12px/1 var(--deck-font);
+	color: var(--deck-text-3);
+	background: rgba(255, 255, 255, 0.05);
+}
+#page-agents .agents-tag .deck-icon {
+	width: 12px;
+	height: 12px;
+}
+#page-agents .agents-tag[data-tone="info"] {
+	color: var(--deck-info);
+	background: var(--deck-accent-weak);
+}
+#page-agents .agents-tag[data-tone="warn"] {
+	color: var(--deck-warn);
+	background: var(--deck-warn-weak);
+}
+#page-agents .agents-tag .deck-num {
+	font-size: 12px;
+}
+#page-agents .agents-no-match {
+	margin: 4px;
+	display: grid;
+	gap: 10px;
+	justify-items: start;
+}
+#page-agents .agents-no-match p {
+	margin: 0;
+}
+
+/* ── Detail ────────────────────────────────────────────────── */
+#page-agents .agents-back {
+	display: none;
+}
+#page-agents .agents-pane {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 12px;
+	outline-offset: 4px;
+	border-radius: var(--deck-radius);
+}
+#page-agents .agents-pane[hidden] {
+	display: none;
+}
+#page-agents .agents-pane > .deck-panel,
+#page-agents .agents-pair > .deck-panel {
+	margin: 0;
+}
+#page-agents .agents-pane-head {
+	display: grid;
+	gap: 10px;
+}
+#page-agents .agents-pane-title {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 6px 10px;
+}
+#page-agents .agents-pane-title h3 {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+}
+#page-agents .agents-mode {
+	font-size: 12px;
+	color: var(--deck-text-3);
+}
+#page-agents .agents-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+#page-agents .agents-role {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.55;
+	color: var(--deck-text);
+	max-width: 72ch;
+}
+#page-agents .agents-section > .deck-panel-title .badge-count {
+	margin-left: 2px;
+}
+#page-agents .agents-section .deck-panel-title .deck-icon {
+	color: var(--deck-text-3);
+}
+#page-agents .agents-title-warn .deck-icon {
+	color: var(--deck-warn);
+}
+#page-agents .agents-section p {
+	margin: 0 0 8px;
+	font-size: 13px;
+}
+#page-agents .agents-section p:last-child {
+	margin-bottom: 0;
+}
+#page-agents .agents-section .deck-kv + .agents-note,
+#page-agents .agents-section .deck-kv + p {
+	margin-top: 10px;
+}
+#page-agents .agents-section .deck-kv .deck-chip {
+	margin-left: 6px;
+	padding: 2px 7px;
+}
+#page-agents .agents-section > .deck-btn {
+	margin-top: 10px;
+}
+#page-agents .agents-pair {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+}
+#page-agents .agents-pair .deck-btn {
+	margin-top: 4px;
+}
+
+/* Memory text and events (metadata/content split is decided server-side). */
+#page-agents .agent-memory {
+	margin: 10px 0 0;
+	padding: 10px 12px;
+	max-height: 240px;
+	overflow: auto;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	font: 400 12px/1.55 var(--deck-mono);
+	color: var(--deck-text-2);
+	background: var(--deck-sunken);
+	border: 1px solid var(--deck-edge);
+	border-radius: var(--deck-radius-sm);
+}
+#page-agents .agent-events {
+	list-style: none;
+	margin: 12px 0 0;
+	padding: 0;
+	display: grid;
+	gap: 0;
+	font-size: 13px;
+	border-top: 1px solid var(--deck-edge);
+}
+#page-agents .agent-events li {
+	display: grid;
+	grid-template-columns: max-content max-content minmax(0, 1fr);
+	gap: 4px 10px;
+	padding: 7px 0;
+	border-bottom: 1px solid var(--deck-edge);
+	overflow-wrap: anywhere;
+}
+#page-agents .agent-event-when {
+	font: 400 12px/1.6 var(--deck-mono);
+	font-variant-numeric: tabular-nums;
+	color: var(--deck-text-3);
+}
+#page-agents .agent-events strong {
+	font-weight: 500;
+}
+
+/* Outputs. */
+#page-agents .agent-files {
+	list-style: none;
+	margin: 10px 0 0;
+	padding: 0;
+	display: grid;
+	gap: 2px;
+}
+#page-agents .agent-files li {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	min-width: 0;
+	font-size: 13px;
+}
+#page-agents .agent-files small {
+	color: var(--deck-text-3);
+	font-size: 12px;
+	white-space: nowrap;
+}
+#page-agents .agents-path-btn {
+	min-width: 0;
+	max-width: 100%;
+	justify-content: flex-start;
+	font: 400 12px/1.2 var(--deck-mono);
+	border-color: transparent;
+	padding: 0 8px;
+	margin-left: -8px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+#page-agents .agents-path-btn:hover {
+	border-color: var(--deck-edge-strong);
+}
+
+/* Run (runner card internals belong to deck-run.css). */
+#page-agents .agent-run .run-grid {
+	grid-template-columns: minmax(0, 1fr);
+	margin-top: 12px;
+}
+#page-agents .agent-last-run {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid var(--deck-edge);
+}
+#page-agents .agent-last-run dd .action-btn {
+	margin-left: 6px;
+}
+@media (pointer: fine) {
+	#page-agents .agent-last-run dd .action-btn {
+		min-height: 26px;
+	}
+}
+
+/* ── Tables inside the deck ────────────────────────────────── */
+#page-agents .ops-table-scroll {
+	margin-top: 12px;
+	border: 1px solid var(--deck-edge);
+	border-radius: var(--deck-radius-sm);
+	background: var(--deck-sunken);
+}
+#page-agents .ops-table th,
+#page-agents .ops-table td {
+	text-align: left;
+	padding: 8px 10px;
+	border-bottom-color: var(--deck-edge);
+}
+#page-agents .ops-table th:first-child,
+#page-agents .ops-table td:first-child {
+	padding-left: 10px;
+}
+#page-agents .ops-table th:last-child,
+#page-agents .ops-table td:last-child {
+	padding-right: 10px;
+}
+#page-agents .ops-table thead th {
+	position: sticky;
+	top: 0;
+	background: var(--deck-sunken);
+	white-space: nowrap;
+}
+#page-agents .ops-table small {
+	color: var(--deck-text-3);
+	font-size: 12px;
+}
+#page-agents .agents-copies-table th[scope="row"] small {
+	display: inline;
+	margin-left: 4px;
+}
+#page-agents .ops-table-scroll > .agents-copies-table {
+	min-width: 620px;
+}
+
+/* ── Scout scan (secondary, below the directory) ───────────── */
+#page-agents .agents-scan {
+	margin-top: 24px;
+}
+#page-agents .agents-scan-head {
+	justify-content: space-between;
+	flex-wrap: wrap;
+}
+#page-agents .agents-scan-head h3 {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+}
+#page-agents .agents-scan-head .deck-icon,
+#page-agents .agents-scan-run .deck-icon {
+	color: var(--deck-text-3);
+}
+#page-agents .agents-scan-head .run-actions {
+	display: inline-flex;
+	gap: 6px;
+}
+#page-agents .agents-scan .interview-note,
+#page-agents .agents-scan .ops-empty {
+	margin: 8px 0 0;
+	font-size: 13px;
+	color: var(--deck-text-2);
+}
+#page-agents .agents-scan .deck-empty {
+	margin-top: 4px;
+}
+#page-agents .agents-scan .deck-empty p {
+	margin: 0;
+}
+#page-agents .agents-scan .ops-table-scroll {
+	max-height: 560px;
+}
+
+/* ── Narrow: list above detail ─────────────────────────────── */
+@media (max-width: 960px) {
+	#page-agents .agents-back {
+		display: inline-flex;
+		justify-self: start;
+		margin-bottom: 12px;
+	}
+	#page-agents .agents-detail {
+		scroll-margin-top: 8px;
+	}
+}
+@media (max-width: 720px) {
+	#page-agents .agents-pair {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	#page-agents .agent-events li {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 2px;
+	}
+}
+@media (max-width: 480px) {
+	#page-agents .agents-toolbar .deck-segments {
+		width: 100%;
+	}
+	#page-agents .agents-row-meta .agents-tag:not([data-tone]) {
+		display: none;
+	}
+	#page-agents .deck-kv {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 2px;
+	}
+	#page-agents .deck-kv dd + dt {
+		margin-top: 8px;
+	}
+	#page-agents .agent-files li {
+		flex-wrap: wrap;
+		gap: 0 12px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#page-agents .agents-path-btn {
+		transition: none;
+	}
+}
+#page-agents .agent-events {
+	grid-template-columns: minmax(0, 1fr);
+}
+#page-agents .agent-events > li > * {
+	min-width: 0;
+	overflow-wrap: anywhere;
+	white-space: normal;
+}
+#page-agents .agent-events > li {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 2px 10px;
+}
+#page-agents .agent-events > li > span:not(.agent-event-when) {
+	flex: 1 1 100%;
+}
+#page-agents .agents-row-meta {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 4px;
+	white-space: nowrap;
+	flex: none;
+}

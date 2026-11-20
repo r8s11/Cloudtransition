@@ -24,3 +24,12 @@ export type { TransitionRepository } from "./repositories/transition-repository.
 export { SqliteTransitionRepository } from "./repositories/transition-repository.js";
 export type { ApprovalRepository } from "./repositories/approval-repository.js";
 export { SqliteApprovalRepository } from "./repositories/approval-repository.js";
+export type {
+  AgentRunStatus,
+  ProjectRecord,
+  AgentRunRecord,
+  RunEventRecord,
+  RunListOptions,
+  RunUsageRecord,
+} from "./types.js";
+export { SqliteRuntimeRepository } from "./repositories/runtime-repository.js";

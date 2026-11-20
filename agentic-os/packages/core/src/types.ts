@@ -87,6 +87,8 @@ export interface PlanTask {
   steps: PlanStep[];
   expectedResult: string;
   verificationCriteria: string[];
+  owner?: string;
+  dependsOn?: string[];
 }
 
 export type PlanStep =
